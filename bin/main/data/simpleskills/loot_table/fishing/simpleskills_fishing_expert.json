@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:fishing",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "entries": [
+        {
+          "type": "minecraft:loot_table",
+          "quality": -2,
+          "value": "simpleskills:fishing/simpleskills_fishing_expert_junk",
+          "weight": 16
+        },
+        {
+          "type": "minecraft:loot_table",
+          "quality": 2,
+          "value": "simpleskills:fishing/simpleskills_fishing_expert_treasure",
+          "weight": 14
+        },
+        {
+          "type": "minecraft:loot_table",
+          "quality": -1,
+          "value": "simpleskills:fishing/simpleskills_fishing_expert_fish",
+          "weight": 70
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "simpleskills:fishing/simpleskills_fishing_expert"
+}
