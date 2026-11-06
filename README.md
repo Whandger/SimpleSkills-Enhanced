@@ -36,12 +36,12 @@ Reaching level 99 requires significant dedication, so achieving the maximum leve
 - Bonuses multiply vanilla block-breaking speed instead of replacing the original calculation.
 - **Tool Durability Protection:** +1 percentage point per level, up to **99%** at level 99.
 
-**Mining**
+### ⛏️ Mining
 
 - **Loot Duplication:** +5 percentage points of duplication chance every 10 levels, reaching **45% at level 90**.
 - **Vein Mining:** Unlocked at level 15. Hold Shift to mine connected blocks of the same ore type. Every 15 levels adds 2 extra blocks, reaching 12 additional blocks at level 90.
 
-**Woodcutting**
+### 🪓 Woodcutting
 
 - **Loot Duplication:** +5 percentage points of duplication chance every 10 levels, reaching **45% at level 90**.
 - **Tree Feller:** Unlocked at level 5. Hold Shift and break a tree trunk with an axe to make the connected tree fall, including its branches and leaves. Logs and leaves fall with animations, and leaves generate their normal drops when they land.
