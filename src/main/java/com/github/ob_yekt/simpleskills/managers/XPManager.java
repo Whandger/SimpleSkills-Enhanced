@@ -1,6 +1,7 @@
 package com.github.ob_yekt.simpleskills.managers;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
+import com.github.ob_yekt.simpleskills.VeinMining;
 import com.github.ob_yekt.simpleskills.ui.SkillTabMenu;
 import com.github.ob_yekt.simpleskills.Skills;
 import com.google.gson.JsonObject;
@@ -162,6 +163,11 @@ public class XPManager {
         } catch (Exception e) {
             Simpleskills.LOGGER.error("Failed to save player skill data for UUID: {}, skill: {}", playerUuid, skill.getId(), e);
             return;
+        }
+
+        // Notify every Vein Mining tier crossed by this Mining level-up.
+        if (skill == Skills.MINING && newLevel > currentLevel) {
+            VeinMining.notifyUnlockedMilestones(player, currentLevel, newLevel);
         }
 
         // Send XP gain notification if enabled

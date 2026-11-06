@@ -6,6 +6,7 @@ import com.github.ob_yekt.simpleskills.Skills;
 import com.github.ob_yekt.simpleskills.GatheringSpeed;
 import com.github.ob_yekt.simpleskills.Slaying;
 import com.github.ob_yekt.simpleskills.Ranged;
+import com.github.ob_yekt.simpleskills.VeinMining;
 import com.github.ob_yekt.simpleskills.managers.ConfigManager;
 import com.github.ob_yekt.simpleskills.managers.DatabaseManager;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
@@ -36,8 +37,8 @@ public class SkillTabMenu {
 
     private static final int XP_BAR_LENGTH = 22;
 
-    private static final int SKILL_BLOCK_LINES = 6;
-    private static final int MAX_BUFF_LINES = 3;
+    private static final int SKILL_BLOCK_LINES = 7;
+    private static final int MAX_BUFF_LINES = 4;
 
     public static void toggleTabMenuVisibility(CommandSourceStack source) {
         ServerPlayer player = source.getPlayer();
@@ -129,7 +130,7 @@ public class SkillTabMenu {
             ));
 
         } catch (Exception e) {
-            Simpleskills.LOGGER.error("Failed to update tab menu for player {}: {}", player.getName().getString(), e.getMessage());
+            Simpleskills.LOGGER.error("Failed to update skill menu for player {}: {}", player.getName().getString(), e.getMessage());
             player.sendSystemMessage(Component.literal("§6[simpleskills]§f Error: Failed to load skill data."), false);
         }
     }
@@ -321,6 +322,16 @@ public class SkillTabMenu {
                     if (duplicationChance > 0.0f) {
                         skillInfo.append(String.format(Locale.US,
                                 "   §8↳ §bLoot Duplication: §a%.0f%%\n", duplicationChance));
+                    }
+                }
+
+                if (skill == Skills.MINING) {
+                    int additionalBlocks = VeinMining.getAdditionalBlockLimit(safeLevel);
+
+                    if (additionalBlocks > 0) {
+                        skillInfo.append(String.format(Locale.US,
+                                "   §8↳ §bShift Vein Miner: §a x%d\n",
+                                additionalBlocks));
                     }
                 }
             }

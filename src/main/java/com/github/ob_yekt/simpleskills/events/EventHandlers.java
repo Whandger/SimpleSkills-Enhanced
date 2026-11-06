@@ -5,6 +5,7 @@ import com.github.ob_yekt.simpleskills.GatheringSpeed;
 import com.github.ob_yekt.simpleskills.Ranged;
 import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.github.ob_yekt.simpleskills.Skills;
+import com.github.ob_yekt.simpleskills.VeinMining;
 import com.github.ob_yekt.simpleskills.Slaying;
 import com.github.ob_yekt.simpleskills.managers.*;
 import com.github.ob_yekt.simpleskills.requirements.SkillRequirement;
@@ -142,6 +143,7 @@ public class EventHandlers {
                         blockTranslationKey,
                         serverPlayer.getName().getString());
 
+                VeinMining.tryActivate(serverPlayer, (ServerLevel) world, pos, state);
                 return;
             }
 
@@ -161,6 +163,7 @@ public class EventHandlers {
             Integer overrideXP = ConfigManager.getBlockXPOverride(blockTranslationKey);
 
             if (relevantSkill == null) {
+                VeinMining.tryActivate(serverPlayer, (ServerLevel) world, pos, state);
                 return;
             }
 
@@ -178,6 +181,9 @@ public class EventHandlers {
 
                 XPManager.addXPWithNotification(serverPlayer, relevantSkill, xp);
             }
+
+            // Use the updated Mining level after the original block's XP has been granted.
+            VeinMining.tryActivate(serverPlayer, (ServerLevel) world, pos, state);
         });
     }
 
