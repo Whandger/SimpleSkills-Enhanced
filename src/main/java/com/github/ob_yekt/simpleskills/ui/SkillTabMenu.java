@@ -7,6 +7,7 @@ import com.github.ob_yekt.simpleskills.GatheringSpeed;
 import com.github.ob_yekt.simpleskills.Slaying;
 import com.github.ob_yekt.simpleskills.Ranged;
 import com.github.ob_yekt.simpleskills.VeinMining;
+import com.github.ob_yekt.simpleskills.TreeFeller;
 import com.github.ob_yekt.simpleskills.managers.ConfigManager;
 import com.github.ob_yekt.simpleskills.managers.DatabaseManager;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
@@ -333,6 +334,10 @@ public class SkillTabMenu {
                                 "   §8↳ §bShift Vein Miner: §a x%d\n",
                                 additionalBlocks));
                     }
+                }
+
+                if (skill == Skills.WOODCUTTING && TreeFeller.isUnlocked(safeLevel)) {
+                    skillInfo.append("   §8↳ §bShift Tree Feller: §aUnlocked\n");
                 }
             }
             case FISHING -> {

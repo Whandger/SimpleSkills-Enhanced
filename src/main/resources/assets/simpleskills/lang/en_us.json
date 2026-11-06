@@ -3,5 +3,6 @@
   "key.simpleskills.cycle_hud_position": "Cycle HUD Position",
   "key.category.minecraft.simpleskills": "simpleskills",
   "message.simpleskills.vein_mining.unlocked": "Vein Mining unlocked! Hold Shift while mining to break up to %s additional connected ores.",
-  "message.simpleskills.vein_mining.improved": "Vein Mining improved! Hold Shift while mining to break up to %s additional connected ores."
+  "message.simpleskills.vein_mining.improved": "Vein Mining improved! Hold Shift while mining to break up to %s additional connected ores.",
+  "message.simpleskills.tree_feller.unlocked": "Tree Feller unlocked! Hold Shift and break a tree trunk with an axe to make the entire tree fall."
 }

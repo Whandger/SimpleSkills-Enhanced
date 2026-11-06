@@ -6,6 +6,7 @@ import com.github.ob_yekt.simpleskills.Ranged;
 import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.github.ob_yekt.simpleskills.Skills;
 import com.github.ob_yekt.simpleskills.VeinMining;
+import com.github.ob_yekt.simpleskills.TreeFeller;
 import com.github.ob_yekt.simpleskills.Slaying;
 import com.github.ob_yekt.simpleskills.managers.*;
 import com.github.ob_yekt.simpleskills.requirements.SkillRequirement;
@@ -184,6 +185,9 @@ public class EventHandlers {
 
             // Use the updated Mining level after the original block's XP has been granted.
             VeinMining.tryActivate(serverPlayer, (ServerLevel) world, pos, state);
+
+            // Tree Feller uses the same post-break path for Woodcutting logs.
+            TreeFeller.tryActivate(serverPlayer, (ServerLevel) world, pos, state);
         });
     }
 

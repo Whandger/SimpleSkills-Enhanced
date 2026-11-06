@@ -13,6 +13,7 @@
     "BlockDropMixin",
     "GatheringSpeedMixin",
     "GatheringDurabilityMixin",
+    "TreeFellerFallingBlockMixin",
     "EnchantingScreenHandlerMixin",
     "ServerPlayerEntityMixin",
     "SpearCancelMixin",

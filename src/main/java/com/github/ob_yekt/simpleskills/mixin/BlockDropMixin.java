@@ -70,7 +70,7 @@ public abstract class BlockDropMixin {
         boolean isLog =
                 skill == Skills.WOODCUTTING
                 && state.is(BlockTags.LOGS)
-                && player.getMainHandItem().is(ItemTags.AXES);
+                && tool.is(ItemTags.AXES);
 
         if (!isOre && !isLog) {
             return;

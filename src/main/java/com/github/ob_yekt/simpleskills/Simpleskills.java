@@ -28,6 +28,7 @@ public class Simpleskills implements ModInitializer {
 		LoreManager.initialize();
 		ConfigManager.initialize();
 		EventHandlers.registerAll();
+		TreeFeller.register();
 
 		// Initialize database and setup server lifecycle hooks
 		DatabaseManager db = DatabaseManager.getInstance();
