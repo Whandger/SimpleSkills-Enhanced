@@ -2,6 +2,8 @@ package com.github.ob_yekt.simpleskills.commands;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.github.ob_yekt.simpleskills.Skills;
+import com.github.ob_yekt.simpleskills.excavating.ExcavatingLoot;
+import com.github.ob_yekt.simpleskills.excavating.ExcavatingRank;
 import com.github.ob_yekt.simpleskills.managers.ConfigManager;
 import com.github.ob_yekt.simpleskills.managers.DatabaseManager;
 import com.github.ob_yekt.simpleskills.managers.AttributeManager;
@@ -54,6 +56,17 @@ public class SimpleskillsCommands {
                                                 .executes(SimpleskillsCommands::disableIronman)))
                                 .then(Commands.literal("prestige")
                                         .executes(SimpleskillsCommands::prestige))
+                                // Balancing helper: prints the exact Excavating loot distribution of a level.
+                                .then(Commands.literal("excavating")
+                                        .requires(source -> source.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.MODERATORS)))
+                                        .then(Commands.literal("odds")
+                                                .then(Commands.argument("level", IntegerArgumentType.integer(ExcavatingRank.MIN_LEVEL, ExcavatingRank.MAX_LEVEL))
+                                                        .executes(context -> {
+                                                            int level = IntegerArgumentType.getInteger(context, "level");
+                                                            context.getSource().sendSuccess(() -> Component.literal(
+                                                                    "§6[simpleskills]§f " + ExcavatingLoot.describe(level)), false);
+                                                            return 1;
+                                                        }))))
                                 .then(Commands.literal("reload")
                                         .requires(source -> source.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.MODERATORS)))
                                         .executes(context -> {

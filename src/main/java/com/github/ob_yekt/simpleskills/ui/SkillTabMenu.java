@@ -8,6 +8,7 @@ import com.github.ob_yekt.simpleskills.Slaying;
 import com.github.ob_yekt.simpleskills.Ranged;
 import com.github.ob_yekt.simpleskills.VeinMining;
 import com.github.ob_yekt.simpleskills.TreeFeller;
+import com.github.ob_yekt.simpleskills.excavating.ExcavatingRank;
 import com.github.ob_yekt.simpleskills.managers.ConfigManager;
 import com.github.ob_yekt.simpleskills.managers.DatabaseManager;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
@@ -307,6 +308,13 @@ public class SkillTabMenu {
                 float speedBonus = safeLevel * GatheringSpeed.BONUS_PER_LEVEL * 100.0f;
                 float durabilityChance = Math.min(safeLevel * GatheringSpeed.BONUS_PER_LEVEL, 0.99f) * 100.0f;
 
+                // Excavating shows its rank first; every rank has its own colour.
+                if (skill == Skills.EXCAVATING) {
+                    skillInfo.append("   §8↳ §bRank: ")
+                             .append(ExcavatingRank.forLevel(safeLevel).getColoredName())
+                             .append("\n");
+                }
+
                 if (speedBonus > 0.0f) {
                     skillInfo.append(String.format(Locale.US,
                             "   §8↳ §bBlock Breaking Speed: §a+%.0f%%\n", speedBonus));
@@ -338,6 +346,12 @@ public class SkillTabMenu {
 
                 if (skill == Skills.WOODCUTTING && TreeFeller.isUnlocked(safeLevel)) {
                     skillInfo.append("   §8↳ §bShift Tree Feller: §aUnlocked\n");
+                }
+
+                if (skill == Skills.EXCAVATING) {
+                    skillInfo.append(String.format(Locale.US,
+                            "   §8↳ §bInvestigation Time: §a%.2fs\n",
+                            ExcavatingRank.investigationSeconds(Math.max(1, safeLevel))));
                 }
             }
             case FISHING -> {

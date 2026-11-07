@@ -2,6 +2,7 @@ package com.github.ob_yekt.simpleskills.managers;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.github.ob_yekt.simpleskills.VeinMining;
+import com.github.ob_yekt.simpleskills.excavating.ExcavatingManager;
 import com.github.ob_yekt.simpleskills.TreeFeller;
 import com.github.ob_yekt.simpleskills.ui.SkillTabMenu;
 import com.github.ob_yekt.simpleskills.Skills;
@@ -173,6 +174,11 @@ public class XPManager {
 
         if (skill == Skills.WOODCUTTING && newLevel > currentLevel) {
             TreeFeller.notifyUnlocked(player, currentLevel, newLevel);
+        }
+
+        // Tell the player when an Excavating level-up reaches a new rank.
+        if (skill == Skills.EXCAVATING && newLevel > currentLevel) {
+            ExcavatingManager.notifyRankUp(player, currentLevel, newLevel);
         }
 
         // Send XP gain notification if enabled

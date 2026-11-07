@@ -36,15 +36,108 @@ Reaching level 99 requires significant dedication, so achieving the maximum leve
 - Bonuses multiply vanilla block-breaking speed instead of replacing the original calculation.
 - **Tool Durability Protection:** +1 percentage point per level, up to **99%** at level 99.
 
+**Loot Duplication (Mining & Woodcutting)**
+
+- +5 percentage points of duplication chance every 10 levels, reaching **45% at level 90**.
+
 ### ⛏️ Mining
 
-- **Loot Duplication:** +5 percentage points of duplication chance every 10 levels, reaching **45% at level 90**.
-- **Vein Mining:** Unlocked at level 15. Hold Shift to mine connected blocks of the same ore type. Every 15 levels adds 2 extra blocks, reaching 12 additional blocks at level 90.
+**Vein Mining**
+
+- Unlocked at level 15.
+- Hold Shift to mine connected blocks of the same ore type.
+- Every 15 levels adds 2 extra blocks, reaching **12 additional blocks at level 90**.
 
 ### 🪓 Woodcutting
 
-- **Loot Duplication:** +5 percentage points of duplication chance every 10 levels, reaching **45% at level 90**.
-- **Tree Feller:** Unlocked at level 5. Hold Shift and break a tree trunk with an axe to make the connected tree fall, including its branches and leaves. Logs and leaves fall with animations, and leaves generate their normal drops when they land.
+**Tree Feller**
+
+- Unlocked at level 5.
+- Hold Shift and break a tree trunk with an axe to make the connected tree fall, including its branches and leaves.
+- Fallen logs and leaves have animations.
+- Leaves generate their normal drops when they land.
+
+### 🥄 Excavating
+
+**Sand Investigation**
+
+- Hold right-click with a shovel on Sand to investigate it and search for buried treasures.
+- **Investigation Speed:** Decreases with skill level, from **3 seconds at level 1** to **1 second at level 99**.
+- Investigation progress, completion, cancellation, loot generation, and XP rewards are controlled server-side.
+- Investigations are canceled if the player changes the target block, shovel, selected hotbar slot, or dimension, moves too far away, or stops holding the interaction.
+- Only one player can investigate the same Sand block at a time.
+- Canceled investigations do not grant XP or loot, consume no durability, and leave the original Sand block untouched.
+
+**Ranks & Progression**
+
+- **10 unique ranks**, each with its own name and color.
+- Progression unlocks access to increasingly valuable rewards.
+- Rank-up notifications announce newly reached ranks.
+
+| Rank | Level Range |
+|:--|:--:|
+| Novice Digger | 1–10 |
+| Sand Seeker | 11–20 |
+| Treasure Scout | 21–30 |
+| Relic Hunter | 31–40 |
+| Gold Prospector | 41–50 |
+| Expert Excavator | 51–60 |
+| Treasure Tracker | 61–70 |
+| Master Prospector | 71–80 |
+| Legendary Digger | 81–90 |
+| Legendary Treasure Hunter | 91–99 |
+
+**Loot System**
+
+- **28 possible rewards** distributed across 7 rarity tiers:
+  - Common
+  - Uncommon
+  - Rare
+  - Very Rare
+  - Epic
+  - Legendary
+  - Mythic
+- Reward chances and rarity budgets scale with skill level.
+- Rewards within each rarity share its budget according to their relative weights.
+- The chance of finding Nothing is calculated dynamically based on available rarity budgets.
+- The complete loot distribution, including Nothing, always totals **100%**.
+- Each completed investigation performs a single loot roll.
+- Enchanted Books are generated using valid loot enchantments, excluding curses.
+- Pottery Sherds are selected from the vanilla pottery sherd tag.
+
+**XP Rewards**
+
+Every completed investigation grants **40 base XP**, even when Nothing is found. Additional XP depends on the rarity of the discovered reward.
+
+| Discovery | Total XP |
+|:--|--:|
+| Nothing | 40 |
+| Common | 140 |
+| Uncommon | 190 |
+| Rare | 240 |
+| Very Rare | 340 |
+| Epic | 540 |
+| Legendary | 840 |
+| Mythic | 1540 |
+
+**Special Discoveries**
+
+- Very Rare and higher-tier discoveries trigger chat notifications.
+- Legendary and Mythic discoveries also trigger special sound and particle effects.
+
+**Investigated Sand**
+
+- Completed investigations transform Sand into a special block: `simpleskills:investigated_sand`.
+- Uses the vanilla Sand texture and matching block properties.
+- Retains vanilla-like gravity, breaking behavior, drops, and placement.
+- Investigated Sand cannot be investigated again.
+- Integrated into relevant sand, glass, and shovel tags.
+- Includes **18 additional recipes** for sandstone, TNT, and concrete powder.
+
+**Shared Gathering Bonuses**
+
+- Excavating uses the shared **Gathering Speed** and **Tool Durability Protection** bonuses.
+- The appropriate tool for Excavating is the Shovel.
 
 ### ⚔️ Slaying
 
@@ -78,10 +171,12 @@ Reaching level 99 requires significant dedication, so achieving the maximum leve
 ### 🖥️ HUD & Interface
 
 **Skills HUD**
+
 - Refreshed visual appearance.
 - Removed the original yellow border.
 
 **Reworked TAB Menu — SkillTabMenu**
+
 - Currently displayed exclusively on the multiplayer player TAB screen.
 - Shows the benefits of each profession.
 - Displays progression information and per-level bonuses.
@@ -100,6 +195,7 @@ SimpleSkills is a **server-side Fabric mod** that transforms Minecraft into an R
 It works in multiplayer without requiring players to install the mod on their clients. For singleplayer, install it on the client.
 
 **Default Controls:**
+
 - `TAB` — Toggle the HUD.
 - `J` — Move the HUD.
 - Keys can be rebound in Minecraft's Controls menu.
@@ -300,7 +396,7 @@ Durability and ingredient recovery bonuses:
 | `/simpleskills leaderboardironman <skill\|total>` | View the Ironman leaderboard. |
 | `/simpleskills query <username> <skill\|total>` | Query a player's skill progression. |
 
-### Administrators
+### Administrators & Moderators
 
 | Command | Description |
 |:--|:--|
@@ -308,6 +404,7 @@ Durability and ingredient recovery bonuses:
 | `/simpleskills reset <username>` | Reset a player's progression. |
 | `/simpleskills addxp <username> <skill> <amount>` | Add XP to a player's skill. |
 | `/simpleskills setlevel <username> <skill> <level>` | Set a player's skill level. |
+| `/simpleskills excavating odds <level>` | Display the exact Excavating loot distribution for a level from 1 to 99. |
 
 ---
 
@@ -370,6 +467,8 @@ Please support his work:
 Responsible for the additional improvements introduced in this fork, including:
 
 - Mining, Woodcutting, and Excavating gathering bonuses.
+- Mining Vein Mining and Woodcutting Tree Feller mechanics.
+- Excavating Sand Investigation, loot progression, ranks, and rewards.
 - Slaying combat improvements.
 - Ranged projectile bonuses and duplication mechanics.
 - Defense bonuses.
@@ -384,4 +483,3 @@ Responsible for the additional improvements introduced in this fork, including:
 **Fork Developer:** Whandger
 
 *Built upon the original SimpleSkills project with respect for its creator and the community.*
-

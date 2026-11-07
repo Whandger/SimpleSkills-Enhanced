@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "simpleskills:block/investigated_sand"
+      },
+      {
+        "model": "simpleskills:block/investigated_sand",
+        "y": 90
+      },
+      {
+        "model": "simpleskills:block/investigated_sand",
+        "y": 180
+      },
+      {
+        "model": "simpleskills:block/investigated_sand",
+        "y": 270
+      }
+    ]
+  }
+}

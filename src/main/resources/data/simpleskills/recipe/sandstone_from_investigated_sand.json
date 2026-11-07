@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "simpleskills:investigated_sand"
+  },
+  "pattern": [
+    "##",
+    "##"
+  ],
+  "result": {
+    "id": "minecraft:sandstone"
+  }
+}
