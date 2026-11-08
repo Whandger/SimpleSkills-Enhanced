@@ -1589,32 +1589,32 @@ private static JsonObject getDefaultArmorRequirements() {
                 new WeaponRequirement("minecraft:stone_spear", "SLAYING", 10),
 
                 // Copper Weapons
-                new WeaponRequirement("minecraft:copper_sword", "SLAYING", 25),
-                new WeaponRequirement("minecraft:copper_axe", "SLAYING", 25),
-                new WeaponRequirement("minecraft:copper_spear", "SLAYING", 25),
+                new WeaponRequirement("minecraft:copper_sword", "SLAYING", 15),
+                new WeaponRequirement("minecraft:copper_axe", "SLAYING", 15),
+                new WeaponRequirement("minecraft:copper_spear", "SLAYING", 15),
 
                 // Iron Weapons
-                new WeaponRequirement("minecraft:iron_sword", "SLAYING", 50),
-                new WeaponRequirement("minecraft:iron_axe", "SLAYING", 50),
-                new WeaponRequirement("minecraft:iron_spear", "SLAYING", 50),
+                new WeaponRequirement("minecraft:iron_sword", "SLAYING", 20),
+                new WeaponRequirement("minecraft:iron_axe", "SLAYING", 20),
+                new WeaponRequirement("minecraft:iron_spear", "SLAYING", 20),
 
                 // Diamond Weapons
-                new WeaponRequirement("minecraft:diamond_sword", "SLAYING", 75),
-                new WeaponRequirement("minecraft:diamond_axe", "SLAYING", 75),
-                new WeaponRequirement("minecraft:diamond_spear", "SLAYING", 75),
+                new WeaponRequirement("minecraft:diamond_sword", "SLAYING", 25),
+                new WeaponRequirement("minecraft:diamond_axe", "SLAYING", 25),
+                new WeaponRequirement("minecraft:diamond_spear", "SLAYING", 25),
 
                 // Netherite Weapons
-                new WeaponRequirement("minecraft:netherite_sword", "SLAYING", 99),
-                new WeaponRequirement("minecraft:netherite_axe", "SLAYING", 99),
-                new WeaponRequirement("minecraft:netherite_spear", "SLAYING", 99),
+                new WeaponRequirement("minecraft:netherite_sword", "SLAYING", 35),
+                new WeaponRequirement("minecraft:netherite_axe", "SLAYING", 35),
+                new WeaponRequirement("minecraft:netherite_spear", "SLAYING", 35),
 
                 // Unique / Misc Weapons
-                new WeaponRequirement("minecraft:mace", "SLAYING", 50),
+                new WeaponRequirement("minecraft:mace", "SLAYING", 35),
 
                 // Ranged Weapons (grouped separately)
                 new WeaponRequirement("minecraft:bow", "RANGED", 0),
                 new WeaponRequirement("minecraft:crossbow", "RANGED", 10),
-                new WeaponRequirement("minecraft:trident", "RANGED", 40)
+                new WeaponRequirement("minecraft:trident", "RANGED", 30)
         };
 
         for (WeaponRequirement req : defaults) {
