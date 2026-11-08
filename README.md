@@ -633,7 +633,7 @@ The current development environment uses:
 | Fabric Loader | 0.20.1 |
 | Fabric API | 0.165.2+26.3 |
 | Fabric Loom | 1.17.21 |
-| SimpleSkills Enhanced | 1.0.6 |
+| SimpleSkills Enhanced | 1.0.7 |
 
 ---
 

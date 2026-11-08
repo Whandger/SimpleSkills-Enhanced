@@ -1435,59 +1435,59 @@ public class ConfigManager {
         return json;
     }
 
-    /**
-     * Default tool requirements configuration.
-     */
-    private static JsonObject getDefaultToolRequirements() {
-        JsonObject json = new JsonObject();
-        record ToolRequirement(String id, String skill, int level) {
-        }
-        ToolRequirement[] defaults = {
-                // Wooden Tools
-                new ToolRequirement("minecraft:wooden_pickaxe", "MINING", 0),
-                new ToolRequirement("minecraft:wooden_axe", "WOODCUTTING", 0),
-                new ToolRequirement("minecraft:wooden_shovel", "EXCAVATING", 0),
-                new ToolRequirement("minecraft:wooden_hoe", "FARMING", 0),
+/**
+ * Default tool requirements configuration.
+ */
+private static JsonObject getDefaultToolRequirements() {
+    JsonObject json = new JsonObject();
+    record ToolRequirement(String id, String skill, int level) {
+    }
+    ToolRequirement[] defaults = {
+            // Wooden Tools
+            new ToolRequirement("minecraft:wooden_pickaxe", "MINING", 0),
+            new ToolRequirement("minecraft:wooden_axe", "WOODCUTTING", 0),
+            new ToolRequirement("minecraft:wooden_shovel", "EXCAVATING", 0),
+            new ToolRequirement("minecraft:wooden_hoe", "FARMING", 0),
 
-                // Golden Tools
-                new ToolRequirement("minecraft:golden_pickaxe", "MINING", 5),
-                new ToolRequirement("minecraft:golden_axe", "WOODCUTTING", 5),
-                new ToolRequirement("minecraft:golden_shovel", "EXCAVATING", 5),
-                new ToolRequirement("minecraft:golden_hoe", "FARMING", 5),
+            // Golden Tools
+            new ToolRequirement("minecraft:golden_pickaxe", "MINING", 5),
+            new ToolRequirement("minecraft:golden_axe", "WOODCUTTING", 5),
+            new ToolRequirement("minecraft:golden_shovel", "EXCAVATING", 5),
+            new ToolRequirement("minecraft:golden_hoe", "FARMING", 5),
 
-                // Stone Tools
-                new ToolRequirement("minecraft:stone_pickaxe", "MINING", 10),
-                new ToolRequirement("minecraft:stone_axe", "WOODCUTTING", 10),
-                new ToolRequirement("minecraft:stone_shovel", "EXCAVATING", 10),
-                new ToolRequirement("minecraft:stone_hoe", "FARMING", 10),
+            // Stone Tools
+            new ToolRequirement("minecraft:stone_pickaxe", "MINING", 10),
+            new ToolRequirement("minecraft:stone_axe", "WOODCUTTING", 10),
+            new ToolRequirement("minecraft:stone_shovel", "EXCAVATING", 10),
+            new ToolRequirement("minecraft:stone_hoe", "FARMING", 10),
 
-                // Copper Tools
-                new ToolRequirement("minecraft:copper_pickaxe", "MINING", 25),
-                new ToolRequirement("minecraft:copper_axe", "WOODCUTTING", 25),
-                new ToolRequirement("minecraft:copper_shovel", "EXCAVATING", 25),
-                new ToolRequirement("minecraft:copper_hoe", "FARMING", 25),
+            // Copper Tools
+            new ToolRequirement("minecraft:copper_pickaxe", "MINING", 15),
+            new ToolRequirement("minecraft:copper_axe", "WOODCUTTING", 15),
+            new ToolRequirement("minecraft:copper_shovel", "EXCAVATING", 15),
+            new ToolRequirement("minecraft:copper_hoe", "FARMING", 15),
 
-                // Iron Tools
-                new ToolRequirement("minecraft:iron_pickaxe", "MINING", 50),
-                new ToolRequirement("minecraft:iron_axe", "WOODCUTTING", 50),
-                new ToolRequirement("minecraft:iron_shovel", "EXCAVATING", 50),
-                new ToolRequirement("minecraft:iron_hoe", "FARMING", 50),
+            // Iron Tools
+            new ToolRequirement("minecraft:iron_pickaxe", "MINING", 25),
+            new ToolRequirement("minecraft:iron_axe", "WOODCUTTING", 25),
+            new ToolRequirement("minecraft:iron_shovel", "EXCAVATING", 25),
+            new ToolRequirement("minecraft:iron_hoe", "FARMING", 25),
 
-                // Diamond Tools
-                new ToolRequirement("minecraft:diamond_pickaxe", "MINING", 75),
-                new ToolRequirement("minecraft:diamond_axe", "WOODCUTTING", 75),
-                new ToolRequirement("minecraft:diamond_shovel", "EXCAVATING", 75),
-                new ToolRequirement("minecraft:diamond_hoe", "FARMING", 75),
+            // Diamond Tools
+            new ToolRequirement("minecraft:diamond_pickaxe", "MINING", 30),
+            new ToolRequirement("minecraft:diamond_axe", "WOODCUTTING", 30),
+            new ToolRequirement("minecraft:diamond_shovel", "EXCAVATING", 30),
+            new ToolRequirement("minecraft:diamond_hoe", "FARMING", 30),
 
-                // Netherite Tools
-                new ToolRequirement("minecraft:netherite_pickaxe", "MINING", 99),
-                new ToolRequirement("minecraft:netherite_axe", "WOODCUTTING", 99),
-                new ToolRequirement("minecraft:netherite_shovel", "EXCAVATING", 99),
-                new ToolRequirement("minecraft:netherite_hoe", "FARMING", 99),
+            // Netherite Tools
+            new ToolRequirement("minecraft:netherite_pickaxe", "MINING", 35),
+            new ToolRequirement("minecraft:netherite_axe", "WOODCUTTING", 35),
+            new ToolRequirement("minecraft:netherite_shovel", "EXCAVATING", 35),
+            new ToolRequirement("minecraft:netherite_hoe", "FARMING", 35),
 
-                // Shield
-                new ToolRequirement("minecraft:shield", "DEFENSE", 5)
-        };
+            // Shield
+            new ToolRequirement("minecraft:shield", "DEFENSE", 5)
+    };
 
         for (ToolRequirement req : defaults) {
             JsonObject entry = new JsonObject();
@@ -1499,60 +1499,62 @@ public class ConfigManager {
         return json;
     }
 
-    /**
-     * Default armor requirements configuration.
-     */
-    private static JsonObject getDefaultArmorRequirements() {
-        JsonObject json = new JsonObject();
-        record ArmorRequirement(String id, String skill, int level) {
-        }
-        ArmorRequirement[] defaults = {
-                // Leather (starter)
-                new ArmorRequirement("minecraft:leather_helmet", "DEFENSE", 0),
-                new ArmorRequirement("minecraft:leather_chestplate", "DEFENSE", 0),
-                new ArmorRequirement("minecraft:leather_leggings", "DEFENSE", 0),
-                new ArmorRequirement("minecraft:leather_boots", "DEFENSE", 0),
+/**
+ * Default armor requirements configuration.
+ */
+private static JsonObject getDefaultArmorRequirements() {
+    JsonObject json = new JsonObject();
+    record ArmorRequirement(String id, String skill, int level) {
+    }
+    ArmorRequirement[] defaults = {
+            // Leather (starter)
+            new ArmorRequirement("minecraft:leather_helmet", "DEFENSE", 0),
+            new ArmorRequirement("minecraft:leather_chestplate", "DEFENSE", 0),
+            new ArmorRequirement("minecraft:leather_leggings", "DEFENSE", 0),
+            new ArmorRequirement("minecraft:leather_boots", "DEFENSE", 0),
 
-                // Gold (early unlock, decorative but weak)
-                new ArmorRequirement("minecraft:golden_helmet", "DEFENSE", 10),
-                new ArmorRequirement("minecraft:golden_chestplate", "DEFENSE", 10),
-                new ArmorRequirement("minecraft:golden_leggings", "DEFENSE", 10),
-                new ArmorRequirement("minecraft:golden_boots", "DEFENSE", 10),
+            // Gold
+            new ArmorRequirement("minecraft:golden_helmet", "DEFENSE", 0),
+            new ArmorRequirement("minecraft:golden_chestplate", "DEFENSE", 0),
+            new ArmorRequirement("minecraft:golden_leggings", "DEFENSE", 0),
+            new ArmorRequirement("minecraft:golden_boots", "DEFENSE", 0),
 
-                // Copper (solid early-mid)
-                new ArmorRequirement("minecraft:copper_helmet", "DEFENSE", 25),
-                new ArmorRequirement("minecraft:copper_chestplate", "DEFENSE", 25),
-                new ArmorRequirement("minecraft:copper_leggings", "DEFENSE", 25),
-                new ArmorRequirement("minecraft:copper_boots", "DEFENSE", 25),
+            // Copper
+            new ArmorRequirement("minecraft:copper_helmet", "DEFENSE", 5),
+            new ArmorRequirement("minecraft:copper_chestplate", "DEFENSE", 5),
+            new ArmorRequirement("minecraft:copper_leggings", "DEFENSE", 5),
+            new ArmorRequirement("minecraft:copper_boots", "DEFENSE", 5),
 
-                new ArmorRequirement("minecraft:turtle_helmet", "DEFENSE", 30),
+            // Turtle
+            new ArmorRequirement("minecraft:turtle_helmet", "DEFENSE", 15),
 
-                // Chainmail (true mid-game)
-                new ArmorRequirement("minecraft:chainmail_helmet", "DEFENSE", 35),
-                new ArmorRequirement("minecraft:chainmail_chestplate", "DEFENSE", 35),
-                new ArmorRequirement("minecraft:chainmail_leggings", "DEFENSE", 35),
-                new ArmorRequirement("minecraft:chainmail_boots", "DEFENSE", 35),
+            // Chainmail
+            new ArmorRequirement("minecraft:chainmail_helmet", "DEFENSE", 15),
+            new ArmorRequirement("minecraft:chainmail_chestplate", "DEFENSE", 15),
+            new ArmorRequirement("minecraft:chainmail_leggings", "DEFENSE", 15),
+            new ArmorRequirement("minecraft:chainmail_boots", "DEFENSE", 15),
 
-                // Iron (late mid-game)
-                new ArmorRequirement("minecraft:iron_helmet", "DEFENSE", 50),
-                new ArmorRequirement("minecraft:iron_chestplate", "DEFENSE", 50),
-                new ArmorRequirement("minecraft:iron_leggings", "DEFENSE", 50),
-                new ArmorRequirement("minecraft:iron_boots", "DEFENSE", 50),
+            // Iron
+            new ArmorRequirement("minecraft:iron_helmet", "DEFENSE", 20),
+            new ArmorRequirement("minecraft:iron_chestplate", "DEFENSE", 20),
+            new ArmorRequirement("minecraft:iron_leggings", "DEFENSE", 20),
+            new ArmorRequirement("minecraft:iron_boots", "DEFENSE", 20),
 
-                // Diamond (late game grind)
-                new ArmorRequirement("minecraft:diamond_helmet", "DEFENSE", 75),
-                new ArmorRequirement("minecraft:diamond_chestplate", "DEFENSE", 75),
-                new ArmorRequirement("minecraft:diamond_leggings", "DEFENSE", 75),
-                new ArmorRequirement("minecraft:diamond_boots", "DEFENSE", 75),
+            // Diamond
+            new ArmorRequirement("minecraft:diamond_helmet", "DEFENSE", 25),
+            new ArmorRequirement("minecraft:diamond_chestplate", "DEFENSE", 25),
+            new ArmorRequirement("minecraft:diamond_leggings", "DEFENSE", 25),
+            new ArmorRequirement("minecraft:diamond_boots", "DEFENSE", 25),
 
-                // Netherite (prestige / max)
-                new ArmorRequirement("minecraft:netherite_helmet", "DEFENSE", 99),
-                new ArmorRequirement("minecraft:netherite_chestplate", "DEFENSE", 99),
-                new ArmorRequirement("minecraft:netherite_leggings", "DEFENSE", 99),
-                new ArmorRequirement("minecraft:netherite_boots", "DEFENSE", 99),
+            // Netherite
+            new ArmorRequirement("minecraft:netherite_helmet", "DEFENSE", 30),
+            new ArmorRequirement("minecraft:netherite_chestplate", "DEFENSE", 30),
+            new ArmorRequirement("minecraft:netherite_leggings", "DEFENSE", 30),
+            new ArmorRequirement("minecraft:netherite_boots", "DEFENSE", 30),
 
-                new ArmorRequirement("minecraft:elytra", "PRAYER", 50)
-        };
+            // Elytra
+            new ArmorRequirement("minecraft:elytra", "PRAYER", 25)
+    };
         for (ArmorRequirement req : defaults) {
             JsonObject entry = new JsonObject();
             entry.addProperty("skill", req.skill);
