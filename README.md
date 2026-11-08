@@ -344,10 +344,10 @@ To address this, I rebalanced the equipment requirements to make progression mor
 
 - **Shields:** Defense level 5.
 - **Weapons:**
-  - Mace: Level 50.
-  - Crossbow: Level 0.
-  - Bow: Level 30.
-  - Trident: Level 99.
+  - Mace: Level 35.
+  - Crossbow: Level 10.
+  - Bow: Level 0.
+  - Trident: Level 30.
 - **Elytra:** Prayer level 25.
 - Affected items display their requirements in their item lore (e.g., `Requires level 25 Defense`).
 - All requirements can be customized through `tool_requirements.json` and `armor_requirements.json`.
