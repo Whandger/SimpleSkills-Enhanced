@@ -12,7 +12,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
-import net.minecraft.world.entity.animal.fish.AbstractFish;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.core.Holder;
@@ -104,13 +104,13 @@ public final class FishingEcosystem {
     }
 
     /** Every handled fish near the bait (alive, swimming, vanilla species). */
-    public static List<AbstractFish> nearbyFish(ServerLevel level, BlockPos bait) {
+    public static List<Mob> nearbyFish(ServerLevel level, BlockPos bait) {
         double range = FishingConfig.detectionRange();
         // Wide on the horizontal plane, deep downwards: ocean fish live up to ~13 blocks under the surface.
         AABB box = new AABB(bait).inflate(range, 0.0, range)
                 .expandTowards(0.0, -SEARCH_DEPTH, 0.0)
                 .expandTowards(0.0, 2.0, 0.0);
-        return level.getEntitiesOfClass(AbstractFish.class, box,
+        return level.getEntitiesOfClass(Mob.class, box,
                 f -> f.isAlive() && f.isInWater() && FishSpecies.of(f) != null);
     }
 
@@ -226,8 +226,8 @@ public final class FishingEcosystem {
             boolean inView = look.dot(center.subtract(eye).normalize()) > 0.30;
             if (inView && surfaceDepth < DEEP_SPAWN_DEPTH) continue;
 
-            EntityType<? extends AbstractFish> type = pickSpecies(level, pos, random);
-            AbstractFish fish = type.spawn(level, pos, EntitySpawnReason.EVENT);
+            EntityType<? extends Mob> type = pickSpecies(level, pos, random);
+            Mob fish = type.spawn(level, pos, EntitySpawnReason.EVENT);
             if (fish != null) {
                 spawned++;
             }
@@ -236,7 +236,7 @@ public final class FishingEcosystem {
     }
 
     /** Species that fits the biome: warm waters get tropical fish and pufferfish, the rest cod and salmon. */
-    private static EntityType<? extends AbstractFish> pickSpecies(ServerLevel level, BlockPos pos, RandomSource random) {
+    private static EntityType<? extends Mob> pickSpecies(ServerLevel level, BlockPos pos, RandomSource random) {
         Holder<Biome> biome = level.getBiome(pos);
         float temperature = biome.value().getBaseTemperature();
         double roll = random.nextDouble();

@@ -8,11 +8,13 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.entity.ExperienceOrb;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.projectile.FishingHook;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -24,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Rewards of a finished fight.
+ * Rewards of a finished fight, delivered straight into the inventory.
  *
  * <p><b>Main reward:</b> the species of the real fish that bit (a salmon is always delivered as a
  * salmon). <b>Extra reward:</b> the existing rank loot table (Novice ... Grandmaster, with its Fish /
@@ -75,27 +77,44 @@ public final class FishingLoot {
         return registries.getLootTable(BuiltInLootTables.FISHING);
     }
 
-    /** Throws the rewards towards the player like vanilla and triggers the vanilla fishing stats. */
+    /**
+     * Hands the rewards straight to the player: into the inventory, and whatever does not fit is dropped
+     * at the player's feet. Nothing is ever left floating next to the water (the hook can be far away,
+     * on the other side of a river), so the catch can not be "lost at the shore".
+     *
+     * <p>Fishing statistics and the vanilla fishing advancement trigger are still awarded, exactly once.</p>
+     */
     public static void deliver(ServerLevel level, ServerPlayer player, FishingHook hook, ItemStack rod,
-                               ItemStack main, List<ItemStack> bonus) {
+                               ItemStack main, List<ItemStack> bonus, int experience) {
         List<ItemStack> all = new ArrayList<>();
         all.add(main);
         all.addAll(bonus);
 
-        CriteriaTriggers.FISHING_ROD_HOOKED.trigger(player, rod, hook, all);
+        // Like vanilla: the trigger sees the full list of rewards before they change hands.
+        CriteriaTriggers.FISHING_ROD_HOOKED.trigger(player, rod, hook, new ArrayList<>(all));
 
         for (ItemStack stack : all) {
-            ItemEntity entity = new ItemEntity(level, hook.getX(), hook.getY(), hook.getZ(), stack);
-            double dx = player.getX() - hook.getX();
-            double dy = player.getY() - hook.getY();
-            double dz = player.getZ() - hook.getZ();
-            entity.setDeltaMovement(dx * 0.1, dy * 0.1 + Math.sqrt(Math.sqrt(dx * dx + dy * dy + dz * dz)) * 0.08, dz * 0.1);
-            level.addFreshEntity(entity);
-            if (stack.is(ItemTags.FISHES)) {
+            if (stack.isEmpty()) continue;
+            boolean isFish = stack.is(ItemTags.FISHES);
+            Item item = stack.getItem();
+            int count = stack.getCount();
+
+            player.getInventory().add(stack);
+            if (!stack.isEmpty()) {
+                // Inventory full: the rest lands at the player's feet (no arm swing, short pickup delay).
+                ItemEntity overflow = new ItemEntity(level, player.getX(), player.getY() + 0.5, player.getZ(), stack);
+                overflow.setDefaultPickUpDelay();
+                level.addFreshEntity(overflow);
+            }
+            player.awardStat(Stats.ITEM_PICKED_UP.get(item), count);
+            if (isFish) {
                 player.awardStat(Stats.FISH_CAUGHT, 1);
             }
         }
-        level.addFreshEntity(new ExperienceOrb(level, player.getX(), player.getY() + 0.5, player.getZ() + 0.5,
-                level.getRandom().nextInt(6) + 1));
+        if (experience > 0) {
+            player.giveExperiencePoints(experience);
+        }
+        level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.ITEM_PICKUP,
+                SoundSource.PLAYERS, 0.2F, (level.getRandom().nextFloat() - level.getRandom().nextFloat()) * 1.4F + 2.0F);
     }
 }

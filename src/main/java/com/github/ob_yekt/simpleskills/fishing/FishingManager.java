@@ -20,8 +20,8 @@ import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.entity.animal.fish.AbstractFish;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.item.ItemStack;
@@ -80,8 +80,10 @@ public final class FishingManager {
         String lastSelectReport = "";
         int blockedTicks;
 
-        @Nullable AbstractFish fish;
+        @Nullable Mob fish;
         @Nullable FishSpecies species;
+        /** Stored size of the hooked fish (read once when the fish is picked, never rolled again). */
+        @Nullable FishAttributes attributes;
 
         // approach
         double speed;
@@ -128,6 +130,7 @@ public final class FishingManager {
 
     public static void registerPayloads() {
         PayloadTypeRegistry.clientboundPlay().register(FishingStatePayload.TYPE, FishingStatePayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(FishingCatchPayload.TYPE, FishingCatchPayload.CODEC);
     }
 
     public static void register() {
@@ -258,7 +261,7 @@ public final class FishingManager {
     private static void tickWaiting(Session s, ServerLevel level, long now) {
         if (now < s.nextSelect) return;
 
-        AbstractFish fish = selectFish(s, level);
+        Mob fish = selectFish(s, level);
         if (fish == null) {
             s.failedSelects++;
             s.nextSelect = now + 40;
@@ -271,7 +274,9 @@ public final class FishingManager {
 
         s.fish = fish;
         s.species = FishSpecies.of(fish);
-        FishingDebug.info(s.player, "fish picked: " + s.species + " at " + String.format("%.1f", Math.sqrt(fish.distanceToSqr(s.hook)))
+        s.attributes = FishAttributes.of(fish);
+        FishingDebug.info(s.player, "fish picked: " + s.species + (s.attributes == null ? "" : " " + s.attributes.weightKg()
+                + " kg / " + s.attributes.lengthCm() + " cm") + " at " + String.format("%.1f", Math.sqrt(fish.distanceToSqr(s.hook)))
                 + " blocks | " + s.lastSelectReport);
         CONTROLLED_FISH.add(fish.getUUID());
         fish.getNavigation().stop();
@@ -282,7 +287,7 @@ public final class FishingManager {
     }
 
     private static void tickApproaching(Session s, ServerLevel level, long now) {
-        AbstractFish fish = s.fish;
+        Mob fish = s.fish;
         if (!fishUsable(s, level)) {
             loseFish(s, now, 40);
             return;
@@ -361,7 +366,7 @@ public final class FishingManager {
     }
 
     private static void tickBiting(Session s, ServerLevel level, long now) {
-        AbstractFish fish = s.fish;
+        Mob fish = s.fish;
         if (!fishUsable(s, level)) {
             setBiting(s.hook, false);
             loseFish(s, now, 40);
@@ -391,12 +396,12 @@ public final class FishingManager {
     }
 
     private static void startFight(Session s, long now) {
-        AbstractFish fish = s.fish;
+        Mob fish = s.fish;
         FishSpecies species = s.species;
         if (fish == null || species == null) return;
 
         FishingDebug.info(s.player, "fight started against " + species);
-        s.model = new FishingFightModel(FishingProgression.fightParams(s.fishingLevel, species), s.rng);
+        s.model = new FishingFightModel(FishingProgression.fightParams(s.fishingLevel, species, s.attributes), s.rng);
         s.lastReelTick = Long.MIN_VALUE / 2;
         s.reelGraceUntil = now + 12; // the click that started the fight must not also reel
         s.neutralYaw = s.player.getYRot();
@@ -409,7 +414,7 @@ public final class FishingManager {
     }
 
     private static void tickFighting(Session s, ServerLevel level, long now) {
-        AbstractFish fish = s.fish;
+        Mob fish = s.fish;
         FishingFightModel model = s.model;
         if (model == null || !fishUsable(s, level)) {
             setBiting(s.hook, false);
@@ -468,7 +473,7 @@ public final class FishingManager {
         s.finished = true;
         FishingDebug.info(s.player, "caught " + s.species);
 
-        AbstractFish fish = s.fish;
+        Mob fish = s.fish;
         FishSpecies species = s.species;
         ServerPlayer player = s.player;
         if (fish == null || species == null) {
@@ -476,25 +481,33 @@ public final class FishingManager {
             return;
         }
 
+        // The stored size of THIS fish drives the XP and the result screen (never rolled again).
+        FishAttributes attributes = s.attributes != null ? s.attributes : FishAttributes.of(fish);
+
         InteractionHand hand = rodHand(player);
         ItemStack rod = hand == null ? ItemStack.EMPTY : player.getItemInHand(hand);
         int luck = ((FishingBobberEntityAccessor) s.hook).getLuckBonus();
 
+        // Rewards go straight to the inventory, wherever the fish was when the bar filled up.
         ItemStack main = new ItemStack(species.item());
         List<ItemStack> bonus = FishingLoot.rollBonus(level, player, s.hook, rod, s.fishingLevel, luck);
-        FishingLoot.deliver(level, player, s.hook, rod, main, bonus);
+        FishingLoot.deliver(level, player, s.hook, rod, main, bonus, level.getRandom().nextInt(6) + 1);
 
         if (hand != null && !rod.isEmpty()) {
             rod.hurtAndBreak(1, player, hand.asEquipmentSlot());
         }
 
-        // XP: only here, once, after the catch is confirmed by the server.
-        int xp = (int) Math.round(ConfigManager.getFishingXP("catch", Skills.FISHING) * species.xpMultiplier());
+        // XP: only here, once, after the catch is confirmed by the server; bigger fish are worth more.
+        int baseXp = ConfigManager.getFishingXP("catch", Skills.FISHING);
+        int xp = FishingProgression.catchXp(baseXp, species, attributes);
         if (xp > 0) {
             XPManager.addXPWithNotification(player, Skills.FISHING, xp);
         }
+        FishingDebug.info(player, "reward: " + species + (attributes == null ? "" : " " + attributes.weightKg() + " kg / "
+                + attributes.lengthCm() + " cm") + ", xp " + xp);
 
         send(s, FishingStatePayload.STATE_CAUGHT, 0f, 0f, 1f, 0);
+        sendCatchResult(player, fish, species, attributes, xp);
         level.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.FISHING_BOBBER_RETRIEVE,
                 SoundSource.NEUTRAL, 1.0F, 0.9F);
 
@@ -505,13 +518,22 @@ public final class FishingManager {
         s.hook.discard(); // -> onHookRemoved -> endSession
     }
 
+    /** Shows the confirmed catch on the client (purely informational: the screen can not grant anything). */
+    private static void sendCatchResult(ServerPlayer player, Mob fish, FishSpecies species, @Nullable FishAttributes attributes, int xp) {
+        if (!FishingConfig.isCatchScreenEnabled() || attributes == null) return;
+        if (player.connection == null || !ServerPlayNetworking.canSend(player, FishingCatchPayload.TYPE)) return;
+        String typeId = BuiltInRegistries.ENTITY_TYPE.getKey(species.entityType()).toString();
+        ServerPlayNetworking.send(player, new FishingCatchPayload(typeId, species.descriptionId(),
+                species.variantOf(fish), attributes.weightKg(), attributes.lengthCm(), xp));
+    }
+
     /** The fish gets away. {@code lineBroke}: the line snapped (durability loss, hook lost). */
     private static void escape(Session s, ServerLevel level, boolean lineBroke) {
         if (s.finished) return;
         s.finished = true;
         FishingDebug.info(s.player, lineBroke ? "line snapped, the fish escaped" : "the fish escaped");
 
-        AbstractFish fish = s.fish;
+        Mob fish = s.fish;
         ServerPlayer player = s.player;
         Vec3 hookPos = s.hook.position();
 
@@ -539,12 +561,12 @@ public final class FishingManager {
     // Fish helpers
     // ==========================================================================================
 
-    private static @Nullable AbstractFish selectFish(Session s, ServerLevel level) {
+    private static @Nullable Mob selectFish(Session s, ServerLevel level) {
         BlockPos bait = s.hook.blockPosition();
         double range = FishingConfig.detectionRange();
-        List<AbstractFish> candidates = new ArrayList<>();
+        List<Mob> candidates = new ArrayList<>();
         int total = 0, busy = 0, scared = 0, far = 0, lowLevel = 0;
-        for (AbstractFish fish : FishingEcosystem.nearbyFish(level, bait)) {
+        for (Mob fish : FishingEcosystem.nearbyFish(level, bait)) {
             FishSpecies species = FishSpecies.of(fish);
             if (species == null) continue;
             total++;
@@ -569,7 +591,7 @@ public final class FishingManager {
     }
 
     private static boolean fishUsable(Session s, ServerLevel level) {
-        AbstractFish fish = s.fish;
+        Mob fish = s.fish;
         return fish != null && fish.isAlive() && !fish.isRemoved() && fish.level() == level && fish.isInWater();
     }
 
@@ -581,7 +603,7 @@ public final class FishingManager {
     }
 
     private static void releaseFish(Session s) {
-        AbstractFish fish = s.fish;
+        Mob fish = s.fish;
         if (fish != null) {
             CONTROLLED_FISH.remove(fish.getUUID());
             if (fish.isAlive() && fish.level() instanceof ServerLevel) {
@@ -590,17 +612,18 @@ public final class FishingManager {
         }
         s.fish = null;
         s.species = null;
+        s.attributes = null;
         s.model = null;
     }
 
-    private static Vec3 mouthOf(AbstractFish fish) {
+    private static Vec3 mouthOf(Mob fish) {
         float yaw = fish.getYRot() * ((float) Math.PI / 180.0F);
         Vec3 forward = new Vec3(-Mth.sin(yaw), 0.0, Mth.cos(yaw));
         return fish.position().add(forward.scale(fish.getBbWidth() * 0.55)).add(0.0, fish.getBbHeight() * 0.5, 0.0);
     }
 
     private static void snapHookToMouth(Session s) {
-        AbstractFish fish = s.fish;
+        Mob fish = s.fish;
         if (fish == null) return;
         Vec3 mouth = mouthOf(fish);
         s.hook.setPos(mouth.x, mouth.y, mouth.z);
@@ -608,7 +631,7 @@ public final class FishingManager {
     }
 
     private static void moveFishInFight(Session s, ServerLevel level, FishingFightModel model) {
-        AbstractFish fish = s.fish;
+        Mob fish = s.fish;
         if (fish == null) return;
         ServerPlayer player = s.player;
 
@@ -638,7 +661,7 @@ public final class FishingManager {
     }
 
     /** Moves the (AI-paused) fish by {@code step}, never letting it leave the water. */
-    private static boolean moveFish(AbstractFish fish, ServerLevel level, Vec3 step) {
+    private static boolean moveFish(Mob fish, ServerLevel level, Vec3 step) {
         Vec3 pos = fish.position();
         Vec3 eye = fish.getEyePosition();
         if (!waterAt(level, pos.add(step)) || !waterAt(level, eye.add(step))) {
@@ -662,7 +685,7 @@ public final class FishingManager {
         return level.hasChunkAt(block) && level.getFluidState(block).is(FluidTags.WATER);
     }
 
-    private static void faceTowards(AbstractFish fish, Vec3 direction, float maxTurnDegrees) {
+    private static void faceTowards(Mob fish, Vec3 direction, float maxTurnDegrees) {
         double horizontal = direction.horizontalDistance();
         if (horizontal < 1.0E-3) return;
         float target = (float) (Mth.atan2(-direction.x, direction.z) * 180.0 / Math.PI);

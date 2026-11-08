@@ -34,8 +34,9 @@ public final class FishingFightModel {
 
     /** Level / species / config dependent knobs. All multipliers are 1.0 for "vanilla balance". */
     public record Params(double fatigueMult, double tensionMult, double recoveryMult,
-                         double maxTension, double speciesPull, double speciesFatigue) {
-        public static final Params DEFAULT = new Params(1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
+                         double maxTension, double speciesPull, double speciesFatigue,
+                         double counterEffect) {
+        public static final Params DEFAULT = new Params(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0);
     }
 
     // ---- Tuning (per tick) -------------------------------------------------------------------
@@ -101,7 +102,8 @@ public final class FishingFightModel {
 
         final boolean pulling = isPulling();
         final double resistance = resistance();
-        counter = clamp01(counter);
+        // Strong (big) fish absorb part of the camera counter-movement.
+        counter = clamp01(counter) * params.counterEffect();
 
         // ---- fatigue ----
         if (pulling) {

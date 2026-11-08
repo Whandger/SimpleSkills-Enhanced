@@ -2,6 +2,8 @@ package com.github.ob_yekt.simpleskills;
 
 import com.github.ob_yekt.simpleskills.excavating.InvestigationHud;
 import com.github.ob_yekt.simpleskills.excavating.InvestigationPayload;
+import com.github.ob_yekt.simpleskills.fishing.FishingCatchPayload;
+import com.github.ob_yekt.simpleskills.fishing.FishingCatchScreen;
 import com.github.ob_yekt.simpleskills.fishing.FishingHud;
 import com.github.ob_yekt.simpleskills.fishing.FishingStatePayload;
 import net.fabricmc.api.ClientModInitializer;
@@ -34,6 +36,11 @@ public class SimpleskillsClient implements ClientModInitializer {
         // Fishing: server-owned minigame state, drawn as tension / fatigue / progress bars
         ClientPlayNetworking.registerGlobalReceiver(FishingStatePayload.TYPE, (payload, context) ->
             context.client().execute(() -> FishingHud.onPayload(payload))
+        );
+
+        // Fishing: result screen of a catch the server already confirmed (display only)
+        ClientPlayNetworking.registerGlobalReceiver(FishingCatchPayload.TYPE, (payload, context) ->
+            context.client().execute(() -> context.client().gui.setScreen(new FishingCatchScreen(payload)))
         );
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {

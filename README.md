@@ -1,8 +1,9 @@
 # SimpleSkills Enhanced
 
-**SimpleSkills Enhanced** is a community-developed fork of the original [SimpleSkills](https://modrinth.com/mod/simpleskills) Fabric mod, introducing additional RPG mechanics, profession bonuses, combat improvements, and interface enhancements.
+**SimpleSkills Enhanced** is a community-developed fork of the original [SimpleSkills](https://modrinth.com/mod/simpleskills) Fabric mod, introducing additional RPG mechanics, profession bonuses, combat improvements, fishing mechanics, and interface enhancements.
 
-> **Important Notice — Original Mod Credits**
+> [!IMPORTANT]
+> **Original Mod Credits**
 >
 > SimpleSkills Enhanced is a **fork** of the official SimpleSkills mod. The entire foundation of the mod, including its skill system, leaderboards, Ironman mode, configuration, and original concept, belongs to its creator, **obyekt** (Discord: `obyekt`).
 >
@@ -26,49 +27,57 @@ Reaching level 99 requires significant dedication, so achieving the maximum leve
 
 ### ⛏️ Mining, 🪓 Woodcutting & 🥄 Excavating
 
-**Gathering Speed**
+#### Gathering Speed
 
 - **+1% block-breaking speed per level**, reaching **+99% at level 99**.
 - Bonuses respect the appropriate tool for each profession:
-  - **Mining:** Pickaxe
-  - **Woodcutting:** Axe
-  - **Excavating:** Shovel
+  - **Mining:** Pickaxe.
+  - **Woodcutting:** Axe.
+  - **Excavating:** Shovel.
 - Bonuses multiply vanilla block-breaking speed instead of replacing the original calculation.
-- **Tool Durability Protection:** +1 percentage point per level, up to **99%** at level 99.
+- **Tool Durability Protection:** +1 percentage point per level, up to **99% at level 99**.
 
-**Loot Duplication (Mining & Woodcutting)**
+#### Loot Duplication (Mining & Woodcutting)
 
-- +5 percentage points of duplication chance every 10 levels, reaching **45% at level 90**.
+- +5 percentage points of duplication chance every 10 levels.
+- Maximum duplication chance: **45% at level 90**.
 
 ### ⛏️ Mining
 
-**Vein Mining**
+#### Vein Mining
 
 - Unlocked at level 15.
-- Hold Shift to mine connected blocks of the same ore type.
-- Every 15 levels adds 2 extra blocks, reaching **12 additional blocks at level 90**.
+- Hold **Shift** to mine connected blocks of the same ore type.
+- Every 15 levels adds 2 extra blocks.
+- Reaches **12 additional blocks at level 90**.
 
 ### 🪓 Woodcutting
 
-**Tree Feller**
+#### Tree Feller
 
 - Unlocked at level 5.
-- Hold Shift and break a tree trunk with an axe to make the connected tree fall, including its branches and leaves.
+- Hold **Shift** and break a tree trunk with an axe to make the connected tree fall, including its branches and leaves.
 - Fallen logs and leaves have animations.
 - Leaves generate their normal drops when they land.
 
 ### 🥄 Excavating
 
-**Sand Investigation**
+#### Sand Investigation
 
 - Hold right-click with a shovel on Sand to investigate it and search for buried treasures.
 - **Investigation Speed:** Decreases with skill level, from **3 seconds at level 1** to **1 second at level 99**.
 - Investigation progress, completion, cancellation, loot generation, and XP rewards are controlled server-side.
-- Investigations are canceled if the player changes the target block, shovel, selected hotbar slot, or dimension, moves too far away, or stops holding the interaction.
+- Investigations are canceled if the player:
+  - Changes the target block.
+  - Changes the shovel being held.
+  - Changes the selected hotbar slot.
+  - Changes dimension.
+  - Moves too far away.
+  - Stops holding the interaction.
 - Only one player can investigate the same Sand block at a time.
 - Canceled investigations do not grant XP or loot, consume no durability, and leave the original Sand block untouched.
 
-**Ranks & Progression**
+#### Ranks & Progression
 
 - **10 unique ranks**, each with its own name and color.
 - Progression unlocks access to increasingly valuable rewards.
@@ -87,7 +96,7 @@ Reaching level 99 requires significant dedication, so achieving the maximum leve
 | Legendary Digger | 81–90 |
 | Legendary Treasure Hunter | 91–99 |
 
-**Loot System**
+#### Loot System
 
 - **28 possible rewards** distributed across 7 rarity tiers:
   - Common
@@ -105,7 +114,7 @@ Reaching level 99 requires significant dedication, so achieving the maximum leve
 - Enchanted Books are generated using valid loot enchantments, excluding curses.
 - Pottery Sherds are selected from the vanilla pottery sherd tag.
 
-**XP Rewards**
+#### XP Rewards
 
 Every completed investigation grants **40 base XP**, even when Nothing is found. Additional XP depends on the rarity of the discovered reward.
 
@@ -120,12 +129,12 @@ Every completed investigation grants **40 base XP**, even when Nothing is found.
 | Legendary | 840 |
 | Mythic | 1540 |
 
-**Special Discoveries**
+#### Special Discoveries
 
 - Very Rare and higher-tier discoveries trigger chat notifications.
 - Legendary and Mythic discoveries also trigger special sound and particle effects.
 
-**Investigated Sand**
+#### Investigated Sand
 
 - Completed investigations transform Sand into a special block: `simpleskills:investigated_sand`.
 - Uses the vanilla Sand texture and matching block properties.
@@ -134,36 +143,93 @@ Every completed investigation grants **40 base XP**, even when Nothing is found.
 - Integrated into relevant sand, glass, and shovel tags.
 - Includes **18 additional recipes** for sandstone, TNT, and concrete powder.
 
-**Shared Gathering Bonuses**
+#### Shared Gathering Bonuses
 
 - Excavating uses the shared **Gathering Speed** and **Tool Durability Protection** bonuses.
 - The appropriate tool for Excavating is the Shovel.
 
 ### 🎣 Fishing
 
-**Real-Time Fishing Minigame**
+#### Real-Time Fishing Minigame
 
 - Replaces the vanilla random fishing-bite process with a minigame driven by real fish entities in the world.
 - Supports **Cod, Salmon, Tropical Fish, and Pufferfish**.
 - The actual fish species determines the main fish item delivered after a successful catch.
-- Fishing sessions progress through five stages: **Settling → Waiting → Approaching → Biting → Fighting**.
-- Fish swim toward the bait before biting. The player must right-click during the bite window to start the fight.
-- During the fight, fish pull left, pull right, or pause. Players counter their movement by turning the camera in the opposite direction and reel using the use key.
-- The HUD displays line tension, fish fatigue, reeling progress, and fish movement.
-- Excessive line tension breaks the fishing line. Failed catches allow the fish to escape without rewards.
+- Fishing sessions progress through five stages:
+
+  **Settling → Waiting → Approaching → Biting → Fighting**
+
+- Fish swim toward the bait before biting.
+- The player must right-click during the bite window to start the fight.
+- During the fight, fish pull left, pull right, or pause.
+- Players counter their movement by turning the camera in the opposite direction and reel using the use key.
+- The HUD displays:
+  - Line tension.
+  - Fish fatigue.
+  - Reeling progress.
+  - Fish movement.
+- Excessive line tension breaks the fishing line.
+- Failed catches allow the fish to escape without rewards.
 - Fish can react to nearby players through configurable hearing and vision behavior.
 - Fish movement is controlled during an active fishing session and returns to normal AI when the session ends.
 
-**Fishing Ecosystem**
+#### Individual Fish Attributes — Weight & Length
+
+Every caught fish has its own individual physical characteristics.
+
+- Each fish receives individual **weight and length attributes**.
+- These attributes make catches more varied: two fish of the same species can have different sizes and weights.
+- Fish attributes are associated with the individual fish rather than being fixed values for the entire species.
+- Supported fish include Cod, Salmon, Tropical Fish, and Pufferfish.
+- Tropical Fish variants are also supported.
+
+#### Size-Based Fishing Difficulty
+
+A fish's physical characteristics directly influence how difficult it is to catch.
+
+- Larger and heavier fish are generally stronger and more difficult to land.
+- Fish weight and size influence the strength of the fish during the fighting stage.
+- Stronger fish create a greater challenge when countering their movements and managing line tension.
+- Smaller and lighter fish are generally easier to catch.
+- The fishing fight therefore depends not only on the species, but also on the individual characteristics of the fish.
+
+#### Size-Based Fishing XP
+
+Fishing XP is calculated using the individual characteristics of the caught fish.
+
+- The fish's weight and length influence the XP awarded after a successful catch.
+- Larger and heavier catches can reward more Fishing XP.
+- Smaller catches generally provide less XP.
+- XP scaling uses a square-root-based size calculation.
+- Size-based XP scaling is clamped between **0.6× and 2.0×**.
+- The maximum reward is capped at **3× the base XP**.
+- The final XP reward is calculated server-side and integrated into the normal Fishing skill progression.
+- The actual XP awarded is displayed on the fishing catch results screen.
+
+#### Fishing Catch Results Screen
+
+After successfully catching a fish, a new results screen displays information about the catch.
+
+The screen includes:
+
+- **The caught fish:** Displays the actual fish visually.
+- **Weight:** Shows the individual weight of the fish.
+- **Length:** Shows the individual length of the fish.
+- **Fishing XP:** Displays the XP awarded for that catch.
+
+The results screen makes each successful fishing session more rewarding by showing the characteristics of the fish and the experience gained.
+
+#### Fishing Ecosystem
 
 - Validates fishing locations using connected water volume and water depth.
 - Searches for eligible fish already present in the environment before replenishing the local population.
 - Can discreetly spawn supported fish when the local population is below the configured target.
 - Spawn positions are selected away from the bait and player, with preference for deeper water and locations outside the player's field of view.
 - Small puddles, shallow water, and locations without sufficient connected water are rejected.
-- The configured minimum fish count is a replenishment target, not a strict requirement. Fishing can proceed when at least one eligible fish is available.
+- The configured minimum fish count is a replenishment target, not a strict requirement.
+- Fishing can proceed when at least one eligible fish is available.
 
-**Supported Fish Species**
+#### Supported Fish Species
 
 | Species | Pull Strength | Fatigue Factor | XP Multiplier | Default Minimum Level |
 |:--|--:|--:|--:|--:|
@@ -172,7 +238,7 @@ Every completed investigation grants **40 base XP**, even when Nothing is found.
 | Tropical Fish | 0.85× | 1.15× | 1.30× | 1 |
 | Pufferfish | 1.10× | 0.90× | 1.50× | 25 |
 
-**Fishing Progression**
+#### Fishing Progression
 
 Fishing levels improve several aspects of the minigame:
 
@@ -183,22 +249,34 @@ Fishing levels improve several aspects of the minigame:
 
 These bonuses can be individually configured.
 
-**Fishing Rewards**
+#### Fishing Rewards
 
 - Successfully caught fish are delivered as their corresponding fish items.
 - Each successful catch performs a single bonus-loot roll.
-- Bonus loot can include junk and treasure. Fish-category rewards are excluded because the main fish is already delivered separately.
+- Bonus loot can include junk and treasure.
+- Fish-category rewards are excluded because the main fish is already delivered separately.
 - The custom rank-based fishing loot table is used when available and enabled.
 - Vanilla fishing loot can be used as a fallback when the custom loot table is unavailable or disabled.
-- Successful catches grant Fishing XP based on configured catch XP and the caught species' XP multiplier.
+- Successful catches grant Fishing XP based on configured catch XP, the caught species' XP multiplier, and the individual fish's size and weight.
 - Successful catches consume 1 fishing rod durability point.
 - Escaped fish grant no catch rewards or XP.
 - When the fishing line breaks, the configured durability penalty is applied.
 
-**Fishing Diagnostics**
+#### Fishing Diagnostics
 
-- Use `/simpleskills fishing debug` to toggle detailed fishing diagnostics for your player.
-- Diagnostic messages help investigate fishing spot validation, fish selection and rejection, fish approach, bite timing, and fight behavior.
+Use the following command to toggle detailed fishing diagnostics for your player:
+
+```text
+/simpleskills fishing debug
+```
+
+Diagnostic messages help investigate:
+
+- Fishing spot validation.
+- Fish selection and rejection.
+- Fish approach.
+- Bite timing.
+- Fight behavior.
 
 ### ⚔️ Slaying
 
@@ -225,18 +303,18 @@ These bonuses can be individually configured.
 
 ### 🛡️ Defense
 
-- **Damage Reduction:** +0.3% per level.
-- **Armor Durability Protection:** +1 percentage point per level.
-- **Knockback Resistance:** +0.5 percentage points per level.
+- **Damage Reduction:** +0.3 percentage points per level, up to **29.7% at level 99**.
+- **Armor Durability Protection:** +1 percentage point per level, up to **99% at level 99**.
+- **Knockback Resistance:** +0.5 percentage points per level, up to **49.5% at level 99**.
 
 ### 🖥️ HUD & Interface
 
-**Skills HUD**
+#### Skills HUD
 
 - Refreshed visual appearance.
 - Removed the original yellow border.
 
-**Reworked TAB Menu — SkillTabMenu**
+#### Reworked TAB Menu — SkillTabMenu
 
 - Currently displayed exclusively on the multiplayer player TAB screen.
 - Shows the benefits of each profession.
@@ -255,11 +333,14 @@ SimpleSkills is a **server-side Fabric mod** that transforms Minecraft into an R
 
 It works in multiplayer without requiring players to install the mod on their clients. For singleplayer, install it on the client.
 
-**Default Controls:**
+### Default Controls
 
-- `TAB` — Toggle the HUD.
-- `J` — Move the HUD.
-- Keys can be rebound in Minecraft's Controls menu.
+| Key | Function |
+|:--|:--|
+| `TAB` | Toggle the HUD. |
+| `J` | Move the HUD. |
+
+Keys can be rebound in Minecraft's Controls menu.
 
 ### ⭐ Main Features
 
@@ -305,7 +386,7 @@ It works in multiplayer without requiring players to install the mod on their cl
 | Diamond | 75 | Netherite | 99 |
 | Netherite | 99 | — | — |
 
-**Additional Equipment Requirements:**
+#### Additional Equipment Requirements
 
 - **Copper Pickaxe:** Mines the same ores as the Iron Pickaxe for balance reasons.
 - **Shields:** Defense level 5 by default.
@@ -330,7 +411,7 @@ It works in multiplayer without requiring players to install the mod on their cl
 
 - Fishing speed increases by **+0.5% per level**, up to **+49.5%**.
 
-**Fishing Loot Tables:**
+##### Fishing Loot Tables
 
 | Tier | Fish | Junk | Treasure |
 |:--|--:|--:|--:|
@@ -408,7 +489,7 @@ Durability and ingredient recovery bonuses:
 
 #### 🔨 Smithing
 
-- Repair bonuses per tier:
+Repair bonuses per tier:
 
 | Tier | Repair Bonus |
 |:--|--:|
@@ -419,7 +500,8 @@ Durability and ingredient recovery bonuses:
 | Grandmaster | 100% |
 
 - Anvils no longer take damage when repairing items.
-- Diamond-to-Netherite upgrade durability bonuses:
+
+Diamond-to-Netherite upgrade durability bonuses:
 
 | Tier | Durability Bonus |
 |:--|--:|
@@ -480,6 +562,8 @@ server_root/config/simpleskills
 
 Customize XP progression, unlock requirements, loot tables, Prayer sacrifices, and Ironman difficulty.
 
+### Ironman Configuration
+
 Important Ironman configuration options:
 
 ```json
@@ -512,9 +596,16 @@ The following options configure the fishing minigame and ecosystem. Missing valu
 | `fishing_ecosystem_max_population` | `12` |
 | `fishing_bite_window_ticks` | `40` |
 
-Species minimum Fishing levels can also be configured individually through `fishing_species_min_level`. The default minimum levels are Cod 1, Salmon 1, Tropical Fish 1, and Pufferfish 25.
+Species minimum Fishing levels can also be configured individually through `fishing_species_min_level`.
 
-Configuration can be reloaded without restarting the server using:
+Default minimum levels:
+
+- Cod: 1.
+- Salmon: 1.
+- Tropical Fish: 1.
+- Pufferfish: 25.
+
+Configuration can be reloaded without restarting the server:
 
 ```text
 /simpleskills reload
@@ -524,12 +615,25 @@ Configuration can be reloaded without restarting the server using:
 
 ## 🚀 Installation
 
-1. Install **Fabric Loader** and **Fabric API**.
+1. Install **Fabric Loader** and **Fabric API** for the supported Minecraft version.
 2. Download the SimpleSkills Enhanced JAR.
 3. Place the JAR inside your server's `mods` folder.
 4. For singleplayer, place the JAR inside your client's `mods` folder.
 5. Customize the configuration files if desired.
 6. Start Minecraft and enjoy your RPG progression!
+
+### Development Environment
+
+The current development environment uses:
+
+| Component | Version |
+|:--|:--|
+| Minecraft | 26.3 |
+| Java | 25.0.1 |
+| Fabric Loader | 0.20.1 |
+| Fabric API | 0.165.2+26.3 |
+| Fabric Loom | 1.17.21 |
+| SimpleSkills Enhanced | 1.0.6 |
 
 ---
 
@@ -557,6 +661,9 @@ Responsible for the additional improvements introduced in this fork, including:
 - Mining Vein Mining and Woodcutting Tree Feller mechanics.
 - Excavating Sand Investigation, loot progression, ranks, and rewards.
 - Fishing Minigame and Fishing Ecosystem.
+- Individual fish weight and length attributes.
+- Size- and weight-based fishing difficulty and XP rewards.
+- Fishing catch results screen displaying the caught fish, its attributes, and awarded XP.
 - Slaying combat improvements.
 - Ranged projectile bonuses and duplication mechanics.
 - Defense bonuses.
@@ -567,7 +674,8 @@ Responsible for the additional improvements introduced in this fork, including:
 
 ## SimpleSkills Enhanced Team
 
-**Original Creator:** obyekt  
+**Original Creator:** obyekt
+
 **Fork Developer:** Whandger
 
 *Built upon the original SimpleSkills project with respect for its creator and the community.*

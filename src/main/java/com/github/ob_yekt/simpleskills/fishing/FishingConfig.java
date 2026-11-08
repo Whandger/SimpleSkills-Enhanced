@@ -31,6 +31,7 @@ public final class FishingConfig {
     public static final String MAX_POPULATION = "fishing_ecosystem_max_population";
     public static final String BITE_WINDOW_TICKS = "fishing_bite_window_ticks";
     public static final String SPECIES_MIN_LEVEL = "fishing_species_min_level";
+    public static final String CATCH_SCREEN_ENABLED = "fishing_catch_screen_enabled";
 
     private static volatile boolean fightEnabled = true;
     private static volatile double detectionRange = 12.0;
@@ -48,6 +49,7 @@ public final class FishingConfig {
     private static volatile boolean spawnEnabled = true;
     private static volatile int maxPopulation = 12;
     private static volatile int biteWindowTicks = 40;
+    private static volatile boolean catchScreenEnabled = true;
     private static volatile JsonObject speciesMinLevel = new JsonObject();
 
     private FishingConfig() {}
@@ -70,8 +72,9 @@ public final class FishingConfig {
         json.addProperty(SPAWN_ENABLED, true);
         json.addProperty(MAX_POPULATION, 12);
         json.addProperty(BITE_WINDOW_TICKS, 40);
+        json.addProperty(CATCH_SCREEN_ENABLED, true);
         JsonObject species = new JsonObject();
-        for (FishSpecies s : FishSpecies.values()) {
+        for (FishSpecies s : FishSpecies.all()) {
             species.addProperty(s.configKey(), s.defaultMinLevel());
         }
         json.add(SPECIES_MIN_LEVEL, species);
@@ -96,6 +99,7 @@ public final class FishingConfig {
         spawnEnabled = bool(cfg, SPAWN_ENABLED, true);
         maxPopulation = (int) num(cfg, MAX_POPULATION, 12, 1, 64);
         biteWindowTicks = (int) num(cfg, BITE_WINDOW_TICKS, 40, 10, 200);
+        catchScreenEnabled = bool(cfg, CATCH_SCREEN_ENABLED, true);
         JsonElement species = cfg.get(SPECIES_MIN_LEVEL);
         speciesMinLevel = species != null && species.isJsonObject() ? species.getAsJsonObject() : new JsonObject();
     }
@@ -116,6 +120,8 @@ public final class FishingConfig {
     public static boolean isSpawnEnabled() { return spawnEnabled; }
     public static int maxPopulation() { return Math.max(maxPopulation, minFishCount); }
     public static int biteWindowTicks() { return biteWindowTicks; }
+    /** Whether the server sends the catch result screen to players that have the mod. */
+    public static boolean isCatchScreenEnabled() { return catchScreenEnabled; }
 
     /** Minimum Fishing level needed to hook the given species. */
     public static int minLevelFor(FishSpecies species) {

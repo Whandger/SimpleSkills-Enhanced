@@ -1,5 +1,7 @@
 package com.github.ob_yekt.simpleskills.fishing;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Level based benefits of the Fishing skill (levels 1-99). Every benefit grows linearly with the
  * level and is shown in the SkillTabMenu through the same numbers used by the fight itself.
@@ -53,14 +55,27 @@ public final class FishingProgression {
     public static double recoveryPercent(int level) { return RECOVERY_BONUS_AT_MAX * fraction(level) * 100.0; }
     public static double attractionPercent(int level) { return ATTRACTION_BONUS_AT_MAX * fraction(level) * 100.0; }
 
-    /** Builds the fight parameters for a player of {@code level} fighting {@code species}. */
-    public static FishingFightModel.Params fightParams(int level, FishSpecies species) {
+    /**
+     * Builds the fight parameters for a player of {@code level} fighting an individual fish: the
+     * species sets the base strength, the stored weight of this very fish scales it (heavier = stronger,
+     * limited to 0.80x .. 1.35x), and the player's Fishing level benefits stay exactly as they were.
+     */
+    public static FishingFightModel.Params fightParams(int level, FishSpecies species, @Nullable FishAttributes fish) {
+        double weight = fish != null ? fish.weightKg() : species.sizeProfile().referenceWeightKg();
+        double strength = FishSizeModel.strengthMultiplier(species.sizeProfile(), weight);
         return new FishingFightModel.Params(
                 fatigueMultiplier(level),
                 tensionMultiplier(level),
                 recoveryMultiplier(level),
                 FishingConfig.lineMaxTension(),
-                species.pullStrength(),
-                species.fatigueFactor());
+                species.pullStrength() * strength,
+                species.fatigueFactor() / FishSizeModel.fatigueDivisor(strength),
+                FishSizeModel.counterEffect(strength));
+    }
+
+    /** Fishing XP of a catch from the stored size of the fish (server side, computed once per catch). */
+    public static int catchXp(int baseXp, FishSpecies species, @Nullable FishAttributes fish) {
+        double weight = fish != null ? fish.weightKg() : species.sizeProfile().referenceWeightKg();
+        return FishSizeModel.catchXp(baseXp, species.xpMultiplier(), species.sizeProfile(), weight);
     }
 }

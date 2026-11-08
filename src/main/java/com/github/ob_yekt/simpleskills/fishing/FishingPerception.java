@@ -7,7 +7,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.entity.animal.fish.AbstractFish;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -53,13 +53,13 @@ public final class FishingPerception {
     // Queries
     // ------------------------------------------------------------------------------------------
 
-    public static Mood moodOf(AbstractFish fish) {
+    public static Mood moodOf(Mob fish) {
         Mind mind = MINDS.get(fish.getUUID());
         return mind == null ? Mood.NORMAL : mind.mood;
     }
 
     /** A fish can only be picked for a fishing session while it is calm. */
-    public static boolean isCalm(AbstractFish fish) {
+    public static boolean isCalm(Mob fish) {
         return moodOf(fish) == Mood.NORMAL;
     }
 
@@ -67,7 +67,7 @@ public final class FishingPerception {
      * Highest threat (0..1) any player (except {@code ignoredPlayer}) in the fish's level poses to it right
      * now. Used by fish that are approaching a bait to decide whether to give up.
      */
-    public static double maxThreat(ServerLevel level, AbstractFish fish, UUID ignoredPlayer) {
+    public static double maxThreat(ServerLevel level, Mob fish, UUID ignoredPlayer) {
         double flee = FishingConfig.fleeRange();
         double best = 0.0;
         for (ServerPlayer player : level.players()) {
@@ -81,7 +81,7 @@ public final class FishingPerception {
     }
 
     /** 0 = no threat, 1 = maximum. Combines hearing (footsteps) and sight. */
-    static double threat(AbstractFish fish, ServerPlayer player, double speedPerTick) {
+    static double threat(Mob fish, ServerPlayer player, double speedPerTick) {
         double flee = FishingConfig.fleeRange();
         double distance = Math.sqrt(player.distanceToSqr(fish));
         double severity = 0.0;
@@ -118,7 +118,7 @@ public final class FishingPerception {
     // ------------------------------------------------------------------------------------------
 
     /** Makes the fish swim away from {@code from} and ignore the bait until it has calmed down. */
-    public static void spook(AbstractFish fish, Vec3 from, int fleeTicks, double speedModifier) {
+    public static void spook(Mob fish, Vec3 from, int fleeTicks, double speedModifier) {
         if (!(fish.level() instanceof ServerLevel level)) return;
         long now = level.getServer().getTickCount();
         Mind mind = MINDS.computeIfAbsent(fish.getUUID(), id -> new Mind());
@@ -128,7 +128,7 @@ public final class FishingPerception {
         swimAwayFrom(fish, level, from, speedModifier);
     }
 
-    private static void swimAwayFrom(AbstractFish fish, ServerLevel level, Vec3 from, double speed) {
+    private static void swimAwayFrom(Mob fish, ServerLevel level, Vec3 from, double speed) {
         RandomSource random = fish.getRandom();
         Vec3 away = fish.position().subtract(from);
         double len = Math.sqrt(away.x * away.x + away.z * away.z);
@@ -152,7 +152,7 @@ public final class FishingPerception {
         }
     }
 
-    private static void alert(AbstractFish fish, Mind mind, long now) {
+    private static void alert(Mob fish, Mind mind, long now) {
         mind.mood = Mood.ALERT;
         mind.until = now + ALERT_TICKS + fish.getRandom().nextInt(20);
         mind.alertScans = 1;
@@ -198,10 +198,10 @@ public final class FishingPerception {
 
         double flee = FishingConfig.fleeRange();
         AABB box = player.getBoundingBox().inflate(flee, flee * 0.6, flee);
-        List<AbstractFish> fish = level.getEntitiesOfClass(AbstractFish.class, box,
-                f -> f.isAlive() && f.isInWater() && !FishingManager.isControlled(f));
+        List<Mob> fish = level.getEntitiesOfClass(Mob.class, box,
+                f -> f.isAlive() && f.isInWater() && !FishingManager.isControlled(f) && FishSpecies.of(f) != null);
         int handled = 0;
-        for (AbstractFish f : fish) {
+        for (Mob f : fish) {
             if (++handled > MAX_FISH_PER_SCAN) break;
             double severity = threat(f, player, speed);
             if (severity <= 0.0) continue;
@@ -209,7 +209,7 @@ public final class FishingPerception {
         }
     }
 
-    private static void react(AbstractFish fish, ServerPlayer player, double severity, long now) {
+    private static void react(Mob fish, ServerPlayer player, double severity, long now) {
         Mind mind = MINDS.computeIfAbsent(fish.getUUID(), id -> new Mind());
         if (mind.mood == Mood.FLEEING) {
             return; // already running
