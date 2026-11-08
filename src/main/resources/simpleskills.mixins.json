@@ -32,6 +32,8 @@
     "FISHING.FishingBobberEntityAccessor",
     "FISHING.FishingBobberEntityMixin",
     "FISHING.FishingBobberLootMixin",
+    "FISHING.FishingHookFightMixin",
+    "FISHING.FishingMobControlMixin",
     "FURNACES.AbstractFurnaceScreenHandlerMixin",
     "FURNACES.FurnaceOutputSlotMixin",
     "LORE.CraftingResultInventoryMixin",

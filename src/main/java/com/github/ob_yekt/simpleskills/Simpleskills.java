@@ -5,6 +5,7 @@ import com.github.ob_yekt.simpleskills.managers.*;
 import com.github.ob_yekt.simpleskills.events.EventHandlers;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingManager;
 import com.github.ob_yekt.simpleskills.excavating.ModBlocks;
+import com.github.ob_yekt.simpleskills.fishing.FishingManager;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -28,6 +29,7 @@ public class Simpleskills implements ModInitializer {
 
 		GatheringSpeed.registerPayloads();
 		ExcavatingManager.registerPayloads();
+		FishingManager.registerPayloads();
 		SimpleskillsCommands.registerCommands();
 		IronmanManager.init();
 		AttributeManager.registerPlayerEvents();
@@ -36,6 +38,7 @@ public class Simpleskills implements ModInitializer {
 		EventHandlers.registerAll();
 		TreeFeller.register();
 		ExcavatingManager.register();
+		FishingManager.register();
 
 		// Initialize database and setup server lifecycle hooks
 		DatabaseManager db = DatabaseManager.getInstance();

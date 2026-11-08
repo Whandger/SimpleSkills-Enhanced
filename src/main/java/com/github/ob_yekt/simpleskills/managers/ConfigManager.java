@@ -2,6 +2,7 @@ package com.github.ob_yekt.simpleskills.managers;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.github.ob_yekt.simpleskills.Skills;
+import com.github.ob_yekt.simpleskills.fishing.FishingConfig;
 import com.github.ob_yekt.simpleskills.requirements.SkillRequirement;
 import com.google.gson.*;
 import net.fabricmc.loader.api.FabricLoader;
@@ -80,6 +81,7 @@ public class ConfigManager {
             loadFishingLootConfig();
             loadFarmingXPConfig();
             loadCombatConfig();
+            FishingConfig.reload();
             Simpleskills.LOGGER.info("All configurations initialized successfully.");
         } catch (IOException e) {
             Simpleskills.LOGGER.error("Error initializing configurations: {}", e.getMessage());
@@ -169,6 +171,8 @@ public class ConfigManager {
         json.addProperty("crafting_lore_in_tooltips_enabled", true);
         json.addProperty("custom_fishing_loot_enabled", true);
         json.addProperty("fishing_speed_bonus_enabled", true);
+        // Fishing minigame (see fishing/FishingConfig.java for the meaning of every option)
+        FishingConfig.addDefaults(json);
         return json;
     }
 
@@ -1720,6 +1724,20 @@ public class ConfigManager {
      */
     public static boolean isCropBlock(String blockTranslationKey) {
         return CROP_CONFIGS.containsKey(blockTranslationKey);
+    }
+
+    /**
+     * Checks if the custom (rank based) fishing loot tables are enabled.
+     */
+    public static boolean isCustomFishingLootEnabled() {
+        try {
+            if (featureConfig.has("custom_fishing_loot_enabled")) {
+                return featureConfig.get("custom_fishing_loot_enabled").getAsBoolean();
+            }
+        } catch (Exception e) {
+            Simpleskills.LOGGER.warn("Error reading custom_fishing_loot_enabled; defaulting to true");
+        }
+        return true;
     }
 
     /**

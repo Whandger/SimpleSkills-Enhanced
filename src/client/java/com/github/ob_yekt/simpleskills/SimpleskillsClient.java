@@ -2,6 +2,8 @@ package com.github.ob_yekt.simpleskills;
 
 import com.github.ob_yekt.simpleskills.excavating.InvestigationHud;
 import com.github.ob_yekt.simpleskills.excavating.InvestigationPayload;
+import com.github.ob_yekt.simpleskills.fishing.FishingHud;
+import com.github.ob_yekt.simpleskills.fishing.FishingStatePayload;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -14,6 +16,7 @@ public class SimpleskillsClient implements ClientModInitializer {
         SkillHudRenderer.register();
         ClientConfig.load();
         InvestigationHud.register();
+        FishingHud.register();
 
         // Gathering Speed: levels pushed by the server (applied in GatheringSpeedMixin)
         // Redireciona a atualização para a thread principal do cliente para garantir thread safety
@@ -28,9 +31,15 @@ public class SimpleskillsClient implements ClientModInitializer {
             context.client().execute(() -> InvestigationHud.onPayload(payload))
         );
 
+        // Fishing: server-owned minigame state, drawn as tension / fatigue / progress bars
+        ClientPlayNetworking.registerGlobalReceiver(FishingStatePayload.TYPE, (payload, context) ->
+            context.client().execute(() -> FishingHud.onPayload(payload))
+        );
+
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             GatheringSpeed.resetClientLevels();
             InvestigationHud.reset();
+            FishingHud.reset();
         });
         Simpleskills.LOGGER.info("[simpleskills] Skill HUD & keybinds registered.");
     }

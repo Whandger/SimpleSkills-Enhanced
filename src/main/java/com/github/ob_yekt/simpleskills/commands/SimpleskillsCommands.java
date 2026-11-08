@@ -4,6 +4,7 @@ import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.github.ob_yekt.simpleskills.Skills;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingLoot;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingRank;
+import com.github.ob_yekt.simpleskills.fishing.FishingDebug;
 import com.github.ob_yekt.simpleskills.managers.ConfigManager;
 import com.github.ob_yekt.simpleskills.managers.DatabaseManager;
 import com.github.ob_yekt.simpleskills.managers.AttributeManager;
@@ -56,6 +57,16 @@ public class SimpleskillsCommands {
                                                 .executes(SimpleskillsCommands::disableIronman)))
                                 .then(Commands.literal("prestige")
                                         .executes(SimpleskillsCommands::prestige))
+                                // Diagnostics of the fishing minigame: prints why a fish does / does not come.
+                                .then(Commands.literal("fishing")
+                                        .then(Commands.literal("debug")
+                                                .executes(context -> {
+                                                    ServerPlayer player = context.getSource().getPlayerOrException();
+                                                    boolean on = FishingDebug.toggle(player);
+                                                    context.getSource().sendSuccess(() -> Component.literal(
+                                                            "\u00a76[simpleskills]\u00a7f Fishing debug " + (on ? "\u00a7aON" : "\u00a7cOFF")), false);
+                                                    return 1;
+                                                })))
                                 // Balancing helper: prints the exact Excavating loot distribution of a level.
                                 .then(Commands.literal("excavating")
                                         .requires(source -> source.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.MODERATORS)))

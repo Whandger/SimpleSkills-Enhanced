@@ -2,6 +2,7 @@ package com.github.ob_yekt.simpleskills.mixin.FISHING;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.github.ob_yekt.simpleskills.Skills;
+import com.github.ob_yekt.simpleskills.fishing.FishingConfig;
 import com.github.ob_yekt.simpleskills.managers.ConfigManager;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
@@ -31,8 +32,9 @@ public abstract class FishingBobberEntityMixin {
     private boolean simpleskills$grantFishingXp(Level world, Entity entity, Operation<Boolean> original) {
         boolean result = original.call(world, entity);
 
-        // Only grant XP for ItemEntity (the caught item), not ExperienceOrbEntity
-        if (result && entity instanceof ItemEntity) {
+        // With the fishing minigame enabled, XP is granted by FishingManager once a catch is confirmed.
+        // This legacy path only runs when the minigame is disabled (avoids any duplicated XP).
+        if (result && entity instanceof ItemEntity && !FishingConfig.isFightEnabled()) {
             FishingHook self = (FishingHook) (Object) this;
             Player player = self.getPlayerOwner();
             if (player instanceof ServerPlayer sp && !world.isClientSide()) {
@@ -48,7 +50,8 @@ public abstract class FishingBobberEntityMixin {
     // 2) Faster bites based on level (apply after vanilla logic for stability)
     @Inject(method = "catchingFish", at = @At("TAIL"))
     private void simpleskills$applyFishingLevelBonus(CallbackInfo ci) {
-        if (!ConfigManager.isFishingSpeedBonusEnabled()) {
+        // With the minigame enabled the level bonus lives in Fish Attraction Speed instead.
+        if (FishingConfig.isFightEnabled() || !ConfigManager.isFishingSpeedBonusEnabled()) {
             return;
         }
 

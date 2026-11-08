@@ -9,6 +9,8 @@ import com.github.ob_yekt.simpleskills.Ranged;
 import com.github.ob_yekt.simpleskills.VeinMining;
 import com.github.ob_yekt.simpleskills.TreeFeller;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingRank;
+import com.github.ob_yekt.simpleskills.fishing.FishingConfig;
+import com.github.ob_yekt.simpleskills.fishing.FishingProgression;
 import com.github.ob_yekt.simpleskills.managers.ConfigManager;
 import com.github.ob_yekt.simpleskills.managers.DatabaseManager;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
@@ -39,8 +41,8 @@ public class SkillTabMenu {
 
     private static final int XP_BAR_LENGTH = 22;
 
-    private static final int SKILL_BLOCK_LINES = 7;
-    private static final int MAX_BUFF_LINES = 4;
+    private static final int SKILL_BLOCK_LINES = 9;
+    private static final int MAX_BUFF_LINES = 6;
 
     public static void toggleTabMenuVisibility(CommandSourceStack source) {
         ServerPlayer player = source.getPlayer();
@@ -360,7 +362,36 @@ public class SkillTabMenu {
 
                 skillInfo.append("   §8↳ §bRank: ").append(rankColor).append(rank).append("\n");
 
-                if (ConfigManager.isFishingSpeedBonusEnabled()) {
+                if (FishingConfig.isFightEnabled()) {
+                    // Real benefits of the fishing minigame (same numbers the fight uses).
+                    if (ConfigManager.isFishingSpeedBonusEnabled()) {
+                        double attraction = FishingProgression.attractionPercent(safeLevel);
+                        if (attraction > 0.0) {
+                            skillInfo.append(String.format(Locale.US,
+                                    "   §8↳ §bFish Attraction Speed: §a+%.0f%%\n", attraction));
+                        }
+                    } else {
+                        skillInfo.append("   §8↳ §bFish Attraction Speed: §cDisabled\n");
+                    }
+
+                    double fatigue = FishingProgression.fatiguePercent(safeLevel);
+                    if (fatigue > 0.0) {
+                        skillInfo.append(String.format(Locale.US,
+                                "   §8↳ §bFish Fatigue: §a+%.0f%% §7(tires faster)\n", fatigue));
+                    }
+
+                    double tension = FishingProgression.tensionReductionPercent(safeLevel);
+                    if (tension > 0.0) {
+                        skillInfo.append(String.format(Locale.US,
+                                "   §8↳ §bLine Tension: §a-%.0f%% §7(builds slower)\n", tension));
+                    }
+
+                    double recovery = FishingProgression.recoveryPercent(safeLevel);
+                    if (recovery > 0.0) {
+                        skillInfo.append(String.format(Locale.US,
+                                "   §8↳ §bLine Recovery: §a+%.0f%% §7(relaxes faster)\n", recovery));
+                    }
+                } else if (ConfigManager.isFishingSpeedBonusEnabled()) {
                     float waitReduction = (1.0f - Math.max(0.20f, 1.0f - (safeLevel * 0.005f))) * 100.0f;
 
                     if (waitReduction > 0.0f) {

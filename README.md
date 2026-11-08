@@ -139,6 +139,67 @@ Every completed investigation grants **40 base XP**, even when Nothing is found.
 - Excavating uses the shared **Gathering Speed** and **Tool Durability Protection** bonuses.
 - The appropriate tool for Excavating is the Shovel.
 
+### 🎣 Fishing
+
+**Real-Time Fishing Minigame**
+
+- Replaces the vanilla random fishing-bite process with a minigame driven by real fish entities in the world.
+- Supports **Cod, Salmon, Tropical Fish, and Pufferfish**.
+- The actual fish species determines the main fish item delivered after a successful catch.
+- Fishing sessions progress through five stages: **Settling → Waiting → Approaching → Biting → Fighting**.
+- Fish swim toward the bait before biting. The player must right-click during the bite window to start the fight.
+- During the fight, fish pull left, pull right, or pause. Players counter their movement by turning the camera in the opposite direction and reel using the use key.
+- The HUD displays line tension, fish fatigue, reeling progress, and fish movement.
+- Excessive line tension breaks the fishing line. Failed catches allow the fish to escape without rewards.
+- Fish can react to nearby players through configurable hearing and vision behavior.
+- Fish movement is controlled during an active fishing session and returns to normal AI when the session ends.
+
+**Fishing Ecosystem**
+
+- Validates fishing locations using connected water volume and water depth.
+- Searches for eligible fish already present in the environment before replenishing the local population.
+- Can discreetly spawn supported fish when the local population is below the configured target.
+- Spawn positions are selected away from the bait and player, with preference for deeper water and locations outside the player's field of view.
+- Small puddles, shallow water, and locations without sufficient connected water are rejected.
+- The configured minimum fish count is a replenishment target, not a strict requirement. Fishing can proceed when at least one eligible fish is available.
+
+**Supported Fish Species**
+
+| Species | Pull Strength | Fatigue Factor | XP Multiplier | Default Minimum Level |
+|:--|--:|--:|--:|--:|
+| Cod | 1.00× | 1.00× | 1.00× | 1 |
+| Salmon | 1.20× | 0.85× | 1.15× | 1 |
+| Tropical Fish | 0.85× | 1.15× | 1.30× | 1 |
+| Pufferfish | 1.10× | 0.90× | 1.50× | 25 |
+
+**Fishing Progression**
+
+Fishing levels improve several aspects of the minigame:
+
+- **Fish Attraction Speed:** Up to +150% at level 99, allowing fish to approach the bait up to 2.5× faster.
+- **Fish Fatigue:** Up to +100% at level 99, making fish tire up to twice as fast.
+- **Line Tension Control:** Reduces tension growth by up to 40% at level 99.
+- **Line Recovery:** Increases recovery speed by up to 100% at level 99.
+
+These bonuses can be individually configured.
+
+**Fishing Rewards**
+
+- Successfully caught fish are delivered as their corresponding fish items.
+- Each successful catch performs a single bonus-loot roll.
+- Bonus loot can include junk and treasure. Fish-category rewards are excluded because the main fish is already delivered separately.
+- The custom rank-based fishing loot table is used when available and enabled.
+- Vanilla fishing loot can be used as a fallback when the custom loot table is unavailable or disabled.
+- Successful catches grant Fishing XP based on configured catch XP and the caught species' XP multiplier.
+- Successful catches consume 1 fishing rod durability point.
+- Escaped fish grant no catch rewards or XP.
+- When the fishing line breaks, the configured durability penalty is applied.
+
+**Fishing Diagnostics**
+
+- Use `/simpleskills fishing debug` to toggle detailed fishing diagnostics for your player.
+- Diagnostic messages help investigate fishing spot validation, fish selection and rejection, fish approach, bite timing, and fight behavior.
+
 ### ⚔️ Slaying
 
 - **Sword Damage:** +0.3% per level, up to **+29.7% at level 99**.
@@ -395,6 +456,7 @@ Durability and ingredient recovery bonuses:
 | `/simpleskills leaderboard <skill\|total>` | View the regular leaderboard. |
 | `/simpleskills leaderboardironman <skill\|total>` | View the Ironman leaderboard. |
 | `/simpleskills query <username> <skill\|total>` | Query a player's skill progression. |
+| `/simpleskills fishing debug` | Toggle detailed fishing minigame diagnostics for your player. |
 
 ### Administrators & Moderators
 
@@ -426,6 +488,31 @@ Important Ironman configuration options:
   "ironman_xp_multiplier": "..."
 }
 ```
+
+### Fishing Minigame Options
+
+The following options configure the fishing minigame and ecosystem. Missing values use the defaults shown below. Changes can be applied without restarting the server using `/simpleskills reload`.
+
+| Option | Default |
+|:--|--:|
+| `fishing_fight_enabled` | `true` |
+| `fishing_fish_detection_range` | `12.0` |
+| `fishing_fish_attraction_speed` | `1.0` |
+| `fishing_fish_flee_range` | `8.0` |
+| `fishing_fish_hearing_enabled` | `true` |
+| `fishing_fish_vision_enabled` | `true` |
+| `fishing_fish_fatigue_rate` | `1.0` |
+| `fishing_line_max_tension` | `1.0` |
+| `fishing_line_recovery_rate` | `1.0` |
+| `fishing_line_break_durability_loss` | `3` |
+| `fishing_ecosystem_min_water_volume` | `40` |
+| `fishing_ecosystem_min_water_depth` | `2` |
+| `fishing_ecosystem_min_fish_count` | `3` |
+| `fishing_ecosystem_spawn_enabled` | `true` |
+| `fishing_ecosystem_max_population` | `12` |
+| `fishing_bite_window_ticks` | `40` |
+
+Species minimum Fishing levels can also be configured individually through `fishing_species_min_level`. The default minimum levels are Cod 1, Salmon 1, Tropical Fish 1, and Pufferfish 25.
 
 Configuration can be reloaded without restarting the server using:
 
@@ -469,6 +556,7 @@ Responsible for the additional improvements introduced in this fork, including:
 - Mining, Woodcutting, and Excavating gathering bonuses.
 - Mining Vein Mining and Woodcutting Tree Feller mechanics.
 - Excavating Sand Investigation, loot progression, ranks, and rewards.
+- Fishing Minigame and Fishing Ecosystem.
 - Slaying combat improvements.
 - Ranged projectile bonuses and duplication mechanics.
 - Defense bonuses.
