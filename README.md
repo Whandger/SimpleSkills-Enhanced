@@ -323,6 +323,35 @@ Diagnostic messages help investigate:
 
 ![SimpleSkills Enhanced — SkillTabMenu](https://media.forgecdn.net/attachments/description/1784164/description_ccb25eef-737e-44f9-96a2-e2b18fb78066.jpg)
 
+#### ⚖️ Rebalanced Gear Progression
+
+During testing with a small group of 3–4 players, I noticed that the original equipment requirements were making progression feel too slow. Players were getting discouraged by how long it took to unlock Iron and Diamond equipment.
+
+To address this, I rebalanced the equipment requirements to make progression more rewarding and accessible, while keeping skill levels meaningful and preserving a sense of advancement.
+
+| Armor | Defense Level | Tool | Tool Level |
+|:--|--:|:--|--:|
+| Leather | 0 | Wood | 0 |
+| Gold | 0 | Gold | 5 |
+| Copper | 5 | Stone | 10 |
+| Turtle Helmet | 15 | Copper | 15 |
+| Chainmail | 15 | Iron | 25 |
+| Iron | 20 | Diamond | 30 |
+| Diamond | 25 | Netherite | 35 |
+| Netherite | 30 | — | — |
+
+#### Additional Equipment Requirements
+
+- **Shields:** Defense level 5.
+- **Weapons:**
+  - Mace: Level 50.
+  - Crossbow: Level 0.
+  - Bow: Level 30.
+  - Trident: Level 99.
+- **Elytra:** Prayer level 25.
+- Affected items display their requirements in their item lore (e.g., `Requires level 25 Defense`).
+- All requirements can be customized through `tool_requirements.json` and `armor_requirements.json`.
+
 ---
 
 ## 📜 Original SimpleSkills Features
@@ -372,32 +401,6 @@ Keys can be rebound in Minecraft's Controls menu.
 | Crafting | Create more durable tools and armor, with a chance to recover materials. |
 | Agility | Run, jump, and swim faster. |
 | Prayer | Sacrifice rare items to obtain long-lasting buffs. |
-
-### 🔓 Gear Progression
-
-| Armor | Defense Level | Tool | Tool Level |
-|:--|--:|:--|--:|
-| Leather | 0 | Wood | 0 |
-| Gold | 10 | Gold | 5 |
-| Copper | 25 | Stone | 10 |
-| Turtle Helmet | 30 | Copper | 25 |
-| Chainmail | 35 | Iron | 50 |
-| Iron | 50 | Diamond | 75 |
-| Diamond | 75 | Netherite | 99 |
-| Netherite | 99 | — | — |
-
-#### Additional Equipment Requirements
-
-- **Copper Pickaxe:** Mines the same ores as the Iron Pickaxe for balance reasons.
-- **Shields:** Defense level 5 by default.
-- **Weapons:**
-  - Mace: Level 50.
-  - Crossbow: Level 0.
-  - Bow: Level 30.
-  - Trident: Level 99.
-- **Elytra:** Prayer level 50 by default.
-- Affected items display their requirements in their item lore (e.g., `Requires level 50 Defense`).
-- All requirements can be customized through `tool_requirements.json` and `armor_requirements.json`.
 
 ### ⚒️ Original Skill Highlights
 
@@ -668,6 +671,7 @@ Responsible for the additional improvements introduced in this fork, including:
 - Ranged projectile bonuses and duplication mechanics.
 - Defense bonuses.
 - HUD and TAB interface improvements.
+- Rebalanced equipment progression based on player testing.
 - Supporting technical implementations and compatibility work.
 
 ---
