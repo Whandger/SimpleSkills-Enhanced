@@ -51,6 +51,8 @@ Reaching level 99 requires significant dedication, so achieving the maximum leve
 - Every 15 levels adds 2 extra blocks.
 - Reaches **12 additional blocks at level 90**.
 
+![Vein Mining](docs/images/vein-miner.gif)
+
 ### 🪓 Woodcutting
 
 #### Tree Feller
@@ -59,6 +61,8 @@ Reaching level 99 requires significant dedication, so achieving the maximum leve
 - Hold **Shift** and break a tree trunk with an axe to make the connected tree fall, including its branches and leaves.
 - Fallen logs and leaves have animations.
 - Leaves generate their normal drops when they land.
+
+![Tree Feller](docs/images/tree-feller.gif)
 
 ### 🥄 Excavating
 
@@ -76,6 +80,8 @@ Reaching level 99 requires significant dedication, so achieving the maximum leve
   - Stops holding the interaction.
 - Only one player can investigate the same Sand block at a time.
 - Canceled investigations do not grant XP or loot, consume no durability, and leave the original Sand block untouched.
+
+![Sand Investigation](docs/images/excavation.gif)
 
 #### Ranks & Progression
 
@@ -173,6 +179,8 @@ Every completed investigation grants **40 base XP**, even when Nothing is found.
 - Fish can react to nearby players through configurable hearing and vision behavior.
 - Fish movement is controlled during an active fishing session and returns to normal AI when the session ends.
 
+![Fishing Minigame](docs/images/fish-minigame.gif)
+
 #### Individual Fish Attributes — Weight & Length
 
 Every caught fish has its own individual physical characteristics.
@@ -218,6 +226,8 @@ The screen includes:
 - **Fishing XP:** Displays the XP awarded for that catch.
 
 The results screen makes each successful fishing session more rewarding by showing the characteristics of the fish and the experience gained.
+
+![Fishing Catch Results](docs/images/fish-catch-hub.gif)
 
 #### Fishing Ecosystem
 
@@ -301,6 +311,8 @@ Diagnostic messages help investigate:
 - **Free Duplication:** Extra projectiles consume no additional ammunition and grant no additional skill XP.
 - **Projectile Trajectory:** Duplicated projectiles follow the original shot direction and spawn at randomized positions around the original projectile.
 
+![Triple Shot](docs/images/triple-shoot.gif)
+
 ### 🛡️ Defense
 
 - **Damage Reduction:** +0.3 percentage points per level, up to **29.7% at level 99**.
@@ -343,7 +355,13 @@ Both perks unlock at **Farming Level 5**.
 
 - Hunger is consumed only when the crop successfully grows.
 
+<<<<<<< HEAD
 # Auto Plant
+=======
+![Bone Meal Mastery](docs/images/bone-meal.gif)
+
+**Auto Plant**
+>>>>>>> 33ba693 (docs: update README with feature showcase images)
 
 - Use any hoe and left-click a fully grown crop on farmland to harvest and automatically replant it.
 - Replanting uses matching seeds from the harvested crop's drops when available.
@@ -351,6 +369,8 @@ Both perks unlock at **Farming Level 5**.
 - Supports compatible crops, including modded crops where applicable.
 - Only fully grown crops can be harvested using this perk.
 - Stems and double-block crops are excluded from Auto Plant.
+
+![Auto Plant](docs/images/auto-farm.gif)
 
 ### 🖥️ HUD & Interface
 
@@ -366,7 +386,7 @@ Both perks unlock at **Farming Level 5**.
 - Displays progression information and per-level bonuses.
 - Improved visual organization of skill information.
 
-![SimpleSkills Enhanced — SkillTabMenu](https://media.forgecdn.net/attachments/description/1784164/description_ccb25eef-737e-44f9-96a2-e2b18fb78066.jpg)
+![SimpleSkills Enhanced — SkillTabMenu](docs/images/tab-interface.jpg)
 
 #### ⚖️ Rebalanced Gear Progression
 
