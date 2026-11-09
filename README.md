@@ -307,11 +307,11 @@ Diagnostic messages help investigate:
 - **Armor Durability Protection:** +1 percentage point per level, up to **99% at level 99**.
 - **Knockback Resistance:** +0.5 percentage points per level, up to **49.5% at level 99**.
 
-**### 🌾 Farming**
+### 🌾 Farming
 
 SimpleSkills Enhanced expands Farming with additional harvesting bonuses, animal loot mechanics, and two unlockable farming perks.
 
-**#### Farming Bonuses**
+#### Farming Bonuses
 
 - **Harvest Bonus:** +1 percentage point of extra harvest drop chance per level, reaching **+99% at level 99**.
 - **Animal Loot Bonus:** +1 percentage point of extra loot chance per level, reaching **+99% at level 99**.
@@ -319,17 +319,17 @@ SimpleSkills Enhanced expands Farming with additional harvesting bonuses, animal
 - Both mechanics use the same Animal Loot Bonus chance.
 - Tamable animals are excluded from the extra loot mechanic when killed.
 
-**#### Farming XP Improvements**
+#### Farming XP Improvements
 
 - **Milking XP:** Successfully milking cows and mooshrooms grants Farming XP.
 - Milking XP can be configured through the optional `milk_cow` action key in `farming_xp.json`.
 - If `milk_cow` is omitted, the base Farming XP value is used.
 
-**#### Farming Perks**
+#### Farming Perks
 
 Both perks unlock at **Farming Level 5**.
 
-**Bone Meal Mastery**
+# Bone Meal Mastery
 
 - Use any hoe and right-click a compatible crop to accelerate its growth without consuming Bone Meal.
 - Hunger cost decreases as Farming level increases:
@@ -343,7 +343,7 @@ Both perks unlock at **Farming Level 5**.
 
 - Hunger is consumed only when the crop successfully grows.
 
-**Auto Plant**
+# Auto Plant
 
 - Use any hoe and left-click a fully grown crop on farmland to harvest and automatically replant it.
 - Replanting uses matching seeds from the harvested crop's drops when available.
