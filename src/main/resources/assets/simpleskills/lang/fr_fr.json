@@ -1,0 +1,5 @@
+{
+  "message.simpleskills.bone_meal_mastery.unlocked": "Bone Meal Mastery débloquée ! Tenez n'importe quelle houe et faites un clic droit sur une culture compatible pour la faire pousser comme avec de la poudre d'os, sans avoir de poudre d'os dans votre inventaire. Cela coûte de la faim selon votre niveau de Farming et devient gratuit à partir du niveau 20.",
+  "message.simpleskills.auto_plant.unlocked": "Auto Plant débloquée ! Tenez n'importe quelle houe et faites un clic gauche sur une culture mature plantée sur de la terre labourée : elle est récoltée et replantée automatiquement avec une graine issue de ses propres drops, sans avoir de graines dans votre inventaire.",
+  "message.simpleskills.bone_meal_mastery.not_enough_hunger": "Pas assez de faim pour utiliser Bone Meal Mastery (coût : %s points de faim)."
+}

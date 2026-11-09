@@ -1,4 +1,3 @@
-
 package com.github.ob_yekt.simpleskills.ui;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
@@ -8,7 +7,9 @@ import com.github.ob_yekt.simpleskills.Slaying;
 import com.github.ob_yekt.simpleskills.Ranged;
 import com.github.ob_yekt.simpleskills.VeinMining;
 import com.github.ob_yekt.simpleskills.TreeFeller;
+import com.github.ob_yekt.simpleskills.events.EventHandlers;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingRank;
+import com.github.ob_yekt.simpleskills.farming.FarmingPerks;
 import com.github.ob_yekt.simpleskills.fishing.FishingConfig;
 import com.github.ob_yekt.simpleskills.fishing.FishingProgression;
 import com.github.ob_yekt.simpleskills.managers.ConfigManager;
@@ -333,6 +334,8 @@ public class SkillTabMenu {
                     if (duplicationChance > 0.0f) {
                         skillInfo.append(String.format(Locale.US,
                                 "   §8↳ §bLoot Duplication: §a%.0f%%\n", duplicationChance));
+                    } else {
+                        skillInfo.append("   §8↳ §bLoot Duplication: §cLOCKED §7(Lv. 10)\n");
                     }
                 }
 
@@ -343,17 +346,53 @@ public class SkillTabMenu {
                         skillInfo.append(String.format(Locale.US,
                                 "   §8↳ §bShift Vein Miner: §a x%d\n",
                                 additionalBlocks));
+                    } else {
+                        skillInfo.append("   §8↳ §bShift Vein Miner: §cLOCKED §7(Lv. 15)\n");
                     }
                 }
 
-                if (skill == Skills.WOODCUTTING && TreeFeller.isUnlocked(safeLevel)) {
-                    skillInfo.append("   §8↳ §bShift Tree Feller: §aUnlocked\n");
+                if (skill == Skills.WOODCUTTING) {
+                    if (TreeFeller.isUnlocked(safeLevel)) {
+                        skillInfo.append("   §8↳ §bShift Tree Feller: §aUnlocked\n");
+                    } else {
+                        skillInfo.append("   §8↳ §bShift Tree Feller: §cLOCKED §7(Lv. 5)\n");
+                    }
                 }
 
                 if (skill == Skills.EXCAVATING) {
                     skillInfo.append(String.format(Locale.US,
                             "   §8↳ §bInvestigation Time: §a%.2fs\n",
                             ExcavatingRank.investigationSeconds(Math.max(1, safeLevel))));
+                }
+            }
+            case FARMING -> {
+                // Exactly four benefits. Harvest Bonus and Animal Loot Bonus use the same
+                // chance methods the game rolls use, so the menu can never disagree with gameplay.
+                float harvestChance = (float) EventHandlers.getHarvestBonusChance(safeLevel) * 100.0f;
+                float animalChance = (float) FarmingPerks.animalLootBonusChance(safeLevel) * 100.0f;
+
+                skillInfo.append(String.format(Locale.US,
+                        "   §8↳ §6Harvest Bonus: §a+%.0f%%\n", harvestChance));
+
+                skillInfo.append(String.format(Locale.US,
+                        "   §8↳ §6Animal Loot Bonus: §a+%.0f%%\n", animalChance));
+
+                if (FarmingPerks.isBoneMealMasteryUnlocked(safeLevel)) {
+                    String cost = FarmingPerks.boneMealCostLabel(safeLevel);
+                    skillInfo.append(cost.equals("FREE")
+                            ? "   §8↳ §6Bone Meal Mastery: §aFREE\n"
+                            : String.format(Locale.US,
+                                    "   §8↳ §6Bone Meal Mastery: §a%s §7bars\n", cost));
+                } else {
+                    skillInfo.append(String.format(Locale.US,
+                            "   §8↳ §6Bone Meal Mastery: §cLOCKED §7(Lv. %d)\n", FarmingPerks.UNLOCK_LEVEL));
+                }
+
+                if (FarmingPerks.isAutoPlantUnlocked(safeLevel)) {
+                    skillInfo.append("   §8↳ §6Auto Plant: §aUNLOCKED\n");
+                } else {
+                    skillInfo.append(String.format(Locale.US,
+                            "   §8↳ §6Auto Plant: §cLOCKED §7(Lv. %d)\n", FarmingPerks.UNLOCK_LEVEL));
                 }
             }
             case FISHING -> {
@@ -440,6 +479,10 @@ public class SkillTabMenu {
                     skillInfo.append("   §8↳ §cLife Steal II: §a60% chance to heal half a heart\n");
                 } else if (safeLevel >= 50) {
                     skillInfo.append("   §8↳ §cLife Steal I: §a30% chance to heal half a heart\n");
+                    skillInfo.append("   §8↳ §cLife Steal II: §cLOCKED §7(Lv. 99)\n");
+                } else {
+                    skillInfo.append("   §8↳ §cLife Steal I: §cLOCKED §7(Lv. 50)\n");
+                    skillInfo.append("   §8↳ §cLife Steal II: §cLOCKED §7(Lv. 99)\n");
                 }
             }
             case RANGED -> {
@@ -495,11 +538,15 @@ public class SkillTabMenu {
                 if (durabilityBonus > 0.0f) {
                     skillInfo.append(String.format(Locale.US,
                             "   §8↳ §6Crafted Item Durability: §a+%.1f%%\n", durabilityBonus));
+                } else {
+                    skillInfo.append("   §8↳ §6Crafted Item Durability: §cLOCKED §7(Lv. 25)\n");
                 }
 
                 if (recoveryChance > 0.0f) {
                     skillInfo.append(String.format(Locale.US,
                             "   §8↳ §6Material Recovery: §a%.1f%%\n", recoveryChance));
+                } else {
+                    skillInfo.append("   §8↳ §6Material Recovery: §cLOCKED §7(Lv. 25)\n");
                 }
             }
             default -> {}

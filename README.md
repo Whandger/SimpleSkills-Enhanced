@@ -389,7 +389,7 @@ Keys can be rebound in Minecraft's Controls menu.
 | Mining | Break stone and ores to unlock better tools. |
 | Woodcutting | Chop trees. |
 | Excavating | Dig dirt, sand, and gravel. |
-| Farming | Till, compost, shear, feed, breed animals, and harvest crops. |
+| Farming | Till, compost, shear, milk, feed, breed animals, and harvest crops. |
 | Fishing | Fish faster and unlock better loot. |
 | Defense | Take armor hits to unlock better equipment. |
 | Slaying | Improve melee combat progression. |
@@ -470,10 +470,13 @@ Potion duration multipliers:
 
 #### 🌾 Farming
 
-- XP for breeding, feeding, and shearing animals.
+- XP for breeding, feeding, shearing, and milking animals.
 - XP for harvesting mature crops.
-- XP configuration through `farming_xp.json`.
-- +1% chance of an extra harvest drop per level, up to 99%.
+- XP configuration through `farming_xp.json` (milking uses the optional `milk_cow` action key; if absent it falls back to the skill's base XP).
+- **Harvest Bonus:** +1% chance of an extra harvest drop per level, up to 99%.
+- **Animal Loot Bonus:** +1% chance per level, up to 99%, of extra drops from killed farm animals **and** extra wool when shearing sheep (one shared percentage).
+- **Bone Meal Mastery (Lv. 5):** hold any hoe and right-click a compatible crop to apply bone meal growth without owning bone meal. Costs hunger: 2 bars (Lv. 5-9), 1.5 (10-14), 1 (15-19), free from Lv. 20.
+- **Auto Plant (Lv. 5):** hold any hoe and left-click a mature crop on farmland to harvest it and replant it automatically using a seed from its own drops.
 - Unlocks better hoes as players progress.
 
 #### 🧰 Crafting
@@ -636,7 +639,7 @@ The current development environment uses:
 | Fabric Loader | 0.20.1 |
 | Fabric API | 0.165.2+26.3 |
 | Fabric Loom | 1.17.21 |
-| SimpleSkills Enhanced | 1.0.7 |
+| SimpleSkills Enhanced | 1.0.8 |
 
 ---
 

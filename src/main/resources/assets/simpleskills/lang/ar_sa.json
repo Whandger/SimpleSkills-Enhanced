@@ -1,0 +1,5 @@
+{
+  "message.simpleskills.bone_meal_mastery.unlocked": "تم فتح Bone Meal Mastery! أمسك أي معزقة وانقر بزر الفأرة الأيمن على محصول متوافق لتنميته كما لو استخدمت مسحوق العظام، دون الحاجة إلى مسحوق عظام في حقيبتك. تستهلك جزءًا من الجوع حسب مستوى Farming وتصبح مجانية ابتداءً من المستوى 20.",
+  "message.simpleskills.auto_plant.unlocked": "تم فتح Auto Plant! أمسك أي معزقة وانقر بزر الفأرة الأيسر على محصول ناضج فوق تربة محروثة: سيُحصد ويُعاد زرعه تلقائيًا باستخدام بذرة من غنائمه نفسها، دون الحاجة إلى بذور في حقيبتك.",
+  "message.simpleskills.bone_meal_mastery.not_enough_hunger": "لا يوجد جوع كافٍ لاستخدام Bone Meal Mastery (التكلفة %s نقاط جوع)."
+}

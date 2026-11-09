@@ -1,0 +1,5 @@
+{
+  "message.simpleskills.bone_meal_mastery.unlocked": "¡Bone Meal Mastery desbloqueada! Sostén cualquier azada y haz clic derecho en un cultivo compatible para hacerlo crecer como con harina de huesos, sin necesitar harina de huesos en el inventario. Consume hambre según tu nivel de Farming y es gratis a partir del nivel 20.",
+  "message.simpleskills.auto_plant.unlocked": "¡Auto Plant desbloqueada! Sostén cualquier azada y haz clic izquierdo en un cultivo maduro sobre tierra de cultivo: se cosecha y se replanta automáticamente usando una semilla de sus propios drops, sin necesitar semillas en el inventario.",
+  "message.simpleskills.bone_meal_mastery.not_enough_hunger": "No tienes suficiente hambre para usar Bone Meal Mastery (cuesta %s puntos de hambre)."
+}

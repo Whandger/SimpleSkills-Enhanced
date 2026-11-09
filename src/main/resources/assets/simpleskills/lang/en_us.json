@@ -5,5 +5,8 @@
   "message.simpleskills.vein_mining.unlocked": "Vein Mining unlocked! Hold Shift while mining to break up to %s additional connected ores.",
   "message.simpleskills.vein_mining.improved": "Vein Mining improved! Hold Shift while mining to break up to %s additional connected ores.",
   "message.simpleskills.tree_feller.unlocked": "Tree Feller unlocked! Hold Shift and break a tree trunk with an axe to make the entire tree fall.",
-  "block.simpleskills.investigated_sand": "Investigated Sand"
+  "block.simpleskills.investigated_sand": "Investigated Sand",
+  "message.simpleskills.bone_meal_mastery.unlocked": "Bone Meal Mastery unlocked! Hold any hoe and right-click a compatible crop to grow it just like bone meal - no bone meal needed in your inventory. It costs hunger depending on your Farming level and becomes free at level 20.",
+  "message.simpleskills.auto_plant.unlocked": "Auto Plant unlocked! Hold any hoe and left-click a fully grown crop on farmland: it is harvested and replanted automatically using a seed from its own drops - no seeds needed in your inventory.",
+  "message.simpleskills.bone_meal_mastery.not_enough_hunger": "Not enough hunger to use Bone Meal Mastery (it costs %s hunger points)."
 }

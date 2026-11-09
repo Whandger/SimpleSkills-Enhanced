@@ -5,6 +5,7 @@ import com.github.ob_yekt.simpleskills.managers.*;
 import com.github.ob_yekt.simpleskills.events.EventHandlers;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingManager;
 import com.github.ob_yekt.simpleskills.excavating.ModBlocks;
+import com.github.ob_yekt.simpleskills.farming.BoneMealMastery;
 import com.github.ob_yekt.simpleskills.fishing.FishingManager;
 
 import net.fabricmc.api.ModInitializer;
@@ -36,6 +37,7 @@ public class Simpleskills implements ModInitializer {
 		LoreManager.initialize();
 		ConfigManager.initialize();
 		EventHandlers.registerAll();
+		BoneMealMastery.register();
 		TreeFeller.register();
 		ExcavatingManager.register();
 		FishingManager.register();

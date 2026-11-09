@@ -3,6 +3,7 @@ package com.github.ob_yekt.simpleskills.managers;
 import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.github.ob_yekt.simpleskills.VeinMining;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingManager;
+import com.github.ob_yekt.simpleskills.farming.FarmingPerks;
 import com.github.ob_yekt.simpleskills.TreeFeller;
 import com.github.ob_yekt.simpleskills.ui.SkillTabMenu;
 import com.github.ob_yekt.simpleskills.Skills;
@@ -174,6 +175,11 @@ public class XPManager {
 
         if (skill == Skills.WOODCUTTING && newLevel > currentLevel) {
             TreeFeller.notifyUnlocked(player, currentLevel, newLevel);
+        }
+
+        // Farming 5: teach Bone Meal Mastery and Auto Plant (only these two perks have unlock messages).
+        if (skill == Skills.FARMING && newLevel > currentLevel) {
+            FarmingPerks.notifyUnlocked(player, currentLevel, newLevel);
         }
 
         // Tell the player when an Excavating level-up reaches a new rank.

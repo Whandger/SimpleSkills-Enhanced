@@ -270,6 +270,14 @@ public class EventHandlers {
                 serverPlayer.getName().getString());
     }
 
+    /**
+     * Harvest Bonus chance: +1% per Farming level, capped at 99%. This is the original formula, moved
+     * into a method so the tab menu can show the exact value the harvest roll uses (no second formula).
+     */
+    public static double getHarvestBonusChance(int farmingLevel) {
+        return Math.min(farmingLevel, 99) / 100.0;
+    }
+
     private static void applyBonusDrops(
             ServerLevel world,
             ServerPlayer player,
@@ -280,7 +288,7 @@ public class EventHandlers {
                 player.getStringUUID(),
                 Skills.FARMING);
 
-        double dropChance = Math.min(farmingLevel, 99) / 100.0;
+        double dropChance = getHarvestBonusChance(farmingLevel);
 
         if (world.getRandom().nextDouble() < dropChance) {
             spawnBonusDrops(world, pos, state);

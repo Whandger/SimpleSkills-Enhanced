@@ -1,3 +1,6 @@
 {
-  "block.simpleskills.investigated_sand": "Areia Investigada"
+  "block.simpleskills.investigated_sand": "Areia Investigada",
+  "message.simpleskills.bone_meal_mastery.unlocked": "Bone Meal Mastery desbloqueada! Segure qualquer enxada e clique com o botão direito em uma plantação compatível para fazê-la crescer como se fosse farinha de osso - não é preciso ter farinha de osso no inventário. O uso gasta fome conforme seu nível de Farming e fica gratuito a partir do nível 20.",
+  "message.simpleskills.auto_plant.unlocked": "Auto Plant desbloqueada! Segure qualquer enxada e clique com o botão esquerdo em uma plantação madura sobre terra arada: ela será colhida e replantada automaticamente usando uma semente dos próprios drops - não é preciso ter sementes no inventário.",
+  "message.simpleskills.bone_meal_mastery.not_enough_hunger": "Fome insuficiente para usar Bone Meal Mastery (custa %s pontos de fome)."
 }
