@@ -356,7 +356,7 @@ Both perks unlock at **Farming Level 5**.
 - Hunger is consumed only when the crop successfully grows.
 
 # Auto Plant
-=======
+
 ![Bone Meal Mastery](docs/images/bone-meal.gif)
 
 **Auto Plant**
