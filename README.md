@@ -307,6 +307,51 @@ Diagnostic messages help investigate:
 - **Armor Durability Protection:** +1 percentage point per level, up to **99% at level 99**.
 - **Knockback Resistance:** +0.5 percentage points per level, up to **49.5% at level 99**.
 
+**### 🌾 Farming**
+
+SimpleSkills Enhanced expands Farming with additional harvesting bonuses, animal loot mechanics, and two unlockable farming perks.
+
+**#### Farming Bonuses**
+
+- **Harvest Bonus:** +1 percentage point of extra harvest drop chance per level, reaching **+99% at level 99**.
+- **Animal Loot Bonus:** +1 percentage point of extra loot chance per level, reaching **+99% at level 99**.
+- Animal Loot Bonus applies to extra drops when killing farm animals and to additional wool when shearing sheep.
+- Both mechanics use the same Animal Loot Bonus chance.
+- Tamable animals are excluded from the extra loot mechanic when killed.
+
+**#### Farming XP Improvements**
+
+- **Milking XP:** Successfully milking cows and mooshrooms grants Farming XP.
+- Milking XP can be configured through the optional `milk_cow` action key in `farming_xp.json`.
+- If `milk_cow` is omitted, the base Farming XP value is used.
+
+**#### Farming Perks**
+
+Both perks unlock at **Farming Level 5**.
+
+**Bone Meal Mastery**
+
+- Use any hoe and right-click a compatible crop to accelerate its growth without consuming Bone Meal.
+- Hunger cost decreases as Farming level increases:
+
+| Farming Level | Hunger Cost |
+|:--|--:|
+| 5–9 | 2 bars |
+| 10–14 | 1.5 bars |
+| 15–19 | 1 bar |
+| 20+ | Free |
+
+- Hunger is consumed only when the crop successfully grows.
+
+**Auto Plant**
+
+- Use any hoe and left-click a fully grown crop on farmland to harvest and automatically replant it.
+- Replanting uses matching seeds from the harvested crop's drops when available.
+- If no matching seed is dropped, the crop is still replanted without consuming an item.
+- Supports compatible crops, including modded crops where applicable.
+- Only fully grown crops can be harvested using this perk.
+- Stems and double-block crops are excluded from Auto Plant.
+
 ### 🖥️ HUD & Interface
 
 #### Skills HUD
@@ -410,22 +455,6 @@ Keys can be rebound in Minecraft's Controls menu.
 - Block XP overrides can be configured through `block_mappings.json`.
 - Ores mined using Silk Touch grant no XP.
 
-#### 🎣 Fishing
-
-- Fishing speed increases by **+0.5% per level**, up to **+49.5%**.
-
-##### Fishing Loot Tables
-
-| Tier | Fish | Junk | Treasure |
-|:--|--:|--:|--:|
-| Novice (1–24) | 70% | 25% | 5% |
-| Journeyman (25–49) | 70% | 22% | 8% |
-| Artisan (50–74) | 70% | 19% | 11% |
-| Expert (75–98) | 70% | 16% | 14% |
-| Grandmaster (99) | 70% | 10% | 20% |
-
-> If another mod modifies fishing loot, set `custom_fishing_loot_enabled` to `false` in `config.json`.
-
 #### ✨ Enchanting
 
 Level-restricted enchantments available at the anvil:
@@ -467,17 +496,6 @@ Potion duration multipliers:
 | Artisan | 1.5× |
 | Expert | 1.75× |
 | Grandmaster | 3× |
-
-#### 🌾 Farming
-
-- XP for breeding, feeding, shearing, and milking animals.
-- XP for harvesting mature crops.
-- XP configuration through `farming_xp.json` (milking uses the optional `milk_cow` action key; if absent it falls back to the skill's base XP).
-- **Harvest Bonus:** +1% chance of an extra harvest drop per level, up to 99%.
-- **Animal Loot Bonus:** +1% chance per level, up to 99%, of extra drops from killed farm animals **and** extra wool when shearing sheep (one shared percentage).
-- **Bone Meal Mastery (Lv. 5):** hold any hoe and right-click a compatible crop to apply bone meal growth without owning bone meal. Costs hunger: 2 bars (Lv. 5-9), 1.5 (10-14), 1 (15-19), free from Lv. 20.
-- **Auto Plant (Lv. 5):** hold any hoe and left-click a mature crop on farmland to harvest it and replant it automatically using a seed from its own drops.
-- Unlocks better hoes as players progress.
 
 #### 🧰 Crafting
 
@@ -673,6 +691,7 @@ Responsible for the additional improvements introduced in this fork, including:
 - Slaying combat improvements.
 - Ranged projectile bonuses and duplication mechanics.
 - Defense bonuses.
+- Farming bonuses, milking XP improvements, Bone Meal Mastery, and Auto Plant.
 - HUD and TAB interface improvements.
 - Rebalanced equipment progression based on player testing.
 - Supporting technical implementations and compatibility work.
