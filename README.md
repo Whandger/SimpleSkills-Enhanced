@@ -355,13 +355,11 @@ Both perks unlock at **Farming Level 5**.
 
 - Hunger is consumed only when the crop successfully grows.
 
-<<<<<<< HEAD
 # Auto Plant
 =======
 ![Bone Meal Mastery](docs/images/bone-meal.gif)
 
 **Auto Plant**
->>>>>>> 33ba693 (docs: update README with feature showcase images)
 
 - Use any hoe and left-click a fully grown crop on farmland to harvest and automatically replant it.
 - Replanting uses matching seeds from the harvested crop's drops when available.
