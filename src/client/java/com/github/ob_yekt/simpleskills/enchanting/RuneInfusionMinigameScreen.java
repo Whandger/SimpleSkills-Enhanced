@@ -172,14 +172,21 @@ public final class RuneInfusionMinigameScreen extends Screen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        if (super.mouseClicked(event, doubleClick)) return true;
-        if (event.button() != 0) return false;
+        if (event.button() != 1) {
+            return super.mouseClicked(event, doubleClick);
+        }
 
         RuneInfusionClientState.State state = RuneInfusionClientState.get();
-        if (state == null) return false;
+
+        if (state == null) {
+            return true;
+        }
 
         int crackId = findCrackAt(event.x(), event.y(), state);
-        if (crackId < 0) return false;
+
+        if (crackId < 0) {
+            return true;
+        }
 
         heldCrackId = crackId;
 
@@ -224,7 +231,7 @@ public final class RuneInfusionMinigameScreen extends Screen {
 
     @Override
     public boolean mouseReleased(MouseButtonEvent event) {
-        if (event.button() == 0 && heldCrackId >= 0) {
+        if (event.button() == 1 && heldCrackId >= 0) {
             sendRelease();
             return true;
         }
@@ -241,7 +248,7 @@ public final class RuneInfusionMinigameScreen extends Screen {
         int itemY = top + 51;
 
         int bestId = -1;
-        double bestDistance = 9.0 * 9.0;
+        double bestDistance = Double.MAX_VALUE;
 
         for (RuneInfusionClientState.Crack crack : state.cracks()) {
             if (crack.repaired()) continue;
@@ -251,9 +258,14 @@ public final class RuneInfusionMinigameScreen extends Screen {
 
             double dx = mouseX - cx;
             double dy = mouseY - cy;
+
+            if (Math.abs(dx) > 24 || Math.abs(dy) > 24) {
+                continue;
+            }
+
             double distance = dx * dx + dy * dy;
 
-            if (distance <= bestDistance) {
+            if (distance < bestDistance) {
                 bestDistance = distance;
                 bestId = crack.id();
             }

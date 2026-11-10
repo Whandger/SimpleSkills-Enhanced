@@ -156,8 +156,9 @@ public final class RuneInfusionMinigame {
         for (Crack crack : new ArrayList<>(cracks)) {
             if (crack.repaired) continue;
 
-            // Enquanto o jogador segura o botão, reduz o tamanho da rachadura.
+            // O tick do servidor é o único responsável pelo reparo contínuo.
             if (crack.id == repairingCrackId) {
+                crack.damageTimer = 0;
                 doRepair(crack, REPAIR_RATE);
                 continue;
             }
@@ -213,16 +214,13 @@ public final class RuneInfusionMinigame {
         Crack crack = findCrack(crackId);
 
         if (crack == null || crack.repaired) {
-            if (repairingCrackId == crackId) {
-                repairingCrackId = -1;
-            }
             return false;
         }
 
         repairingCrackId = crackId;
         crack.damageTimer = 0;
 
-        // Regride imediatamente o tamanho da rachadura a cada clique.
+        // Aplica progresso imediato para que cliques rápidos também reparem.
         doRepair(crack, 30);
 
         return true;
@@ -246,19 +244,17 @@ public final class RuneInfusionMinigame {
             return false;
         }
 
-        repairingCrackId = crackId;
-        crack.damageTimer = 0;
-
-        // Regride continuamente enquanto o botão do mouse é mantido pressionado.
-        doRepair(crack, REPAIR_RATE);
-
-        return true;
+        // Apenas confirma que o jogador continua segurando o botão.
+        // O progresso será aplicado exclusivamente pelo tick do servidor.
+        return repairingCrackId == crackId;
     }
 
     private void doRepair(Crack crack, int amount) {
+        if (crack.repaired) return;
+
         crack.age = Math.max(0, crack.age - amount);
 
-        if (crack.age <= 0 && !crack.repaired) {
+        if (crack.age == 0) {
             crack.repaired = true;
             repairedCracks++;
 
