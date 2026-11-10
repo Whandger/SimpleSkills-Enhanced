@@ -2,6 +2,8 @@ package com.github.ob_yekt.simpleskills.mixin.SMITHING;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.github.ob_yekt.simpleskills.Skills;
+import com.github.ob_yekt.simpleskills.enchanting.EnchantmentLimits;
+import com.github.ob_yekt.simpleskills.enchanting.EnchantProgression;
 import com.github.ob_yekt.simpleskills.managers.ConfigManager;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
 import com.github.ob_yekt.simpleskills.requirements.SkillRequirement;
@@ -175,6 +177,37 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu implement
         this.broadcastChanges(); // sync to client immediately
     }
 
+    /**
+     * Vanilla clamps every anvil enchantment combination to Enchantment#getMaxLevel(),
+     * which is the original registry level (for example Sharpness V). Redirect only
+     * the call made by AnvilMenu#createResult so supported enchantments can progress
+     * beyond their vanilla maximum without mutating registry entries or changing
+     * getMaxLevel() globally.
+     */
+    @Redirect(method = "createResult",
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/world/item/enchantment/Enchantment;getMaxLevel()I"))
+    private int simpleskills_useProfessionEnchantmentCap(Enchantment enchantment) {
+        int vanillaMaximum = enchantment.getMaxLevel();
+        if (!(this.player instanceof ServerPlayer serverPlayer)) {
+            return vanillaMaximum;
+        }
+
+        Identifier enchantmentId = serverPlayer.level()
+                .registryAccess()
+                .lookupOrThrow(Registries.ENCHANTMENT)
+                .getKey(enchantment);
+        if (enchantmentId == null || !EnchantmentLimits.hasConfiguredLimit(enchantmentId.toString())) {
+            // Unknown/third-party enchantments are deliberately left vanilla-safe.
+            return vanillaMaximum;
+        }
+
+        int professionLevel = XPManager.getSkillLevel(serverPlayer.getStringUUID(), Skills.ENCHANTING);
+        int configuredMaximum = EnchantmentLimits.getMaxLevel(enchantmentId.toString(), vanillaMaximum);
+        int progressionMaximum = EnchantProgression.getUnlockedEnchantmentLevel(professionLevel);
+        return Math.max(1, Math.min(configuredMaximum, progressionMaximum));
+    }
+
     @Inject(method = "createResult", at = @At("TAIL"))
     private void simpleskills_checkEnchantmentRequirements(CallbackInfo ci) {
         if (this.simpleskills$isPureRepair) {
@@ -197,9 +230,28 @@ public abstract class AnvilScreenHandlerMixin extends ItemCombinerMenu implement
                     .getKey(enchantment);
             if (enchantmentId == null) continue;
 
-            // Pass the enchantment level to check for the appropriate requirement
-            SkillRequirement requirement = ConfigManager.getEnchantmentRequirement(enchantmentId.toString(), enchantmentLevel);
+            // Only reject a cap violation when this operation is introducing or increasing
+            // the enchantment. Existing over-cap enchantments remain untouched and preservable.
+            ItemEnchantments originalEnchantments = EnchantmentHelper.getEnchantmentsForCrafting(this.inputSlots.getItem(0));
+            int originalLevel = originalEnchantments.getLevel(enchantmentEntry);
             int playerEnchantingLevel = XPManager.getSkillLevel(serverPlayer.getStringUUID(), Skills.ENCHANTING);
+            int effectiveCap = EnchantmentLimits.getMaxLevel(enchantmentId.toString(), enchantment.getMaxLevel());
+
+            // Known/configured enchantments obey both profession progression and their own cap.
+            // Unknown third-party enchantments retain their original vanilla max-level fallback.
+            if (EnchantmentLimits.hasConfiguredLimit(enchantmentId.toString())) {
+                effectiveCap = Math.min(effectiveCap,
+                        EnchantProgression.getUnlockedEnchantmentLevel(playerEnchantingLevel));
+            }
+            if (enchantmentLevel > originalLevel && enchantmentLevel > effectiveCap) {
+                hasRestrictedEnchantment = true;
+                serverPlayer.sendSystemMessage(Component.literal("§6[simpleskills]§f " + enchantmentId.getPath().replace("_", " ")
+                        + " can be increased up to level " + effectiveCap + " with your current ENCHANTING level."), true);
+                break;
+            }
+
+            // Preserve the existing level-gate configuration for the anvil.
+            SkillRequirement requirement = ConfigManager.getEnchantmentRequirement(enchantmentId.toString(), enchantmentLevel);
 
             if (requirement != null && playerEnchantingLevel < requirement.getLevel()) {
                 hasRestrictedEnchantment = true;

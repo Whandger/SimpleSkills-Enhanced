@@ -9,6 +9,8 @@ import com.github.ob_yekt.simpleskills.VeinMining;
 import com.github.ob_yekt.simpleskills.TreeFeller;
 import com.github.ob_yekt.simpleskills.events.EventHandlers;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingRank;
+import com.github.ob_yekt.simpleskills.enchanting.EnchantProgression;
+import com.github.ob_yekt.simpleskills.enchanting.EnchantingRank;
 import com.github.ob_yekt.simpleskills.farming.FarmingPerks;
 import com.github.ob_yekt.simpleskills.fishing.FishingConfig;
 import com.github.ob_yekt.simpleskills.fishing.FishingProgression;
@@ -280,6 +282,14 @@ public class SkillTabMenu {
                 numberFormat.format(xpToNextLevel));
     }
 
+    private static String toRoman(int level) {
+        return switch (level) {
+            case 1 -> "I"; case 2 -> "II"; case 3 -> "III"; case 4 -> "IV"; case 5 -> "V";
+            case 6 -> "VI"; case 7 -> "VII"; case 8 -> "VIII"; case 9 -> "IX"; case 10 -> "X";
+            default -> "—";
+        };
+    }
+
     private static List<String> getSkillBuffLines(Skills skill, int level) {
         StringBuilder buffInfo = new StringBuilder();
         appendSkillBuffInfo(buffInfo, skill, level);
@@ -299,6 +309,15 @@ public class SkillTabMenu {
         int safeLevel = Math.max(0, Math.min(level, XPManager.getMaxLevel()));
 
         switch (skill) {
+            case ENCHANTING -> {
+                EnchantingRank rank = EnchantProgression.getRank(Math.max(1, safeLevel));
+                int unlockedLevel = EnchantProgression.getUnlockedEnchantmentLevel(safeLevel);
+                skillInfo.append("   §8↳ §5Enchanting Rank: ")
+                         .append(rank.getColoredName()).append("\n");
+                skillInfo.append(String.format(Locale.US,
+                        "   §8↳ §dUnlocked Enchantment Level: §f%s\n",
+                        unlockedLevel == 0 ? "LOCKED" : toRoman(unlockedLevel)));
+            }
             case AGILITY -> {
                 float movementBonus = safeLevel * 0.3f;
 
