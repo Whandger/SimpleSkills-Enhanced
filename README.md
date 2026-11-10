@@ -372,33 +372,48 @@ Both perks unlock at **Farming Level 5**.
 
 ### ✨ Enchanting
 
-SimpleSkills Enhanced completely overhauls the vanilla enchanting system, replacing the standard RNG table with an interactive, skill-based minigame.
+SimpleSkills Enhanced completely overhauls Minecraft's vanilla enchanting system, replacing the standard RNG-based table with an interactive, skill-based minigame.
 
-#### Rune Ores
+#### ⛏️ Rune Ores
+
 - Added **Rune Ore** and **Deepslate Rune Ore** to Overworld generation.
-- Mining these ores drops **Runes**, which are required for the new Enchanting system.
-- Grants significant Mining XP (900 XP for Rune Ore, 1100 XP for Deepslate Rune Ore).
+- Mining these ores drops **Runes**, required for the new Enchanting system.
+- Grants significant Mining XP:
+  - Rune Ore: **900 XP**
+  - Deepslate Rune Ore: **1,100 XP**
 
-#### Rune Infusion Minigame
-- Interacting with an Enchanting Table now opens the **Rune Infusion** menu.
-- **No XP or Lapis Cost:** Enchanting now exclusively costs **Runes** (1 Rune per selected enchantment).
-- Select up to **4 compatible enchantments** to apply to your equipment at once.
+#### 🔮 Rune Infusion Minigame
 
-![Rune Infusion selection](docs/images/select-enchant.jpg)
+Interacting with an Enchanting Table now opens the **Rune Infusion** menu.
 
-- **Interactive Gameplay:** You must stabilize the magical energy. Cracks will appear on the item interface—hold your click on these cracks to repair them before they drain the equipment's integrity.
-- **Difficulty Scaling:** The speed and frequency of cracks depend on the combined levels of the enchantments you selected (from Calm to Chaotic).
-- **Grading System:** Your performance is graded at the end of the infusion (Poor, Fair, Good, Excellent, Perfect). Higher grades give you a chance to receive a **bonus enchantment level** for free!
+- **No XP or Lapis Cost:** Enchanting exclusively consumes Runes (1 Rune per selected enchantment).
+- **Multiple Enchantments:** Select up to **4 compatible enchantments** to apply to your equipment at once.
 
-![Rune Infusion mini game](docs/images/enchant-minigame.gif)
+<p align="center">
+  <img src="docs/images/select-enchant.jpg" alt="Rune Infusion Selection" width="600">
+  <br>
+  <em>Rune Infusion — Enchantment Selection</em>
+</p>
 
-#### Over-level Enchanting & Progression
-- Progression directly unlocks higher enchantment tiers. Every 10 levels generally unlock the next tier (e.g., Level 10-19 unlocks Tier II, Level 90-99 unlocks Tier X).
-- Bypasses vanilla enchantment caps: Supported enchantments can scale far beyond their normal limits (e.g., Sharpness X), fully configurable via `enchantment_limits.json`.
-- **Anvil Integration:** The Anvil respects your current Enchanting profession level and the new configured caps, allowing you to combine books up to your newly unlocked limits.
+- **Interactive Gameplay:** Stabilize magical energy by repairing cracks that appear directly on the equipment. Hold your click on each crack before it grows too large and damages the item's integrity.
+- **Difficulty Scaling:** Crack speed and frequency depend on the combined levels of the selected enchantments, ranging from Calm to Chaotic.
+- **Grading System:** Your performance is graded at the end of each infusion: Poor, Fair, Good, Excellent, or Perfect. Higher grades provide a chance to receive a **bonus enchantment level** for free.
 
-#### Ranks & Progression
-- **10 unique ranks** for the Enchanting profession.
+<p align="center">
+  <img src="docs/images/enchant-minigame.gif" alt="Rune Infusion Minigame" width="600">
+  <br>
+  <em>Rune Infusion — Magical Stabilization Minigame</em>
+</p>
+
+#### 📈 Over-level Enchanting & Progression
+
+- **Tier Unlocks:** Every 10 profession levels generally unlock the next enchantment tier (e.g., Level 10–19 unlocks Tier II, Level 90–99 unlocks Tier X).
+- **Beyond Vanilla Limits:** Supported enchantments can exceed their normal maximum levels (e.g., Sharpness X), configurable through `enchantment_limits.json`.
+- **Anvil Integration:** The Anvil respects your current Enchanting profession level and configured limits, allowing you to combine enchanted books up to your unlocked tiers.
+
+#### 🏅 Ranks & Progression
+
+Progress through **10 unique ranks** as you master the art of Rune Infusion.
 
 | Rank | Level Range |
 |:--|:--:|
