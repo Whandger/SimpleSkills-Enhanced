@@ -3,6 +3,7 @@ package com.github.ob_yekt.simpleskills.managers;
 import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.github.ob_yekt.simpleskills.Skills;
 import com.github.ob_yekt.simpleskills.fishing.FishingConfig;
+import com.github.ob_yekt.simpleskills.enchanting.EnchantmentLimits;
 import com.github.ob_yekt.simpleskills.requirements.SkillRequirement;
 import com.google.gson.*;
 import net.fabricmc.loader.api.FabricLoader;
@@ -66,6 +67,7 @@ public class ConfigManager {
             loadArmorRequirements();
             loadWeaponRequirements();
             loadEnchantmentRequirements();
+            EnchantmentLimits.reload();
             loadPrayerSacrifices();
             loadCookingXPConfig();
             loadCookingMultipliersConfig();
@@ -223,6 +225,13 @@ public class ConfigManager {
                     Simpleskills.LOGGER.warn("Invalid skill {} for block {} in block_mappings.json, skipping", skillId, block);
                 }
             }
+            // Built-in Rune ores are always Mining blocks. Add them after loading the user file
+            // so existing installations receive the new mappings without overwriting overrides.
+            BLOCK_SKILL_MAP.putIfAbsent("block.simpleskills.rune_ore", Skills.MINING);
+            BLOCK_XP_MAP.putIfAbsent("block.simpleskills.rune_ore", 900);
+            BLOCK_SKILL_MAP.putIfAbsent("block.simpleskills.deepslate_rune_ore", Skills.MINING);
+            BLOCK_XP_MAP.putIfAbsent("block.simpleskills.deepslate_rune_ore", 1100);
+
             Simpleskills.LOGGER.info("Loaded {} block mappings.", BLOCK_SKILL_MAP.size());
         } catch (JsonSyntaxException e) {
             Simpleskills.LOGGER.error("JSON syntax error in block_mappings.json: {}", e.getMessage());
@@ -1025,6 +1034,10 @@ public class ConfigManager {
 
         defaults.add(new BlockMapping("block.minecraft.diamond_ore", "MINING", 1500));       // 100 * 15
         defaults.add(new BlockMapping("block.minecraft.deepslate_diamond_ore", "MINING", 1500));
+
+        // SimpleSkills Rune ores
+        defaults.add(new BlockMapping("block.simpleskills.rune_ore", "MINING", 900));
+        defaults.add(new BlockMapping("block.simpleskills.deepslate_rune_ore", "MINING", 1100));
 
         // Mining: Nether Ores
         defaults.add(new BlockMapping("block.minecraft.nether_quartz_ore", "MINING", 150));  // 100 * 1.5

@@ -5,8 +5,14 @@ import com.github.ob_yekt.simpleskills.managers.*;
 import com.github.ob_yekt.simpleskills.events.EventHandlers;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingManager;
 import com.github.ob_yekt.simpleskills.excavating.ModBlocks;
+import com.github.ob_yekt.simpleskills.runes.RuneContent;
+import com.github.ob_yekt.simpleskills.runes.RuneWorldgen;
 import com.github.ob_yekt.simpleskills.farming.BoneMealMastery;
 import com.github.ob_yekt.simpleskills.fishing.FishingManager;
+import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionMinigameRuntime;
+import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionStatePayload;
+import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionNetworking;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -27,6 +33,8 @@ public class Simpleskills implements ModInitializer {
 
 		// Blocks must be registered during initialization, before the registries freeze.
 		ModBlocks.register();
+		RuneContent.register();
+		RuneWorldgen.register();
 
 		GatheringSpeed.registerPayloads();
 		ExcavatingManager.registerPayloads();
@@ -41,6 +49,10 @@ public class Simpleskills implements ModInitializer {
 		TreeFeller.register();
 		ExcavatingManager.register();
 		FishingManager.register();
+		RuneInfusionNetworking.registerPayloads();
+		PayloadTypeRegistry.clientboundPlay().register(RuneInfusionStatePayload.TYPE, RuneInfusionStatePayload.CODEC);
+		RuneInfusionNetworking.registerReceivers();
+		RuneInfusionMinigameRuntime.register();
 
 		// Initialize database and setup server lifecycle hooks
 		DatabaseManager db = DatabaseManager.getInstance();
