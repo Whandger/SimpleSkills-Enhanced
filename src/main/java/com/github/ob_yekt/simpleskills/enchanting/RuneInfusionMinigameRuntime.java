@@ -1,6 +1,6 @@
-
 package com.github.ob_yekt.simpleskills.enchanting;
 
+import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -10,6 +10,7 @@ import java.util.UUID;
 
 /**
  * Server lifecycle, minigame ticking, authoritative completion and state synchronization.
+ * Input packets (BEGIN/HOLD/RELEASE) are handled in RuneInfusionNetworking only.
  */
 public final class RuneInfusionMinigameRuntime {
     private static long serverTick;
@@ -17,191 +18,86 @@ public final class RuneInfusionMinigameRuntime {
     private RuneInfusionMinigameRuntime() {}
 
     public static void register() {
-        ServerPlayNetworking.registerGlobalReceiver(
-                RuneInfusionInputPayload.TYPE,
-                (payload, context) -> context.server().execute(
-                        () -> handleInput(context.player().getUUID(), payload)
-                )
-        );
-
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             serverTick++;
-
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                UUID playerId = player.getUUID();
-
-                RuneInfusionMinigameController.tickPlayer(playerId);
-
-                RuneInfusionMinigame.Snapshot snapshot =
-                        RuneInfusionMinigameController.snapshot(playerId);
-
-                UUID sessionId =
-                        RuneInfusionMinigameController.sessionId(playerId);
-
-                if (snapshot == null || sessionId == null) {
-                    continue;
-                }
-
-                // Capture the equipment slot before success/failure removes its reservation.
-                int equipmentSlot =
-                        RuneInfusionService.getActiveEquipmentSlot(player);
-
-                if (snapshot.state() == RuneInfusionMinigame.State.SUCCEEDED) {
-                    boolean applied =
-                            RuneInfusionService.applySuccessfulInfusion(
-                                    player,
-                                    snapshot.grade()
-                            );
-
-                    if (applied) {
-                        ServerPlayNetworking.send(
-                                player,
-                                new RuneInfusionResultPayload(
-                                        RuneInfusionResultPayload.SUCCEEDED,
-                                        0,
-                                        snapshot.grade().ordinal()
-                                )
-                        );
-                    } else {
-                        RuneInfusionService.fail(player);
-
-                        ServerPlayNetworking.send(
-                                player,
-                                new RuneInfusionResultPayload(
-                                        RuneInfusionResultPayload.FAILED,
-                                        0,
-                                        snapshot.grade().ordinal()
-                                )
-                        );
-                    }
-
-                    finish(player, sessionId, snapshot, equipmentSlot);
-                    continue;
-                }
-
-                if (snapshot.state() == RuneInfusionMinigame.State.FAILED) {
-                    RuneInfusionService.fail(player);
-
-                    ServerPlayNetworking.send(
-                            player,
-                            new RuneInfusionResultPayload(
-                                    RuneInfusionResultPayload.FAILED,
-                                    0,
-                                    snapshot.grade().ordinal()
-                            )
-                    );
-
-                    finish(player, sessionId, snapshot, equipmentSlot);
-                    continue;
-                }
-
-                // 10 snapshots per second are sufficient for visual synchronization.
-                if ((serverTick & 1L) == 0L) {
-                    ServerPlayNetworking.send(
-                            player,
-                            RuneInfusionStatePayload.from(
-                                    sessionId,
-                                    snapshot,
-                                    equipmentSlot
-                            )
-                    );
-                }
+                tickPlayer(player);
             }
         });
 
-        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
-            RuneInfusionService.fail(handler.player);
-            RuneInfusionService.clearTerminalSession(handler.player);
-            RuneInfusionMinigameController.removePlayer(
-                    handler.player.getUUID()
-            );
+        ServerPlayConnectionEvents.DISCONNECT.register((handler, server) ->
+                dropSession(handler.player, false));
+
+        ServerLivingEntityEvents.AFTER_DEATH.register((entity, source) -> {
+            if (entity instanceof ServerPlayer player) dropSession(player, true);
         });
     }
 
-    /**
-     * Sends the final authoritative snapshot and then stops the client display.
-     */
-    private static void finish(
-            ServerPlayer player,
-            UUID sessionId,
-            RuneInfusionMinigame.Snapshot snapshot,
-            int equipmentSlot
-    ) {
-        ServerPlayNetworking.send(
-                player,
-                RuneInfusionStatePayload.from(
-                        sessionId,
-                        snapshot,
-                        equipmentSlot
-                )
-        );
+    private static void tickPlayer(ServerPlayer player) {
+        UUID playerId = player.getUUID();
+        UUID sessionId = RuneInfusionMinigameController.sessionId(playerId);
+        if (sessionId == null) return;
 
-        ServerPlayNetworking.send(
-                player,
-                new RuneInfusionStatePayload(
-                        0L,
-                        0L,
-                        RuneInfusionStatePayload.STOP,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        0,
-                        -1,
-                        ""
-                )
-        );
+        // Captured before success/failure releases the equipment reservation.
+        int equipmentSlot = RuneInfusionService.getActiveEquipmentSlot(player);
 
-        RuneInfusionMinigameController.remove(
-                player.getUUID(),
-                sessionId
-        );
+        if (equipmentSlot < 0) {
+            // The reserved stack is gone (moved, dropped, destroyed): end the attempt cleanly.
+            RuneInfusionMinigameController.abort(playerId, sessionId);
+        } else {
+            RuneInfusionMinigameController.tickPlayer(playerId);
+        }
 
-        RuneInfusionService.clearTerminalSession(player);
-    }
+        RuneInfusionMinigame.Snapshot snapshot = RuneInfusionMinigameController.snapshot(playerId);
+        if (snapshot == null) return;
 
-    /**
-     * Handles repair input. All actual repair progress is validated and applied
-     * by the server-side minigame controller.
-     */
-    private static void handleInput(
-            UUID playerId,
-            RuneInfusionInputPayload payload
-    ) {
-        if (payload == null
-                || payload.crackId() < 0
-                || payload.crackId() > 4096) {
+        if (snapshot.state() == RuneInfusionMinigame.State.SUCCEEDED) {
+            boolean applied = RuneInfusionService.applySuccessfulInfusion(player, snapshot.grade());
+            if (!applied) RuneInfusionService.fail(player);
+
+            ServerPlayNetworking.send(player, new RuneInfusionResultPayload(
+                    applied ? RuneInfusionResultPayload.SUCCEEDED : RuneInfusionResultPayload.FAILED,
+                    0, snapshot.grade().ordinal()));
+            finish(player, sessionId, snapshot, equipmentSlot);
             return;
         }
 
-        UUID sessionId = payload.sessionId();
+        if (snapshot.state() == RuneInfusionMinigame.State.FAILED) {
+            RuneInfusionService.fail(player);
+            ServerPlayNetworking.send(player, new RuneInfusionResultPayload(
+                    RuneInfusionResultPayload.FAILED, 0, snapshot.grade().ordinal()));
+            finish(player, sessionId, snapshot, equipmentSlot);
+            return;
+        }
 
-        switch (payload.action()) {
-            case RuneInfusionInputPayload.BEGIN ->
-                    RuneInfusionMinigameController.beginRepair(
-                            playerId,
-                            sessionId,
-                            payload.crackId()
-                    );
+        // 10 snapshots per second are enough for visual synchronization.
+        if ((serverTick & 1L) == 0L) {
+            ServerPlayNetworking.send(player,
+                    RuneInfusionStatePayload.from(sessionId, snapshot, equipmentSlot));
+        }
+    }
 
-            case RuneInfusionInputPayload.HOLD ->
-                    RuneInfusionMinigameController.holdRepair(
-                            playerId,
-                            sessionId,
-                            payload.crackId()
-                    );
+    /** Sends the final snapshot, then STOP (carrying the real session id), then frees all state. */
+    private static void finish(ServerPlayer player, UUID sessionId,
+                               RuneInfusionMinigame.Snapshot snapshot, int equipmentSlot) {
+        ServerPlayNetworking.send(player, RuneInfusionStatePayload.from(sessionId, snapshot, equipmentSlot));
+        ServerPlayNetworking.send(player, RuneInfusionStatePayload.stop(sessionId));
 
-            case RuneInfusionInputPayload.RELEASE ->
-                    RuneInfusionMinigameController.releaseRepair(
-                            playerId,
-                            sessionId,
-                            payload.crackId()
-                    );
+        RuneInfusionMinigameController.remove(player.getUUID(), sessionId);
+        RuneInfusionService.clearTerminalSession(player);
+    }
 
-            default -> {
-                // Ignore unknown client actions.
-            }
+    /** Disconnect / death: drop every trace of the session. Runes are not refunded after start. */
+    private static void dropSession(ServerPlayer player, boolean notifyClient) {
+        UUID playerId = player.getUUID();
+        UUID sessionId = RuneInfusionMinigameController.sessionId(playerId);
+
+        RuneInfusionService.fail(player);
+        RuneInfusionService.clearTerminalSession(player);
+        RuneInfusionMinigameController.removePlayer(playerId);
+
+        if (notifyClient && sessionId != null) {
+            ServerPlayNetworking.send(player, RuneInfusionStatePayload.stop(sessionId));
         }
     }
 }

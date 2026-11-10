@@ -1,4 +1,3 @@
-
 package com.github.ob_yekt.simpleskills.enchanting;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
@@ -8,6 +7,12 @@ import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
+import java.util.UUID;
+
+/**
+ * Server snapshot. state: 0 = STOP, 1 = RUNNING, 2 = SUCCEEDED, 3 = FAILED.
+ * cracks: rows "id,x*1000,y*1000,ageTicks,growthRequired,repairing(0/1)" separated by ';'.
+ */
 public record RuneInfusionStatePayload(
         long sessionMost,
         long sessionLeast,
@@ -26,11 +31,7 @@ public record RuneInfusionStatePayload(
 
     public static final CustomPacketPayload.Type<RuneInfusionStatePayload> TYPE =
             new CustomPacketPayload.Type<>(
-                    Identifier.fromNamespaceAndPath(
-                            Simpleskills.MOD_ID,
-                            "rune_infusion_state"
-                    )
-            );
+                    Identifier.fromNamespaceAndPath(Simpleskills.MOD_ID, "rune_infusion_state"));
 
     public static final StreamCodec<RegistryFriendlyByteBuf, RuneInfusionStatePayload> CODEC =
             StreamCodec.composite(
@@ -53,26 +54,26 @@ public record RuneInfusionStatePayload(
         return TYPE;
     }
 
-    public static RuneInfusionStatePayload from(
-            java.util.UUID id,
-            RuneInfusionMinigame.Snapshot s,
-            int inventorySlot
-    ) {
+    /** STOP carries the real session id so the client can match and clean up the right session. */
+    public static RuneInfusionStatePayload stop(UUID id) {
+        return new RuneInfusionStatePayload(id.getMostSignificantBits(), id.getLeastSignificantBits(),
+                STOP, 0, 0, 0, 0, 0, 0, -1, "");
+    }
+
+    public static RuneInfusionStatePayload from(UUID id, RuneInfusionMinigame.Snapshot s, int inventorySlot) {
         StringBuilder encoded = new StringBuilder();
         int count = 0;
 
         for (RuneInfusionMinigame.CrackSnapshot c : s.cracks()) {
-            if (count++ >= 64) break;
-
+            if (count++ >= 16) break;
             if (!encoded.isEmpty()) encoded.append(';');
 
             encoded.append(c.id()).append(',')
                     .append(Math.round(c.x() * 1000)).append(',')
                     .append(Math.round(c.y() * 1000)).append(',')
-                    .append(c.repairProgress()).append(',')
-                    .append(c.repairRequired()).append(',')
                     .append(c.ageTicks()).append(',')
-                    .append(c.repaired() ? 1 : 0);
+                    .append(c.growthRequired()).append(',')
+                    .append(c.repairing() ? 1 : 0);
         }
 
         return new RuneInfusionStatePayload(

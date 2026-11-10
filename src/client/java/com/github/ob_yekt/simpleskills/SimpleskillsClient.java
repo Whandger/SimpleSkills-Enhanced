@@ -74,13 +74,16 @@ public class SimpleskillsClient implements ClientModInitializer {
         // Rune Infusion: authoritative server snapshot for the minigame screen.
         ClientPlayNetworking.registerGlobalReceiver(RuneInfusionStatePayload.TYPE, (payload, context) ->
             context.client().execute(() -> {
-                boolean wasActive = RuneInfusionClientState.get() != null;
                 RuneInfusionClientState.accept(payload);
                 if (payload.state() == RuneInfusionStatePayload.STOP) {
-                    if (wasActive) {
-                        context.client().gui.setScreen(null);
-                    }
-                } else if (!wasActive && context.client().player != null) {
+                    // The screen shows the result for a moment and closes itself.
+                    if (!RuneInfusionClientState.hasScreen()) RuneInfusionClientState.reset();
+                    return;
+                }
+                java.util.UUID sessionId = new java.util.UUID(payload.sessionMost(), payload.sessionLeast());
+                if (!sessionId.equals(RuneInfusionClientState.shownSession())
+                        && context.client().player != null) {
+                    RuneInfusionClientState.markShown(sessionId);
                     context.client().gui.setScreen(
                         new com.github.ob_yekt.simpleskills.enchanting.RuneInfusionMinigameScreen()
                     );

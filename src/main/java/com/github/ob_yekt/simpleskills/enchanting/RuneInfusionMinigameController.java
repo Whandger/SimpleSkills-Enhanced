@@ -5,9 +5,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Owns one authoritative overload minigame per player. Call tickPlayer/tickAll only from the
- * logical server tick; packet handlers should call the repair methods on the server thread.
- * This class deliberately has no Minecraft networking or client dependencies.
+ * Owns one authoritative minigame per player. No Minecraft networking or client dependencies.
  */
 public final class RuneInfusionMinigameController {
     private static final Map<UUID, RuneInfusionMinigame> ACTIVE = new ConcurrentHashMap<>();
@@ -16,28 +14,25 @@ public final class RuneInfusionMinigameController {
 
     public enum StartResult { STARTED, PLAYER_ALREADY_ACTIVE, INVALID_ARGUMENTS }
 
+    /**
+     * Starts a new game for the player. RuneInfusionService already guarantees that a player has a
+     * single live session, so any entry still here is stale and is deliberately replaced.
+     */
     public static synchronized StartResult start(UUID playerId, UUID sessionId, long serverSeed,
-                                                   int enchantmentCount, int highestLevel) {
-        if (playerId == null || sessionId == null || enchantmentCount < 1 || enchantmentCount > 4
-                || highestLevel < 1 || highestLevel > 10) {
+                                                   int difficultyScore) {
+        if (playerId == null || sessionId == null || difficultyScore < 1) {
             return StartResult.INVALID_ARGUMENTS;
         }
-        RuneInfusionMinigame current = ACTIVE.get(playerId);
-        if (current != null && current.snapshot().state() == RuneInfusionMinigame.State.RUNNING) {
-            return StartResult.PLAYER_ALREADY_ACTIVE;
-        }
-        ACTIVE.put(playerId, RuneInfusionMinigame.start(sessionId, serverSeed,
-                enchantmentCount, highestLevel));
+        int score = Math.min(RuneInfusionMinigame.MAX_DIFFICULTY, difficultyScore);
+        ACTIVE.put(playerId, RuneInfusionMinigame.start(sessionId, serverSeed, score));
         return StartResult.STARTED;
     }
 
-    /** Advances exactly one authoritative game tick for this player. */
     public static RuneInfusionMinigame.Snapshot tickPlayer(UUID playerId) {
         RuneInfusionMinigame game = playerId == null ? null : ACTIVE.get(playerId);
         return game == null ? null : game.tick();
     }
 
-    /** Advances all active games once; invoke once per server tick, never from a packet handler. */
     public static void tickAll() {
         ACTIVE.forEach((playerId, game) -> {
             if (game.snapshot().state() == RuneInfusionMinigame.State.RUNNING) game.tick();
@@ -72,14 +67,13 @@ public final class RuneInfusionMinigameController {
         return true;
     }
 
-    /** Remove only the matching session, preventing stale packets from deleting a newer attempt. */
+    /** Removes only the matching session, so a stale packet cannot delete a newer attempt. */
     public static boolean remove(UUID playerId, UUID sessionId) {
         if (playerId == null || sessionId == null) return false;
         RuneInfusionMinigame game = ACTIVE.get(playerId);
         return game != null && game.sessionId().equals(sessionId) && ACTIVE.remove(playerId, game);
     }
 
-    /** Remove a disconnected player's session so it cannot leak or be resumed by a stale client. */
     public static void removePlayer(UUID playerId) {
         if (playerId == null) return;
         RuneInfusionMinigame game = ACTIVE.remove(playerId);
@@ -88,13 +82,11 @@ public final class RuneInfusionMinigameController {
 
     public static int activeCount() { return ACTIVE.size(); }
 
-    /** Returns the current session id for server-to-client snapshot routing. */
     public static UUID sessionId(UUID playerId) {
         RuneInfusionMinigame game = playerId == null ? null : ACTIVE.get(playerId);
         return game == null ? null : game.sessionId();
     }
 
-    /** Snapshot for the player's current session, or null when no session exists. */
     public static RuneInfusionMinigame.Snapshot snapshot(UUID playerId) {
         RuneInfusionMinigame game = playerId == null ? null : ACTIVE.get(playerId);
         return game == null ? null : game.snapshot();
