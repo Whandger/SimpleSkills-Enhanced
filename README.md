@@ -370,6 +370,49 @@ Both perks unlock at **Farming Level 5**.
 
 ![Auto Plant](docs/images/auto-farm.gif)
 
+### ✨ Enchanting
+
+SimpleSkills Enhanced completely overhauls the vanilla enchanting system, replacing the standard RNG table with an interactive, skill-based minigame.
+
+#### Rune Ores
+- Added **Rune Ore** and **Deepslate Rune Ore** to Overworld generation.
+- Mining these ores drops **Runes**, which are required for the new Enchanting system.
+- Grants significant Mining XP (900 XP for Rune Ore, 1100 XP for Deepslate Rune Ore).
+
+#### Rune Infusion Minigame
+- Interacting with an Enchanting Table now opens the **Rune Infusion** menu.
+- **No XP or Lapis Cost:** Enchanting now exclusively costs **Runes** (1 Rune per selected enchantment).
+- Select up to **4 compatible enchantments** to apply to your equipment at once.
+
+![Rune Infusion selection](docs/images/select-enchant.jpg)
+
+- **Interactive Gameplay:** You must stabilize the magical energy. Cracks will appear on the item interface—hold your click on these cracks to repair them before they drain the equipment's integrity.
+- **Difficulty Scaling:** The speed and frequency of cracks depend on the combined levels of the enchantments you selected (from Calm to Chaotic).
+- **Grading System:** Your performance is graded at the end of the infusion (Poor, Fair, Good, Excellent, Perfect). Higher grades give you a chance to receive a **bonus enchantment level** for free!
+
+![Rune Infusion mini game](docs/images/enchant-minigame.gif)
+
+#### Over-level Enchanting & Progression
+- Progression directly unlocks higher enchantment tiers. Every 10 levels generally unlock the next tier (e.g., Level 10-19 unlocks Tier II, Level 90-99 unlocks Tier X).
+- Bypasses vanilla enchantment caps: Supported enchantments can scale far beyond their normal limits (e.g., Sharpness X), fully configurable via `enchantment_limits.json`.
+- **Anvil Integration:** The Anvil respects your current Enchanting profession level and the new configured caps, allowing you to combine books up to your newly unlocked limits.
+
+#### Ranks & Progression
+- **10 unique ranks** for the Enchanting profession.
+
+| Rank | Level Range |
+|:--|:--:|
+| Rune Novice | 1–10 |
+| Rune Initiate | 11–20 |
+| Glyph Scribe | 21–30 |
+| Sigil Adept | 31–40 |
+| Spellweaver | 41–50 |
+| Rune Binder | 51–60 |
+| Arcane Infuser | 61–70 |
+| Master Runesmith | 71–80 |
+| Grand Runecaster | 81–90 |
+| Archmage of Runes | 91–99 |
+
 ### 🖥️ HUD & Interface
 
 #### Skills HUD
@@ -472,22 +515,6 @@ Keys can be rebound in Minecraft's Controls menu.
 - XP is calculated based on block hardness and the required tool.
 - Block XP overrides can be configured through `block_mappings.json`.
 - Ores mined using Silk Touch grant no XP.
-
-#### ✨ Enchanting
-
-Level-restricted enchantments available at the anvil:
-
-| Enchantment | Required Level |
-|:--|--:|
-| Efficiency IV | 15 |
-| Fortune III | 25 |
-| Sharpness V | 50 |
-| Power V | 50 |
-| Efficiency V | 75 |
-| Mending | 99 |
-
-- XP per enchantment: `multiplier × level²`.
-- XP requirements can be adjusted through `enchantment_requirements.json`.
 
 #### 🍖 Cooking
 
@@ -615,45 +642,8 @@ Important Ironman configuration options:
 }
 ```
 
-### Fishing Minigame Options
 
-The following options configure the fishing minigame and ecosystem. Missing values use the defaults shown below. Changes can be applied without restarting the server using `/simpleskills reload`.
 
-| Option | Default |
-|:--|--:|
-| `fishing_fight_enabled` | `true` |
-| `fishing_fish_detection_range` | `12.0` |
-| `fishing_fish_attraction_speed` | `1.0` |
-| `fishing_fish_flee_range` | `8.0` |
-| `fishing_fish_hearing_enabled` | `true` |
-| `fishing_fish_vision_enabled` | `true` |
-| `fishing_fish_fatigue_rate` | `1.0` |
-| `fishing_line_max_tension` | `1.0` |
-| `fishing_line_recovery_rate` | `1.0` |
-| `fishing_line_break_durability_loss` | `3` |
-| `fishing_ecosystem_min_water_volume` | `40` |
-| `fishing_ecosystem_min_water_depth` | `2` |
-| `fishing_ecosystem_min_fish_count` | `3` |
-| `fishing_ecosystem_spawn_enabled` | `true` |
-| `fishing_ecosystem_max_population` | `12` |
-| `fishing_bite_window_ticks` | `40` |
-
-Species minimum Fishing levels can also be configured individually through `fishing_species_min_level`.
-
-Default minimum levels:
-
-- Cod: 1.
-- Salmon: 1.
-- Tropical Fish: 1.
-- Pufferfish: 25.
-
-Configuration can be reloaded without restarting the server:
-
-```text
-/simpleskills reload
-```
-
----
 
 ## 🚀 Installation
 
@@ -675,7 +665,7 @@ The current development environment uses:
 | Fabric Loader | 0.20.1 |
 | Fabric API | 0.165.2+26.3 |
 | Fabric Loom | 1.17.21 |
-| SimpleSkills Enhanced | 1.0.8 |
+| SimpleSkills Enhanced | 1.0.9 |
 
 ---
 
