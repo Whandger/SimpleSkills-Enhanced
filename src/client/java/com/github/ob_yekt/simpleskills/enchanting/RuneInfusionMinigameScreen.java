@@ -22,6 +22,18 @@ public final class RuneInfusionMinigameScreen extends Screen {
     private static final int RED = 0xFFE45A4A;
     private static final int GREEN = 0xFF67D68B;
 
+    // Cores das rachaduras.
+    private static final int CRACK_DARK = 0xFF252321;
+    private static final int CRACK_GRAY = 0xFF999795;
+    private static final int CRACK_LIGHT = 0xFFBDBAB5;
+
+    // Brilho usado somente durante o reparo.
+    private static final int REPAIR_GLOW = 0x88F5D98A;
+    private static final int REPAIR_GLOW_INNER = 0x66FFFFFF;
+
+    // Tempo necessário para a rachadura atingir seu tamanho máximo.
+    private static final int CRACK_GROWTH_TICKS = 240;
+
     private int left;
     private int top;
     private int heldCrackId = -1;
@@ -94,39 +106,133 @@ public final class RuneInfusionMinigameScreen extends Screen {
                     itemY + 40, RED);
         }
 
+        /*
+         * Crescimento individual das rachaduras.
+         *
+         * Cada rachadura começa em ageTicks = 0.
+         * Conforme ageTicks aumenta, os segmentos aparecem.
+         * Durante o reparo, ageTicks diminui e a rachadura
+         * volta visualmente ao ponto inicial.
+         */
         for (RuneInfusionClientState.Crack crack : s.cracks()) {
             if (crack.repaired()) continue;
 
-            float progress = crack.repairRequired() <= 0
-                    ? 0f
-                    : Math.max(0f, Math.min(1f,
-                            crack.repairProgress() / (float) crack.repairRequired()));
+            int cx = itemX + 7 + Math.round(
+                    Math.max(0f, Math.min(1f, crack.x())) * 76f);
 
-            int cx = itemX + 7 + Math.round(Math.max(0f, Math.min(1f, crack.x())) * 76f);
-            int cy = itemY + 4 + Math.round(Math.max(0f, Math.min(1f, crack.y())) * 78f);
+            int cy = itemY + 4 + Math.round(
+                    Math.max(0f, Math.min(1f, crack.y())) * 78f);
 
-            int color = heldCrackId == crack.id() ? GOLD : RED;
+            boolean repairing = heldCrackId == crack.id();
 
-            // O comprimento visual acompanha o crescimento real da rachadura.
-            int length = Math.max(3, Math.round(12 * progress));
+            // Progresso individual da rachadura.
+            float growth = Math.max(0f, Math.min(
+                    1f,
+                    crack.ageTicks() / (float) CRACK_GROWTH_TICKS
+            ));
 
-            g.fill(cx - 1, cy - length / 2, cx + 2, cy + length / 2 + 1, color);
-            g.fill(cx - length / 2, cy - 1, cx + length / 2 + 1, cy + 2, color);
+            /*
+             * Fenda principal.
+             * Começa pequena e cresce gradualmente.
+             */
+            int[] mainCrack = {
+                    -1, -12,
+                     2,  -7,
+                    -2,  -2,
+                     2,   3,
+                     0,   8
+            };
 
-            g.fill(cx - length / 2, cy - length / 2,
-                    cx - length / 2 + 2, cy - length / 2 + 2, color);
+            drawCrackPath(
+                    g,
+                    cx,
+                    cy,
+                    mainCrack,
+                    growth,
+                    repairing
+            );
 
-            g.fill(cx + length / 2 - 1, cy + length / 2 - 1,
-                    cx + length / 2 + 2, cy + length / 2 + 2, color);
+            /*
+             * Ramificações laterais.
+             * Elas começam a aparecer depois que a fenda principal
+             * já começou a crescer.
+             */
+            if (growth > 0.18f) {
+                float branchGrowth = Math.max(0f, Math.min(
+                        1f,
+                        (growth - 0.18f) / 0.45f
+                ));
 
-            if (heldCrackId == crack.id()) {
-                g.fill(cx - 6, cy + 9, cx + 7, cy + 11, 0xFF39312A);
-                int repairedWidth = Math.max(0, Math.min(13,
-                        13 * (crack.repairRequired() - crack.repairProgress())
-                                / Math.max(1, crack.repairRequired())));
-                if (repairedWidth > 0) {
-                    g.fill(cx - 6, cy + 9, cx - 6 + repairedWidth, cy + 11, GREEN);
-                }
+                int[] upperBranch = {
+                        -2,  -2,
+                        -7,  -5,
+                       -10, -10,
+                       -15, -12
+                };
+
+                drawCrackPath(
+                        g,
+                        cx,
+                        cy,
+                        upperBranch,
+                        branchGrowth,
+                        repairing
+                );
+
+                int[] lowerBranch = {
+                         2,  3,
+                         7,  5,
+                        10, 10,
+                        15, 13
+                };
+
+                drawCrackPath(
+                        g,
+                        cx,
+                        cy,
+                        lowerBranch,
+                        branchGrowth,
+                        repairing
+                );
+            }
+
+            /*
+             * Pequenas fissuras nas extremidades.
+             * Aparecem quando a rachadura já está desenvolvida.
+             */
+            if (growth > 0.72f) {
+                float smallGrowth = Math.max(0f, Math.min(
+                        1f,
+                        (growth - 0.72f) / 0.28f
+                ));
+
+                int[] upperTip = {
+                        -10, -10,
+                         -9, -15
+                };
+
+                drawCrackPath(
+                        g,
+                        cx,
+                        cy,
+                        upperTip,
+                        smallGrowth,
+                        repairing
+                );
+
+                int[] lowerTip = {
+                        10, 10,
+                        14,  8
+                };
+
+                drawCrackPath(
+                        g,
+                        cx,
+                        cy,
+                        lowerTip,
+                        smallGrowth,
+                        repairing
+                );
             }
         }
 
@@ -164,6 +270,94 @@ public final class RuneInfusionMinigameScreen extends Screen {
         centered(g,
                 Component.translatable("gui.simpleskills.rune_infusion.hold_to_repair"),
                 top + PANEL_H - 15, MUTED);
+    }
+
+    /**
+     * Desenha uma rachadura através de pontos.
+     *
+     * O progresso revela os segmentos gradualmente.
+     * Quando diminui, os segmentos desaparecem na ordem inversa.
+     */
+    private void drawCrackPath(
+            GuiGraphicsExtractor g,
+            int centerX,
+            int centerY,
+            int[] points,
+            float progress,
+            boolean repairing
+    ) {
+        if (progress <= 0f || points.length < 4) return;
+
+        int segmentCount = points.length / 2 - 1;
+        float visibleSegments = segmentCount * Math.min(1f, progress);
+
+        for (int i = 0; i < segmentCount; i++) {
+            if (i >= visibleSegments) break;
+
+            float segmentProgress = Math.min(1f, visibleSegments - i);
+
+            int x1 = points[i * 2];
+            int y1 = points[i * 2 + 1];
+            int x2 = points[(i + 1) * 2];
+            int y2 = points[(i + 1) * 2 + 1];
+
+            int endX = x1 + Math.round((x2 - x1) * segmentProgress);
+            int endY = y1 + Math.round((y2 - y1) * segmentProgress);
+
+            drawCrackSegment(
+                    g,
+                    centerX + x1,
+                    centerY + y1,
+                    centerX + endX,
+                    centerY + endY,
+                    repairing
+            );
+        }
+    }
+
+    /**
+     * Desenha uma fenda fina e irregular.
+     *
+     * A rachadura permanece cinza.
+     * Durante o reparo, somente a luz abaixo dela é adicionada.
+     */
+    private void drawCrackSegment(
+            GuiGraphicsExtractor g,
+            int x1,
+            int y1,
+            int x2,
+            int y2,
+            boolean repairing
+    ) {
+        int dx = x2 - x1;
+        int dy = y2 - y1;
+        int steps = Math.max(Math.abs(dx), Math.abs(dy));
+
+        if (steps == 0) steps = 1;
+
+        for (int i = 0; i <= steps; i++) {
+            float t = i / (float) steps;
+
+            int x = x1 + Math.round(dx * t);
+            int y = y1 + Math.round(dy * t);
+
+            // Brilho discreto abaixo de cada trecho da rachadura.
+            if (repairing) {
+                g.fill(x - 1, y + 2, x + 2, y + 4, REPAIR_GLOW);
+                g.fill(x, y + 2, x + 1, y + 3, REPAIR_GLOW_INNER);
+            }
+
+            // Sombra escura deslocada, dando profundidade à fenda.
+            g.fill(x + 1, y + 1, x + 2, y + 2, CRACK_DARK);
+
+            // Interior cinza da rachadura.
+            g.fill(x, y, x + 1, y + 1, CRACK_GRAY);
+
+            // Pequeno reflexo na borda.
+            if (i % 3 == 0) {
+                g.fill(x, y, x + 1, y + 1, CRACK_LIGHT);
+            }
+        }
     }
 
     private void centered(GuiGraphicsExtractor g, Component text, int y, int color) {
