@@ -10,6 +10,10 @@ import java.util.Set;
  * Server-side rules shared by the Rune Enchanting preparation menu and the infusion manager.
  * This class deliberately contains no client-provided costs or outcomes: the server derives the
  * Rune cost and validates every requested level again when the player starts an infusion.
+ *
+ * A request describes the FINAL set of enchantments the player wants (max 4). Enchantments already
+ * on the item are part of that set; leaving one out removes it. Only new or increased enchantments
+ * cost Runes.
  */
 public final class RuneInfusionRules {
     public static final int MAX_SELECTED_ENCHANTMENTS = 4;
@@ -22,11 +26,24 @@ public final class RuneInfusionRules {
 
     private RuneInfusionRules() {}
 
-    /** One requested final level for an enchantment, identified by its namespaced registry id. */
-    public record Selection(String enchantmentId, int targetLevel, int vanillaMaxLevel) {
+    /**
+     * One requested final level for an enchantment, identified by its namespaced registry id.
+     * currentLevel is the level already on the item (0 = not present); it is filled in by the server.
+     */
+    public record Selection(String enchantmentId, int targetLevel, int vanillaMaxLevel, int currentLevel) {
         public Selection {
             if (enchantmentId == null) throw new IllegalArgumentException("enchantmentId cannot be null");
             enchantmentId = normalize(enchantmentId);
+            currentLevel = Math.max(0, currentLevel);
+        }
+
+        public Selection(String enchantmentId, int targetLevel, int vanillaMaxLevel) {
+            this(enchantmentId, targetLevel, vanillaMaxLevel, 0);
+        }
+
+        /** True when this selection adds the enchantment or raises its level (costs a Rune). */
+        public boolean changed() {
+            return targetLevel > currentLevel;
         }
     }
 
@@ -41,7 +58,8 @@ public final class RuneInfusionRules {
         INVALID_LEVEL,
         LEVEL_LOCKED,
         ENCHANTMENT_CAP_REACHED,
-        NOT_AN_UPGRADE
+        NOT_AN_UPGRADE,
+        NOTHING_TO_CHANGE
     }
 
     public record Validation(Rejection rejection, String enchantmentId, int allowedMaximum) {
@@ -56,6 +74,10 @@ public final class RuneInfusionRules {
      * Validates a complete selection. `compatibleIds` must be built by the server from the actual
      * target stack and registry; existingLevels must also come from that server-owned stack.
      * An empty compatibleIds set means no enchantment is compatible, not "skip compatibility".
+     *
+     * A selection whose level equals the level already on the item is a "keep" and is always fine;
+     * a lower level is rejected; a higher/new level must respect progression and the cap.
+     * At least one selection must actually add or raise an enchantment.
      */
     public static Validation validate(
             int professionLevel,
@@ -72,6 +94,7 @@ public final class RuneInfusionRules {
         Set<String> seen = new HashSet<>();
         Set<String> normalizedCompatible = normalizeSet(compatibleIds);
         Map<String, Integer> current = normalizeMap(existingLevels);
+        int changes = 0;
 
         for (Selection selection : selections) {
             if (selection == null) return new Validation(Rejection.UNKNOWN_ENCHANTMENT, "", 0);
@@ -88,6 +111,13 @@ public final class RuneInfusionRules {
                 return new Validation(Rejection.INVALID_LEVEL, id, 0);
             }
 
+            int existing = current.getOrDefault(id, 0);
+            if (selection.targetLevel() < existing) {
+                return new Validation(Rejection.NOT_AN_UPGRADE, id, existing);
+            }
+            // Keeping an enchantment exactly as it is never needs progression or cap checks.
+            if (selection.targetLevel() == existing) continue;
+
             int cap = EnchantmentLimits.getMaxLevel(id, selection.vanillaMaxLevel());
             int unlocked = EnchantProgression.getUnlockedEnchantmentLevel(professionLevel);
             int allowed = Math.min(unlocked, cap);
@@ -100,23 +130,25 @@ public final class RuneInfusionRules {
             if (selection.targetLevel() > allowed) {
                 return new Validation(Rejection.INVALID_LEVEL, id, allowed);
             }
-            if (selection.targetLevel() <= current.getOrDefault(id, 0)) {
-                return new Validation(Rejection.NOT_AN_UPGRADE, id, allowed);
-            }
+            changes++;
         }
+
+        if (changes == 0) return new Validation(Rejection.NOTHING_TO_CHANGE, "", 0);
         return Validation.success();
     }
 
-    /** The authoritative cost is exactly one Rune per distinct selected enchantment. */
+    /** The authoritative cost is one Rune per enchantment that is added or raised. */
     public static int getRuneCost(List<Selection> selections) {
         if (selections == null || selections.isEmpty() || selections.size() > MAX_SELECTED_ENCHANTMENTS) {
             return 0;
         }
         Set<String> unique = new HashSet<>();
+        int changed = 0;
         for (Selection selection : selections) {
             if (selection == null || !unique.add(selection.enchantmentId())) return 0;
+            if (selection.changed()) changed++;
         }
-        return unique.size() * RUNES_PER_ENCHANTMENT;
+        return changed * RUNES_PER_ENCHANTMENT;
     }
 
     public static List<Selection> immutableCopy(List<Selection> selections) {

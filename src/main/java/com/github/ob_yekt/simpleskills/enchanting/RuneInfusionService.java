@@ -36,7 +36,10 @@ public final class RuneInfusionService {
     /**
      * Revalidates the equipment, selection and payment on the logical server. The supplied stack
      * must be the exact stack object in the player's inventory; a copied client stack is rejected.
-     * Runes are consumed only after all validation has succeeded.
+     *
+     * `requested` is the FINAL set of enchantments (max 4), including the ones already on the item
+     * that the player keeps. Existing enchantments missing from it are removed on success.
+     * Only new or raised enchantments cost Runes. Runes are consumed only after all validation passed.
      */
     public static synchronized StartResult begin(ServerPlayer player, ItemStack equipment,
             List<RuneInfusionRules.Selection> requested) {
@@ -57,9 +60,15 @@ public final class RuneInfusionService {
             if (selection == null || !requestedIds.add(selection.enchantmentId())) return StartResult.INVALID_SELECTION;
         }
 
-        List<RuneInfusionCatalog.Entry> available = RuneInfusionCatalog.getAvailable(player, equipment, Set.of());
+        List<RuneInfusionCatalog.Entry> available = RuneInfusionCatalog.getAvailable(player, equipment);
         Map<String, RuneInfusionCatalog.Entry> byId = new HashMap<>();
         for (RuneInfusionCatalog.Entry entry : available) byId.put(entry.id(), entry);
+
+        // Levels currently on the server-owned stack.
+        Map<String, Integer> existing = new HashMap<>();
+        var currentEnchantments = EnchantmentHelper.getEnchantmentsForCrafting(equipment);
+        currentEnchantments.entrySet().forEach(entry -> entry.getKey().unwrapKey().ifPresent(key ->
+                existing.put(key.identifier().toString(), entry.getValue())));
 
         var registry = player.level().registryAccess().lookupOrThrow(Registries.ENCHANTMENT);
         List<RuneInfusionRules.Selection> validated = new ArrayList<>();
@@ -72,29 +81,44 @@ public final class RuneInfusionService {
                             net.minecraft.resources.Identifier.parse(selection.enchantmentId())))
                     .orElse(null);
             if (holder == null) return StartResult.INVALID_SELECTION;
+            // The final set must be internally compatible (an existing conflicting enchantment
+            // has to be dropped by the player, i.e. left out of the request).
             for (Holder<Enchantment> alreadySelected : selectedHolders) {
                 if (!Enchantment.areCompatible(holder, alreadySelected)) return StartResult.INVALID_SELECTION;
             }
             selectedHolders.add(holder);
             validated.add(new RuneInfusionRules.Selection(selection.enchantmentId(),
-                    selection.targetLevel(), holder.value().getMaxLevel()));
+                    selection.targetLevel(), holder.value().getMaxLevel(),
+                    existing.getOrDefault(selection.enchantmentId(), 0)));
         }
 
         int professionLevel = XPManager.getSkillLevel(player.getStringUUID(), Skills.ENCHANTING);
+        int unlocked = EnchantProgression.getUnlockedEnchantmentLevel(professionLevel);
         Set<String> compatible = new HashSet<>(byId.keySet());
-        Map<String, Integer> existing = new HashMap<>();
-        var currentEnchantments = EnchantmentHelper.getEnchantmentsForCrafting(equipment);
-        currentEnchantments.entrySet().forEach(entry -> entry.getKey().unwrapKey().ifPresent(key ->
-                existing.put(key.identifier().toString(), entry.getValue())));
 
         RuneInfusionRules.Validation validation = RuneInfusionRules.validate(
                 professionLevel, validated, compatible, existing);
         if (!validation.accepted()) return StartResult.INVALID_SELECTION;
 
         int cost = RuneInfusionRules.getRuneCost(validated);
+        if (cost < 1) return StartResult.INVALID_SELECTION;
         if (countRunes(player) < cost) return StartResult.INSUFFICIENT_RUNES;
 
-        RuneInfusionSession session = RuneInfusionSession.create(playerId, validated);
+        // Existing (removable) enchantments the player left out of the final set.
+        List<String> removed = new ArrayList<>();
+        for (RuneInfusionCatalog.Entry entry : available) {
+            if (entry.existing() && !requestedIds.contains(entry.id())) removed.add(entry.id());
+        }
+
+        // Difficulty counts EVERY enchantment in the final set (existing ones included).
+        double rawDifficulty = 0.0;
+        for (RuneInfusionRules.Selection selection : validated) {
+            int cap = EnchantmentLimits.getMaxLevel(selection.enchantmentId(), selection.vanillaMaxLevel());
+            rawDifficulty += RuneInfusionDifficulty.contribution(selection.targetLevel(), cap, unlocked);
+        }
+        int difficulty = RuneInfusionDifficulty.toScore(rawDifficulty);
+
+        RuneInfusionSession session = RuneInfusionSession.create(playerId, validated, removed, difficulty);
         if (!consumeRunes(player, cost)) return StartResult.PAYMENT_FAILED;
         if (!session.markStarted()) return StartResult.PAYMENT_FAILED;
         ACTIVE.put(playerId, session);
@@ -138,10 +162,14 @@ public final class RuneInfusionService {
             holders.put(selection.enchantmentId(), holder);
         }
 
-        // Recheck conflicts against the equipment as it exists at the moment of application.
+        Set<String> removed = new HashSet<>(session.removedIds());
+
+        // Recheck conflicts against what will remain on the equipment (removed ones are ignored).
         var existing = EnchantmentHelper.getEnchantmentsForCrafting(equipment);
         for (Holder<Enchantment> requested : holders.values()) {
             for (Holder<Enchantment> current : existing.keySet()) {
+                String currentId = current.unwrapKey().map(k -> k.identifier().toString()).orElse("");
+                if (removed.contains(currentId)) continue;
                 if (!current.equals(requested) && !Enchantment.areCompatible(requested, current)) return false;
             }
         }
@@ -152,11 +180,19 @@ public final class RuneInfusionService {
             }
         }
 
+        int professionLevel = XPManager.getSkillLevel(player.getStringUUID(), Skills.ENCHANTING);
+        int unlocked = EnchantProgression.getUnlockedEnchantmentLevel(professionLevel);
+
         EnchantmentHelper.updateEnchantments(equipment, mutable -> {
+            // Enchantments the player chose to drop.
+            mutable.removeIf(holder -> holder.unwrapKey()
+                    .map(key -> removed.contains(key.identifier().toString()))
+                    .orElse(false));
+
             for (RuneInfusionRules.Selection selection : session.selections()) {
+                if (!selection.changed()) continue; // "keep" entries are left untouched
+
                 int finalLevel = selection.targetLevel();
-                int professionLevel = XPManager.getSkillLevel(player.getStringUUID(), Skills.ENCHANTING);
-                int unlocked = EnchantProgression.getUnlockedEnchantmentLevel(professionLevel);
                 int cap = EnchantmentLimits.getMaxLevel(selection.enchantmentId(),
                         holders.get(selection.enchantmentId()).value().getMaxLevel());
                 if (finalLevel < Math.min(unlocked, cap)
@@ -171,7 +207,7 @@ public final class RuneInfusionService {
         return completed;
     }
 
-    /** Failure after payment never refunds Runes. */
+    /** Failure after payment never refunds Runes and never touches the equipment. */
     public static synchronized boolean fail(ServerPlayer player) {
         RuneInfusionSession session = player == null ? null : ACTIVE.get(player.getUUID());
         if (session == null) return false;
@@ -207,22 +243,21 @@ public final class RuneInfusionService {
         }
         return false;
     }
+
     public static synchronized int getActiveEquipmentSlot(ServerPlayer player) {
-    if (player == null) return -1;
+        if (player == null) return -1;
 
-    ItemStack reserved = ACTIVE_EQUIPMENT.get(player.getUUID());
-    if (reserved == null || reserved.isEmpty()) return -1;
+        ItemStack reserved = ACTIVE_EQUIPMENT.get(player.getUUID());
+        if (reserved == null || reserved.isEmpty()) return -1;
 
-    Inventory inventory = player.getInventory();
-
-    for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
-        if (inventory.getItem(slot) == reserved) {
-            return slot;
+        Inventory inventory = player.getInventory();
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            if (inventory.getItem(slot) == reserved) {
+                return slot;
+            }
         }
+        return -1;
     }
-
-    return -1;
-}
 
     private static int countRunes(ServerPlayer player) {
         int count = 0;
