@@ -1,6 +1,7 @@
 package com.github.ob_yekt.simpleskills.enchanting;
 
 import com.github.ob_yekt.simpleskills.Skills;
+import com.github.ob_yekt.simpleskills.managers.ConfigManager;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
 import com.github.ob_yekt.simpleskills.runes.RuneContent;
 import net.minecraft.core.Holder;
@@ -25,6 +26,10 @@ public final class RuneInfusionService {
     private static final Map<UUID, RuneInfusionSession> ACTIVE = new ConcurrentHashMap<>();
     /** Exact server-owned stack reserved for the active attempt. */
     private static final Map<UUID, ItemStack> ACTIVE_EQUIPMENT = new ConcurrentHashMap<>();
+
+    /** Vanilla enchanting table levels go from 1 to 30; an enchantment of weight 10 maps to 30. */
+    private static final double TABLE_LEVEL_PER_WEIGHT = 3.0;
+    private static final int MAX_TABLE_LEVEL = 30;
 
     private RuneInfusionService() {}
 
@@ -135,7 +140,7 @@ public final class RuneInfusionService {
     /**
      * Applies the selected enchantments after a successful minigame. The equipment must still be
      * the exact stack reserved at begin(); the registry and current stack are checked again here.
-     * This method must only be called by server-side result logic.
+     * Awards Enchanting XP on success. This method must only be called by server-side result logic.
      */
     public static synchronized boolean applySuccessfulInfusion(ServerPlayer player) {
         return applySuccessfulInfusion(player, RuneInfusionMinigame.Grade.POOR);
@@ -203,8 +208,54 @@ public final class RuneInfusionService {
             }
         });
         boolean completed = session.complete();
-        if (completed) ACTIVE_EQUIPMENT.remove(playerId);
+        if (completed) {
+            ACTIVE_EQUIPMENT.remove(playerId);
+            awardEnchantingXp(player, session, holders, grade);
+        }
         return completed;
+    }
+
+    /**
+     * Enchanting XP for a successful infusion, using the mod's official enchanting formula
+     * (ConfigManager.enchantment_xp_per_level_squared * level^2, the one the vanilla table used).
+     *
+     * Each enchantment that was added or raised is converted to an equivalent table level (1..30)
+     * from its position on the shared 1..10 scale, so higher levels give much more XP. Kept
+     * enchantments give nothing, and the minigame grade scales the total. XPManager applies the
+     * Ironman/standard multiplier itself.
+     */
+    private static void awardEnchantingXp(ServerPlayer player, RuneInfusionSession session,
+                                          Map<String, Holder<Enchantment>> holders,
+                                          RuneInfusionMinigame.Grade grade) {
+        int multiplier = ConfigManager.getEnchantmentXpPerLevelSquared();
+        long total = 0L;
+
+        for (RuneInfusionRules.Selection selection : session.selections()) {
+            if (!selection.changed()) continue;
+            Holder<Enchantment> holder = holders.get(selection.enchantmentId());
+            int vanillaMax = holder == null ? selection.vanillaMaxLevel() : holder.value().getMaxLevel();
+            int cap = EnchantmentLimits.getMaxLevel(selection.enchantmentId(), vanillaMax);
+
+            double weight = RuneInfusionDifficulty.weight(selection.targetLevel(), cap);
+            int tableLevel = (int) Math.max(1, Math.min(MAX_TABLE_LEVEL, Math.round(weight * TABLE_LEVEL_PER_WEIGHT)));
+            total += (long) multiplier * tableLevel * tableLevel;
+        }
+
+        long scaled = Math.round(total * gradeMultiplier(grade));
+        int xp = (int) Math.min(Integer.MAX_VALUE, scaled);
+        if (xp > 0) {
+            XPManager.addXPWithNotification(player, Skills.ENCHANTING, xp);
+        }
+    }
+
+    private static double gradeMultiplier(RuneInfusionMinigame.Grade grade) {
+        return switch (grade) {
+            case POOR -> 0.75;
+            case FAIR -> 0.90;
+            case GOOD -> 1.00;
+            case EXCELLENT -> 1.25;
+            case PERFECT -> 1.50;
+        };
     }
 
     /** Failure after payment never refunds Runes and never touches the equipment. */
