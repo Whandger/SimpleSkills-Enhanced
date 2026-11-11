@@ -1,6 +1,7 @@
 package com.github.ob_yekt.simpleskills.managers;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
+import com.github.ob_yekt.simpleskills.DefenseCombat;
 import com.github.ob_yekt.simpleskills.VeinMining;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingManager;
 import com.github.ob_yekt.simpleskills.farming.FarmingPerks;
@@ -187,6 +188,10 @@ public class XPManager {
             ExcavatingManager.notifyRankUp(player, currentLevel, newLevel);
         }
 
+        if (skill == Skills.DEFENSE && newLevel > currentLevel) {
+            notifyDefenseUnlocks(player, currentLevel, newLevel);
+        }
+
         // Send XP gain notification if enabled
         if (notifyXP) {
             if (XP_NOTIFICATIONS_ENABLED && xpToAdd >= XP_NOTIFICATION_THRESHOLD) {
@@ -207,6 +212,31 @@ public class XPManager {
         // Notify listener
         if (onXPChangeListener != null) {
             onXPChangeListener.accept(player, skill);
+        }
+    }
+
+    public static void notifyDefenseUnlocks(ServerPlayer player, int oldLevel, int newLevel) {
+        if (newLevel <= oldLevel) return;
+        int[] parryTierLevels = {20, 40, 60, 70, 80, 90};
+        for (int tierLevel : parryTierLevels) {
+            if (oldLevel < tierLevel && newLevel >= tierLevel) {
+                player.sendSystemMessage(Component.translatable("message.simpleskills.defense.parry_tier_up",
+                        Component.translatable("skill.simpleskills.defense.parry_tier_" + tierLevel),
+                        DefenseCombat.getParryWindowTicks(tierLevel)).withStyle(ChatFormatting.GOLD));
+            }
+        }
+        int[] levels = {10, 30, 50, 75, 99};
+        String[] keys = {
+                "message.simpleskills.defense.perfect_parry_unlocked",
+                "message.simpleskills.defense.projectile_reflection_unlocked",
+                "message.simpleskills.defense.enhanced_parry_unlocked",
+                "message.simpleskills.defense.counter_mastery_unlocked",
+                "message.simpleskills.defense.master_defender_unlocked"
+        };
+        for (int i = 0; i < levels.length; i++) {
+            if (oldLevel < levels[i] && newLevel >= levels[i]) {
+                player.sendSystemMessage(Component.translatable(keys[i]).withStyle(ChatFormatting.GOLD));
+            }
         }
     }
 

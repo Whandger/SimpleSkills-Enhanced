@@ -318,6 +318,26 @@ Diagnostic messages help investigate:
 - **Damage Reduction:** +0.3 percentage points per level, up to **29.7% at level 99**.
 - **Armor Durability Protection:** +1 percentage point per level, up to **99% at level 99**.
 - **Knockback Resistance:** +0.5 percentage points per level, up to **49.5% at level 99**.
+- **Shield Parry (level 10):** A fully blocked physical hit within 4 server ticks of raising a shield stuns its attacker for 2 seconds (1 second for the Ender Dragon and Wither), grants 2× shield-block XP, and triggers a message, a sharp parry sound, and a ring of sparks and enchantment particles around the shield, with an additional impact burst.
+- **Projectile Reflection (level 30):** While blocking, reflect eligible arrows, spectral arrows, tridents, and vanilla ghast, blaze, wither, and dragon fireballs toward their original owner when available. Reflected projectiles become owned by the defender and cannot immediately hit the reflector again.
+- **Parry window progression:** Starts at **4 ticks at Defense 10**, gains **2 ticks every 10 Defense levels**, and receives its final increase at level 99, reaching **22 ticks**. The window is 20 ticks at level 90 and 22 ticks at level 99.
+- **Enhanced Parry (level 50):** Increases parry XP to 2.5× and improves the particle burst.
+- **Counter Mastery (level 75):** A successful parry grants +20% damage for 5 seconds. It applies to melee attacks and player-owned arrows; another parry refreshes the duration.
+- **Impenetrable Aegis (level 99):** Parry effects gain a larger particle ring and an exclusive sound. This final tier adds no passive damage bonus.
+- Parry tier notifications appear at each tier in the table below. Projectile Reflection unlocks at level 30, and Counter Mastery unlocks at level 75. The TAB skill summary shows the current parry tier, its next tier, and Projectile Reflection separately.
+
+| Defense Level | Parry Tier | Window |
+|--:|:--|--:|
+| 10 | Basic Parry | 4 ticks |
+| 20 | Quick Reflex | 6 ticks |
+| 30 | Firm Guard | 8 ticks |
+| 40 | Synchronized Defense | 10 ticks |
+| 50 | Enhanced Parry | 12 ticks |
+| 60 | Absolute Block | 14 ticks |
+| 70 | Relentless Counterattack | 16 ticks |
+| 80 | Perfect Defense | 18 ticks |
+| 90 | Protective Instinct | 20 ticks |
+| 99 | Impenetrable Aegis | 22 ticks |
 
 ### 🌾 Farming
 
@@ -455,6 +475,19 @@ Progress through **10 unique ranks** as you master the art of Rune Infusion.
 - Improved visual organization of skill information.
 
 ![SimpleSkills Enhanced — SkillTabMenu](docs/images/tab-interface.jpg)
+
+#### Languages
+
+The mod reads the language selected in each player's Minecraft client and displays translated interface text where available. Included language files are:
+
+- Arabic (`ar_sa`)
+- English (`en_us`)
+- Spanish (Spain, `es_es`)
+- Spanish (Mexico, `es_mx`)
+- French (`fr_fr`)
+- Portuguese (Brazil, `pt_br`)
+
+English (`en_us`) is the fallback when a translation is unavailable. For the TAB skill screen, regional variants use the matching language translation when possible (for example, other Portuguese variants use `pt_br` and other Spanish variants use `es_es`).
 
 #### ⚖️ Rebalanced Gear Progression
 

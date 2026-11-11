@@ -1,0 +1,11 @@
+{
+  "perfect_parry": {
+    "sounds": ["simpleskills:parry_sound"]
+  },
+  "master_defender_parry": {
+    "sounds": ["simpleskills:master_parry_sound"]
+  },
+  "projectile_reflection": {
+    "sounds": ["minecraft:item.shield.block"]
+  }
+}
