@@ -510,23 +510,21 @@ public class SkillTabMenu {
                             tabText(player, "gui.simpleskills.tab.knockback_resistance"), knockbackResistance));
                 }
 
-                String stageKey = safeLevel >= 99 ? "master_defender" : safeLevel >= 75 ? "counter_mastery"
-                        : safeLevel >= 50 ? "enhanced_parry" : safeLevel >= 10 ? "perfect_parry" : null;
-                int stageLevel = safeLevel >= 99 ? 99 : safeLevel >= 75 ? 75 : safeLevel >= 50 ? 50 : 10;
-                int nextStage = safeLevel < 10 ? 10 : safeLevel < 50 ? 50 : safeLevel < 75 ? 75 : safeLevel < 99 ? 99 : 0;
-                if (stageKey == null) {
+                int stageLevel = safeLevel >= 99 ? 99 : safeLevel < 10 ? 10 : 10 + ((safeLevel - 10) / 10) * 10;
+                int nextStage = safeLevel < 10 ? 10 : safeLevel >= 99 ? 0
+                        : Math.min(99, 10 + (((safeLevel - 10) / 10) + 1) * 10);
+                if (safeLevel < 10) {
                     skillInfo.append("   §8↳ §c").append(tabText(player, "gui.simpleskills.tab.parry_tier")).append(": ")
-                            .append(rankColorForLevel(10)).append(tabText(player, "skill.simpleskills.defense.perfect_parry"))
+                            .append(rankColorForLevel(10)).append(tabText(player, "skill.simpleskills.defense.parry_tier_10"))
                             .append(" ").append(lockedAt(player, 10)).append("\n");
                 } else {
                     skillInfo.append("   §8↳ §c").append(tabText(player, "gui.simpleskills.tab.parry_tier")).append(": ")
-                            .append(rankColorForLevel(stageLevel)).append(tabText(player, "skill.simpleskills.defense." + stageKey))
+                            .append(rankColorForLevel(stageLevel)).append(tabText(player, "skill.simpleskills.defense.parry_tier_" + stageLevel))
                             .append(" §a").append(tabText(player, "gui.simpleskills.tab.unlocked")).append("\n");
                 }
-                if (nextStage > 0 && stageKey != null) {
-                    String nextKey = nextStage == 50 ? "enhanced_parry" : nextStage == 75 ? "counter_mastery" : "master_defender";
+                if (nextStage > 0 && safeLevel >= 10) {
                     skillInfo.append("   §8↳ §c").append(tabText(player, "gui.simpleskills.tab.next_tier")).append(": ")
-                            .append(rankColorForLevel(nextStage)).append(tabText(player, "skill.simpleskills.defense." + nextKey))
+                            .append(rankColorForLevel(nextStage)).append(tabText(player, "skill.simpleskills.defense.parry_tier_" + nextStage))
                             .append(" ").append(lockedAt(player, nextStage)).append("\n");
                 }
                 String projectileLabel = tabText(player, "gui.simpleskills.tab.projectile_reflection");

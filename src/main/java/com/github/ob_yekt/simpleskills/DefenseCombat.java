@@ -22,8 +22,8 @@ import com.google.gson.JsonObject;
 
 /** Server-authoritative combat perks unlocked by Defense. */
 public final class DefenseCombat {
-    public static final int PERFECT_WINDOW_TICKS = 8;
-    public static final int ENHANCED_WINDOW_TICKS = 12;
+    public static final int BASE_PARRY_WINDOW_TICKS = 4;
+    public static final int PARRY_WINDOW_INCREASE_PER_TIER = 2;
     public static final int NORMAL_STUN_TICKS = 40;
     public static final int BOSS_STUN_TICKS = 20;
     public static final double PERFECT_XP_MULTIPLIER = 2.0;
@@ -94,7 +94,7 @@ public final class DefenseCombat {
         if (level < 10 || !(attacker instanceof net.minecraft.world.entity.LivingEntity)) return;
         int raisedAt = ((DefenseParryAccess) defender).simpleskills$getShieldRaisedTick();
         int elapsed = defender.tickCount - raisedAt;
-        int window = level >= 50 ? ENHANCED_WINDOW_TICKS : PERFECT_WINDOW_TICKS;
+        int window = getParryWindowTicks(level);
         if (raisedAt < 0 || elapsed < 0 || elapsed > window) return;
 
         PARRY_AWARDS.put(defender.getUUID(), new ParryAward(defender, defender.level().getGameTime(), attacker.getUUID(), incomingDamage));
@@ -126,8 +126,37 @@ public final class DefenseCombat {
             serverLevel.sendParticles(ParticleTypes.SWEEP_ATTACK,
                     defender.getX(), defender.getY() + 1.0, defender.getZ(), 4, 0.45, 0.3, 0.45, 0.0);
         }
+        spawnShieldSparks(serverLevel, defender, level);
         spawnShieldParryRing(serverLevel, defender, level);
         grantParryXp(defender, incomingDamage, level >= 50 ? ENHANCED_XP_MULTIPLIER : PERFECT_XP_MULTIPLIER);
+    }
+
+    public static int getParryWindowTicks(int defenseLevel) {
+        if (defenseLevel < 10) return 0;
+        if (defenseLevel >= 99) return BASE_PARRY_WINDOW_TICKS + 9 * PARRY_WINDOW_INCREASE_PER_TIER;
+        return BASE_PARRY_WINDOW_TICKS + ((defenseLevel - 10) / 10) * PARRY_WINDOW_INCREASE_PER_TIER;
+    }
+
+    private static void spawnShieldSparks(ServerLevel level, ServerPlayer player, int defenseLevel) {
+        Vec3 look = player.getLookAngle().normalize();
+        Vec3 right = new Vec3(-look.z, 0.0, look.x).normalize();
+        if (right.lengthSqr() < 1.0E-4) right = new Vec3(1.0, 0.0, 0.0);
+        double handSide = player.getUsedItemHand() == net.minecraft.world.InteractionHand.OFF_HAND ? -1.0 : 1.0;
+        Vec3 origin = player.getEyePosition().add(look.scale(0.5)).add(right.scale(0.24 * handSide))
+                .add(0.0, -0.12, 0.0);
+        int sparksPerSide = defenseLevel >= 50 ? 9 : 7;
+
+        for (int side : new int[] {-1, 1}) {
+            for (int i = 0; i < sparksPerSide; i++) {
+                double speed = 0.10 + i * 0.025;
+                double lift = 0.20 + (i % 3) * 0.045;
+                Vec3 start = origin.add(right.scale(side * (0.08 + (i % 3) * 0.035)));
+                Vec3 velocity = right.scale(side * speed).add(look.scale(0.025)).add(0.0, lift, 0.0);
+                // Count zero sends one particle with the supplied velocity; gravity carries the sparks back down.
+                level.sendParticles(ParticleTypes.ELECTRIC_SPARK, start.x, start.y, start.z,
+                        0, velocity.x, velocity.y, velocity.z, 1.0);
+            }
+        }
     }
 
     private static void spawnShieldParryRing(ServerLevel level, ServerPlayer player, int defenseLevel) {
