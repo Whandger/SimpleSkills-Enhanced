@@ -1,0 +1,330 @@
+{
+  "sources": [
+    {
+      "type": "unstitch",
+      "resource": "simpleskills:block/rune_ore_break",
+      "divisor_x": 16.0,
+      "divisor_y": 160.0,
+      "regions": [
+        {
+          "sprite": "simpleskills:block/rune_ore",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_1",
+          "x": 0,
+          "y": 16,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_2",
+          "x": 0,
+          "y": 32,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_3",
+          "x": 0,
+          "y": 48,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_4",
+          "x": 0,
+          "y": 64,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_5",
+          "x": 0,
+          "y": 80,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_6",
+          "x": 0,
+          "y": 96,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_7",
+          "x": 0,
+          "y": 112,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_8",
+          "x": 0,
+          "y": 128,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_9",
+          "x": 0,
+          "y": 144,
+          "width": 16,
+          "height": 16
+        }
+      ]
+    },
+    {
+      "type": "unstitch",
+      "resource": "simpleskills:block/rune_ore_break_e",
+      "divisor_x": 16.0,
+      "divisor_y": 160.0,
+      "regions": [
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_0_e",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_1_e",
+          "x": 0,
+          "y": 16,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_2_e",
+          "x": 0,
+          "y": 32,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_3_e",
+          "x": 0,
+          "y": 48,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_4_e",
+          "x": 0,
+          "y": 64,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_5_e",
+          "x": 0,
+          "y": 80,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_6_e",
+          "x": 0,
+          "y": 96,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_7_e",
+          "x": 0,
+          "y": 112,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_8_e",
+          "x": 0,
+          "y": 128,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/rune_ore_stage_9_e",
+          "x": 0,
+          "y": 144,
+          "width": 16,
+          "height": 16
+        }
+      ]
+    },
+    {
+      "type": "unstitch",
+      "resource": "simpleskills:block/deepslate_rune_ore_break",
+      "divisor_x": 16.0,
+      "divisor_y": 160.0,
+      "regions": [
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_0",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_1",
+          "x": 0,
+          "y": 16,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_2",
+          "x": 0,
+          "y": 32,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_3",
+          "x": 0,
+          "y": 48,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_4",
+          "x": 0,
+          "y": 64,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_5",
+          "x": 0,
+          "y": 80,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_6",
+          "x": 0,
+          "y": 96,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_7",
+          "x": 0,
+          "y": 112,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_8",
+          "x": 0,
+          "y": 128,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_9",
+          "x": 0,
+          "y": 144,
+          "width": 16,
+          "height": 16
+        }
+      ]
+    },
+    {
+      "type": "unstitch",
+      "resource": "simpleskills:block/deepslate_rune_ore_break_e",
+      "divisor_x": 16.0,
+      "divisor_y": 160.0,
+      "regions": [
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_0_e",
+          "x": 0,
+          "y": 0,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_1_e",
+          "x": 0,
+          "y": 16,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_2_e",
+          "x": 0,
+          "y": 32,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_3_e",
+          "x": 0,
+          "y": 48,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_4_e",
+          "x": 0,
+          "y": 64,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_5_e",
+          "x": 0,
+          "y": 80,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_6_e",
+          "x": 0,
+          "y": 96,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_7_e",
+          "x": 0,
+          "y": 112,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_8_e",
+          "x": 0,
+          "y": 128,
+          "width": 16,
+          "height": 16
+        },
+        {
+          "sprite": "simpleskills:block/deepslate_rune_ore_stage_9_e",
+          "x": 0,
+          "y": 144,
+          "width": 16,
+          "height": 16
+        }
+      ]
+    }
+  ]
+}

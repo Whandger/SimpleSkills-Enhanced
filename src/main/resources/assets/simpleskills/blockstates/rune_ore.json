@@ -1,7 +1,34 @@
 {
   "variants": {
-    "": {
-      "model": "simpleskills:block/rune_ore"
+    "charge=0": {
+      "model": "simpleskills:block/rune_ore_stage_0"
+    },
+    "charge=1": {
+      "model": "simpleskills:block/rune_ore_stage_1"
+    },
+    "charge=2": {
+      "model": "simpleskills:block/rune_ore_stage_2"
+    },
+    "charge=3": {
+      "model": "simpleskills:block/rune_ore_stage_3"
+    },
+    "charge=4": {
+      "model": "simpleskills:block/rune_ore_stage_4"
+    },
+    "charge=5": {
+      "model": "simpleskills:block/rune_ore_stage_5"
+    },
+    "charge=6": {
+      "model": "simpleskills:block/rune_ore_stage_6"
+    },
+    "charge=7": {
+      "model": "simpleskills:block/rune_ore_stage_7"
+    },
+    "charge=8": {
+      "model": "simpleskills:block/rune_ore_stage_8"
+    },
+    "charge=9": {
+      "model": "simpleskills:block/rune_ore_stage_9"
     }
   }
 }

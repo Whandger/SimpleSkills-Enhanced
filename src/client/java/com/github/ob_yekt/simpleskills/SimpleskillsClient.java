@@ -11,6 +11,7 @@ import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionClientState;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionCatalogResponsePayload;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionPreparationScreen;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionResultPayload;
+import com.github.ob_yekt.simpleskills.runes.RuneMiningClient;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -103,6 +104,7 @@ public class SimpleskillsClient implements ClientModInitializer {
             InvestigationHud.reset();
             FishingHud.reset();
             RuneInfusionClientState.reset();
+            RuneMiningClient.clear();
         });
         Simpleskills.LOGGER.info("[simpleskills] Skill HUD & keybinds registered.");
     }

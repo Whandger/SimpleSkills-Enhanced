@@ -54,5 +54,9 @@
   "injectors": {
     "defaultRequire": 1
   },
-  "priority": 900
+  "priority": 900,
+  "client": [
+    "RuneMiningClientMixin",
+    "RuneOreDestroyProgressMixin"
+  ]
 }

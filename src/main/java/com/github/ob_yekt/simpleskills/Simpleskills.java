@@ -7,6 +7,7 @@ import com.github.ob_yekt.simpleskills.excavating.ExcavatingManager;
 import com.github.ob_yekt.simpleskills.excavating.ModBlocks;
 import com.github.ob_yekt.simpleskills.runes.RuneContent;
 import com.github.ob_yekt.simpleskills.runes.RuneWorldgen;
+import com.github.ob_yekt.simpleskills.runes.RuneMiningManager;
 import com.github.ob_yekt.simpleskills.farming.BoneMealMastery;
 import com.github.ob_yekt.simpleskills.fishing.FishingManager;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionMinigameRuntime;
@@ -34,6 +35,7 @@ public class Simpleskills implements ModInitializer {
 		// Blocks must be registered during initialization, before the registries freeze.
 		ModBlocks.register();
 		RuneContent.register();
+		RuneMiningManager.register();
 		RuneWorldgen.register();
 
 		GatheringSpeed.registerPayloads();
