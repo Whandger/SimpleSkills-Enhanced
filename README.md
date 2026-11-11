@@ -382,6 +382,18 @@ SimpleSkills Enhanced completely overhauls Minecraft's vanilla enchanting system
   - Rune Ore: **900 XP**
   - Deepslate Rune Ore: **1,100 XP**
 
+<p align="center">
+  <img src="docs/images/mining_rune_ore_stone.gif" alt="Rune stone block" width="600">
+  <br>
+  <em>Rune Infusion — Enchantment Selection</em>
+</p>
+
+<p align="center">
+  <img src="docs/images/rune_ore.gif" alt="Rune ore" width="600">
+  <br>
+  <em>Rune Infusion — Enchantment Selection</em>
+</p>
+
 #### 🔮 Rune Infusion Minigame
 
 Interacting with an Enchanting Table now opens the **Rune Infusion** menu.
@@ -680,7 +692,7 @@ The current development environment uses:
 | Fabric Loader | 0.20.1 |
 | Fabric API | 0.165.2+26.3 |
 | Fabric Loom | 1.17.21 |
-| SimpleSkills Enhanced | 1.1.1 |
+| SimpleSkills Enhanced | 1.1.2 |
 
 ---
 

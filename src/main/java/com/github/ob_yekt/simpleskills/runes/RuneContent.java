@@ -46,7 +46,7 @@ public final class RuneContent {
         registered = true;
 
         RUNE_ORE = Registry.register(BuiltInRegistries.BLOCK, RUNE_ORE_BLOCK_KEY,
-                new Block(BlockBehaviour.Properties.of()
+                new RuneOreBlock(BlockBehaviour.Properties.of()
                         .mapColor(MapColor.STONE)
                         .instrument(NoteBlockInstrument.BASEDRUM)
                         .strength(3.0F, 3.0F)
@@ -55,7 +55,7 @@ public final class RuneContent {
                         .setId(RUNE_ORE_BLOCK_KEY)));
 
         DEEPSLATE_RUNE_ORE = Registry.register(BuiltInRegistries.BLOCK, DEEPSLATE_RUNE_ORE_BLOCK_KEY,
-                new Block(BlockBehaviour.Properties.of()
+                new RuneOreBlock(BlockBehaviour.Properties.of()
                         .mapColor(MapColor.COLOR_GRAY)
                         .instrument(NoteBlockInstrument.BASEDRUM)
                         .strength(4.5F, 3.0F)

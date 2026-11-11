@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "simpleskills:block/rune_ore_stage_1"
+  }
+}
