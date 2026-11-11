@@ -1,5 +1,7 @@
 package com.github.ob_yekt.simpleskills.enchanting;
 
+import com.github.ob_yekt.simpleskills.Skills;
+import com.github.ob_yekt.simpleskills.managers.XPManager;
 import com.github.ob_yekt.simpleskills.runes.RuneContent;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -17,7 +19,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -98,17 +99,20 @@ public final class RuneInfusionNetworking {
             return;
         }
 
-        List<RuneInfusionCatalog.Entry> entries =
-                RuneInfusionCatalog.getAvailable(player, equipment, Set.of());
+        List<RuneInfusionCatalog.Entry> entries = RuneInfusionCatalog.getAvailable(player, equipment);
         Map<String, List<String>> conflicts = conflictsOf(player, entries);
 
-        // Row format: id|currentLevel|maximumSelectableLevel|conflictId,conflictId
+        int professionLevel = XPManager.getSkillLevel(player.getStringUUID(), Skills.ENCHANTING);
+        int unlocked = EnchantProgression.getUnlockedEnchantmentLevel(professionLevel);
+
+        // Row format: id|currentLevel|maximumSelectableLevel|configuredCap|conflictId,conflictId
         StringBuilder rows = new StringBuilder();
         for (RuneInfusionCatalog.Entry entry : entries) {
             StringBuilder row = new StringBuilder();
             row.append(entry.id()).append('|')
                     .append(entry.currentLevel()).append('|')
                     .append(entry.maximumSelectableLevel()).append('|')
+                    .append(entry.configuredCap()).append('|')
                     .append(String.join(",", conflicts.getOrDefault(entry.id(), List.of())));
 
             if (rows.length() + row.length() + 1 > 24_000) break;
@@ -117,7 +121,7 @@ public final class RuneInfusionNetworking {
         }
 
         ServerPlayNetworking.send(player,
-                new RuneInfusionCatalogResponsePayload(slot, countRunes(inventory), rows.toString()));
+                new RuneInfusionCatalogResponsePayload(slot, countRunes(inventory), unlocked, rows.toString()));
     }
 
     /** Pairwise incompatibility among the offered enchantments, so the UI can block bad picks. */
@@ -171,14 +175,15 @@ public final class RuneInfusionNetworking {
             String id = payload.enchantmentIds().get(i);
             Integer level = payload.targetLevels().get(i);
 
-            if (id == null || id.length() > 128 || level == null || level < 1 || level > 10) {
+            if (id == null || id.length() > 128 || level == null || level < 1 || level > 255) {
                 send(player, RuneInfusionResultPayload.INVALID_SELECTION, 0, -1);
                 return;
             }
+            // The server fills in the real current level and vanilla max when it revalidates.
             selections.add(new RuneInfusionRules.Selection(id, level, 1));
         }
 
-        // Validation + Rune payment (the ONLY cost: 1 Rune per enchantment, no XP, no lapis).
+        // Validation + Rune payment (only new/raised enchantments cost 1 Rune each; no XP, no lapis).
         RuneInfusionService.StartResult result = RuneInfusionService.begin(player, equipment, selections);
 
         if (result != RuneInfusionService.StartResult.STARTED) {
@@ -197,13 +202,10 @@ public final class RuneInfusionNetworking {
         RuneInfusionSession session = RuneInfusionService.getActiveSession(player);
         UUID sessionId = session == null ? null : session.sessionId();
 
-        // Difficulty = SUM of the (server-validated) target levels of every selected enchantment.
-        int difficulty = 0;
-        if (session != null) {
-            for (RuneInfusionRules.Selection selection : session.selections()) {
-                difficulty += selection.targetLevel();
-            }
-        }
+        // Difficulty is computed by the server from the FINAL set (existing + new), scaled by the
+        // player's unlocked level. See RuneInfusionDifficulty.
+        int difficulty = session == null ? 1 : session.difficulty();
+        int runeCost = session == null ? 0 : session.runeCost();
 
         boolean stateReady = sessionId != null && RuneInfusionService.markInProgress(player);
         RuneInfusionMinigameController.StartResult gameStart = stateReady
@@ -218,7 +220,7 @@ public final class RuneInfusionNetworking {
             return;
         }
 
-        send(player, RuneInfusionResultPayload.STARTED, selections.size(), -1);
+        send(player, RuneInfusionResultPayload.STARTED, runeCost, -1);
     }
 
     private static void send(ServerPlayer player, int result, int cost, int grade) {
