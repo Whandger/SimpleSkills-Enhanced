@@ -8,8 +8,8 @@ import java.util.Random;
 import java.util.UUID;
 
 /**
- * Authoritative minigame model. Difficulty is the SUM of the target levels of all selected
- * enchantments (1..40). No client-supplied value influences progress.
+ * Authoritative minigame model. Difficulty is the score computed by RuneInfusionDifficulty
+ * (1..40) from the FINAL set of enchantments. No client-supplied value influences progress.
  */
 public final class RuneInfusionMinigame {
     public static final int TICK_RATE = 20;
@@ -106,22 +106,30 @@ public final class RuneInfusionMinigame {
         return a + (b - a) * t;
     }
 
-    /** difficultyScore = sum of the target levels of every selected enchantment. */
+    /**
+     * Maps the difficulty score (1..40) to minigame parameters.
+     *
+     * The whole scale is demanding: even score 1 is not a free pass, and the curve is
+     * front-loaded (t^0.8) so the middle of the scale is already tough. Score 40 stays the
+     * hardest: cracks turn critical in ~4s, a new one appears every ~2s, up to 6 live at once and
+     * repairing is slow, so the player has to keep hopping between cracks while they are small.
+     */
     public static Difficulty difficultyFor(int difficultyScore) {
         int d = Math.max(MIN_DIFFICULTY, Math.min(MAX_DIFFICULTY, difficultyScore));
-        double t = (d - 1) / (double) (MAX_DIFFICULTY - 1);
+        double linear = (d - 1) / (double) (MAX_DIFFICULTY - 1);
+        double t = Math.pow(linear, 0.8);                      // front-loaded: mid scores ramp up sooner
 
-        int growth = (int) Math.round(lerp(340, 130, t));
-        int spawn = (int) Math.round(lerp(220, 70, t));
-        int maxActive = Math.min(5, 1 + (d + 1) / 7);
-        int initial = d >= 25 ? 3 : d >= 10 ? 2 : 1;
-        int repair = d <= 12 ? 4 : d <= 26 ? 3 : 2;
-        int damage = (int) Math.round(lerp(25, 60, t));
-        int duration = 20 * (int) Math.round(lerp(26, 50, t));
-        double branch = lerp(0.0, 0.30, t);
+        int growth = (int) Math.round(lerp(280, 80, t));       // ticks until a crack becomes critical
+        int spawn = (int) Math.round(lerp(170, 38, t));        // ticks between new cracks
+        int maxActive = Math.min(6, 1 + (d + 3) / 7);
+        int initial = d >= 30 ? 4 : d >= 20 ? 3 : d >= 8 ? 2 : 1;
+        int repair = d <= 8 ? 4 : d <= 18 ? 3 : d <= 30 ? 2 : 1;    // age removed per tick while held
+        int damage = (int) Math.round(lerp(35, 90, t));        // integrity lost per second per critical crack
+        int duration = 20 * (int) Math.round(lerp(30, 60, t));
+        double branch = lerp(0.0, 0.40, t);
 
-        return new Difficulty(d, growth, spawn, Math.min(maxActive, Math.max(initial, maxActive)),
-                Math.min(initial, maxActive), repair, damage, duration, branch);
+        return new Difficulty(d, growth, spawn, maxActive, Math.min(initial, maxActive),
+                repair, damage, duration, branch);
     }
 
     public static RuneInfusionMinigame start(UUID sessionId, long serverSeed, int difficultyScore) {
