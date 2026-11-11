@@ -23,6 +23,7 @@ import java.util.UUID;
 
 /**
  * Server-authoritative network boundary for Rune Infusion preparation and input.
+ * The infusion is only reachable through an Enchanting Table (see RuneInfusionTable).
  */
 public final class RuneInfusionNetworking {
     private RuneInfusionNetworking() {}
@@ -32,6 +33,7 @@ public final class RuneInfusionNetworking {
                 RuneInfusionStartPayload.TYPE, RuneInfusionStartPayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(
                 RuneInfusionInputPayload.TYPE, RuneInfusionInputPayload.CODEC);
+        // Kept registered for protocol compatibility; the server no longer answers it (no hotkey).
         PayloadTypeRegistry.serverboundPlay().register(
                 RuneInfusionCatalogRequestPayload.TYPE, RuneInfusionCatalogRequestPayload.CODEC);
         PayloadTypeRegistry.clientboundPlay().register(
@@ -41,9 +43,6 @@ public final class RuneInfusionNetworking {
     }
 
     public static void registerReceivers() {
-        ServerPlayNetworking.registerGlobalReceiver(RuneInfusionCatalogRequestPayload.TYPE,
-                (payload, context) -> context.server().execute(() -> handleCatalog(context.player(), payload)));
-
         ServerPlayNetworking.registerGlobalReceiver(RuneInfusionStartPayload.TYPE,
                 (payload, context) -> context.server().execute(() -> handleStart(context.player(), payload)));
 
@@ -76,11 +75,6 @@ public final class RuneInfusionNetworking {
                     RuneInfusionMinigameController.releaseRepair(playerId, sessionId, crackId);
             default -> { }
         }
-    }
-
-    private static void handleCatalog(ServerPlayer player, RuneInfusionCatalogRequestPayload payload) {
-        if (player == null || payload == null) return;
-        openCatalog(player, payload.inventorySlot());
     }
 
     private static void openCatalog(ServerPlayer player, int slot) {
@@ -156,6 +150,12 @@ public final class RuneInfusionNetworking {
     }
 
     private static void handleStart(ServerPlayer player, RuneInfusionStartPayload payload) {
+        // The infusion only works at an Enchanting Table the player opened and is still near.
+        if (!RuneInfusionTable.isNearOpenedTable(player)) {
+            send(player, RuneInfusionResultPayload.INVALID_SELECTION, 0, -1);
+            return;
+        }
+
         Inventory inventory = player.getInventory();
 
         if (payload == null

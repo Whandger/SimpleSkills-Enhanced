@@ -5,9 +5,6 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.network.chat.Component;
-import net.minecraft.client.Minecraft;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionCatalogRequestPayload;
 
 public class Keybinds {
     public static final String KEY_CATEGORY = "key.categories.misc";
@@ -16,13 +13,6 @@ public class Keybinds {
             "key.simpleskills.toggle_hud",
             InputConstants.Type.KEYBOARD,
             InputConstants.KEY_H,
-            KeyMapping.Category.MISC
-    );
-
-    public static final KeyMapping OPEN_RUNE_INFUSION_KEY = new KeyMapping(
-            "key.simpleskills.open_rune_infusion",
-            InputConstants.Type.KEYBOARD,
-            InputConstants.KEY_K,
             KeyMapping.Category.MISC
     );
 
@@ -36,17 +26,11 @@ public class Keybinds {
     public static void register() {
         KeyMappingHelper.registerKeyMapping(TOGGLE_HUD_KEY);
         KeyMappingHelper.registerKeyMapping(CYCLE_HUD_POSITION_KEY);
-        KeyMappingHelper.registerKeyMapping(OPEN_RUNE_INFUSION_KEY);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            while (OPEN_RUNE_INFUSION_KEY.consumeClick()) {
-                if (client.player != null && client.getConnection() != null) {
-                    ClientPlayNetworking.send(new RuneInfusionCatalogRequestPayload(
-                            client.player.getInventory().getSelectedSlot()));
-                }
+            if (SimpleskillsClient.isMultiplayer()) {
+                return;
             }
-
-            if (SimpleskillsClient.isMultiplayer()) return;
 
             while (TOGGLE_HUD_KEY.consumeClick()) {
                 SkillHudRenderer.toggleHudVisibility();
