@@ -318,6 +318,12 @@ Diagnostic messages help investigate:
 - **Damage Reduction:** +0.3 percentage points per level, up to **29.7% at level 99**.
 - **Armor Durability Protection:** +1 percentage point per level, up to **99% at level 99**.
 - **Knockback Resistance:** +0.5 percentage points per level, up to **49.5% at level 99**.
+- **Perfect Parry (level 10):** A fully blocked physical hit within 8 server ticks of raising a shield stuns its attacker for 2 seconds (1 second for the Ender Dragon and Wither), grants 2× shield-block XP, and triggers a message, a sharp parry sound, and a ring of sparks and enchantment particles around the shield, with an additional impact burst.
+- **Projectile Reflection (level 30):** While blocking, reflect eligible arrows, spectral arrows, tridents, and vanilla ghast, blaze, wither, and dragon fireballs toward their original owner when available. Reflected projectiles become owned by the defender and cannot immediately hit the reflector again.
+- **Enhanced Parry (level 50):** Extends the parry window to 12 ticks, increases the particle burst, and raises parry XP to 2.5×.
+- **Counter Mastery (level 75):** A successful parry grants +20% damage for 5 seconds. It applies to melee attacks and player-owned arrows; another parry refreshes the duration.
+- **Master Defender (level 99):** Perfect Parry uses an exclusive toast sound, stronger particles, and a mastery message. It does not add another passive damage bonus.
+- Defense milestone notifications appear when the player crosses levels 10, 30, 50, 75, and 99. The TAB skill summary shows the current parry tier, its next tier, and Projectile Reflection separately.
 
 ### 🌾 Farming
 
@@ -455,6 +461,19 @@ Progress through **10 unique ranks** as you master the art of Rune Infusion.
 - Improved visual organization of skill information.
 
 ![SimpleSkills Enhanced — SkillTabMenu](docs/images/tab-interface.jpg)
+
+#### Languages
+
+The mod reads the language selected in each player's Minecraft client and displays translated interface text where available. Included language files are:
+
+- Arabic (`ar_sa`)
+- English (`en_us`)
+- Spanish (Spain, `es_es`)
+- Spanish (Mexico, `es_mx`)
+- French (`fr_fr`)
+- Portuguese (Brazil, `pt_br`)
+
+English (`en_us`) is the fallback when a translation is unavailable. For the TAB skill screen, regional variants use the matching language translation when possible (for example, other Portuguese variants use `pt_br` and other Spanish variants use `es_es`).
 
 #### ⚖️ Rebalanced Gear Progression
 

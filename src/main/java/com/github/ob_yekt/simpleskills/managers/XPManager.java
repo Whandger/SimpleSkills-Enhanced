@@ -187,6 +187,10 @@ public class XPManager {
             ExcavatingManager.notifyRankUp(player, currentLevel, newLevel);
         }
 
+        if (skill == Skills.DEFENSE && newLevel > currentLevel) {
+            notifyDefenseUnlocks(player, currentLevel, newLevel);
+        }
+
         // Send XP gain notification if enabled
         if (notifyXP) {
             if (XP_NOTIFICATIONS_ENABLED && xpToAdd >= XP_NOTIFICATION_THRESHOLD) {
@@ -207,6 +211,23 @@ public class XPManager {
         // Notify listener
         if (onXPChangeListener != null) {
             onXPChangeListener.accept(player, skill);
+        }
+    }
+
+    public static void notifyDefenseUnlocks(ServerPlayer player, int oldLevel, int newLevel) {
+        if (newLevel <= oldLevel) return;
+        int[] levels = {10, 30, 50, 75, 99};
+        String[] keys = {
+                "message.simpleskills.defense.perfect_parry_unlocked",
+                "message.simpleskills.defense.projectile_reflection_unlocked",
+                "message.simpleskills.defense.enhanced_parry_unlocked",
+                "message.simpleskills.defense.counter_mastery_unlocked",
+                "message.simpleskills.defense.master_defender_unlocked"
+        };
+        for (int i = 0; i < levels.length; i++) {
+            if (oldLevel < levels[i] && newLevel >= levels[i]) {
+                player.sendSystemMessage(Component.translatable(keys[i]).withStyle(ChatFormatting.GOLD));
+            }
         }
     }
 

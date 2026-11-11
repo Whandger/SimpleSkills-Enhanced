@@ -584,6 +584,11 @@ public class EventHandlers {
                             && source.getEntity() instanceof LivingEntity attacker
                             && !(attacker instanceof Player)) {
 
+                        // A confirmed parry was already awarded by the shield-block callback.
+                        if (com.github.ob_yekt.simpleskills.DefenseCombat.consumeParryXp(defender, attacker, originalAmount)) {
+                            return;
+                        }
+
                         JsonObject config = ConfigManager.getCombatConfig();
 
                         float xpPerDamageDefense = config.get("defense_xp_per_damage") != null

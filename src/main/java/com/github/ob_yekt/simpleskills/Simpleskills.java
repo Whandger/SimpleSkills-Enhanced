@@ -31,6 +31,7 @@ public class Simpleskills implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		LOGGER.info("Initializing SimpleSkills mod...");
+		SimpleSkillsSounds.register();
 
 		// Blocks must be registered during initialization, before the registries freeze.
 		ModBlocks.register();
@@ -47,6 +48,7 @@ public class Simpleskills implements ModInitializer {
 		LoreManager.initialize();
 		ConfigManager.initialize();
 		EventHandlers.registerAll();
+		DefenseCombat.register();
 		BoneMealMastery.register();
 		TreeFeller.register();
 		ExcavatingManager.register();

@@ -289,8 +289,12 @@ public class SimpleskillsCommands {
         Skills skill = parseSkillName(source, skillName);
         if (skill == null) return 0;
 
+        int oldLevel = XPManager.getSkillLevel(playerUuid, skill);
         int newXP = XPManager.getExperienceForLevel(newLevel);
         db.savePlayerSkill(playerUuid, skill.getId(), newXP, newLevel);
+        if (skill == Skills.DEFENSE) {
+            XPManager.notifyDefenseUnlocks(targetPlayer, oldLevel, newLevel);
+        }
         AttributeManager.refreshAllAttributes(targetPlayer);
         SkillTabMenu.updateTabMenu(targetPlayer);
 

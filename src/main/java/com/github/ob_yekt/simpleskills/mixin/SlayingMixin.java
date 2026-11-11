@@ -11,12 +11,25 @@ import net.minecraft.tags.ItemTags;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 
 @Mixin(Player.class)
 public abstract class SlayingMixin {
+
+    @ModifyArg(
+        method = "attack",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hurtOrSimulate(Lnet/minecraft/world/damagesource/DamageSource;F)Z"),
+        index = 1
+    )
+    private float simpleskills$applyCounterMastery(float damage) {
+        Player player = (Player) (Object) this;
+        return player instanceof net.minecraft.server.level.ServerPlayer serverPlayer
+                && com.github.ob_yekt.simpleskills.DefenseCombat.hasCounterMastery(serverPlayer)
+                ? (float) (damage * com.github.ob_yekt.simpleskills.DefenseCombat.COUNTER_DAMAGE_MULTIPLIER) : damage;
+    }
 
     @ModifyExpressionValue(
         method = "attack",
