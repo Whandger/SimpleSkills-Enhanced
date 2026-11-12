@@ -325,7 +325,8 @@ public class SkillTabMenu {
         return switch (skill) {
             case AGILITY -> {
                 AgilityRank rank = AgilityRank.forLevel(safeLevel);
-                yield rankColorForLevel(rank.getMinimumLevel())
+                int rankIndex = rank.ordinal() + 1;
+                yield rankColorForLevel((rankIndex - 1) * 10 + 1)
                         + tabText(player, "skill.simpleskills.rank.agility." + rank.name().toLowerCase(Locale.ROOT));
             }
             case EXCAVATING -> {
