@@ -326,6 +326,10 @@ Diagnostic messages help investigate:
 - **Impenetrable Aegis (level 99):** Parry effects gain a larger particle ring and an exclusive sound. This final tier adds no passive damage bonus.
 - Parry tier notifications appear at each tier in the table below. Projectile Reflection unlocks at level 30, and Counter Mastery unlocks at level 75. The TAB skill summary shows the current parry tier, its next tier, and Projectile Reflection separately.
 
+![Defense parry stuns a slime](docs/images/parry-stun.gif)
+
+![Defense parry reflects an arrow](docs/images/parry-arrow.gif)
+
 | Defense Level | Parry Tier | Window |
 |--:|:--|--:|
 | 10 | Basic Parry | 4 ticks |
@@ -522,6 +526,8 @@ Progress through **10 unique ranks** as you master the art of Rune Infusion.
 - The selection is saved for the player and displayed after their name in chat (for example, `Whandger (Worldforger): Hello!`).
 - Use the menu to change or remove the equipped title. A title can only be selected after its rank is unlocked.
 - Profession names, rank titles, and menu labels follow the player's Minecraft language where a translation is available.
+
+![Profession Rank Titles menu](docs/images/tittle_menu.png)
 
 #### Languages
 

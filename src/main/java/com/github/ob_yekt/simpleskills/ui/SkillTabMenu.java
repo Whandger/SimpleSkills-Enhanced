@@ -231,6 +231,7 @@ public class SkillTabMenu {
     }
 
     private static String padToColumnWidth(String text) {
+        text = fitToColumnWidth(text);
         int currentWidth = calculateTextWidth(text);
         int remainingWidth = COLUMN_WIDTH_PIXELS - currentWidth;
 
@@ -238,6 +239,30 @@ public class SkillTabMenu {
 
         int spaces = Math.round(remainingWidth / 4.0f);
         return text + "§r" + " ".repeat(spaces);
+    }
+
+    /** Keeps long localized perk descriptions from shifting or wrapping into the next column. */
+    private static String fitToColumnWidth(String text) {
+        if (calculateTextWidth(text) <= COLUMN_WIDTH_PIXELS) return text;
+
+        StringBuilder fitted = new StringBuilder();
+        int width = 0;
+        for (int i = 0; i < text.length(); i++) {
+            char character = text.charAt(i);
+            if (character == '§' && i + 1 < text.length()) {
+                fitted.append(character).append(text.charAt(++i));
+                continue;
+            }
+
+            int characterWidth = getCharacterWidth(character);
+            if (width + characterWidth + 6 > COLUMN_WIDTH_PIXELS) {
+                fitted.append("§8…§r");
+                break;
+            }
+            fitted.append(character);
+            width += characterWidth;
+        }
+        return fitted.toString();
     }
 
     private static int calculateTextWidth(String text) {
@@ -340,7 +365,7 @@ public class SkillTabMenu {
         } catch (RuntimeException ignored) {
             // Keep the default unlock level if the server config value is invalid.
         }
-        text.append("   §8↳ §b").append(tabText(player, "gui.simpleskills.tab." + abilityKey)).append(": ");
+        text.append("   §8↳ §7").append(tabText(player, "gui.simpleskills.tab." + abilityKey)).append(": ");
         if (skillLevel >= requiredLevel) {
             double multiplier;
             if (abilityKey.equals("agility_dash")) {
@@ -351,7 +376,7 @@ public class SkillTabMenu {
                         (skillLevel - requiredLevel) / (double) Math.max(1, 40 - requiredLevel)));
                 multiplier = (0.5 + 0.5 * progress) / 0.5;
             }
-            text.append("§e").append(String.format(Locale.US, "%.2fx", multiplier)).append("\n");
+            text.append("§a").append(String.format(Locale.US, "%.2fx", multiplier)).append("\n");
         } else {
             text.append(lockedAt(player, requiredLevel)).append("\n");
         }
@@ -391,7 +416,7 @@ public class SkillTabMenu {
         switch (skill) {
             case ENCHANTING -> {
                 int unlockedLevel = EnchantProgression.getUnlockedEnchantmentLevel(safeLevel);
-                skillInfo.append(String.format("   §8↳ §d%s: §f%s\n",
+                skillInfo.append(String.format("   §8↳ §7%s: §f%s\n",
                         tabText(player, "gui.simpleskills.tab.unlocked_enchantment_level"),
                         unlockedLevel == 0 ? tabText(player, "gui.simpleskills.tab.locked") : toRoman(unlockedLevel)));
             }
@@ -399,7 +424,7 @@ public class SkillTabMenu {
                 float movementBonus = safeLevel * 0.3f;
 
                 if (movementBonus > 0.0f) {
-                    skillInfo.append(String.format(Locale.US, "   §8↳ §b%s: §a+%.1f%%\n",
+                    skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a+%.1f%%\n",
                             tabText(player, "gui.simpleskills.tab.movement_speed"), movementBonus));
                 }
 
@@ -411,12 +436,12 @@ public class SkillTabMenu {
                 float durabilityChance = Math.min(safeLevel * GatheringSpeed.BONUS_PER_LEVEL, 0.99f) * 100.0f;
 
                 if (speedBonus > 0.0f) {
-                    skillInfo.append(String.format(Locale.US, "   §8↳ §b%s: §a+%.0f%%\n",
+                    skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a+%.0f%%\n",
                             tabText(player, "gui.simpleskills.tab.block_breaking_speed"), speedBonus));
                 }
 
                 if (durabilityChance > 0.0f) {
-                    skillInfo.append(String.format(Locale.US, "   §8↳ §b%s: §a%.0f%%\n",
+                    skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a%.0f%%\n",
                             tabText(player, "gui.simpleskills.tab.durability_protection"), durabilityChance));
                 }
 
@@ -424,10 +449,10 @@ public class SkillTabMenu {
                     float duplicationChance = Math.min((safeLevel / 10) * 0.05f, 0.45f) * 100.0f;
 
                     if (duplicationChance > 0.0f) {
-                        skillInfo.append(String.format(Locale.US, "   §8↳ §b%s: §a%.0f%%\n",
+                        skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a%.0f%%\n",
                                 tabText(player, "gui.simpleskills.tab.loot_duplication"), duplicationChance));
                     } else {
-                        skillInfo.append(String.format("   §8↳ §b%s: %s\n",
+                        skillInfo.append(String.format("   §8↳ §7%s: %s\n",
                                 tabText(player, "gui.simpleskills.tab.loot_duplication"), lockedAt(player, 10)));
                     }
                 }
@@ -436,26 +461,26 @@ public class SkillTabMenu {
                     int additionalBlocks = VeinMining.getAdditionalBlockLimit(safeLevel);
 
                     if (additionalBlocks > 0) {
-                        skillInfo.append(String.format(Locale.US, "   §8↳ §b%s: §a x%d\n",
+                        skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a x%d\n",
                                 tabText(player, "gui.simpleskills.tab.shift_vein_miner"), additionalBlocks));
                     } else {
-                        skillInfo.append(String.format("   §8↳ §b%s: %s\n",
+                        skillInfo.append(String.format("   §8↳ §7%s: %s\n",
                                 tabText(player, "gui.simpleskills.tab.shift_vein_miner"), lockedAt(player, 15)));
                     }
                 }
 
                 if (skill == Skills.WOODCUTTING) {
                     if (TreeFeller.isUnlocked(safeLevel)) {
-                        skillInfo.append(String.format("   §8↳ §b%s: §a%s\n",
+                        skillInfo.append(String.format("   §8↳ §7%s: §a%s\n",
                                 tabText(player, "gui.simpleskills.tab.shift_tree_feller"), tabText(player, "gui.simpleskills.tab.unlocked")));
                     } else {
-                        skillInfo.append(String.format("   §8↳ §b%s: %s\n",
+                        skillInfo.append(String.format("   §8↳ §7%s: %s\n",
                                 tabText(player, "gui.simpleskills.tab.shift_tree_feller"), lockedAt(player, 5)));
                     }
                 }
 
                 if (skill == Skills.EXCAVATING) {
-                    skillInfo.append(String.format(Locale.US, "   §8↳ §b%s: §a%.2fs\n",
+                    skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a%.2fs\n",
                             tabText(player, "gui.simpleskills.tab.investigation_time"),
                             ExcavatingRank.investigationSeconds(Math.max(1, safeLevel))));
                 }
@@ -466,30 +491,30 @@ public class SkillTabMenu {
                 float harvestChance = (float) EventHandlers.getHarvestBonusChance(safeLevel) * 100.0f;
                 float animalChance = (float) FarmingPerks.animalLootBonusChance(safeLevel) * 100.0f;
 
-                skillInfo.append(String.format(Locale.US, "   §8↳ §6%s: §a+%.0f%%\n",
+                skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a+%.0f%%\n",
                         tabText(player, "gui.simpleskills.tab.harvest_bonus"), harvestChance));
 
-                skillInfo.append(String.format(Locale.US, "   §8↳ §6%s: §a+%.0f%%\n",
+                skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a+%.0f%%\n",
                         tabText(player, "gui.simpleskills.tab.animal_loot_bonus"), animalChance));
 
                 if (FarmingPerks.isBoneMealMasteryUnlocked(safeLevel)) {
                     String cost = FarmingPerks.boneMealCostLabel(safeLevel);
                     skillInfo.append(cost.equals("FREE")
-                            ? String.format("   §8↳ §6%s: §a%s\n", tabText(player, "gui.simpleskills.tab.bone_meal_mastery"),
+                            ? String.format("   §8↳ §7%s: §a%s\n", tabText(player, "gui.simpleskills.tab.bone_meal_mastery"),
                                     tabText(player, "gui.simpleskills.tab.free"))
-                            : String.format(Locale.US, "   §8↳ §6%s: §a%s §7%s\n",
+                            : String.format(Locale.US, "   §8↳ §7%s: §a%s §7%s\n",
                                     tabText(player, "gui.simpleskills.tab.bone_meal_mastery"), cost,
                                     tabText(player, "gui.simpleskills.tab.bars")));
                 } else {
-                    skillInfo.append(String.format(Locale.US, "   §8↳ §6%s: %s\n",
+                    skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: %s\n",
                             tabText(player, "gui.simpleskills.tab.bone_meal_mastery"), lockedAt(player, FarmingPerks.UNLOCK_LEVEL)));
                 }
 
                 if (FarmingPerks.isAutoPlantUnlocked(safeLevel)) {
-                    skillInfo.append(String.format("   §8↳ §6%s: §a%s\n",
+                    skillInfo.append(String.format("   §8↳ §7%s: §a%s\n",
                             tabText(player, "gui.simpleskills.tab.auto_plant"), tabText(player, "gui.simpleskills.tab.unlocked")));
                 } else {
-                    skillInfo.append(String.format(Locale.US, "   §8↳ §6%s: %s\n",
+                    skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: %s\n",
                             tabText(player, "gui.simpleskills.tab.auto_plant"), lockedAt(player, FarmingPerks.UNLOCK_LEVEL)));
                 }
             }
@@ -499,31 +524,31 @@ public class SkillTabMenu {
                     if (ConfigManager.isFishingSpeedBonusEnabled()) {
                         double attraction = FishingProgression.attractionPercent(safeLevel);
                         if (attraction > 0.0) {
-                            skillInfo.append(String.format(Locale.US, "   §8↳ §b%s: §a+%.0f%%\n",
+                            skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a+%.0f%%\n",
                                     tabText(player, "gui.simpleskills.tab.fish_attraction_speed"), attraction));
                         }
                     } else {
-                        skillInfo.append(String.format("   §8↳ §b%s: §c%s\n",
+                        skillInfo.append(String.format("   §8↳ §7%s: §c%s\n",
                                 tabText(player, "gui.simpleskills.tab.fish_attraction_speed"), tabText(player, "gui.simpleskills.tab.disabled")));
                     }
 
                     double fatigue = FishingProgression.fatiguePercent(safeLevel);
                     if (fatigue > 0.0) {
-                        skillInfo.append(String.format(Locale.US, "   §8↳ §b%s: §a+%.0f%% §7(%s)\n",
+                        skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a+%.0f%% §7(%s)\n",
                                 tabText(player, "gui.simpleskills.tab.fish_fatigue"), fatigue,
                                 tabText(player, "gui.simpleskills.tab.tires_faster")));
                     }
 
                     double tension = FishingProgression.tensionReductionPercent(safeLevel);
                     if (tension > 0.0) {
-                        skillInfo.append(String.format(Locale.US, "   §8↳ §b%s: §a-%.0f%% §7(%s)\n",
+                        skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a-%.0f%% §7(%s)\n",
                                 tabText(player, "gui.simpleskills.tab.line_tension"), tension,
                                 tabText(player, "gui.simpleskills.tab.builds_slower")));
                     }
 
                     double recovery = FishingProgression.recoveryPercent(safeLevel);
                     if (recovery > 0.0) {
-                        skillInfo.append(String.format(Locale.US, "   §8↳ §b%s: §a+%.0f%% §7(%s)\n",
+                        skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a+%.0f%% §7(%s)\n",
                                 tabText(player, "gui.simpleskills.tab.line_recovery"), recovery,
                                 tabText(player, "gui.simpleskills.tab.relaxes_faster")));
                     }
@@ -531,11 +556,11 @@ public class SkillTabMenu {
                     float waitReduction = (1.0f - Math.max(0.20f, 1.0f - (safeLevel * 0.005f))) * 100.0f;
 
                     if (waitReduction > 0.0f) {
-                        skillInfo.append(String.format(Locale.US, "   §8↳ §b%s: §a%.1f%%\n",
+                        skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a%.1f%%\n",
                                 tabText(player, "gui.simpleskills.tab.bite_wait_reduction"), waitReduction));
                     }
                 } else {
-                    skillInfo.append(String.format("   §8↳ §b%s: §c%s\n",
+                    skillInfo.append(String.format("   §8↳ §7%s: §c%s\n",
                             tabText(player, "gui.simpleskills.tab.bite_speed"), tabText(player, "gui.simpleskills.tab.disabled")));
                 }
             }
@@ -545,17 +570,17 @@ public class SkillTabMenu {
                 float knockbackResistance = safeLevel * 0.5f;
 
                 if (damageReduction > 0.0f) {
-                    skillInfo.append(String.format(Locale.US, "   §8↳ §c%s: §a%.1f%%\n",
+                    skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a%.1f%%\n",
                             tabText(player, "gui.simpleskills.tab.damage_reduction"), damageReduction));
                 }
 
                 if (armorProtection > 0.0f) {
-                    skillInfo.append(String.format(Locale.US, "   §8↳ §c%s: §a%.0f%%\n",
+                    skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a%.0f%%\n",
                             tabText(player, "gui.simpleskills.tab.armor_durability_protection"), armorProtection));
                 }
 
                 if (knockbackResistance > 0.0f) {
-                    skillInfo.append(String.format(Locale.US, "   §8↳ §c%s: §a%.1f%%\n",
+                    skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a%.1f%%\n",
                             tabText(player, "gui.simpleskills.tab.knockback_resistance"), knockbackResistance));
                 }
 
@@ -563,25 +588,25 @@ public class SkillTabMenu {
                 int nextStage = safeLevel < 10 ? 10 : safeLevel >= 99 ? 0
                         : Math.min(99, 10 + (((safeLevel - 10) / 10) + 1) * 10);
                 if (safeLevel < 10) {
-                    skillInfo.append("   §8↳ §c").append(tabText(player, "gui.simpleskills.tab.parry_tier")).append(": ")
+                    skillInfo.append("   §8↳ §7").append(tabText(player, "gui.simpleskills.tab.parry_tier")).append(": ")
                             .append(rankColorForLevel(10)).append(tabText(player, "skill.simpleskills.defense.parry_tier_10"))
                             .append(" ").append(lockedAt(player, 10)).append("\n");
                 } else {
-                    skillInfo.append("   §8↳ §c").append(tabText(player, "gui.simpleskills.tab.parry_tier")).append(": ")
+                    skillInfo.append("   §8↳ §7").append(tabText(player, "gui.simpleskills.tab.parry_tier")).append(": ")
                             .append(rankColorForLevel(stageLevel)).append(tabText(player, "skill.simpleskills.defense.parry_tier_" + stageLevel))
                             .append(" §a").append(tabText(player, "gui.simpleskills.tab.unlocked")).append("\n");
                 }
                 if (nextStage > 0 && safeLevel >= 10) {
-                    skillInfo.append("   §8↳ §c").append(tabText(player, "gui.simpleskills.tab.next_tier")).append(": ")
+                    skillInfo.append("   §8↳ §7").append(tabText(player, "gui.simpleskills.tab.next_tier")).append(": ")
                             .append(rankColorForLevel(nextStage)).append(tabText(player, "skill.simpleskills.defense.parry_tier_" + nextStage))
                             .append(" ").append(lockedAt(player, nextStage)).append("\n");
                 }
                 String projectileLabel = tabText(player, "gui.simpleskills.tab.projectile_reflection");
                 if (safeLevel >= 30) {
-                    skillInfo.append("   §8↳ §c").append(projectileLabel).append(": §a")
+                    skillInfo.append("   §8↳ §7").append(projectileLabel).append(": §a")
                             .append(tabText(player, "gui.simpleskills.tab.unlocked")).append("\n");
                 } else {
-                    skillInfo.append("   §8↳ §c").append(projectileLabel).append(": ").append(rankColorForLevel(30))
+                    skillInfo.append("   §8↳ §7").append(projectileLabel).append(": ").append(rankColorForLevel(30))
                             .append(lockedAt(player, 30)).append("\n");
                 }
             }
@@ -590,27 +615,27 @@ public class SkillTabMenu {
                 float criticalChance = Math.min(safeLevel * Slaying.CRITICAL_CHANCE_PER_LEVEL, 0.495f) * 100.0f;
 
                 if (damageBonus > 0.0f) {
-                    skillInfo.append(String.format(Locale.US, "   §8↳ §c%s: §a+%.1f%%\n",
+                    skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a+%.1f%%\n",
                             tabText(player, "gui.simpleskills.tab.sword_damage"), damageBonus));
                 }
 
                 if (criticalChance > 0.0f) {
-                    skillInfo.append(String.format(Locale.US, "   §8↳ §c%s: §a%.1f%%\n",
+                    skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a%.1f%%\n",
                             tabText(player, "gui.simpleskills.tab.critical_chance"), criticalChance));
                 }
 
                 if (safeLevel >= 99) {
-                    skillInfo.append("   §8↳ §c").append(tabText(player, "gui.simpleskills.tab.life_steal_ii"))
+                    skillInfo.append("   §8↳ §7").append(tabText(player, "gui.simpleskills.tab.life_steal_ii"))
                             .append(": ").append(tabText(player, "gui.simpleskills.tab.life_steal_ii_description")).append("\n");
                 } else if (safeLevel >= 50) {
-                    skillInfo.append("   §8↳ §c").append(tabText(player, "gui.simpleskills.tab.life_steal_i"))
+                    skillInfo.append("   §8↳ §7").append(tabText(player, "gui.simpleskills.tab.life_steal_i"))
                             .append(": ").append(tabText(player, "gui.simpleskills.tab.life_steal_i_description")).append("\n");
-                    skillInfo.append(String.format("   §8↳ §c%s: %s\n",
+                    skillInfo.append(String.format("   §8↳ §7%s: %s\n",
                             tabText(player, "gui.simpleskills.tab.life_steal_ii"), lockedAt(player, 99)));
                 } else {
-                    skillInfo.append(String.format("   §8↳ §c%s: %s\n",
+                    skillInfo.append(String.format("   §8↳ §7%s: %s\n",
                             tabText(player, "gui.simpleskills.tab.life_steal_i"), lockedAt(player, 50)));
-                    skillInfo.append(String.format("   §8↳ §c%s: %s\n",
+                    skillInfo.append(String.format("   §8↳ §7%s: %s\n",
                             tabText(player, "gui.simpleskills.tab.life_steal_ii"), lockedAt(player, 99)));
                 }
             }
@@ -627,15 +652,15 @@ public class SkillTabMenu {
                         : Math.min((safeLevel - 50) / 49.0f, 1.0f) * 100.0f;
 
                 if (damageBonus > 0.0f) {
-                    skillInfo.append(String.format(Locale.US, "   §8↳ §c%s: §a+%.1f%%\n",
+                    skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a+%.1f%%\n",
                             tabText(player, "gui.simpleskills.tab.projectile_damage"), damageBonus));
                 }
 
                 if (safeLevel > 0) {
-                    skillInfo.append(String.format(Locale.US, "   §8↳ §c%s: §a%.1f%%\n",
+                    skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a%.1f%%\n",
                             tabText(player, "gui.simpleskills.tab.double_shot_chance"), doubleShotChance));
 
-                    skillInfo.append(String.format(Locale.US, "   §8↳ §c%s: §a%.1f%%\n",
+                    skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a%.1f%%\n",
                             tabText(player, "gui.simpleskills.tab.triple_shot_chance"), tripleShotChance));
                 }
             }
@@ -643,14 +668,14 @@ public class SkillTabMenu {
                 float repairEfficiency = safeLevel >= 99 ? 1.00f : safeLevel >= 75 ? 0.55f : safeLevel >= 50 ? 0.45f : safeLevel >= 25 ? 0.35f : 0.25f;
                 float netheriteBonus = (ConfigManager.getSmithingMultiplier(safeLevel) - 1.0f) * 100.0f;
 
-                skillInfo.append(String.format(Locale.US, "   §8↳ §6%s: §a%.0f%%\n",
+                skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a%.0f%%\n",
                         tabText(player, "gui.simpleskills.tab.repair_efficiency"), repairEfficiency * 100.0f))
-                         .append(String.format("   §8↳ §6%s: §a%s\n",
+                         .append(String.format("   §8↳ §7%s: §a%s\n",
                                  tabText(player, "gui.simpleskills.tab.anvil_durability"),
                                  tabText(player, "gui.simpleskills.tab.no_degradation")));
 
                 if (netheriteBonus > 0.0f) {
-                    skillInfo.append(String.format(Locale.US, "   §8↳ §6%s: §a+%.1f%%\n",
+                    skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a+%.1f%%\n",
                             tabText(player, "gui.simpleskills.tab.netherite_durability"), netheriteBonus));
                 }
             }
@@ -658,7 +683,7 @@ public class SkillTabMenu {
                 float foodBonus = (ConfigManager.getCookingMultiplier(safeLevel) - 1.0f) * 100.0f;
 
                 if (foodBonus > 0.0f) {
-                    skillInfo.append(String.format(Locale.US, "   §8↳ §6%s: §a%+.1f%%\n",
+                    skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a%+.1f%%\n",
                             tabText(player, "gui.simpleskills.tab.food_nutrition_saturation"), foodBonus));
                 }
             }
@@ -667,18 +692,18 @@ public class SkillTabMenu {
                 float recoveryChance = ConfigManager.getCraftingRecoveryChance(safeLevel) * 100.0f;
 
                 if (durabilityBonus > 0.0f) {
-                    skillInfo.append(String.format(Locale.US, "   §8↳ §6%s: §a+%.1f%%\n",
+                    skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a+%.1f%%\n",
                             tabText(player, "gui.simpleskills.tab.crafted_item_durability"), durabilityBonus));
                 } else {
-                    skillInfo.append(String.format("   §8↳ §6%s: %s\n",
+                    skillInfo.append(String.format("   §8↳ §7%s: %s\n",
                             tabText(player, "gui.simpleskills.tab.crafted_item_durability"), lockedAt(player, 25)));
                 }
 
                 if (recoveryChance > 0.0f) {
-                    skillInfo.append(String.format(Locale.US, "   §8↳ §6%s: §a%.1f%%\n",
+                    skillInfo.append(String.format(Locale.US, "   §8↳ §7%s: §a%.1f%%\n",
                             tabText(player, "gui.simpleskills.tab.material_recovery"), recoveryChance));
                 } else {
-                    skillInfo.append(String.format("   §8↳ §6%s: %s\n",
+                    skillInfo.append(String.format("   §8↳ §7%s: %s\n",
                             tabText(player, "gui.simpleskills.tab.material_recovery"), lockedAt(player, 25)));
                 }
             }
