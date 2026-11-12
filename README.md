@@ -515,6 +515,14 @@ Progress through **10 unique ranks** as you master the art of Rune Infusion.
 
 ![SimpleSkills Enhanced — SkillTabMenu](docs/images/tab-interface.jpg)
 
+#### Profession Rank Titles
+
+- Open the **Profession Titles** menu with **U** by default; the key can be changed in Minecraft's Controls menu.
+- Browse professions and choose from ranks already unlocked through that profession's level progression.
+- The selection is saved for the player and displayed after their name in chat (for example, `Whandger (Worldforger): Hello!`).
+- Use the menu to change or remove the equipped title. A title can only be selected after its rank is unlocked.
+- Profession names, rank titles, and menu labels follow the player's Minecraft language where a translation is available.
+
 #### Languages
 
 The mod reads the language selected in each player's Minecraft client and displays translated interface text where available. Included language files are:

@@ -12,6 +12,7 @@ import com.github.ob_yekt.simpleskills.managers.AttributeManager;
 import com.github.ob_yekt.simpleskills.managers.IronmanManager;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
 import com.github.ob_yekt.simpleskills.ui.SkillTabMenu;
+import com.github.ob_yekt.simpleskills.ui.RankTitleManager;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -58,6 +59,20 @@ public class SimpleskillsCommands {
                                                 .executes(SimpleskillsCommands::disableIronman)))
                                 .then(Commands.literal("prestige")
                                         .executes(SimpleskillsCommands::prestige))
+                                .then(Commands.literal("titles")
+                                        .executes(context -> {
+                                            RankTitleManager.showMenu(context.getSource().getPlayerOrException());
+                                            return 1;
+                                        }))
+                                .then(Commands.literal("title")
+                                        .then(Commands.literal("clear")
+                                                .executes(SimpleskillsCommands::clearTitle))
+                                        .then(Commands.literal("set")
+                                                .then(Commands.argument("id", StringArgumentType.word())
+                                                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(
+                                                                RankTitleManager.allOptions().stream()
+                                                                        .map(RankTitleManager.TitleOption::id), builder))
+                                                        .executes(SimpleskillsCommands::setTitle))))
                                 // Diagnostics of the fishing minigame: prints why a fish does / does not come.
                                 .then(Commands.literal("fishing")
                                         .then(Commands.literal("debug")
@@ -140,6 +155,37 @@ public class SimpleskillsCommands {
                                                 .suggests((context, builder) -> SharedSuggestionProvider.suggest(getValidSkills(), builder))
                                                 .executes(SimpleskillsCommands::showIronmanSkillLeaderboard)))
                 ));
+    }
+
+    private static int setTitle(CommandContext<CommandSourceStack> context) {
+        ServerPlayer player = context.getSource().getPlayer();
+        if (player == null) return 0;
+        String id = StringArgumentType.getString(context, "id");
+        RankTitleManager.TitleOption option = RankTitleManager.find(id);
+        if (option == null) {
+            context.getSource().sendFailure(Component.translatable("message.simpleskills.titles.invalid"));
+            return 0;
+        }
+        if (!RankTitleManager.isUnlocked(player, option)) {
+            context.getSource().sendFailure(Component.translatable("message.simpleskills.titles.locked",
+                    option.requiredLevel()));
+            return 0;
+        }
+
+        DatabaseManager.getInstance().setSelectedTitleKey(player.getStringUUID(), option.id());
+        com.github.ob_yekt.simpleskills.managers.NamePrefixManager.updatePlayerNameDecorations(player);
+        context.getSource().sendSuccess(() -> Component.translatable("message.simpleskills.titles.selected",
+                Component.translatable(option.translationKey())), false);
+        return 1;
+    }
+
+    private static int clearTitle(CommandContext<CommandSourceStack> context) {
+        ServerPlayer player = context.getSource().getPlayer();
+        if (player == null) return 0;
+        DatabaseManager.getInstance().setSelectedTitleKey(player.getStringUUID(), null);
+        com.github.ob_yekt.simpleskills.managers.NamePrefixManager.updatePlayerNameDecorations(player);
+        context.getSource().sendSuccess(() -> Component.translatable("message.simpleskills.titles.cleared"), false);
+        return 1;
     }
 
     private static int prestige(CommandContext<CommandSourceStack> context) {

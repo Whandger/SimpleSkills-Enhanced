@@ -7,6 +7,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.network.chat.Component;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import com.github.ob_yekt.simpleskills.agility.AgilityActionPayload;
+import com.github.ob_yekt.simpleskills.ui.RankTitleMenuActionPayload;
 import net.minecraft.world.phys.Vec3;
 import java.util.UUID;
 
@@ -34,6 +35,13 @@ public class Keybinds {
             KeyMapping.Category.MISC
     );
 
+    public static final KeyMapping OPEN_RANK_TITLES_KEY = new KeyMapping(
+            "key.simpleskills.open_rank_titles",
+            InputConstants.Type.KEYBOARD,
+            InputConstants.KEY_U,
+            KeyMapping.Category.MISC
+    );
+
     private static boolean wasJumpDown;
     private static boolean canDoubleJump = true;
     private static boolean wasOnGround;
@@ -43,6 +51,7 @@ public class Keybinds {
         KeyMappingHelper.registerKeyMapping(TOGGLE_HUD_KEY);
         KeyMappingHelper.registerKeyMapping(CYCLE_HUD_POSITION_KEY);
         KeyMappingHelper.registerKeyMapping(AGILITY_DASH_KEY);
+        KeyMappingHelper.registerKeyMapping(OPEN_RANK_TITLES_KEY);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null) {
@@ -61,6 +70,10 @@ public class Keybinds {
                 wasJumpDown = client.options.keyJump.isDown();
             }
             if (onGround) canDoubleJump = true;
+            if (OPEN_RANK_TITLES_KEY.consumeClick()
+                    && ClientPlayNetworking.canSend(RankTitleMenuActionPayload.TYPE)) {
+                ClientPlayNetworking.send(new RankTitleMenuActionPayload(RankTitleMenuActionPayload.OPEN, ""));
+            }
             if (AGILITY_DASH_KEY.consumeClick() && AgilityClientState.getLevel() >= AgilityClientState.getDashUnlockLevel()
                     && ClientPlayNetworking.canSend(AgilityActionPayload.TYPE)) {
                 ClientPlayNetworking.send(new AgilityActionPayload(AgilityActionPayload.DASH));
