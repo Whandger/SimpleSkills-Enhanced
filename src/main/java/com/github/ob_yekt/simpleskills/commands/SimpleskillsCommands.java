@@ -125,7 +125,7 @@ public class SimpleskillsCommands {
                                         .then(Commands.argument("targets", StringArgumentType.string())
                                                 .suggests((context, builder) -> SharedSuggestionProvider.suggest(getOnlinePlayerNames(context), builder))
                                                 .then(Commands.argument("skill", StringArgumentType.word())
-                                                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(getValidSkills(), builder))
+                                                        .suggests((context, builder) -> SharedSuggestionProvider.suggest(getSetLevelSkills(), builder))
                                                         .then(Commands.argument("level", IntegerArgumentType.integer(1, XPManager.getMaxLevel()))
                                                                 .executes(SimpleskillsCommands::setLevel)))))
                                 .then(Commands.literal("setprestige")
@@ -337,15 +337,27 @@ public class SimpleskillsCommands {
         String playerUuid = targetPlayer.getStringUUID();
         db.ensurePlayerInitialized(playerUuid);
 
+        int newXP = XPManager.getExperienceForLevel(newLevel);
+        if (skillName.equalsIgnoreCase("ALL")) {
+            for (Skills skill : Skills.values()) {
+                int oldLevel = XPManager.getSkillLevel(playerUuid, skill);
+                db.savePlayerSkill(playerUuid, skill.getId(), newXP, newLevel);
+                if (skill == Skills.DEFENSE) XPManager.notifyDefenseUnlocks(targetPlayer, oldLevel, newLevel);
+            }
+            AttributeManager.refreshAllAttributes(targetPlayer);
+            SkillTabMenu.updateTabMenu(targetPlayer);
+            source.sendSuccess(() -> Component.literal("§6[simpleskills]§f Set all skills for " + playerName + " to level " + newLevel + "."), true);
+            targetPlayer.sendSystemMessage(Component.literal("§6[simpleskills]§f All your skills are now level " + newLevel + "!"), false);
+            Simpleskills.LOGGER.info("Set all skills to level {} for player {}", newLevel, playerName);
+            return 1;
+        }
+
         Skills skill = parseSkillName(source, skillName);
         if (skill == null) return 0;
 
         int oldLevel = XPManager.getSkillLevel(playerUuid, skill);
-        int newXP = XPManager.getExperienceForLevel(newLevel);
         db.savePlayerSkill(playerUuid, skill.getId(), newXP, newLevel);
-        if (skill == Skills.DEFENSE) {
-            XPManager.notifyDefenseUnlocks(targetPlayer, oldLevel, newLevel);
-        }
+        if (skill == Skills.DEFENSE) XPManager.notifyDefenseUnlocks(targetPlayer, oldLevel, newLevel);
         AttributeManager.refreshAllAttributes(targetPlayer);
         SkillTabMenu.updateTabMenu(targetPlayer);
 
@@ -545,6 +557,10 @@ public class SimpleskillsCommands {
         return Stream.of(Skills.values())
                 .map(Skills::getId)
                 .toList();
+    }
+
+    private static List<String> getSetLevelSkills() {
+        return Stream.concat(Stream.of("ALL"), getValidSkills().stream()).toList();
     }
 
     /**
