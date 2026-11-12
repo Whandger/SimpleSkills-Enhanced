@@ -14,6 +14,7 @@ import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionCatalogResponsePay
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionPreparationScreen;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionResultPayload;
 import com.github.ob_yekt.simpleskills.runes.RuneMiningClient;
+import com.github.ob_yekt.simpleskills.ui.RankTitleMenuDataPayload;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -34,6 +35,8 @@ public class SimpleskillsClient implements ClientModInitializer {
                 context.client().execute(() -> AgilityClientState.set(payload)));
         ClientPlayNetworking.registerGlobalReceiver(AgilityDashCooldownPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> AgilityDashHud.onCooldown(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(RankTitleMenuDataPayload.TYPE, (payload, context) ->
+                context.client().execute(() -> RankTitleMenuScreen.showOrUpdate(payload)));
 
         // Gathering Speed: levels pushed by the server (applied in GatheringSpeedMixin)
         // Redireciona a atualização para a thread principal do cliente para garantir thread safety
@@ -110,6 +113,7 @@ public class SimpleskillsClient implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             GatheringSpeed.resetClientLevels();
             AgilityClientState.reset();
+            RankTitleMenuScreen.clearActive();
             AgilityDashHud.reset();
             InvestigationHud.reset();
             FishingHud.reset();

@@ -95,7 +95,8 @@ public class DatabaseManager {
             player_uuid TEXT PRIMARY KEY,
             is_ironman INTEGER DEFAULT 0,
             is_tab_menu_visible INTEGER DEFAULT 1,
-            prestige INTEGER DEFAULT 0
+            prestige INTEGER DEFAULT 0,
+            selected_title_key TEXT DEFAULT NULL
         )
     """;
         String createSkillsTable = """
@@ -127,6 +128,11 @@ public class DatabaseManager {
             // Lightweight migration for older databases missing prestige column
             try {
                 stmt.execute("ALTER TABLE players ADD COLUMN prestige INTEGER DEFAULT 0");
+            } catch (SQLException ignored) {
+                // Column likely exists; ignore
+            }
+            try {
+                stmt.execute("ALTER TABLE players ADD COLUMN selected_title_key TEXT DEFAULT NULL");
             } catch (SQLException ignored) {
                 // Column likely exists; ignore
             }
@@ -370,6 +376,33 @@ public class DatabaseManager {
 
     public void incrementPrestige(String playerUuid) {
         setPrestige(playerUuid, getPrestige(playerUuid) + 1);
+    }
+
+    public String getSelectedTitleKey(String playerUuid) {
+        checkConnection();
+        String sql = "SELECT selected_title_key FROM players WHERE player_uuid = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, playerUuid);
+            try (ResultSet result = statement.executeQuery()) {
+                return result.next() ? result.getString("selected_title_key") : null;
+            }
+        } catch (SQLException e) {
+            Simpleskills.LOGGER.error("Failed to get selected title for UUID {}: {}", playerUuid, e.getMessage());
+            throw new DatabaseException("Failed to get selected title", e);
+        }
+    }
+
+    public void setSelectedTitleKey(String playerUuid, String titleKey) {
+        checkConnection();
+        String sql = "UPDATE players SET selected_title_key = ? WHERE player_uuid = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, titleKey);
+            statement.setString(2, playerUuid);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            Simpleskills.LOGGER.error("Failed to set selected title for UUID {}: {}", playerUuid, e.getMessage());
+            throw new DatabaseException("Failed to set selected title", e);
+        }
     }
 
     public void setIronmanMode(String playerUuid, boolean isIronman) {

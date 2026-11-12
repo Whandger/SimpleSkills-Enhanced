@@ -12,12 +12,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.server.level.ServerPlayer;
 
 /** Reads the player's locale for the text-only TAB overlay, which is sent as a literal component. */
-final class SkillTabTranslations {
+public final class SkillTabTranslations {
     private static final Map<String, Map<String, String>> CACHE = new ConcurrentHashMap<>();
 
     private SkillTabTranslations() {}
 
-    static String get(ServerPlayer player, String key) {
+    public static String get(ServerPlayer player, String key) {
         String locale = normalize(player.clientInformation().language());
         String value = CACHE.computeIfAbsent(locale, SkillTabTranslations::load).get(key);
         if (value == null) {
@@ -32,7 +32,7 @@ final class SkillTabTranslations {
         return value != null ? value : key;
     }
 
-    static String format(ServerPlayer player, String key, Object... args) {
+    public static String format(ServerPlayer player, String key, Object... args) {
         return String.format(Locale.US, get(player, key), args);
     }
 

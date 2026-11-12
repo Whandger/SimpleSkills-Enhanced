@@ -37,7 +37,7 @@ public class SkillTabMenu {
     private static final Map<UUID, Boolean> playerTabMenuVisibility = new HashMap<>();
     private static final NumberFormat numberFormat = NumberFormat.getIntegerInstance(Locale.US);
 
-    private static final int COLUMN_WIDTH_PIXELS = 240;
+    private static final int COLUMN_WIDTH_PIXELS = 260;
     private static final int COLUMN_GAP_SPACES = 3;
 
     // NOVA CONSTANTE: Controla o distanciamento da margem esquerda para centralizar o bloco
@@ -180,8 +180,11 @@ public class SkillTabMenu {
         boolean isMaxLevel = skill.level() >= XPManager.getMaxLevel();
         String levelColor = isMaxLevel ? "§f" : "§a";
 
+        String skillTitle = tabText(player, "skill.simpleskills.name." + skillEnum.name().toLowerCase(Locale.ROOT));
+        String rankTitle = getSkillRankTitle(skillEnum, skill.level(), player);
+        if (rankTitle != null) skillTitle += " " + rankTitle;
         lines.add(SkillTabTranslations.format(player, "gui.simpleskills.tab.skill_title",
-                tabText(player, "skill.simpleskills.name." + skillEnum.name().toLowerCase(Locale.ROOT)),
+                skillTitle,
                 levelColor, skill.level()));
         lines.add(createProgressBar(skill));
         lines.add(isMaxLevel ? "§f" + tabText(player, "gui.simpleskills.tab.max_level") : createXpLine(skill, player));
@@ -291,6 +294,43 @@ public class SkillTabMenu {
         return SkillTabTranslations.get(player, key);
     }
 
+    /** Returns a localized, rank-colored title suffix for skills with named progression ranks. */
+    private static String getSkillRankTitle(Skills skill, int level, ServerPlayer player) {
+        int safeLevel = Math.max(1, Math.min(level, XPManager.getMaxLevel()));
+        return switch (skill) {
+            case AGILITY -> {
+                AgilityRank rank = AgilityRank.forLevel(safeLevel);
+                yield rankColorForLevel(rank.getMinimumLevel())
+                        + tabText(player, "skill.simpleskills.rank.agility." + rank.name().toLowerCase(Locale.ROOT));
+            }
+            case EXCAVATING -> {
+                ExcavatingRank rank = ExcavatingRank.forLevel(safeLevel);
+                yield rankColorForLevel(rank.getMinLevel())
+                        + tabText(player, "skill.simpleskills.rank.excavating." + rank.name().toLowerCase(Locale.ROOT));
+            }
+            case ENCHANTING -> {
+                EnchantingRank rank = EnchantProgression.getRank(safeLevel);
+                yield rankColorForLevel(rank.getMinimumLevel())
+                        + tabText(player, "skill.simpleskills.rank.enchanting." + rank.name().toLowerCase(Locale.ROOT));
+            }
+            case FISHING -> {
+                String rankKey = safeLevel >= 99 ? "grandmaster" : safeLevel >= 75 ? "expert"
+                        : safeLevel >= 50 ? "artisan" : safeLevel >= 25 ? "journeyman" : "novice";
+                int rankLevel = safeLevel >= 99 ? 99 : safeLevel >= 75 ? 75 : safeLevel >= 50 ? 50
+                        : safeLevel >= 25 ? 25 : 1;
+                yield rankColorForLevel(rankLevel)
+                        + tabText(player, "skill.simpleskills.rank.fishing." + rankKey);
+            }
+            case MINING, WOODCUTTING, FARMING, SLAYING, RANGED, DEFENSE, ALCHEMY, SMITHING, COOKING, CRAFTING, PRAYER -> {
+                int rank = Math.min(10, ((safeLevel - 1) / 10) + 1);
+                String profession = skill.name().toLowerCase(Locale.ROOT);
+                yield rankColorForLevel((rank - 1) * 10 + 1)
+                        + tabText(player, "skill.simpleskills.rank." + profession + ".rank_" + rank);
+            }
+            default -> null;
+        };
+    }
+
     private static void appendAgilityAbility(ServerPlayer player, StringBuilder text, String abilityKey,
             String configKey, int fallbackLevel, int skillLevel) {
         int requiredLevel = fallbackLevel;
@@ -350,24 +390,13 @@ public class SkillTabMenu {
 
         switch (skill) {
             case ENCHANTING -> {
-                EnchantingRank rank = EnchantProgression.getRank(Math.max(1, safeLevel));
                 int unlockedLevel = EnchantProgression.getUnlockedEnchantmentLevel(safeLevel);
-                skillInfo.append(String.format("   §8↳ §5%s: %s%s\n",
-                        tabText(player, "gui.simpleskills.tab.enchanting_rank"),
-                        rankColorForLevel(rank.getMinimumLevel()),
-                        tabText(player, "skill.simpleskills.rank.enchanting." + rank.name().toLowerCase(Locale.ROOT))));
                 skillInfo.append(String.format("   §8↳ §d%s: §f%s\n",
                         tabText(player, "gui.simpleskills.tab.unlocked_enchantment_level"),
                         unlockedLevel == 0 ? tabText(player, "gui.simpleskills.tab.locked") : toRoman(unlockedLevel)));
             }
             case AGILITY -> {
                 float movementBonus = safeLevel * 0.3f;
-
-                AgilityRank rank = AgilityRank.forLevel(safeLevel);
-                skillInfo.append(String.format("   §8↳ §b%s: %s%s\n",
-                        tabText(player, "gui.simpleskills.tab.rank"),
-                        rankColorForLevel(rank.getMinimumLevel()),
-                        tabText(player, "skill.simpleskills.rank.agility." + rank.name().toLowerCase(Locale.ROOT))));
 
                 if (movementBonus > 0.0f) {
                     skillInfo.append(String.format(Locale.US, "   §8↳ §b%s: §a+%.1f%%\n",
@@ -380,15 +409,6 @@ public class SkillTabMenu {
             case MINING, WOODCUTTING, EXCAVATING -> {
                 float speedBonus = safeLevel * GatheringSpeed.BONUS_PER_LEVEL * 100.0f;
                 float durabilityChance = Math.min(safeLevel * GatheringSpeed.BONUS_PER_LEVEL, 0.99f) * 100.0f;
-
-                // Excavating shows its rank first; every rank has its own colour.
-                if (skill == Skills.EXCAVATING) {
-                    ExcavatingRank rank = ExcavatingRank.forLevel(safeLevel);
-                    skillInfo.append("   §8↳ §b").append(tabText(player, "gui.simpleskills.tab.rank")).append(": ")
-                             .append(rankColorForLevel(rank.getMinLevel()))
-                             .append(tabText(player, "skill.simpleskills.rank.excavating." + rank.name().toLowerCase(Locale.ROOT)))
-                             .append("\n");
-                }
 
                 if (speedBonus > 0.0f) {
                     skillInfo.append(String.format(Locale.US, "   §8↳ §b%s: §a+%.0f%%\n",
@@ -474,13 +494,6 @@ public class SkillTabMenu {
                 }
             }
             case FISHING -> {
-                int fishingRankLevel = safeLevel >= 99 ? 99 : safeLevel >= 75 ? 75 : safeLevel >= 50 ? 50 : safeLevel >= 25 ? 25 : 1;
-                String rankKey = safeLevel >= 99 ? "grandmaster" : safeLevel >= 75 ? "expert" : safeLevel >= 50 ? "artisan" : safeLevel >= 25 ? "journeyman" : "novice";
-                String rankColor = rankColorForLevel(fishingRankLevel);
-
-                skillInfo.append("   §8↳ §b").append(tabText(player, "gui.simpleskills.tab.rank")).append(": ")
-                        .append(rankColor).append(tabText(player, "skill.simpleskills.rank.fishing." + rankKey)).append("\n");
-
                 if (FishingConfig.isFightEnabled()) {
                     // Real benefits of the fishing minigame (same numbers the fight uses).
                     if (ConfigManager.isFishingSpeedBonusEnabled()) {

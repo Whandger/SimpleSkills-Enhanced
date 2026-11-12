@@ -14,6 +14,7 @@ import com.github.ob_yekt.simpleskills.fishing.FishingManager;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionMinigameRuntime;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionStatePayload;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionNetworking;
+import com.github.ob_yekt.simpleskills.ui.RankTitleManager;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 
 import net.fabricmc.api.ModInitializer;
@@ -44,6 +45,7 @@ public class Simpleskills implements ModInitializer {
 		ExcavatingManager.registerPayloads();
 		FishingManager.registerPayloads();
 		AgilityManager.registerPayloads();
+		RankTitleManager.registerPayloads();
 		SimpleskillsCommands.registerCommands();
 		IronmanManager.init();
 		AttributeManager.registerPlayerEvents();
@@ -52,6 +54,7 @@ public class Simpleskills implements ModInitializer {
 		EventHandlers.registerAll();
 		DefenseCombat.register();
 		AgilityManager.register();
+		RankTitleManager.registerReceivers();
 		BoneMealMastery.register();
 		TreeFeller.register();
 		ExcavatingManager.register();

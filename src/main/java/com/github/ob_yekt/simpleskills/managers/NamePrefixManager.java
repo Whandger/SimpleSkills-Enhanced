@@ -1,6 +1,7 @@
 package com.github.ob_yekt.simpleskills.managers;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
+import com.github.ob_yekt.simpleskills.ui.RankTitleManager;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -12,7 +13,7 @@ import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.TeamColor;
 
 /**
- * Maintains per-player scoreboard team to show chat/nametag/tab-list prefix: "★X [username]" and skull for Ironman.
+ * Maintains per-player scoreboard decorations for prestige, Ironman, and the selected profession title.
  */
 public class NamePrefixManager {
     private static final String TEAM_PREFIX = "simpleskills_prefix_";
@@ -23,6 +24,12 @@ public class NamePrefixManager {
         DatabaseManager db = DatabaseManager.getInstance();
         boolean isIronman = db.isPlayerInIronmanMode(playerUuid);
         int prestige = db.getPrestige(playerUuid);
+        String selectedTitleId = db.getSelectedTitleKey(playerUuid);
+        RankTitleManager.TitleOption selectedTitle = RankTitleManager.find(selectedTitleId);
+        if (selectedTitleId != null && !RankTitleManager.isUnlocked(player, selectedTitle)) {
+            db.setSelectedTitleKey(playerUuid, null);
+            selectedTitle = null;
+        }
 
         String starPart = prestige > 0 ? ("§6★" + prestige + " §f") : "";
         String skullPart = isIronman ? "§c§l☠ §f" : "";
@@ -39,12 +46,19 @@ public class NamePrefixManager {
         }
 
         team.setPlayerPrefix(Component.literal(prefix));
+        Component suffix = selectedTitle == null ? Component.empty()
+                : Component.literal(" (").withStyle(ChatFormatting.GRAY)
+                        .append(Component.literal(RankTitleManager.getLocalizedTitle(player, selectedTitle))
+                                .withStyle(ChatFormatting.GOLD))
+                        .append(Component.literal(")").withStyle(ChatFormatting.GRAY));
+        team.setPlayerSuffix(suffix);
         team.setColor(Optional.of(TeamColor.WHITE));
 
         // Ensure membership
         scoreboard.addPlayerToTeam(player.getScoreboardName(), team);
 
-        Simpleskills.LOGGER.debug("Updated name decorations for {}: {}", player.getName().getString(), prefix.replace("§", ""));
+        Simpleskills.LOGGER.debug("Updated name decorations for {} (title: {})",
+                player.getName().getString(), selectedTitle == null ? "none" : selectedTitle.id());
     }
 }
 
