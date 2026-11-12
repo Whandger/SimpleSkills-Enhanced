@@ -2,6 +2,7 @@ package com.github.ob_yekt.simpleskills.commands;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.github.ob_yekt.simpleskills.Skills;
+import com.github.ob_yekt.simpleskills.agility.AgilityManager;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingLoot;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingRank;
 import com.github.ob_yekt.simpleskills.fishing.FishingDebug;
@@ -83,6 +84,10 @@ public class SimpleskillsCommands {
                                         .executes(context -> {
                                             ConfigManager.initialize();
                                             XPManager.reloadConfig();
+                                            for (ServerPlayer onlinePlayer : context.getSource().getServer().getPlayerList().getPlayers()) {
+                                                AgilityManager.syncLevel(onlinePlayer,
+                                                        XPManager.getSkillLevel(onlinePlayer.getStringUUID(), Skills.AGILITY));
+                                            }
                                             context.getSource().sendSuccess(() -> Component.literal("§6[simpleskills]§f Configs reloaded."), true);
                                             return 1;
                                         }))

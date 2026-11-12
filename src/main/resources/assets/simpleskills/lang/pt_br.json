@@ -182,5 +182,21 @@
   "skill.simpleskills.defense.parry_tier_80": "Defesa Perfeita",
   "skill.simpleskills.defense.parry_tier_90": "Instinto Protetor",
   "skill.simpleskills.defense.parry_tier_99": "Égide Impenetrável",
-  "message.simpleskills.defense.parry_tier_up": "Seu nível de parry melhorou: %s — a janela agora é de %d ticks."
+  "message.simpleskills.defense.parry_tier_up": "Seu nível de parry melhorou: %s — a janela agora é de %d ticks.",
+  "key.simpleskills.agility_dash": "Investida",
+  "message.simpleskills.agility.dash_unlocked": "Investida desbloqueada na Agilidade %s: pressione a tecla configurada para avançar na direção do movimento. A força aumenta do nível 15 até o máximo no nível 99, e a recarga diminui conforme sua Agilidade aumenta.",
+  "message.simpleskills.agility.double_jump_unlocked": "Pulo Duplo desbloqueado na Agilidade %s: pressione Espaço uma vez no ar para pular novamente. A força aumenta junto com a Agilidade até atingir o máximo no nível 40. Consome fome e zera a distância de queda acumulada.",
+  "gui.simpleskills.tab.agility_dash": "Investida",
+  "gui.simpleskills.tab.agility_double_jump": "Pulo Duplo",
+  "gui.simpleskills.tab.strength": "Força",
+  "skill.simpleskills.rank.agility.wanderer": "Andarilho",
+  "skill.simpleskills.rank.agility.lightfoot": "Passo Leve",
+  "skill.simpleskills.rank.agility.jumper": "Saltador",
+  "skill.simpleskills.rank.agility.acrobat": "Acrobata",
+  "skill.simpleskills.rank.agility.wind_runner": "Corredor do Vento",
+  "skill.simpleskills.rank.agility.wraith": "Vulto",
+  "skill.simpleskills.rank.agility.zephyr": "Zéfiro",
+  "skill.simpleskills.rank.agility.gale": "Vendaval",
+  "skill.simpleskills.rank.agility.lightning": "Relâmpago",
+  "skill.simpleskills.rank.agility.untouchable_legend": "Lenda Intocável"
 }

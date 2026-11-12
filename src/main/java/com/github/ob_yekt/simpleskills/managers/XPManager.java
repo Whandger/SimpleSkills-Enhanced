@@ -1,6 +1,7 @@
 package com.github.ob_yekt.simpleskills.managers;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
+import com.github.ob_yekt.simpleskills.agility.AgilityManager;
 import com.github.ob_yekt.simpleskills.DefenseCombat;
 import com.github.ob_yekt.simpleskills.VeinMining;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingManager;
@@ -190,6 +191,10 @@ public class XPManager {
 
         if (skill == Skills.DEFENSE && newLevel > currentLevel) {
             notifyDefenseUnlocks(player, currentLevel, newLevel);
+        }
+
+        if (skill == Skills.AGILITY && newLevel > currentLevel) {
+            AgilityManager.notifyUnlocks(player, currentLevel, newLevel);
         }
 
         // Send XP gain notification if enabled

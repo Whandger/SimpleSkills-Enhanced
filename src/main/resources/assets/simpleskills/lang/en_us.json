@@ -188,5 +188,22 @@
   "skill.simpleskills.defense.parry_tier_80": "Perfect Defense",
   "skill.simpleskills.defense.parry_tier_90": "Protective Instinct",
   "skill.simpleskills.defense.parry_tier_99": "Impenetrable Aegis",
-  "message.simpleskills.defense.parry_tier_up": "Parry tier improved: %s — the parry window is now %d ticks."
+  "message.simpleskills.defense.parry_tier_up": "Parry tier improved: %s — the parry window is now %d ticks.",
+  "key.simpleskills.agility_dash": "Dash",
+  "message.simpleskills.agility.dash_unlocked": "Dash unlocked at Agility %s: press your configured Dash key to burst in your movement direction. Its strength increases from level 15 to its full power at level 99, and its cooldown gets shorter as your Agility increases.",
+  "message.simpleskills.agility.double_jump_unlocked": "Double Jump unlocked at Agility %s: press Space once while airborne to jump again. Its strength increases with Agility, reaching its full power at level 40. It costs hunger and resets accumulated fall distance.",
+  "gui.simpleskills.tab.agility_dash": "Dash",
+  "gui.simpleskills.tab.agility_double_jump": "Double Jump",
+  "gui.simpleskills.tab.strength": "Strength",
+  "skill.simpleskills.rank.agility.wanderer": "Wanderer",
+  "skill.simpleskills.rank.agility.lightfoot": "Lightfoot",
+  "skill.simpleskills.rank.agility.jumper": "Jumper",
+  "skill.simpleskills.rank.agility.acrobat": "Acrobat",
+  "skill.simpleskills.rank.agility.wind_runner": "Wind Runner",
+  "skill.simpleskills.rank.agility.wraith": "Wraith",
+  "skill.simpleskills.rank.agility.zephyr": "Zephyr",
+  "skill.simpleskills.rank.agility.gale": "Gale",
+  "skill.simpleskills.rank.agility.lightning": "Lightning",
+  "skill.simpleskills.rank.agility.untouchable_legend": "Untouchable Legend",
+  "pt_br": null
 }

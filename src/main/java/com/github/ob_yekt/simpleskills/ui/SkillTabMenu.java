@@ -9,6 +9,7 @@ import com.github.ob_yekt.simpleskills.VeinMining;
 import com.github.ob_yekt.simpleskills.TreeFeller;
 import com.github.ob_yekt.simpleskills.events.EventHandlers;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingRank;
+import com.github.ob_yekt.simpleskills.agility.AgilityRank;
 import com.github.ob_yekt.simpleskills.enchanting.EnchantProgression;
 import com.github.ob_yekt.simpleskills.enchanting.EnchantingRank;
 import com.github.ob_yekt.simpleskills.farming.FarmingPerks;
@@ -290,6 +291,32 @@ public class SkillTabMenu {
         return SkillTabTranslations.get(player, key);
     }
 
+    private static void appendAgilityAbility(ServerPlayer player, StringBuilder text, String abilityKey,
+            String configKey, int fallbackLevel, int skillLevel) {
+        int requiredLevel = fallbackLevel;
+        try {
+            var agilityConfig = ConfigManager.getAgilityConfig();
+            if (agilityConfig.has(configKey)) requiredLevel = Math.max(1, agilityConfig.get(configKey).getAsInt());
+        } catch (RuntimeException ignored) {
+            // Keep the default unlock level if the server config value is invalid.
+        }
+        text.append("   §8↳ §b").append(tabText(player, "gui.simpleskills.tab." + abilityKey)).append(": ");
+        if (skillLevel >= requiredLevel) {
+            double multiplier;
+            if (abilityKey.equals("agility_dash")) {
+                double progress = Math.max(0.0, Math.min(1.0, (skillLevel - 15) / 84.0));
+                multiplier = (0.35 + 0.65 * progress) / 0.35;
+            } else {
+                double progress = Math.max(0.0, Math.min(1.0,
+                        (skillLevel - requiredLevel) / (double) Math.max(1, 40 - requiredLevel)));
+                multiplier = (0.5 + 0.5 * progress) / 0.5;
+            }
+            text.append("§e").append(String.format(Locale.US, "%.2fx", multiplier)).append("\n");
+        } else {
+            text.append(lockedAt(player, requiredLevel)).append("\n");
+        }
+    }
+
     private static String lockedAt(ServerPlayer player, int level) {
         return "§c" + tabText(player, "gui.simpleskills.tab.locked") + " §7("
                 + tabText(player, "gui.simpleskills.tab.level_abbr") + " " + level + ")";
@@ -336,10 +363,19 @@ public class SkillTabMenu {
             case AGILITY -> {
                 float movementBonus = safeLevel * 0.3f;
 
+                AgilityRank rank = AgilityRank.forLevel(safeLevel);
+                skillInfo.append(String.format("   §8↳ §b%s: %s%s\n",
+                        tabText(player, "gui.simpleskills.tab.rank"),
+                        rankColorForLevel(rank.getMinimumLevel()),
+                        tabText(player, "skill.simpleskills.rank.agility." + rank.name().toLowerCase(Locale.ROOT))));
+
                 if (movementBonus > 0.0f) {
                     skillInfo.append(String.format(Locale.US, "   §8↳ §b%s: §a+%.1f%%\n",
                             tabText(player, "gui.simpleskills.tab.movement_speed"), movementBonus));
                 }
+
+                appendAgilityAbility(player, skillInfo, "agility_dash", "dash_unlocked_at", 15, safeLevel);
+                appendAgilityAbility(player, skillInfo, "agility_double_jump", "double_jump_unlocked_at", 10, safeLevel);
             }
             case MINING, WOODCUTTING, EXCAVATING -> {
                 float speedBonus = safeLevel * GatheringSpeed.BONUS_PER_LEVEL * 100.0f;

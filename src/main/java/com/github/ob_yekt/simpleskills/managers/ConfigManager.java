@@ -129,6 +129,15 @@ public class ConfigManager {
             for (Map.Entry<String, JsonElement> entry : defaultConfig.entrySet()) {
                 if (!loadedConfig.has(entry.getKey())) {
                     loadedConfig.add(entry.getKey(), entry.getValue());
+                } else if (entry.getValue().isJsonObject()) {
+                    JsonObject defaults = entry.getValue().getAsJsonObject();
+                    JsonElement configured = loadedConfig.get(entry.getKey());
+                    JsonObject section = configured != null && configured.isJsonObject()
+                            ? configured.getAsJsonObject() : new JsonObject();
+                    for (Map.Entry<String, JsonElement> setting : defaults.entrySet()) {
+                        if (!section.has(setting.getKey())) section.add(setting.getKey(), setting.getValue());
+                    }
+                    loadedConfig.add(entry.getKey(), section);
                 }
             }
             featureConfig = loadedConfig;
@@ -173,6 +182,18 @@ public class ConfigManager {
         json.addProperty("crafting_lore_in_tooltips_enabled", true);
         json.addProperty("custom_fishing_loot_enabled", true);
         json.addProperty("fishing_speed_bonus_enabled", true);
+        JsonObject agility = new JsonObject();
+        agility.addProperty("dash_unlocked_at", 15);
+        agility.addProperty("dash_cooldown_ticks_base", 100);
+        agility.addProperty("dash_cooldown_reduction_per_level", 0.5);
+        agility.addProperty("dash_impulse", 1.2);
+        agility.addProperty("dash_vertical_impulse", 0.35);
+        agility.addProperty("dash_iframe_ticks", 4);
+        agility.addProperty("dash_exhaustion", 1.0);
+        agility.addProperty("double_jump_unlocked_at", 10);
+        agility.addProperty("double_jump_vertical_velocity", 0.9);
+        agility.addProperty("double_jump_exhaustion", 1.0);
+        json.add("agility", agility);
         // Fishing minigame (see fishing/FishingConfig.java for the meaning of every option)
         FishingConfig.addDefaults(json);
         return json;
@@ -2115,5 +2136,23 @@ private static JsonObject getDefaultArmorRequirements() {
      */
     public static JsonObject getFeatureConfig() {
         return featureConfig;
+    }
+
+    public static JsonObject getAgilityConfig() {
+        if (featureConfig != null && featureConfig.has("agility") && featureConfig.get("agility").isJsonObject()) {
+            return featureConfig.getAsJsonObject("agility");
+        }
+        JsonObject defaults = new JsonObject();
+        defaults.addProperty("dash_unlocked_at", 15);
+        defaults.addProperty("dash_cooldown_ticks_base", 100);
+        defaults.addProperty("dash_cooldown_reduction_per_level", 0.5);
+        defaults.addProperty("dash_impulse", 1.2);
+        defaults.addProperty("dash_vertical_impulse", 0.35);
+        defaults.addProperty("dash_iframe_ticks", 4);
+        defaults.addProperty("dash_exhaustion", 1.0);
+        defaults.addProperty("double_jump_unlocked_at", 10);
+        defaults.addProperty("double_jump_vertical_velocity", 0.9);
+        defaults.addProperty("double_jump_exhaustion", 1.0);
+        return defaults;
     }
 }

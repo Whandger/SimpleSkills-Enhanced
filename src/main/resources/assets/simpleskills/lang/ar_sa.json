@@ -181,5 +181,21 @@
   "skill.simpleskills.defense.parry_tier_80": "دفاع مثالي",
   "skill.simpleskills.defense.parry_tier_90": "غريزة الحماية",
   "skill.simpleskills.defense.parry_tier_99": "إيغيس منيعة",
-  "message.simpleskills.defense.parry_tier_up": "تطور مستوى الصد لديك: %s — أصبحت نافذة الصد %d نبضات."
+  "message.simpleskills.defense.parry_tier_up": "تطور مستوى الصد لديك: %s — أصبحت نافذة الصد %d نبضات.",
+  "key.simpleskills.agility_dash": "اندفاع",
+  "message.simpleskills.agility.dash_unlocked": "تم فتح الاندفاع عند مستوى الرشاقة %s: اضغط الزر المعيّن للاندفاع في اتجاه حركتك. تزداد قوته من المستوى 15 حتى تبلغ أقصى قوة عند المستوى 99، ويقل وقت تهدئته مع ارتفاع الرشاقة.",
+  "message.simpleskills.agility.double_jump_unlocked": "تم فتح القفزة المزدوجة عند مستوى الرشاقة %s: اضغط المسافة مرة واحدة في الهواء للقفز مجدداً. تزداد قوتها مع الرشاقة حتى تبلغ أقصى قوة عند المستوى 40. تستهلك الجوع وتعيد ضبط مسافة السقوط المتراكمة.",
+  "gui.simpleskills.tab.agility_dash": "اندفاع",
+  "gui.simpleskills.tab.agility_double_jump": "قفزة مزدوجة",
+  "gui.simpleskills.tab.strength": "القوة",
+  "skill.simpleskills.rank.agility.wanderer": "المتجول",
+  "skill.simpleskills.rank.agility.lightfoot": "خفيف الخطى",
+  "skill.simpleskills.rank.agility.jumper": "الوثّاب",
+  "skill.simpleskills.rank.agility.acrobat": "البهلوان",
+  "skill.simpleskills.rank.agility.wind_runner": "عدّاء الرياح",
+  "skill.simpleskills.rank.agility.wraith": "الطيف",
+  "skill.simpleskills.rank.agility.zephyr": "زفير",
+  "skill.simpleskills.rank.agility.gale": "العاصفة",
+  "skill.simpleskills.rank.agility.lightning": "البرق",
+  "skill.simpleskills.rank.agility.untouchable_legend": "الأسطورة التي لا تُمس"
 }

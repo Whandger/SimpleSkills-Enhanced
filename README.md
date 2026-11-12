@@ -339,6 +339,45 @@ Diagnostic messages help investigate:
 | 90 | Protective Instinct | 20 ticks |
 | 99 | Impenetrable Aegis | 22 ticks |
 
+### 🏃 Agility
+
+Agility grants a **+0.3% movement-speed bonus per level**, reaching **+29.7% at level 99**, and unlocks two server-validated movement abilities:
+
+- **Dash (level 15):** Press the configurable Dash key (default `V`) to burst in the current movement direction. Dash strength starts at its baseline (**1.00×**) when unlocked and scales to **2.86× at level 99**. Its cooldown gets shorter as Agility increases, and it grants brief damage immunity.
+- **Double Jump (level 10):** Press Space once while airborne to jump again. Its strength starts at **1.00×** when unlocked and rises to **2.00× at level 40**, remaining at maximum afterward. It adds upward and forward momentum, costs hunger, and clears accumulated fall distance.
+
+The TAB skill summary shows each unlocked ability's current strength multiplier relative to its strength at unlock. Agility has ten ranks:
+
+| Rank | Level Range |
+|:--|:--:|
+| Wanderer | 1–9 |
+| Lightfoot | 10–19 |
+| Jumper | 20–29 |
+| Acrobat | 30–39 |
+| Wind Runner | 40–49 |
+| Wraith | 50–59 |
+| Zephyr | 60–69 |
+| Gale | 70–79 |
+| Lightning | 80–89 |
+| Untouchable Legend | 90–99 |
+
+Rank names are progression titles; they do not grant separate wall-running, air-dash, slow-immunity, or fall-immunity mechanics.
+
+Unlock levels, Dash cooldown and impulse, Dash immunity duration, exhaustion costs, and Double Jump strength are configurable in the `agility` section of `config/simpleskills/config.json`.
+
+| `agility` setting | Default | Purpose |
+|:--|--:|:--|
+| `dash_unlocked_at` | 15 | Agility level required for Dash. |
+| `dash_cooldown_ticks_base` | 100 | Base Dash cooldown in server ticks. |
+| `dash_cooldown_reduction_per_level` | 0.5 | Ticks removed from the cooldown per Agility level. |
+| `dash_impulse` | 1.2 | Base horizontal Dash impulse before level scaling. |
+| `dash_vertical_impulse` | 0.35 | Minimum upward velocity during Dash. |
+| `dash_iframe_ticks` | 4 | Damage immunity duration after Dash. |
+| `dash_exhaustion` | 1.0 | Hunger exhaustion caused by Dash. |
+| `double_jump_unlocked_at` | 10 | Agility level required for Double Jump. |
+| `double_jump_vertical_velocity` | 0.9 | Maximum upward velocity applied by Double Jump; it scales with Agility up to level 40. |
+| `double_jump_exhaustion` | 1.0 | Hunger exhaustion caused by Double Jump. |
+
 ### 🌾 Farming
 
 SimpleSkills Enhanced expands Farming with additional harvesting bonuses, animal loot mechanics, and two unlockable farming perks.
@@ -725,7 +764,7 @@ The current development environment uses:
 | Fabric Loader | 0.20.1 |
 | Fabric API | 0.165.2+26.3 |
 | Fabric Loom | 1.17.21 |
-| SimpleSkills Enhanced | 1.1.2 |
+| SimpleSkills Enhanced | 1.1.4 |
 
 ---
 
@@ -759,6 +798,7 @@ Responsible for the additional improvements introduced in this fork, including:
 - Slaying combat improvements.
 - Ranged projectile bonuses and duplication mechanics.
 - Defense bonuses.
+- Agility Dash and Double Jump action abilities, Agility ranks, and progressive ability strength.
 - Farming bonuses, milking XP improvements, Bone Meal Mastery, and Auto Plant.
 - HUD and TAB interface improvements.
 - Rebalanced equipment progression based on player testing.
