@@ -188,5 +188,21 @@
   "skill.simpleskills.defense.parry_tier_80": "Defensa Perfecta",
   "skill.simpleskills.defense.parry_tier_90": "Instinto Protector",
   "skill.simpleskills.defense.parry_tier_99": "Égida Impenetrable",
-  "message.simpleskills.defense.parry_tier_up": "Tu nivel de parada mejoró: %s — la ventana ahora es de %d ticks."
+  "message.simpleskills.defense.parry_tier_up": "Tu nivel de parada mejoró: %s — la ventana ahora es de %d ticks.",
+  "key.simpleskills.agility_dash": "Impulso",
+  "message.simpleskills.agility.dash_unlocked": "Impulso desbloqueado en Agilidad %s: presiona la tecla configurada para impulsarte en la dirección del movimiento. Su fuerza aumenta desde el nivel 15 hasta alcanzar el máximo en el nivel 99; su enfriamiento también se reduce con Agilidad.",
+  "message.simpleskills.agility.double_jump_unlocked": "Salto Doble desbloqueado en Agilidad %s: presiona Espacio una vez en el aire para volver a saltar. Su fuerza aumenta con la Agilidad hasta alcanzar el máximo en el nivel 40. Consume hambre y reinicia la distancia de caída acumulada.",
+  "gui.simpleskills.tab.agility_dash": "Impulso",
+  "gui.simpleskills.tab.agility_double_jump": "Salto Doble",
+  "gui.simpleskills.tab.strength": "Fuerza",
+  "skill.simpleskills.rank.agility.wanderer": "Caminante",
+  "skill.simpleskills.rank.agility.lightfoot": "Paso Ligero",
+  "skill.simpleskills.rank.agility.jumper": "Saltador",
+  "skill.simpleskills.rank.agility.acrobat": "Acróbata",
+  "skill.simpleskills.rank.agility.wind_runner": "Corredor del Viento",
+  "skill.simpleskills.rank.agility.wraith": "Espectro",
+  "skill.simpleskills.rank.agility.zephyr": "Céfiro",
+  "skill.simpleskills.rank.agility.gale": "Vendaval",
+  "skill.simpleskills.rank.agility.lightning": "Relámpago",
+  "skill.simpleskills.rank.agility.untouchable_legend": "Leyenda Intocable"
 }

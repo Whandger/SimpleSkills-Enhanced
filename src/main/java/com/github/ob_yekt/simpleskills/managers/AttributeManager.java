@@ -5,6 +5,7 @@ import com.github.ob_yekt.simpleskills.Defense;
 import com.github.ob_yekt.simpleskills.GatheringSpeed;
 import com.github.ob_yekt.simpleskills.Ranged;
 import com.github.ob_yekt.simpleskills.Simpleskills;
+import com.github.ob_yekt.simpleskills.agility.AgilityManager;
 import com.github.ob_yekt.simpleskills.Skills;
 import com.github.ob_yekt.simpleskills.Slaying;
 import com.github.ob_yekt.simpleskills.managers.DatabaseManager.SkillData;
@@ -177,6 +178,7 @@ public class AttributeManager {
         switch (skill) {
 
             case AGILITY -> {
+                AgilityManager.syncLevel(player, skillLevel);
                 AttributeInstance moveSpeed =
                         player.getAttribute(Attributes.MOVEMENT_SPEED);
 

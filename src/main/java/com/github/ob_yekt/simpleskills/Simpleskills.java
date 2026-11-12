@@ -9,6 +9,7 @@ import com.github.ob_yekt.simpleskills.runes.RuneContent;
 import com.github.ob_yekt.simpleskills.runes.RuneWorldgen;
 import com.github.ob_yekt.simpleskills.runes.RuneMiningManager;
 import com.github.ob_yekt.simpleskills.farming.BoneMealMastery;
+import com.github.ob_yekt.simpleskills.agility.AgilityManager;
 import com.github.ob_yekt.simpleskills.fishing.FishingManager;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionMinigameRuntime;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionStatePayload;
@@ -42,6 +43,7 @@ public class Simpleskills implements ModInitializer {
 		GatheringSpeed.registerPayloads();
 		ExcavatingManager.registerPayloads();
 		FishingManager.registerPayloads();
+		AgilityManager.registerPayloads();
 		SimpleskillsCommands.registerCommands();
 		IronmanManager.init();
 		AttributeManager.registerPlayerEvents();
@@ -49,6 +51,7 @@ public class Simpleskills implements ModInitializer {
 		ConfigManager.initialize();
 		EventHandlers.registerAll();
 		DefenseCombat.register();
+		AgilityManager.register();
 		BoneMealMastery.register();
 		TreeFeller.register();
 		ExcavatingManager.register();

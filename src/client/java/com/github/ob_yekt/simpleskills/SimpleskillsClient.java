@@ -6,6 +6,8 @@ import com.github.ob_yekt.simpleskills.fishing.FishingCatchPayload;
 import com.github.ob_yekt.simpleskills.fishing.FishingCatchScreen;
 import com.github.ob_yekt.simpleskills.fishing.FishingHud;
 import com.github.ob_yekt.simpleskills.fishing.FishingStatePayload;
+import com.github.ob_yekt.simpleskills.agility.AgilityLevelPayload;
+import com.github.ob_yekt.simpleskills.agility.AgilityDashCooldownPayload;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionStatePayload;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionClientState;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionCatalogResponsePayload;
@@ -26,6 +28,12 @@ public class SimpleskillsClient implements ClientModInitializer {
         ClientConfig.load();
         InvestigationHud.register();
         FishingHud.register();
+        AgilityDashHud.register();
+
+        ClientPlayNetworking.registerGlobalReceiver(AgilityLevelPayload.TYPE, (payload, context) ->
+                context.client().execute(() -> AgilityClientState.set(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(AgilityDashCooldownPayload.TYPE, (payload, context) ->
+                context.client().execute(() -> AgilityDashHud.onCooldown(payload)));
 
         // Gathering Speed: levels pushed by the server (applied in GatheringSpeedMixin)
         // Redireciona a atualização para a thread principal do cliente para garantir thread safety
@@ -101,6 +109,8 @@ public class SimpleskillsClient implements ClientModInitializer {
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             GatheringSpeed.resetClientLevels();
+            AgilityClientState.reset();
+            AgilityDashHud.reset();
             InvestigationHud.reset();
             FishingHud.reset();
             RuneInfusionClientState.reset();

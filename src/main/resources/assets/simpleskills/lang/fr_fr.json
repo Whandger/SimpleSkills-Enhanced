@@ -181,5 +181,21 @@
   "skill.simpleskills.defense.parry_tier_80": "Défense parfaite",
   "skill.simpleskills.defense.parry_tier_90": "Instinct protecteur",
   "skill.simpleskills.defense.parry_tier_99": "Égide impénétrable",
-  "message.simpleskills.defense.parry_tier_up": "Votre maîtrise de la parade progresse : %s — la fenêtre passe à %d ticks."
+  "message.simpleskills.defense.parry_tier_up": "Votre maîtrise de la parade progresse : %s — la fenêtre passe à %d ticks.",
+  "key.simpleskills.agility_dash": "Ruée",
+  "message.simpleskills.agility.dash_unlocked": "Ruée débloquée au niveau %s d’Agilité : appuyez sur la touche configurée pour bondir dans votre direction de déplacement. Sa puissance augmente du niveau 15 à son maximum au niveau 99, et son temps de recharge diminue avec l’Agilité.",
+  "message.simpleskills.agility.double_jump_unlocked": "Double saut débloqué au niveau %s d’Agilité : appuyez une fois sur Espace en plein air pour sauter à nouveau. Sa puissance augmente avec l’Agilité jusqu’à atteindre son maximum au niveau 40. Il consomme de la faim et réinitialise la distance de chute accumulée.",
+  "gui.simpleskills.tab.agility_dash": "Ruée",
+  "gui.simpleskills.tab.agility_double_jump": "Double saut",
+  "gui.simpleskills.tab.strength": "Puissance",
+  "skill.simpleskills.rank.agility.wanderer": "Vagabond",
+  "skill.simpleskills.rank.agility.lightfoot": "Pied léger",
+  "skill.simpleskills.rank.agility.jumper": "Sauteur",
+  "skill.simpleskills.rank.agility.acrobat": "Acrobate",
+  "skill.simpleskills.rank.agility.wind_runner": "Coureur du vent",
+  "skill.simpleskills.rank.agility.wraith": "Spectre",
+  "skill.simpleskills.rank.agility.zephyr": "Zéphyr",
+  "skill.simpleskills.rank.agility.gale": "Grand vent",
+  "skill.simpleskills.rank.agility.lightning": "Éclair",
+  "skill.simpleskills.rank.agility.untouchable_legend": "Légende intouchable"
 }
