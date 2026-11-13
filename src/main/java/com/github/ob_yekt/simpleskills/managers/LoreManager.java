@@ -20,7 +20,6 @@ import net.minecraft.world.item.component.ItemLore;
 public class LoreManager {
     private static final String LORE_PREFIX = "Requires";
     private static final String TO_USE = " to use";
-    private static final String TO_SACRIFICE = " to sacrifice";
 
     // Record to hold tier name and its color (as integer RGB)
     public record TierInfo(String name, int color) {}
@@ -53,8 +52,7 @@ public class LoreManager {
         // Handle item requirements (tools, armor, weapons, sacrifices)
         SkillRequirement requirement = getItemRequirement(itemId);
         if (requirement != null) {
-            boolean isSacrifice = ConfigManager.PRAYER_SACRIFICES.containsKey(itemId);
-            String action = isSacrifice ? TO_SACRIFICE : TO_USE;
+            String action = TO_USE;
             String skillName = requirement.getSkill().getId().substring(0, 1).toUpperCase() +
                     requirement.getSkill().getId().substring(1).toLowerCase();
             String prestigePart = requirement.getRequiredPrestige() > 0 ? String.format(
@@ -110,11 +108,6 @@ public class LoreManager {
 
         SkillRequirement weaponReq = ConfigManager.getWeaponRequirement(itemId);
         if (weaponReq != null) return weaponReq;
-
-        if (ConfigManager.PRAYER_SACRIFICES.containsKey(itemId)) {
-            return ConfigManager.PRAYER_SACRIFICES.get(itemId).requirement();
-        }
-
         return null;
     }
 

@@ -34,7 +34,6 @@ public class ConfigManager {
     private static final Map<String, SkillRequirement> WEAPON_REQUIREMENTS = new HashMap<>();
     private static final Map<String, List<SkillRequirement>> ENCHANTMENT_REQUIREMENTS = new HashMap<>();
     private static int enchantmentXpPerLevelSquared = 100;
-    public static final Map<String, PrayerSacrifice> PRAYER_SACRIFICES = new HashMap<>();
     private static final Map<String, Integer> COOKING_XP_MAP = new HashMap<>();
     private static final Map<String, Float> COOKING_MULTIPLIER_MAP = new HashMap<>();
     private static final Map<String, Integer> CRAFTING_XP_MAP = new HashMap<>();
@@ -68,7 +67,6 @@ public class ConfigManager {
             loadWeaponRequirements();
             loadEnchantmentRequirements();
             EnchantmentLimits.reload();
-            loadPrayerSacrifices();
             loadCookingXPConfig();
             loadCookingMultipliersConfig();
             loadCraftingXPConfig();
@@ -1914,112 +1912,11 @@ private static JsonObject getDefaultArmorRequirements() {
         return json;
     }
 
-    /**
-     * Represents a prayer sacrifice configuration with effect level and ambient status.
-     */
-    public record PrayerSacrifice(
-            Skills skill,
-            int xp,
-            SkillRequirement requirement,
-            String effect,
-            String displayName,
-            int durationTicks,
-            int effectLevel, // New field for effect level (e.g., 2 for Haste 2)
-            boolean isAmbient // New field for ambient status
-    ) {
-    }
-
-    /**
-     * Loads prayer sacrifices from prayer_sacrifices.json.
-     */
-    private static void loadPrayerSacrifices() {
-        Path filePath = CONFIG_DIR.resolve("prayer_sacrifices.json");
-        try {
-            JsonObject json = loadJsonFile(filePath, getDefaultPrayerSacrifices());
-            PRAYER_SACRIFICES.clear();
-            for (Map.Entry<String, JsonElement> entryElement : json.entrySet()) {
-                String itemId = entryElement.getKey();
-                JsonObject entry = entryElement.getValue().getAsJsonObject();
-                String skillId = entry.get("skill").getAsString();
-                Skills skill = Skills.valueOf(skillId.toUpperCase());
-                int xp = entry.get("xp").getAsInt();
-                int level = entry.get("level").getAsInt();
-                String effect = entry.get("effect").getAsString();
-                String displayName = entry.has("name") ? entry.get("name").getAsString() : capitalize(effect.split(":")[1].replace("_", " "));
-                int duration = entry.get("duration").getAsInt();
-                int effectLevel = entry.has("effectLevel") ? entry.get("effectLevel").getAsInt() : 1;
-                boolean isAmbient = entry.has("isAmbient") && entry.get("isAmbient").getAsBoolean();
-                SkillRequirement requirement = new SkillRequirement(skill, level, null);
-                PRAYER_SACRIFICES.put(itemId, new PrayerSacrifice(skill, xp, requirement, effect, displayName, duration, effectLevel, isAmbient));
-                Simpleskills.LOGGER.debug("Loaded prayer sacrifice: {} -> skill: {}, xp: {}, requirement: {}, effect: {}, displayName: {}, durationTicks: {}, effectLevel: {}, isAmbient: {}",
-                        itemId, skill, xp, requirement, effect, displayName, duration, effectLevel, isAmbient);
-            }
-        } catch (JsonSyntaxException e) {
-            Simpleskills.LOGGER.error("JSON syntax error in prayer_sacrifices.json: {}", e.getMessage());
-        } catch (IOException e) {
-            Simpleskills.LOGGER.error("Error loading prayer_sacrifices.json: {}", e.getMessage());
-        }
-    }
-
-    /**
-     * Default prayer sacrifices configuration.
-     */
-    private static JsonObject getDefaultPrayerSacrifices() {
-        JsonObject json = new JsonObject();
-        record PrayerSacrificeConfig(String item, String skill, int xp, int level, String effect, int duration,
-                                     String name, int effectLevel, boolean isAmbient) {
-        }
-        PrayerSacrificeConfig[] defaults = new PrayerSacrificeConfig[]{
-                // Tier 1: 1h (72,000 ticks), novice buffs
-                new PrayerSacrificeConfig("minecraft:rabbit_foot", "PRAYER", 15000, 0, "minecraft:luck", 72000, "Prayer I: Luck", 1, true),
-                new PrayerSacrificeConfig("minecraft:spore_blossom", "PRAYER", 20000, 0, "minecraft:absorption", 72000, "Prayer I: Absorption", 3, true),
-                new PrayerSacrificeConfig("minecraft:glow_ink_sac", "PRAYER", 12000, 0, "minecraft:dolphins_grace", 72000, "Prayer I: Dolphin's Grace", 1, true),
-                // Tier 2: 2h (144000 ticks), journeyman buffs
-                new PrayerSacrificeConfig("minecraft:phantom_membrane", "PRAYER", 18000, 25, "minecraft:slow_falling", 216000, "Prayer III: Slow Falling", 1, true),
-                new PrayerSacrificeConfig("minecraft:golden_apple", "PRAYER", 22000, 25, "minecraft:health_boost", 144000, "Prayer II: Health Boost", 1, true),
-                new PrayerSacrificeConfig("minecraft:nautilus_shell", "PRAYER", 9000, 25, "minecraft:water_breathing", 144000, "Prayer II: Water Breathing", 1, true),
-                // Tier 3: 3h (216000 ticks), expert buffs
-                new PrayerSacrificeConfig("minecraft:heart_of_the_sea", "PRAYER", 30000, 50, "minecraft:conduit_power", 144000, "Prayer II: Conduit Power", 1, true),
-                new PrayerSacrificeConfig("minecraft:diamond", "PRAYER", 25000, 50, "minecraft:speed", 216000, "Prayer II: Speed II", 2, true),
-                new PrayerSacrificeConfig("minecraft:goat_horn", "PRAYER", 45000, 50, "minecraft:jump_boost", 216000, "Prayer III: Jump Boost II", 2, true),
-                // Tier 4: 4h (288000 ticks), artisan buffs
-                new PrayerSacrificeConfig("minecraft:pitcher_plant", "PRAYER", 40000, 75, "minecraft:strength", 288000, "Prayer IV: Strength II", 2, true),
-                new PrayerSacrificeConfig("minecraft:enchanted_golden_apple", "PRAYER", 85000, 75, "minecraft:hero_of_the_village", 288000, "Prayer IV: Hero of the Village", 1, true),
-                new PrayerSacrificeConfig("minecraft:wither_skeleton_skull", "PRAYER", 75000, 75, "minecraft:fire_resistance", 288000, "Prayer IV: Fire Resistance", 1, true),
-                // Tier 5: 8h (57,6000 ticks), grandmaster buffs
-                new PrayerSacrificeConfig("minecraft:torchflower", "PRAYER", 60000, 99, "minecraft:night_vision", 576000, "Prayer V: Night Vision", 1, true),
-                new PrayerSacrificeConfig("minecraft:totem_of_undying", "PRAYER", 95000, 99, "minecraft:invisibility", 576000, "Prayer V: Invisibility", 1, true),
-                new PrayerSacrificeConfig("minecraft:nether_star", "PRAYER", 170000, 99, "minecraft:haste", 576000, "Prayer V: Haste II", 2, true)
-        };
-        for (PrayerSacrificeConfig config : defaults) {
-            JsonObject entry = new JsonObject();
-            entry.addProperty("skill", config.skill);
-            entry.addProperty("xp", config.xp);
-            entry.addProperty("level", config.level);
-            entry.addProperty("effect", config.effect);
-            entry.addProperty("duration", config.duration);
-            entry.addProperty("name", config.name);
-            entry.addProperty("effectLevel", config.effectLevel);
-            entry.addProperty("isAmbient", config.isAmbient);
-            json.add(config.item, entry);
-        }
-        return json;
-    }
-
-    /**
-     * Gets the prayer sacrifice configuration for an item.
-     */
     public static int getFarmingActionXP(String actionKey, Skills skill) {
         return FARMING_ACTION_XP_MAP.getOrDefault(actionKey, getBaseXP(skill));
 
     }
 
-    /**
-     * Gets the prayer sacrifice configuration for an item.
-     */
-    public static PrayerSacrifice getPrayerSacrifice(String itemId) {
-        return PRAYER_SACRIFICES.get(itemId);
-    }
 
     /**
      * Gets the base XP for a skill.
