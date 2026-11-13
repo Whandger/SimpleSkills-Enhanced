@@ -9,6 +9,7 @@ final class PrayerVfxFlair {
     private PrayerVfxFlair() {}
 
     static void draw(Matrix4fc m, VertexConsumer o, PrayerAbility ab, Vec3 dest, float age, int dur) {
+        if (ab == PrayerAbility.SPARK) return;
         float[][] pal = palette(ab);
         float[] c = pal[0], k = pal[1];
         float fade = (float) Math.min(smooth(0, 3, age), 1 - smooth(dur - 8, dur, age));

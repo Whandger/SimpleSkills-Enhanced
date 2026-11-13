@@ -38,7 +38,7 @@ final class PrayerAbilityVfx {
             case UNHOLY_GROUND -> PrayerUnholyGroundVfx.draw(m, out, age, duration);
             case APOCALYPSE -> PrayerApocalypseVfx.draw(m, out, age, duration);
             case LIGHTNING_BOLT -> PrayerLightningVfx.draw(m, out, hand, destination, age, duration);
-            case SPARK -> PrayerSparkVfx.draw(m, out, destination, age, duration);
+            case SPARK -> PrayerSparkVfx.draw(m, out, hand, destination, age, duration);
             case CHAIN_LIGHTNING -> PrayerChainLightningVfx.draw(m, out, destination, age, duration);
             case THUNDERSTORM -> PrayerThunderstormVfx.draw(m, out, age, duration);
             case STORM_JUDGMENT -> PrayerStormJudgmentVfx.draw(m, out, age, duration);
