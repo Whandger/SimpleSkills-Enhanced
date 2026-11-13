@@ -96,7 +96,10 @@ public class DatabaseManager {
             is_ironman INTEGER DEFAULT 0,
             is_tab_menu_visible INTEGER DEFAULT 1,
             prestige INTEGER DEFAULT 0,
-            selected_title_key TEXT DEFAULT NULL
+            selected_title_key TEXT DEFAULT NULL,
+            prayer_specialization TEXT DEFAULT 'divine',
+            prayer_loadout TEXT DEFAULT '[]',
+            prayer_active_slot INTEGER DEFAULT 0
         )
     """;
         String createSkillsTable = """
@@ -133,6 +136,21 @@ public class DatabaseManager {
             }
             try {
                 stmt.execute("ALTER TABLE players ADD COLUMN selected_title_key TEXT DEFAULT NULL");
+            } catch (SQLException ignored) {
+                // Column likely exists; ignore
+            }
+            try {
+                stmt.execute("ALTER TABLE players ADD COLUMN prayer_specialization TEXT DEFAULT 'divine'");
+            } catch (SQLException ignored) {
+                // Column likely exists; ignore
+            }
+            try {
+                stmt.execute("ALTER TABLE players ADD COLUMN prayer_loadout TEXT DEFAULT '[]'");
+            } catch (SQLException ignored) {
+                // Column likely exists; ignore
+            }
+            try {
+                stmt.execute("ALTER TABLE players ADD COLUMN prayer_active_slot INTEGER DEFAULT 0");
             } catch (SQLException ignored) {
                 // Column likely exists; ignore
             }
@@ -402,6 +420,87 @@ public class DatabaseManager {
         } catch (SQLException e) {
             Simpleskills.LOGGER.error("Failed to set selected title for UUID {}: {}", playerUuid, e.getMessage());
             throw new DatabaseException("Failed to set selected title", e);
+        }
+    }
+
+    public String getPrayerSpecialization(String playerUuid) {
+        checkConnection();
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT prayer_specialization FROM players WHERE player_uuid = ?")) {
+            statement.setString(1, playerUuid);
+            try (ResultSet result = statement.executeQuery()) {
+                return result.next() ? result.getString("prayer_specialization") : "divine";
+            }
+        } catch (SQLException e) {
+            Simpleskills.LOGGER.error("Failed to get Prayer specialization for UUID {}", playerUuid, e);
+            throw new DatabaseException("Failed to get Prayer specialization", e);
+        }
+    }
+
+    public void setPrayerSpecialization(String playerUuid, String specialization) {
+        checkConnection();
+        try (PreparedStatement statement = connection.prepareStatement(
+                "UPDATE players SET prayer_specialization = ? WHERE player_uuid = ?")) {
+            statement.setString(1, specialization);
+            statement.setString(2, playerUuid);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            Simpleskills.LOGGER.error("Failed to save Prayer specialization for UUID {}", playerUuid, e);
+            throw new DatabaseException("Failed to save Prayer specialization", e);
+        }
+    }
+
+    public String getPrayerLoadout(String playerUuid) {
+        checkConnection();
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT prayer_loadout FROM players WHERE player_uuid = ?")) {
+            statement.setString(1, playerUuid);
+            try (ResultSet result = statement.executeQuery()) {
+                return result.next() ? result.getString("prayer_loadout") : "[]";
+            }
+        } catch (SQLException e) {
+            Simpleskills.LOGGER.error("Failed to get Prayer loadout for UUID {}", playerUuid, e);
+            throw new DatabaseException("Failed to get Prayer loadout", e);
+        }
+    }
+
+    public void setPrayerLoadout(String playerUuid, String loadoutJson) {
+        checkConnection();
+        try (PreparedStatement statement = connection.prepareStatement(
+                "UPDATE players SET prayer_loadout = ? WHERE player_uuid = ?")) {
+            statement.setString(1, loadoutJson);
+            statement.setString(2, playerUuid);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            Simpleskills.LOGGER.error("Failed to save Prayer loadout for UUID {}", playerUuid, e);
+            throw new DatabaseException("Failed to save Prayer loadout", e);
+        }
+    }
+
+    public int getPrayerActiveSlot(String playerUuid) {
+        checkConnection();
+        try (PreparedStatement statement = connection.prepareStatement(
+                "SELECT prayer_active_slot FROM players WHERE player_uuid = ?")) {
+            statement.setString(1, playerUuid);
+            try (ResultSet result = statement.executeQuery()) {
+                return result.next() ? Math.max(0, Math.min(7, result.getInt("prayer_active_slot"))) : 0;
+            }
+        } catch (SQLException e) {
+            Simpleskills.LOGGER.error("Failed to get Prayer active slot for UUID {}", playerUuid, e);
+            throw new DatabaseException("Failed to get Prayer active slot", e);
+        }
+    }
+
+    public void setPrayerActiveSlot(String playerUuid, int slot) {
+        checkConnection();
+        try (PreparedStatement statement = connection.prepareStatement(
+                "UPDATE players SET prayer_active_slot = ? WHERE player_uuid = ?")) {
+            statement.setInt(1, Math.max(0, Math.min(7, slot)));
+            statement.setString(2, playerUuid);
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            Simpleskills.LOGGER.error("Failed to save Prayer active slot for UUID {}", playerUuid, e);
+            throw new DatabaseException("Failed to save Prayer active slot", e);
         }
     }
 

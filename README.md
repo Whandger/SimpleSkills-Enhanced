@@ -382,6 +382,17 @@ Unlock levels, Dash cooldown and impulse, Dash immunity duration, exhaustion cos
 | `double_jump_vertical_velocity` | 0.9 | Maximum upward velocity applied by Double Jump; it scales with Agility up to level 40. |
 | `double_jump_exhaustion` | 1.0 | Hunger exhaustion caused by Double Jump. |
 
+### 🙏 Prayer — Divine Arts
+
+Prayer has been reworked into three selectable magic disciplines: **Divine**, **Unholy**, and **Elementalist**. The trees contain **35 spells** unlocked from levels 1 to 99, with one distinct icon per spell.
+
+- Open the Magic Skillbook with **B**, the Magic Wheel with **C**, and cast the equipped spell with **R** by default. These keys can be changed in Minecraft's Controls menu.
+- Equip spells into an eight-slot loadout and switch slots from the wheel.
+- Divine focuses on healing, cleansing, and protection; Unholy uses curses, soul magic, and shadow movement; Elementalist specializes in fire, ice, and lightning.
+- Every spell has a dedicated sound cue and an impact animation. Five animated, emissive sigil styles distinguish the disciplines and elements, while each spell varies the ring, spiral, and burst pattern.
+- Spell effects and progression are validated by the server. The skillbook, wheel, and spell names follow the player's Minecraft language across the included translations.
+- Prayer no longer uses the original candle-sacrifice buff mechanic in this fork.
+
 ### 🌾 Farming
 
 SimpleSkills Enhanced expands Farming with additional harvesting bonuses, animal loot mechanics, and two unlockable farming perks.
@@ -775,10 +786,10 @@ The current development environment uses:
 |:--|:--|
 | Minecraft | 26.3 |
 | Java | 25.0.1 |
-| Fabric Loader | 0.20.1 |
-| Fabric API | 0.165.2+26.3 |
+| Fabric Loader | 0.19.5 |
+| Fabric API | 0.160.6+26.3 |
 | Fabric Loom | 1.17.21 |
-| SimpleSkills Enhanced | 1.1.4 |
+| SimpleSkills Enhanced | 1.1.5 |
 
 ---
 
@@ -813,6 +824,7 @@ Responsible for the additional improvements introduced in this fork, including:
 - Ranged projectile bonuses and duplication mechanics.
 - Defense bonuses.
 - Agility Dash and Double Jump action abilities, Agility ranks, and progressive ability strength.
+- Prayer Divine Arts rework with three disciplines, 35 spells, a skillbook, an eight-slot magic wheel, custom spell icons, animated sigils, and individual spell sound cues.
 - Farming bonuses, milking XP improvements, Bone Meal Mastery, and Auto Plant.
 - HUD and TAB interface improvements.
 - Rebalanced equipment progression based on player testing.
