@@ -1,4 +1,6 @@
-package com.github.ob_yekt.simpleskills.prayer;
+package com.github.ob_yekt.simpleskills.prayer.eletro;
+
+import com.github.ob_yekt.simpleskills.prayer.PrayerVfxGeometry;
 
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import java.util.ArrayList;
@@ -7,10 +9,10 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4fc;
 
 /** Procedural 3D geometry and animation for the Lightning Bolt spell. */
-final class PrayerLightningVfx {
+public final class PrayerLightningVfx {
     private PrayerLightningVfx() {}
 
-    static void draw(Matrix4fc matrix, VertexConsumer vertices, Vec3 hand, Vec3 destination,
+    public static void draw(Matrix4fc matrix, VertexConsumer vertices, Vec3 hand, Vec3 destination,
                      float age, int duration) {
         float fade = fadeOut(age, duration, 5, 5);
         long seed = (long) Math.floor(age * 3.0f);

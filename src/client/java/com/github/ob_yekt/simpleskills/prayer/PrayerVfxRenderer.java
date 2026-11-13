@@ -43,19 +43,18 @@ public final class PrayerVfxRenderer extends EntityRenderer<PrayerVfxEntity, Pra
         float age = state.age;
         collector.submitCustomGeometry(pose, RenderTypes.lightning(), (matrix, vertices) -> {
             Matrix4fc transform = matrix.pose();
-            PrayerAbility ability = null;
-            if (state.style == 0) {
-                PrayerLightningVfx.draw(transform, vertices, state.hand, state.end, age, state.duration);
-                ability = PrayerAbility.LIGHTNING_BOLT;
-            } else if (state.style == 1) {
+            PrayerAbility ability = switch (state.style) {
+                case 0 -> PrayerAbility.LIGHTNING_BOLT;
+                case 1 -> PrayerAbility.DIVINE_HEALING;
+                case 2 -> PrayerAbility.METEOR;
+                default -> PrayerVisualEffects.abilityForStyle(state.style);
+            };
+            if (state.style == 1) {
                 healing(transform, vertices, age, state.duration);
-                ability = PrayerAbility.DIVINE_HEALING;
             } else if (state.style == 2) {
                 meteor(transform, vertices, age, state.duration);
-                ability = PrayerAbility.METEOR;
-            } else {
-                ability = PrayerVisualEffects.abilityForStyle(state.style);
-                if (ability != null) PrayerAbilityVfx.draw(transform, vertices, ability, state.end, age, state.duration);
+            } else if (ability != null) {
+                PrayerAbilityVfx.draw(transform, vertices, ability, state.hand, state.end, age, state.duration);
             }
             if (ability != null) PrayerVfxFlair.draw(transform, vertices, ability, state.end, age, state.duration);
         });

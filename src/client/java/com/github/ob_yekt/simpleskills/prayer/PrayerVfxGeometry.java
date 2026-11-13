@@ -5,17 +5,17 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4fc;
 
 /** Small mesh primitives shared by the Prayer prototypes. All geometry is emitted in world space. */
-final class PrayerVfxGeometry {
+public final class PrayerVfxGeometry {
     private static final int TUBE_SIDES = 6;
 
     private PrayerVfxGeometry() { }
 
-    static void tube(Matrix4fc matrix, VertexConsumer out, Vec3 from, Vec3 to,
+    public static void tube(Matrix4fc matrix, VertexConsumer out, Vec3 from, Vec3 to,
                      double radius, float r, float g, float b, float alpha) {
         taperedTube(matrix, out, from, to, radius, radius, r, g, b, alpha);
     }
 
-    static void taperedTube(Matrix4fc matrix, VertexConsumer out, Vec3 from, Vec3 to,
+    public static void taperedTube(Matrix4fc matrix, VertexConsumer out, Vec3 from, Vec3 to,
                             double startRadius, double endRadius, float r, float g, float b, float alpha) {
         Vec3 axis = to.subtract(from);
         if (axis.lengthSqr() < 1.0E-8 || startRadius + endRadius < 1.0E-5) return;
@@ -38,7 +38,7 @@ final class PrayerVfxGeometry {
         }
     }
 
-    static void torus(Matrix4fc matrix, VertexConsumer out, Vec3 center, double radius, double tubeRadius,
+    public static void torus(Matrix4fc matrix, VertexConsumer out, Vec3 center, double radius, double tubeRadius,
                       int segments, double rotation, float r, float g, float b, float alpha) {
         if (segments < 3 || radius <= 0) return;
         for (int i = 0; i < segments; i++) {
@@ -50,7 +50,7 @@ final class PrayerVfxGeometry {
         }
     }
 
-    static void wireSphere(Matrix4fc matrix, VertexConsumer out, Vec3 center, double radius,
+    public static void wireSphere(Matrix4fc matrix, VertexConsumer out, Vec3 center, double radius,
                            int divisions, double phase, float r, float g, float b, float alpha, double thickness) {
         if (divisions < 6 || radius <= 0) return;
         for (int latitude = -2; latitude <= 2; latitude++) {
@@ -88,7 +88,7 @@ final class PrayerVfxGeometry {
         }
     }
 
-    static void ellipsoid(Matrix4fc matrix, VertexConsumer out, Vec3 center, Vec3 radii,
+    public static void ellipsoid(Matrix4fc matrix, VertexConsumer out, Vec3 center, Vec3 radii,
                           int latitudes, int longitudes, float r, float g, float b, float alpha,
                           double rotation) {
         Vec3[][] rings = new Vec3[latitudes + 1][longitudes];
@@ -117,7 +117,7 @@ final class PrayerVfxGeometry {
         }
     }
 
-    static void quad(Matrix4fc matrix, VertexConsumer out, Vec3 a, Vec3 b, Vec3 c, Vec3 d,
+    public static void quad(Matrix4fc matrix, VertexConsumer out, Vec3 a, Vec3 b, Vec3 c, Vec3 d,
                      float r, float g, float blue, float alpha) {
         vertex(matrix, out, a, r, g, blue, alpha);
         vertex(matrix, out, b, r, g, blue, alpha);
@@ -125,7 +125,7 @@ final class PrayerVfxGeometry {
         vertex(matrix, out, d, r, g, blue, alpha);
     }
 
-    static void triangle(Matrix4fc matrix, VertexConsumer out, Vec3 a, Vec3 b, Vec3 c,
+    public static void triangle(Matrix4fc matrix, VertexConsumer out, Vec3 a, Vec3 b, Vec3 c,
                          float r, float g, float blue, float alpha) {
         // Custom geometry is submitted as quads; repeating the last point closes a triangle safely.
         quad(matrix, out, a, b, c, c, r, g, blue, alpha);
