@@ -18,6 +18,7 @@ final class PrayerAbilityVfx {
                      Vec3 destination, float age, int duration) {
         switch (ability) {
             case LIGHT_ORB -> PrayerLightOrbVfx.draw(m, out, destination, age, duration);
+            case DIVINE_HEALING -> PrayerDivineHealingVfx.draw(m, out, age, duration);
             case HOLY_BOLT -> PrayerHolyBoltVfx.draw(m, out, destination, age, duration);
             case PURIFICATION -> PrayerPurificationVfx.draw(m, out, age, duration);
             case DIVINE_PROTECTION -> PrayerDivineProtectionVfx.draw(m, out, age, duration);
@@ -45,6 +46,7 @@ final class PrayerAbilityVfx {
             case FLAME_BURST -> PrayerFlameBurstVfx.draw(m, out, age, duration);
             case BURNING_GROUND -> PrayerBurningGroundVfx.draw(m, out, age, duration);
             case INFERNO -> PrayerInfernoVfx.draw(m, out, age, duration);
+            case METEOR -> PrayerMeteorVfx.draw(m, out, age, duration);
             case ICE_SHARD -> PrayerIceShardVfx.draw(m, out, destination, age, duration);
             case FROST_NOVA -> PrayerFrostNovaVfx.draw(m, out, age, duration);
             case ICE_PRISON -> PrayerIcePrisonVfx.draw(m, out, destination, age, duration);
