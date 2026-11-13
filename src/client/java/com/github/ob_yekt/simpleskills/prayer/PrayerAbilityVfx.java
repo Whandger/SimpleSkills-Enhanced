@@ -340,43 +340,40 @@ final class PrayerAbilityVfx {
         }
     }
 
-    // 11. SHADOW_BOLT — an unstable, cracked mass wrapped in rotating shards and a torn wake.
+    // 11. SHADOW_BOLT — Singularidade voraz que suga a luz em formato de espiral.
     private static void shadowBolt(Matrix4fc m, VertexConsumer out, Vec3 destination, float age, int duration) {
         float fade = fade(age, duration, 3, 5);
         double travel = smooth(3, duration * 0.63, age);
         Vec3 center = Vec3.ZERO.lerp(destination, travel);
-        double pulse = 1 + 0.14 * Math.sin(age * 0.5);
-        double radius = 0.27 * pulse;
-        PrayerVfxGeometry.ellipsoid(m, out, center, new Vec3(radius, radius * 1.15, radius), 9, 14,
-                0.055f, 0.025f, 0.09f, 0.94f * fade, age * 0.17);
-        PrayerVfxGeometry.ellipsoid(m, out, center, new Vec3(radius * 0.48, radius * 0.64, radius * 0.48),
-                8, 12, 0.48f, 0.07f, 0.22f, 0.85f * fade, -age * 0.27);
-        for (int crack = 0; crack < 7; crack++) {
-            double angle = crack * Math.PI * 2 / 7 + age * 0.04;
-            Vec3 start = center.add(Math.cos(angle) * radius * 0.3, Math.sin(angle * 2) * radius * 0.7,
-                    Math.sin(angle) * radius * 0.3);
-            Vec3 end = center.add(Math.cos(angle + 0.6) * radius * 1.25,
-                    Math.sin(angle * 1.4) * radius * 1.1, Math.sin(angle + 0.6) * radius * 1.25);
-            bolt(m, out, start, end, crack * 421L + (long) age / 3, 4, radius * 0.38, 0.92f * fade);
+        
+        // Núcleo da Singularidade
+        PrayerVfxGeometry.wireSphere(m, out, center, 0.35, 16, -age * 0.3, 
+                0.15f, 0.02f, 0.25f, 0.9f * fade, 0.03);
+        
+        // Fitas escuras rasgando o ar e sendo sugadas para o núcleo
+        Vec3 dir = safeNormalize(destination, new Vec3(0, 0, -1));
+        Vec3[] frame = basis(dir);
+        for (int ribbon = 0; ribbon < 6; ribbon++) {
+            double angle = ribbon * Math.PI * 2 / 6 + age * 0.35;
+            Vec3 previous = center.add(dir.scale(0.5));
+            for (int step = 1; step <= 10; step++) {
+                double t = step / 10.0;
+                double radius = 0.9 * Math.sin(t * Math.PI);
+                double twist = angle + t * Math.PI * 2;
+                Vec3 point = center.subtract(dir.scale(t * 1.5))
+                        .add(frame[0].scale(Math.cos(twist) * radius))
+                        .add(frame[1].scale(Math.sin(twist) * radius));
+                PrayerVfxGeometry.tube(m, out, previous, point, 0.06 * (1 - t), 
+                        0.25f, 0.02f, 0.35f, 0.85f * fade);
+                previous = point;
+            }
         }
-        for (int shard = 0; shard < 9; shard++) {
-            double angle = shard * Math.PI * 2 / 9 - age * (shard % 2 == 0 ? 0.09 : -0.12);
-            Vec3 axis = new Vec3(Math.cos(angle), Math.sin(age * 0.13 + shard) * 0.58,
-                    Math.sin(angle)).normalize();
-            Vec3 point = center.add(axis.scale(radius * (1.42 + (shard % 3) * 0.22)));
-            crystal(m, out, point, axis, 0.24, 0.085, 0.3f, 0.04f, 0.42f, 0.83f * fade);
-        }
-        for (int tail = 0; tail < 4; tail++) {
-            double angle = age * 0.16 + tail * Math.PI / 2;
-            Vec3 end = center.subtract(destination.subtract(Vec3.ZERO).normalize().scale(0.24 + tail * 0.08))
-                    .add(Math.cos(angle) * 0.2, Math.sin(angle * 1.4) * 0.16, Math.sin(angle) * 0.2);
-            PrayerVfxGeometry.taperedTube(m, out, center, end, 0.065, 0.003,
-                    0.24f, 0.05f, 0.34f, 0.48f * fade);
-        }
-        if (travel > 0.94) {
-            double burst = smooth(0.94, 1, travel);
-            PrayerVfxGeometry.wireSphere(m, out, destination, 0.22 + burst * 0.8, 12,
-                    age * 0.12, 0.55f, 0.08f, 0.45f, (float) (0.65 * (1 - burst) * fade), 0.02);
+        
+        // Implosão violenta no contato
+        if (travel > 0.9) {
+            double burst = smooth(0.9, 1.0, travel);
+            PrayerVfxGeometry.torus(m, out, destination, 1.8 * (1 - burst), 0.12, 32, age, 
+                    0.2f, 0.01f, 0.3f, (float)(1 - burst) * fade);
         }
     }
 
@@ -660,26 +657,33 @@ final class PrayerAbilityVfx {
         }
     }
 
-    // 21. SPARK — a short, almost instantaneous arc with tiny branching discharges.
+    // 21. SPARK — Arco voltaico contínuo e ramificações que enjaulam a hitbox do mob.
     private static void spark(Matrix4fc m, VertexConsumer out, Vec3 destination, float age, int duration) {
         float fade = fade(age, duration, 1, 3);
         double travel = smooth(1, duration * 0.4, age);
         Vec3 tip = Vec3.ZERO.lerp(destination, travel);
-        bolt(m, out, Vec3.ZERO, tip, (long) age / 2, 12, 0.13 + travel * 0.06, fade);
-        for (int branch = 0; branch < 5; branch++) {
-            double t = 0.25 + branch * 0.14;
+        
+        // Relâmpago principal ancorado na mão
+        bolt(m, out, Vec3.ZERO, tip, (long) age / 2, 14, 0.25, fade);
+        
+        // Ramificações elétricas buscando o alvo
+        for (int branch = 0; branch < 6; branch++) {
+            double t = 0.3 + branch * 0.12;
             if (t > travel) continue;
-            Vec3 root = destination.scale(t);
-            double angle = branch * 2.4 + age * 0.16;
-            Vec3 end = root.add(Math.cos(angle) * 0.38, Math.sin(angle * 1.7) * 0.27,
-                    Math.sin(angle) * 0.38);
-            bolt(m, out, root, end, branch * 53L + (long) age / 2, 4, 0.07, 0.82f * fade);
+            Vec3 root = Vec3.ZERO.lerp(destination, t);
+            double angle = branch * 2.4 + age * 0.25;
+            Vec3 end = root.add(Math.cos(angle) * 0.6, Math.sin(angle * 1.7) * 0.8, Math.sin(angle) * 0.6);
+            bolt(m, out, root, end, branch * 53L + (long) age, 5, 0.1, 0.82f * fade);
         }
-        PrayerVfxGeometry.ellipsoid(m, out, Vec3.ZERO, new Vec3(0.11, 0.11, 0.11), 7, 10,
-                0.35f, 0.78f, 1.0f, 0.8f * fade, age * 0.2);
+        
+        // Gaiola elétrica de impacto colando no mob
         if (travel > 0.8) {
-            PrayerVfxGeometry.wireSphere(m, out, destination, 0.16 + travel * 0.2, 8, age * 0.18,
-                    0.42f, 0.84f, 1.0f, fade * 0.66f, 0.012);
+            for (int i = 0; i < 5; i++) {
+                Vec3 sparkEnd = destination.add(Math.cos(age+i)*0.8, Math.sin(age-i)*0.8, Math.sin(age*1.2+i)*0.8);
+                bolt(m, out, destination, sparkEnd, i * 19L + (long)age, 3, 0.08, 0.8f * fade);
+            }
+            PrayerVfxGeometry.wireSphere(m, out, destination, 0.4 + travel * 0.3, 10, age * 0.18,
+                    0.42f, 0.84f, 1.0f, fade * 0.7f, 0.015);
         }
     }
 
@@ -775,32 +779,40 @@ final class PrayerAbilityVfx {
                 0.35f, 0.78f, 1.0f, 0.78f * fade * (float) (1 - strike * 0.6));
     }
 
-    // 26. FIREBALL — three independently moving thermal shells and a turbulent tail surround the projectile.
+    // 26. FIREBALL — Rastro conectado à mão, núcleo turbulento e impacto cinético brutal.
     private static void fireball(Matrix4fc m, VertexConsumer out, Vec3 destination, float age, int duration) {
         float fade = fade(age, duration, 2, 4);
         double travel = smooth(2, duration * 0.58, age);
         Vec3 center = Vec3.ZERO.lerp(destination, travel);
-        double pulse = 1 + 0.12 * Math.sin(age * 0.5);
-        double radius = 0.34 * pulse;
-        PrayerVfxGeometry.ellipsoid(m, out, center, new Vec3(radius * 1.1, radius, radius), 9, 14,
-                0.92f, 0.19f, 0.025f, 0.8f * fade, age * 0.2);
-        PrayerVfxGeometry.ellipsoid(m, out, center, new Vec3(radius * 0.75, radius * 0.76, radius * 0.75),
-                8, 12, 1.0f, 0.48f, 0.04f, 0.9f * fade, -age * 0.23);
-        PrayerVfxGeometry.ellipsoid(m, out, center, new Vec3(radius * 0.42, radius * 0.5, radius * 0.42),
-                7, 10, 1.0f, 0.91f, 0.37f, 0.96f * fade, age * 0.33);
-        Vec3 back = safeNormalize(destination.scale(-1), new Vec3(0, 0, 1));
-        Vec3[] frame = basis(back);
-        for (int tongue = 0; tongue < 7; tongue++) {
-            double angle = tongue * Math.PI * 2 / 7 + age * 0.13;
-            Vec3 side = frame[0].scale(Math.cos(angle)).add(frame[1].scale(Math.sin(angle)));
-            Vec3 start = center.add(side.scale(radius * 0.35));
-            Vec3 end = center.add(back.scale(0.4 + (tongue % 3) * 0.2))
-                    .add(side.scale(radius * (1.8 + 0.45 * Math.sin(age * 0.4 + tongue))));
-            PrayerVfxGeometry.taperedTube(m, out, start, end, 0.11, 0.006,
-                    1.0f, 0.24f + (tongue % 2) * 0.16f, 0.025f, 0.84f * fade);
-            PrayerVfxGeometry.taperedTube(m, out, start, end, 0.035, 0.002,
-                    1.0f, 0.8f, 0.23f, 0.92f * fade);
+        Vec3 dir = safeNormalize(destination, new Vec3(0, 0, 1));
+        
+        // Rastro de fogo saindo da mão
+        List<Vec3> trail = jagged(Vec3.ZERO, center, Math.max(3, (int)(travel * 12)), (long)age / 3, 0.15);
+        for (int i = 0; i < trail.size() - 1; i++) {
+            double t = i / (double)trail.size();
+            PrayerVfxGeometry.tube(m, out, trail.get(i), trail.get(i+1), 0.18 * t, 
+                    1.0f, 0.35f * (float)t, 0.02f, fade * 0.75f);
         }
+        
+        // Núcleo denso e caótico
+        double pulse = 1 + 0.15 * Math.sin(age * 0.6);
+        double radius = 0.38 * pulse;
+        PrayerVfxGeometry.ellipsoid(m, out, center, new Vec3(radius, radius * 1.1, radius), 12, 16, 
+                1.0f, 0.4f, 0.05f, 0.9f * fade, age * 0.25);
+        PrayerVfxGeometry.ellipsoid(m, out, center, new Vec3(radius * 0.6, radius * 0.6, radius * 0.6), 8, 12, 
+                1.0f, 0.9f, 0.2f, 0.95f * fade, -age * 0.35);
+        
+        // Chamas envolvendo a esfera
+        Vec3[] frame = basis(dir);
+        for (int tongue = 0; tongue < 9; tongue++) {
+            double angle = tongue * Math.PI * 2 / 9 + age * 0.18;
+            Vec3 side = frame[0].scale(Math.cos(angle)).add(frame[1].scale(Math.sin(angle)));
+            Vec3 start = center.add(side.scale(radius * 0.4));
+            Vec3 end = center.subtract(dir.scale(0.5 + (tongue % 3) * 0.25))
+                             .add(side.scale(radius * (1.6 + 0.5 * Math.sin(age * 0.4 + tongue))));
+            PrayerVfxGeometry.taperedTube(m, out, start, end, 0.14, 0.01, 1.0f, 0.25f, 0.02f, 0.85f * fade);
+        }
+        
         if (travel > 0.9) flameBurstImpact(m, out, destination, age, duration, fade);
     }
 
@@ -893,35 +905,43 @@ final class PrayerAbilityVfx {
         }
     }
 
-    // 31. ICE_SHARD — a long, rotating, glass-faceted crystal is the projectile itself.
+    // 31. ICE_SHARD — Corre pelo chão rasgando a terra e explode em cristais no mob.
     private static void iceShard(Matrix4fc m, VertexConsumer out, Vec3 destination, float age, int duration) {
         float fade = fade(age, duration, 2, 4);
         double travel = smooth(2, duration * 0.58, age);
-        Vec3 center = Vec3.ZERO.lerp(destination, travel);
-        Vec3 direction = safeNormalize(destination, new Vec3(0, 0, -1));
-        crystal(m, out, center, direction, 1.22, 0.29, 0.28f, 0.75f, 1.0f, 0.75f * fade);
-        crystal(m, out, center, direction, 0.92, 0.14, 0.86f, 0.98f, 1.0f, 0.92f * fade);
-        Vec3[] frame = basis(direction);
-        for (int shard = 0; shard < 4; shard++) {
-            double angle = shard * Math.PI / 2 + age * 0.14;
-            Vec3 axis = frame[0].scale(Math.cos(angle)).add(frame[1].scale(Math.sin(angle)));
-            Vec3 point = center.add(axis.scale(0.24));
-            crystal(m, out, point, direction.add(axis.scale(0.34)), 0.55, 0.09,
-                    0.48f, 0.89f, 1.0f, 0.82f * fade);
+        
+        // Estima o chão baseando-se na posição do jogador (Vec3.ZERO) e do alvo.
+        double floorY = -1.2; 
+        
+        int numSpikes = (int)(travel * 22);
+        for (int i = 0; i < numSpikes; i++) {
+            double t = i / 22.0;
+            Vec3 groundPath = new Vec3(0, floorY, 0).lerp(destination.add(0, -0.5, 0), t);
+            
+            double zig = Math.sin(i * 14.3) * 0.35;
+            double zag = Math.cos(i * 21.7) * 0.35;
+            Vec3 basePoint = groundPath.add(zig, 0, zag);
+            
+            double scale = 0.4 + (i % 3) * 0.25;
+            Vec3 axis = new Vec3(zig * 0.3, 1.0, zag * 0.3).normalize();
+            
+            crystal(m, out, basePoint.add(0, scale * 0.5, 0), axis, scale * 1.5, scale * 0.35, 
+                    0.35f, 0.78f, 1.0f, 0.9f * fade);
         }
-        PrayerVfxGeometry.taperedTube(m, out, center.subtract(direction.scale(0.48)),
-                center.subtract(direction.scale(1.4)), 0.18, 0.005,
-                0.22f, 0.72f, 1.0f, 0.45f * fade);
-        if (travel > 0.92) {
-            double impact = smooth(0.92, 1, travel);
-            for (int shard = 0; shard < 6; shard++) {
-                double angle = shard * Math.PI / 3;
-                Vec3 dir = new Vec3(Math.cos(angle), 0.6 + shard % 2 * 0.4, Math.sin(angle));
-                crystal(m, out, destination.add(dir.scale(0.2 + impact * 0.65)), dir,
-                        0.5 * (1 - impact * 0.35), 0.1, 0.42f, 0.84f, 1.0f, 0.85f * fade);
+        
+        // Erupção massiva ao atingir o mob
+        if (travel > 0.85) {
+            double impact = smooth(0.85, 1, travel);
+            Vec3 impactCenter = destination.add(0, -0.5, 0);
+            for (int i = 0; i < 12; i++) {
+                double angle = i * Math.PI / 6;
+                Vec3 dir = new Vec3(Math.cos(angle), 0.8 + (i % 3) * 0.5, Math.sin(angle)).normalize();
+                double scale = (1.5 + (i % 4) * 0.6) * impact;
+                Vec3 spikeBase = impactCenter.add(Math.cos(angle) * 0.4, 0, Math.sin(angle) * 0.4);
+                
+                crystal(m, out, spikeBase.add(dir.scale(scale * 0.5)), dir, scale * 2.2, scale * 0.45, 
+                        0.2f, 0.85f, 1.0f, (float)(0.9 * (1 - impact * 0.2) * fade));
             }
-            ringPlane(m, out, destination, UP, 0.18 + impact * 0.7, 0.025,
-                    age * 0.08, 0.51f, 0.87f, 1.0f, (float) (0.7 * (1 - impact) * fade));
         }
     }
 
