@@ -44,6 +44,18 @@ public final class PrayerVisualEffects {
         PrayerVfxEntity visual = new PrayerVfxEntity(level, style, start, end, owner, duration);
         level.addFreshEntity(visual);
 
+        var extra = switch (ability.specialization()) {
+            case DIVINE -> net.minecraft.core.particles.ParticleTypes.END_ROD;
+            case UNHOLY -> net.minecraft.core.particles.ParticleTypes.SOUL_FIRE_FLAME;
+            case ELEMENTALIST -> switch (ability.element()) {
+                case FIRE -> net.minecraft.core.particles.ParticleTypes.FLAME;
+                case ICE -> net.minecraft.core.particles.ParticleTypes.SNOWFLAKE;
+                case ELECTRICITY -> net.minecraft.core.particles.ParticleTypes.ELECTRIC_SPARK;
+            };
+        };
+        int count = 6 + ability.requiredLevel() / 4;
+        level.sendParticles(extra, impact.x, impact.y + 0.3, impact.z, count, 0.6, 0.4, 0.6, 0.03);
+
         float volume = ability.requiredLevel() >= 90 ? 1.0f : ability.requiredLevel() >= 50 ? 0.85f : 0.7f;
         level.playSound(null, hand.x, hand.y, hand.z, SimpleSkillsSounds.prayerSpell(ability),
                 SoundSource.PLAYERS, volume, 1.0f);

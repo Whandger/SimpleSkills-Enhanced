@@ -19,15 +19,12 @@ import com.github.ob_yekt.simpleskills.prayer.PrayerMenuDataPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerClientState;
 import com.github.ob_yekt.simpleskills.prayer.PrayerCooldownPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerCooldownHud;
-import com.github.ob_yekt.simpleskills.prayer.PrayerSigilParticle;
-import com.github.ob_yekt.simpleskills.prayer.PrayerParticles;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVfxEntity;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVfxRenderer;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.client.particle.v1.ParticleProviderRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 
@@ -35,15 +32,6 @@ public class SimpleskillsClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         EntityRendererRegistry.register(PrayerVfxEntity.TYPE, PrayerVfxRenderer::new);
-        ParticleProviderRegistry particles = ParticleProviderRegistry.getInstance();
-        particles.register(PrayerParticles.DIVINE_SIGIL, PrayerSigilParticle.Provider::new);
-        particles.register(PrayerParticles.UNHOLY_SIGIL, PrayerSigilParticle.Provider::new);
-        particles.register(PrayerParticles.FIRE_SIGIL, PrayerSigilParticle.Provider::new);
-        particles.register(PrayerParticles.ICE_SIGIL, PrayerSigilParticle.Provider::new);
-        particles.register(PrayerParticles.LIGHTNING_SIGIL, PrayerSigilParticle.Provider::new);
-        particles.register(PrayerParticles.DIVINE_HEALING, PrayerSigilParticle.Provider::new);
-        particles.register(PrayerParticles.LIGHTNING_BOLT, PrayerSigilParticle.Provider::new);
-        particles.register(PrayerParticles.METEOR, PrayerSigilParticle.Provider::new);
         Keybinds.register();
         SkillHudRenderer.register();
         ClientConfig.load();

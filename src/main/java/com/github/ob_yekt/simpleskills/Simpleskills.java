@@ -17,7 +17,6 @@ import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionNetworking;
 import com.github.ob_yekt.simpleskills.ui.RankTitleManager;
 import com.github.ob_yekt.simpleskills.prayer.PrayerManager;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVisualEffects;
-import com.github.ob_yekt.simpleskills.prayer.PrayerParticles;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVfxEntity;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 
@@ -51,7 +50,6 @@ public class Simpleskills implements ModInitializer {
 		AgilityManager.registerPayloads();
 		RankTitleManager.registerPayloads();
 		PrayerManager.registerPayloads();
-		PrayerParticles.register();
 		PrayerVfxEntity.register();
 		SimpleskillsCommands.registerCommands();
 		IronmanManager.init();
