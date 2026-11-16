@@ -33,6 +33,16 @@ public final class PrayerVfxRenderer extends EntityRenderer<PrayerVfxEntity, Pra
         state.hand = entity.handOffset();
         state.age = entity.life() + partialTick;
         state.duration = entity.maxLife();
+        PrayerSoundtrack.update(entity, abilityOf(state.style), state.hand, state.end, state.age, state.duration);
+    }
+
+    private static PrayerAbility abilityOf(int style) {
+        return switch (style) {
+            case 0 -> PrayerAbility.LIGHTNING_BOLT;
+            case 1 -> PrayerAbility.DIVINE_HEALING;
+            case 2 -> PrayerAbility.METEOR;
+            default -> PrayerVisualEffects.abilityForStyle(style);
+        };
     }
 
     @Override
@@ -40,15 +50,11 @@ public final class PrayerVfxRenderer extends EntityRenderer<PrayerVfxEntity, Pra
         float age = state.age;
         collector.submitCustomGeometry(pose, RenderTypes.lightning(), (matrix, vertices) -> {
             Matrix4fc transform = matrix.pose();
-            PrayerAbility ability = switch (state.style) {
-                case 0 -> PrayerAbility.LIGHTNING_BOLT;
-                case 1 -> PrayerAbility.DIVINE_HEALING;
-                case 2 -> PrayerAbility.METEOR;
-                default -> PrayerVisualEffects.abilityForStyle(state.style);
-            };
+            PrayerAbility ability = abilityOf(state.style);
             if (ability != null) {
                 PrayerAbilityVfx.draw(transform, vertices, ability, state.hand, state.end, age, state.duration);
                 PrayerVfxFlair.draw(transform, vertices, ability, state.end, age, state.duration);
+                PrayerSoundtrack.drawWorldFrames(transform, vertices, ability, state.hand, state.end, age, state.duration);
             }
         });
     }

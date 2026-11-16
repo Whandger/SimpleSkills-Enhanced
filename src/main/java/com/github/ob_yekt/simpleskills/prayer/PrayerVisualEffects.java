@@ -106,7 +106,7 @@ public final class PrayerVisualEffects {
             case CHAIN_LIGHTNING -> (int) Math.round(duration * 0.42);
             case HOLY_BOLT -> (int) Math.round(duration * 0.56);
             case FIREBALL, ICE_SHARD -> (int) Math.round(duration * 0.58);
-            case SHADOW_BOLT -> (int) Math.round(duration * 0.63);
+            case SHADOW_BOLT -> (int) Math.round(duration * 0.82); // Dano apenas na detonação do buraco negro
             case METEOR -> (int) Math.round(duration * 0.64);
             case CURSE_OF_WEAKNESS -> (int) Math.round(duration * 0.32);
             case CORRUPTION -> (int) Math.round(duration * 0.46);
@@ -124,6 +124,7 @@ public final class PrayerVisualEffects {
         return switch (ability) {
             case LIGHTNING_BOLT -> 30;
             case DIVINE_HEALING -> 42;
+            case SHADOW_BOLT -> 44; // ~0.55s voo + ~1.25s sucção 4x4 + ~0.40s explosão
             case METEOR -> 52;
             case DIVINE_PROTECTION, SANCTUARY, DARK_PACT -> 76;
             case CELESTIAL_WRATH, APOCALYPSE, THUNDERSTORM, ABSOLUTE_ZERO, STORM_JUDGMENT -> 88;

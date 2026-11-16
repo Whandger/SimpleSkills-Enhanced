@@ -1,8 +1,10 @@
 package com.github.ob_yekt.simpleskills.prayer;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
+import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.Registry;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -16,7 +18,9 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3f;
 import org.joml.Vector3fc;
@@ -87,12 +91,74 @@ public final class PrayerVfxEntity extends Entity {
                 if (owner instanceof LivingEntity) setPos(owner.getX(), owner.getY(), owner.getZ());
             }
 
+            if (payloadAbility == PrayerAbility.SHADOW_BOLT && !impactFired) {
+                tickShadowBolt(server);
+            }
+
             if (!impactFired && payloadAbility != null && life >= impactTick) {
                 impactFired = true;
                 PrayerManager.executeDelayedImpact(server, casterUuid, targetUuid, impactPos, payloadAbility, prayerLevel);
             }
 
             if (life >= maxLife) discard();
+        }
+    }
+
+    private void tickShadowBolt(ServerLevel server) {
+        final Entity caster = casterUuid != null ? server.getEntity(casterUuid) : null;
+        final LivingEntity primaryTarget = (targetUuid != null
+                && server.getEntity(targetUuid) instanceof LivingEntity living
+                && living.isAlive()) ? living : null;
+
+        // 1. Mantém a orbe e o buraco negro acompanhando o centro do mob atingido
+        if (primaryTarget != null) {
+            impactPos = primaryTarget.position().add(0, primaryTarget.getBbHeight() * 0.5, 0);
+            entityData.set(END, new Vector3f(
+                    (float) (impactPos.x - getX()),
+                    (float) (impactPos.y - getY()),
+                    (float) (impactPos.z - getZ())
+            ));
+        }
+
+        if (impactPos == null) return;
+
+        // 2. Fase de Buraco Negro (entre 26% da duração e o tick de explosão)
+        double progress = (double) life / Math.max(1, maxLife);
+        if (progress >= 0.26 && life < impactTick) {
+            // Prende o mob atingido no centro da singularidade enquanto não explode
+            if (primaryTarget != null) {
+                Vec3 targetCenter = primaryTarget.position().add(0, primaryTarget.getBbHeight() * 0.5, 0);
+                Vec3 toCore = impactPos.subtract(targetCenter);
+                Vec3 pinVel = toCore.lengthSqr() > 0.01 ? toCore.scale(0.45) : Vec3.ZERO;
+                primaryTarget.setDeltaMovement(pinVel);
+                primaryTarget.fallDistance = 0;
+                primaryTarget.needsSync = true;
+            }
+
+            // Puxa todos os mobs numa área 4x4 ao redor do alvo atingido
+            AABB suctionBox = AABB.ofSize(impactPos, 4.0, 3.5, 4.0);
+            List<LivingEntity> nearbyMobs = server.getEntitiesOfClass(LivingEntity.class, suctionBox,
+                    e -> e != caster && e != primaryTarget && e.isAlive() && !(e instanceof Player));
+
+            for (LivingEntity mob : nearbyMobs) {
+                Vec3 mobCenter = mob.position().add(0, mob.getBbHeight() * 0.5, 0);
+                Vec3 pull = impactPos.subtract(mobCenter);
+                double dist = pull.length();
+                if (dist > 0.28) {
+                    double strength = Math.min(0.42, 0.16 + (1.0 - Math.min(1.0, dist / 2.8)) * 0.22);
+                    Vec3 dir = pull.normalize().scale(strength);
+                    mob.setDeltaMovement(mob.getDeltaMovement().scale(0.35).add(dir.x, Math.max(dir.y, 0.04), dir.z));
+                } else {
+                    mob.setDeltaMovement(Vec3.ZERO);
+                }
+                mob.fallDistance = 0;
+                mob.needsSync = true;
+            }
+
+            if (life % 2 == 0) {
+                server.sendParticles(ParticleTypes.REVERSE_PORTAL,
+                        impactPos.x, impactPos.y, impactPos.z, 3, 1.4, 0.6, 1.4, 0.08);
+            }
         }
     }
 

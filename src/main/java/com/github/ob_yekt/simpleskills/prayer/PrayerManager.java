@@ -180,7 +180,10 @@ public final class PrayerManager {
                 && (!ability.id().equals("holy_light") || target instanceof Player) ? target : player;
 
         Vec3 impact = switch (ability) {
-            case HOLY_BOLT, DIVINE_SMITE, SHADOW_BOLT, LIFE_DRAIN, CURSE_OF_WEAKNESS, CORRUPTION,
+            case SHADOW_BOLT -> target != null
+                    ? target.position().add(0, target.getBbHeight() * 0.5, 0)
+                    : castPoint;
+            case HOLY_BOLT, DIVINE_SMITE, LIFE_DRAIN, CURSE_OF_WEAKNESS, CORRUPTION,
                     SPARK, CHAIN_LIGHTNING, FIREBALL, ICE_SHARD, ICE_PRISON, LIGHTNING_BOLT, METEOR -> castPoint;
             case SHADOWSTEP -> player.position();
             default -> new Vec3(visualTarget.getX(), visualTarget.getY(), visualTarget.getZ());
@@ -220,6 +223,25 @@ public final class PrayerManager {
 
         float scaling = 1.0f + Math.max(0, level - 1) * 0.006f;
         Vec3 particlePos = impactPos;
+
+        if (ability == PrayerAbility.SHADOW_BOLT) {
+            float damage = (4.0f + level * 0.13f) * scaling;
+            AABB blastBox = AABB.ofSize(impactPos, 4.2, 3.5, 4.2);
+            for (LivingEntity victim : serverLevel.getEntitiesOfClass(LivingEntity.class, blastBox,
+                    entity -> entity != player && entity.isAlive() && !(entity instanceof Player))) {
+                if (victim.hurtServer(serverLevel, player.damageSources().magic(), damage)) {
+                    applyEffect(victim, "minecraft:slowness", 40, 1);
+                    Vec3 knock = victim.position().add(0, victim.getBbHeight() * 0.5, 0).subtract(impactPos);
+                    if (knock.lengthSqr() > 1.0E-4) {
+                        Vec3 push = knock.normalize().scale(0.45);
+                        victim.setDeltaMovement(victim.getDeltaMovement().add(push.x, 0.22, push.z));
+                        victim.needsSync = true;
+                    }
+                }
+            }
+            PrayerVisualEffects.spawnImpactParticles(serverLevel, impactPos, ability);
+            return;
+        }
 
         if (isAreaSpell(ability)) {
             double radius = ability.requiredLevel() >= 70 ? 9.0 : ability.requiredLevel() >= 30 ? 6.0 : 4.0;
