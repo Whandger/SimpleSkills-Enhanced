@@ -10,7 +10,7 @@ import net.minecraft.resources.Identifier;
 /** Untrusted Prayer UI/cast request; action and unlock state are verified on the server. */
 public record PrayerActionPayload(int action, String value) implements CustomPacketPayload {
     public static final int OPEN = 0, SELECT_SPECIALIZATION = 1, EQUIP = 2, CAST = 3,
-            SELECT_SLOT = 4, OPEN_WHEEL = 5;
+            SELECT_SLOT = 4, OPEN_WHEEL = 5, EQUIP_TO_SLOT = 6;
     public static final Type<PrayerActionPayload> TYPE = new Type<>(Identifier.fromNamespaceAndPath(Simpleskills.MOD_ID, "prayer_action"));
     public static final StreamCodec<RegistryFriendlyByteBuf, PrayerActionPayload> CODEC = StreamCodec.composite(
             ByteBufCodecs.VAR_INT, PrayerActionPayload::action, ByteBufCodecs.STRING_UTF8, PrayerActionPayload::value,

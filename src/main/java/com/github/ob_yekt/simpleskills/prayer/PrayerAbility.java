@@ -101,7 +101,7 @@ public enum PrayerAbility {
             case RADIANT_NOVA, FLAME_BURST, FROST_NOVA -> 12;
             case SOUL_EXPLOSION -> (int) Math.round(d * 0.42);
             case CELESTIAL_WRATH, THUNDERSTORM -> 28;
-            case STORM_JUDGMENT, ABSOLUTE_ZERO -> (int) Math.round(d * 0.55);
+            case STORM_JUDGMENT, ABSOLUTE_ZERO -> (int) Math.round(d * 0.75);
             default -> 0;
         };
     }
