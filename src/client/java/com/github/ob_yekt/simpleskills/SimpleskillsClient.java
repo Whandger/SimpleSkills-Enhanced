@@ -19,6 +19,7 @@ import com.github.ob_yekt.simpleskills.prayer.PrayerMenuDataPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerClientState;
 import com.github.ob_yekt.simpleskills.prayer.PrayerCooldownPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerCooldownHud;
+import com.github.ob_yekt.simpleskills.prayer.PrayerImpactFeedback;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVfxEntity;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVfxRenderer;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
@@ -39,6 +40,7 @@ public class SimpleskillsClient implements ClientModInitializer {
         FishingHud.register();
         AgilityDashHud.register();
         PrayerCooldownHud.register();
+        PrayerImpactFeedback.registerClientHooks();
 
         ClientPlayNetworking.registerGlobalReceiver(AgilityLevelPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> AgilityClientState.set(payload)));
