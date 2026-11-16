@@ -7,6 +7,8 @@ import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
@@ -56,7 +58,7 @@ public final class RuneInfusionPreparationScreen extends Screen {
     private Component status = Component.empty();
 
     public RuneInfusionPreparationScreen(RuneInfusionCatalogResponsePayload catalog) {
-        super(Component.translatable("gui.simpleskills.rune_infusion.prepare"));
+        super(RuneInfusionText.text("gui.simpleskills.rune_infusion.prepare"));
         this.catalog = catalog;
 
         if (catalog.rows() != null && !catalog.rows().isBlank()) {
@@ -74,7 +76,7 @@ public final class RuneInfusionPreparationScreen extends Screen {
                         for (String c : parts[4].split(",")) if (!c.isBlank()) conflicts.add(c);
                     }
                     Entry entry = new Entry(parts[0], current, maximum, cap, conflicts,
-                            Component.translatable(translationKey(parts[0])));
+                            enchantmentName(parts[0]));
                     entries.add(entry);
                     byId.put(entry.id(), entry);
                 } catch (NumberFormatException ignored) { }
@@ -95,6 +97,17 @@ public final class RuneInfusionPreparationScreen extends Screen {
         return "enchantment." + ns + "." + path.replace('/', '.');
     }
 
+    private static Component enchantmentName(String id) {
+        Minecraft minecraft = Minecraft.getInstance();
+        Identifier identifier = Identifier.tryParse(id);
+        if (identifier != null && minecraft.level != null) {
+            var enchantment = minecraft.level.registryAccess()
+                    .lookupOrThrow(Registries.ENCHANTMENT).get(identifier);
+            if (enchantment.isPresent()) return enchantment.get().value().description();
+        }
+        return Component.literal(translationKey(id));
+    }
+
     // ------------------------------------------------------------------ layout
 
     private int listX0() { return left + 118; }
@@ -109,9 +122,9 @@ public final class RuneInfusionPreparationScreen extends Screen {
         left = (width - WIDTH) / 2;
         top = (height - HEIGHT) / 2;
 
-        addRenderableWidget(Button.builder(Component.translatable("gui.simpleskills.rune_infusion.close"),
+        addRenderableWidget(Button.builder(RuneInfusionText.text("gui.simpleskills.rune_infusion.close"),
                 b -> onClose()).bounds(left + WIDTH - 106, top + 210, 90, 20).build());
-        start = addRenderableWidget(Button.builder(Component.translatable("gui.simpleskills.rune_infusion.start"),
+        start = addRenderableWidget(Button.builder(RuneInfusionText.text("gui.simpleskills.rune_infusion.start"),
                 b -> start()).bounds(left + WIDTH - 206, top + 210, 96, 20).build());
         scroll = Math.min(scroll, maxScroll());
         refresh();
@@ -158,11 +171,11 @@ public final class RuneInfusionPreparationScreen extends Screen {
                 return;
             }
             if (isBlocked(e)) {
-                status = Component.translatable("gui.simpleskills.rune_infusion.conflict");
+                status = RuneInfusionText.text("gui.simpleskills.rune_infusion.conflict");
                 return;
             }
             if (selected.size() >= MAX_SELECTED) {
-                status = Component.translatable("gui.simpleskills.rune_infusion.max_selected");
+                status = RuneInfusionText.text("gui.simpleskills.rune_infusion.max_selected");
                 return;
             }
             // Re-adding an existing enchantment restores it as-is; a new one starts at level I.
@@ -198,12 +211,12 @@ public final class RuneInfusionPreparationScreen extends Screen {
         boolean tooMany = selected.size() > MAX_SELECTED;
         start.active = cost > 0 && enough && !tooMany;
         if (tooMany) {
-            status = Component.translatable("gui.simpleskills.rune_infusion.max_selected");
+            status = RuneInfusionText.text("gui.simpleskills.rune_infusion.max_selected");
         } else if (cost > 0 && !enough) {
-            status = Component.translatable("gui.simpleskills.rune_infusion.not_enough");
+            status = RuneInfusionText.text("gui.simpleskills.rune_infusion.not_enough");
         } else if (selected.size() >= MAX_SELECTED && status.getString().isEmpty()) {
             // 4/4 already (e.g. the item has 4 enchantments): explain why nothing else can be added.
-            status = Component.translatable("gui.simpleskills.rune_infusion.max_selected");
+            status = RuneInfusionText.text("gui.simpleskills.rune_infusion.max_selected");
         }
     }
 
@@ -299,21 +312,21 @@ public final class RuneInfusionPreparationScreen extends Screen {
         g.fill(left, top, left + WIDTH, top + HEIGHT, 0xEE17120E);
         g.fill(left + 6, top + 6, left + WIDTH - 6, top + HEIGHT - 6, 0xFF292018);
 
-        g.centeredText(font, Component.translatable("gui.simpleskills.rune_infusion.prepare"),
+        g.centeredText(font, RuneInfusionText.text("gui.simpleskills.rune_infusion.prepare"),
                 width / 2, top + 10, GOLD);
-        g.centeredText(font, Component.translatable("gui.simpleskills.rune_infusion.hint"),
+        g.centeredText(font, RuneInfusionText.text("gui.simpleskills.rune_infusion.hint"),
                 width / 2, top + 23, MUTED);
 
         drawLeftPanel(g, mc);
         drawList(g, mouseX, mouseY);
 
-        g.text(font, Component.translatable("gui.simpleskills.rune_infusion.selected", selected.size()),
+        g.text(font, RuneInfusionText.text("gui.simpleskills.rune_infusion.selected", selected.size()),
                 listX0(), top + 186, selected.size() > MAX_SELECTED ? RED : MUTED, false);
         if (!status.getString().isEmpty()) {
             g.text(font, status, listX0(), top + 198, RED, false);
         }
         if (entries.isEmpty()) {
-            g.centeredText(font, Component.translatable("gui.simpleskills.rune_infusion.no_enchantments"),
+            g.centeredText(font, RuneInfusionText.text("gui.simpleskills.rune_infusion.no_enchantments"),
                     listX0() + (listX1() - listX0()) / 2, top + 100, RED);
         }
     }
@@ -342,7 +355,7 @@ public final class RuneInfusionPreparationScreen extends Screen {
             String name = font.plainSubstrByWidth(item.getHoverName().getString(), 96);
             g.centeredText(font, Component.literal(name), bx + 44, top + 128, TEXT);
         } else {
-            g.centeredText(font, Component.translatable("gui.simpleskills.rune_infusion.no_item"),
+            g.centeredText(font, RuneInfusionText.text("gui.simpleskills.rune_infusion.no_item"),
                     bx + 44, by + 40, RED);
         }
 
@@ -350,9 +363,9 @@ public final class RuneInfusionPreparationScreen extends Screen {
         boolean enough = catalog.runeCount() >= cost;
 
         g.item(new ItemStack(RuneContent.RUNE), bx, top + 142);
-        g.text(font, Component.translatable("gui.simpleskills.rune_infusion.runes", catalog.runeCount()),
+        g.text(font, RuneInfusionText.text("gui.simpleskills.rune_infusion.runes", catalog.runeCount()),
                 bx + 20, top + 146, enough ? TEXT : RED, false);
-        g.text(font, Component.translatable("gui.simpleskills.rune_infusion.cost", cost),
+        g.text(font, RuneInfusionText.text("gui.simpleskills.rune_infusion.cost", cost),
                 bx, top + 162, enough ? GOLD : RED, false);
 
         int score = difficulty();
@@ -360,8 +373,8 @@ public final class RuneInfusionPreparationScreen extends Screen {
         Component label = score == 0
                 ? Component.literal("-")
                 : Component.literal(score + " ").append(
-                        Component.translatable("gui.simpleskills.rune_infusion.difficulty." + difficultyBand(score)));
-        g.text(font, Component.translatable("gui.simpleskills.rune_infusion.difficulty", label),
+                        RuneInfusionText.text("gui.simpleskills.rune_infusion.difficulty." + difficultyBand(score)));
+        g.text(font, RuneInfusionText.text("gui.simpleskills.rune_infusion.difficulty", label),
                 bx, top + 176, color, false);
 
         g.fill(bx, top + 190, bx + 88, top + 196, 0xFF080706);

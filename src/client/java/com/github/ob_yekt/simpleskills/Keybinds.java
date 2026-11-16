@@ -8,6 +8,8 @@ import net.minecraft.network.chat.Component;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import com.github.ob_yekt.simpleskills.agility.AgilityActionPayload;
 import com.github.ob_yekt.simpleskills.ui.RankTitleMenuActionPayload;
+import com.github.ob_yekt.simpleskills.prayer.PrayerActionPayload;
+import com.github.ob_yekt.simpleskills.prayer.PrayerClientState;
 import net.minecraft.world.phys.Vec3;
 import java.util.UUID;
 
@@ -42,6 +44,13 @@ public class Keybinds {
             KeyMapping.Category.MISC
     );
 
+    public static final KeyMapping OPEN_PRAYER_BOOK_KEY = new KeyMapping(
+            "key.simpleskills.prayer_book", InputConstants.Type.KEYBOARD, InputConstants.KEY_B, KeyMapping.Category.MISC);
+    public static final KeyMapping CAST_PRAYER_KEY = new KeyMapping(
+            "key.simpleskills.prayer_cast", InputConstants.Type.KEYBOARD, InputConstants.KEY_R, KeyMapping.Category.MISC);
+    public static final KeyMapping OPEN_PRAYER_WHEEL_KEY = new KeyMapping(
+            "key.simpleskills.prayer_wheel", InputConstants.Type.KEYBOARD, InputConstants.KEY_C, KeyMapping.Category.MISC);
+
     private static boolean wasJumpDown;
     private static boolean canDoubleJump = true;
     private static boolean wasOnGround;
@@ -52,6 +61,9 @@ public class Keybinds {
         KeyMappingHelper.registerKeyMapping(CYCLE_HUD_POSITION_KEY);
         KeyMappingHelper.registerKeyMapping(AGILITY_DASH_KEY);
         KeyMappingHelper.registerKeyMapping(OPEN_RANK_TITLES_KEY);
+        KeyMappingHelper.registerKeyMapping(OPEN_PRAYER_BOOK_KEY);
+        KeyMappingHelper.registerKeyMapping(CAST_PRAYER_KEY);
+        KeyMappingHelper.registerKeyMapping(OPEN_PRAYER_WHEEL_KEY);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null) {
@@ -73,6 +85,18 @@ public class Keybinds {
             if (OPEN_RANK_TITLES_KEY.consumeClick()
                     && ClientPlayNetworking.canSend(RankTitleMenuActionPayload.TYPE)) {
                 ClientPlayNetworking.send(new RankTitleMenuActionPayload(RankTitleMenuActionPayload.OPEN, ""));
+            }
+            if (OPEN_PRAYER_BOOK_KEY.consumeClick() && client.gui.screen() == null && ClientPlayNetworking.canSend(PrayerActionPayload.TYPE)) {
+                PrayerClientState.requestOpen();
+                ClientPlayNetworking.send(new PrayerActionPayload(PrayerActionPayload.OPEN, ""));
+            }
+            if (OPEN_PRAYER_WHEEL_KEY.consumeClick() && client.gui.screen() == null && ClientPlayNetworking.canSend(PrayerActionPayload.TYPE)) {
+                PrayerClientState.requestWheel();
+                ClientPlayNetworking.send(new PrayerActionPayload(PrayerActionPayload.OPEN_WHEEL, ""));
+            }
+            if (CAST_PRAYER_KEY.consumeClick() && client.gui.screen() == null && !PrayerClientState.equipped().isEmpty()
+                    && ClientPlayNetworking.canSend(PrayerActionPayload.TYPE)) {
+                ClientPlayNetworking.send(new PrayerActionPayload(PrayerActionPayload.CAST, PrayerClientState.equipped()));
             }
             if (AGILITY_DASH_KEY.consumeClick() && AgilityClientState.getLevel() >= AgilityClientState.getDashUnlockLevel()
                     && ClientPlayNetworking.canSend(AgilityActionPayload.TYPE)) {

@@ -1,11 +1,367 @@
 {
   "perfect_parry": {
-    "sounds": ["simpleskills:parry_sound"]
+    "sounds": [
+      "simpleskills:parry_sound"
+    ]
   },
   "master_defender_parry": {
-    "sounds": ["simpleskills:master_parry_sound"]
+    "sounds": [
+      "simpleskills:master_parry_sound"
+    ]
   },
   "projectile_reflection": {
-    "sounds": ["minecraft:item.shield.block"]
+    "sounds": [
+      "minecraft:item.shield.block"
+    ]
+  },
+  "prayer_light_orb": {
+    "sounds": [
+      {
+        "name": "minecraft:block.amethyst_block.chime",
+        "type": "event",
+        "volume": 0.45,
+        "pitch": 1.05
+      }
+    ]
+  },
+  "prayer_divine_healing": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.allay.ambient_with_item",
+        "type": "event",
+        "volume": 0.65,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "prayer_holy_bolt": {
+    "sounds": [
+      {
+        "name": "minecraft:block.enchantment_table.use",
+        "type": "event",
+        "volume": 0.65,
+        "pitch": 1.3
+      }
+    ]
+  },
+  "prayer_purification": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.experience_orb.pickup",
+        "type": "event",
+        "volume": 0.55,
+        "pitch": 1.35
+      }
+    ]
+  },
+  "prayer_divine_protection": {
+    "sounds": [
+      {
+        "name": "minecraft:item.totem.use",
+        "type": "event",
+        "volume": 0.8,
+        "pitch": 0.85
+      }
+    ]
+  },
+  "prayer_sanctuary": {
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.activate",
+        "type": "event",
+        "volume": 0.8,
+        "pitch": 0.95
+      }
+    ]
+  },
+  "prayer_divine_smite": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.player.attack.sweep",
+        "type": "event",
+        "volume": 0.85,
+        "pitch": 0.85
+      }
+    ]
+  },
+  "prayer_radiant_nova": {
+    "sounds": [
+      {
+        "name": "minecraft:block.beacon.ambient",
+        "type": "event",
+        "volume": 0.8,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "prayer_holy_light": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.allay.item_given",
+        "type": "event",
+        "volume": 0.65,
+        "pitch": 1.1
+      }
+    ]
+  },
+  "prayer_celestial_wrath": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.evoker.prepare_summon",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 0.85
+      }
+    ]
+  },
+  "prayer_shadow_bolt": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.wither.shoot",
+        "type": "event",
+        "volume": 0.75,
+        "pitch": 1.35
+      }
+    ]
+  },
+  "prayer_life_drain": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.heartbeat",
+        "type": "event",
+        "volume": 0.8,
+        "pitch": 0.9
+      }
+    ]
+  },
+  "prayer_curse_of_weakness": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.evoker.prepare_attack",
+        "type": "event",
+        "volume": 0.75,
+        "pitch": 0.8
+      }
+    ]
+  },
+  "prayer_corruption": {
+    "sounds": [
+      {
+        "name": "minecraft:block.respawn_anchor.deplete",
+        "type": "event",
+        "volume": 0.8,
+        "pitch": 0.8
+      }
+    ]
+  },
+  "prayer_shadowstep": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.enderman.teleport",
+        "type": "event",
+        "volume": 0.7,
+        "pitch": 1.2
+      }
+    ]
+  },
+  "prayer_soul_harvest": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.phantom.flap",
+        "type": "event",
+        "volume": 0.75,
+        "pitch": 0.9
+      }
+    ]
+  },
+  "prayer_dark_pact": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.wither.ambient",
+        "type": "event",
+        "volume": 0.85,
+        "pitch": 0.7
+      }
+    ]
+  },
+  "prayer_soul_explosion": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.ghast.shoot",
+        "type": "event",
+        "volume": 0.65,
+        "pitch": 0.75
+      }
+    ]
+  },
+  "prayer_unholy_ground": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.zombie_villager.converted",
+        "type": "event",
+        "volume": 0.8,
+        "pitch": 0.8
+      }
+    ]
+  },
+  "prayer_apocalypse": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.warden.sonic_boom",
+        "type": "event",
+        "volume": 0.75,
+        "pitch": 0.6
+      }
+    ]
+  },
+  "prayer_spark": {
+    "sounds": [
+      {
+        "name": "minecraft:block.amethyst_block.resonate",
+        "type": "event",
+        "volume": 0.4,
+        "pitch": 1.5
+      }
+    ]
+  },
+  "prayer_fireball": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.blaze.shoot",
+        "type": "event",
+        "volume": 0.7,
+        "pitch": 0.95
+      }
+    ]
+  },
+  "prayer_ice_shard": {
+    "sounds": [
+      {
+        "name": "minecraft:block.glass.hit",
+        "type": "event",
+        "volume": 0.55,
+        "pitch": 1.6
+      }
+    ]
+  },
+  "prayer_flame_burst": {
+    "sounds": [
+      {
+        "name": "minecraft:item.firecharge.use",
+        "type": "event",
+        "volume": 0.75,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "prayer_lightning_bolt": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.lightning_bolt.thunder",
+        "type": "event",
+        "volume": 0.55,
+        "pitch": 1.4
+      }
+    ]
+  },
+  "prayer_frost_nova": {
+    "sounds": [
+      {
+        "name": "minecraft:block.glass.break",
+        "type": "event",
+        "volume": 0.75,
+        "pitch": 1.2
+      }
+    ]
+  },
+  "prayer_burning_ground": {
+    "sounds": [
+      {
+        "name": "minecraft:block.fire.ambient",
+        "type": "event",
+        "volume": 0.8,
+        "pitch": 0.8
+      }
+    ]
+  },
+  "prayer_chain_lightning": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.guardian.attack",
+        "type": "event",
+        "volume": 0.7,
+        "pitch": 1.2
+      }
+    ]
+  },
+  "prayer_ice_prison": {
+    "sounds": [
+      {
+        "name": "minecraft:block.glass.place",
+        "type": "event",
+        "volume": 0.7,
+        "pitch": 1.3
+      }
+    ]
+  },
+  "prayer_inferno": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.dragon_fireball.explode",
+        "type": "event",
+        "volume": 0.9,
+        "pitch": 1.0
+      }
+    ]
+  },
+  "prayer_blizzard": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.stray.ambient",
+        "type": "event",
+        "volume": 0.75,
+        "pitch": 0.9
+      }
+    ]
+  },
+  "prayer_meteor": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.firework_rocket.blast",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 0.7
+      }
+    ]
+  },
+  "prayer_thunderstorm": {
+    "sounds": [
+      {
+        "name": "minecraft:block.conduit.activate",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 0.8
+      }
+    ]
+  },
+  "prayer_absolute_zero": {
+    "sounds": [
+      {
+        "name": "minecraft:block.respawn_anchor.charge",
+        "type": "event",
+        "volume": 0.95,
+        "pitch": 0.8
+      }
+    ]
+  },
+  "prayer_storm_judgment": {
+    "sounds": [
+      {
+        "name": "minecraft:entity.lightning_bolt.impact",
+        "type": "event",
+        "volume": 1.0,
+        "pitch": 0.8
+      }
+    ]
   }
 }

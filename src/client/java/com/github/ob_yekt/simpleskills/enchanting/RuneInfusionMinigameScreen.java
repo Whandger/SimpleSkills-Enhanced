@@ -192,7 +192,7 @@ public final class RuneInfusionMinigameScreen extends Screen {
     private ItemMask activeMask = FALLBACK_MASK;
 
     public RuneInfusionMinigameScreen() {
-        super(Component.translatable("gui.simpleskills.rune_infusion.title"));
+        super(RuneInfusionText.text("gui.simpleskills.rune_infusion.title"));
     }
 
     @Override
@@ -476,8 +476,8 @@ public final class RuneInfusionMinigameScreen extends Screen {
         g.fill(left, top, left + PANEL_W, top + PANEL_H, PANEL);
         g.fill(left + 6, top + 6, left + PANEL_W - 6, top + PANEL_H - 6, INNER);
 
-        centered(g, Component.translatable("gui.simpleskills.rune_infusion.title"), top + 10, GOLD);
-        centered(g, Component.translatable("gui.simpleskills.rune_infusion.subtitle"), top + 23, MUTED);
+        centered(g, RuneInfusionText.text("gui.simpleskills.rune_infusion.title"), top + 10, GOLD);
+        centered(g, RuneInfusionText.text("gui.simpleskills.rune_infusion.subtitle"), top + 23, MUTED);
 
         // Item frame (pulses red while any crack is damaging the enchantment).
         int frame = anyCritical && running ? argb(180 + (int) (75 * pulse()), 0xFF3B30) : GOLD_DARK;
@@ -495,7 +495,7 @@ public final class RuneInfusionMinigameScreen extends Screen {
             g.item(equipment, 0, 0);
             g.pose().popMatrix();
         } else {
-            centered(g, Component.translatable("gui.simpleskills.rune_infusion.missing_item"),
+            centered(g, RuneInfusionText.text("gui.simpleskills.rune_infusion.missing_item"),
                     boxY + BOX / 2 - 4, RED);
         }
 
@@ -512,14 +512,14 @@ public final class RuneInfusionMinigameScreen extends Screen {
         if (!running) {
             boolean ok = s.state() == RuneInfusionClientState.SUCCEEDED;
             g.fill(boxX + 2, boxY + 2, boxX + BOX - 2, boxY + BOX - 2, 0xB0000000);
-            centered(g, Component.translatable(ok
+            centered(g, RuneInfusionText.text(ok
                             ? "gui.simpleskills.rune_infusion.result.success"
                             : "gui.simpleskills.rune_infusion.result.failed"),
                     boxY + BOX / 2 - 10, ok ? GREEN : RED);
             if (ok) {
                 int grade = Math.max(0, Math.min(4, s.grade()));
-                centered(g, Component.translatable("gui.simpleskills.rune_infusion.grade",
-                                Component.translatable("gui.simpleskills.rune_infusion.grade." + grade)),
+                centered(g, RuneInfusionText.text("gui.simpleskills.rune_infusion.grade",
+                                RuneInfusionText.text("gui.simpleskills.rune_infusion.grade." + grade)),
                         boxY + BOX / 2 + 4, GOLD);
             }
         }
@@ -537,30 +537,30 @@ public final class RuneInfusionMinigameScreen extends Screen {
         int filled = barW * integrity / 1000;
         if (filled > 0) g.fill(barX, barY, barX + filled, barY + 8, barColor);
 
-        centered(g, Component.translatable("gui.simpleskills.rune_infusion.integrity", integrity / 10),
+        centered(g, RuneInfusionText.text("gui.simpleskills.rune_infusion.integrity", integrity / 10),
                 top + 160, TEXT);
 
         String time = String.format(java.util.Locale.ROOT, "%d / %ds",
                 s.elapsedTicks() / 20, s.durationTicks() / 20);
-        g.text(font, Component.translatable("gui.simpleskills.rune_infusion.time", time),
+        g.text(font, RuneInfusionText.text("gui.simpleskills.rune_infusion.time", time),
                 left + 18, top + 174, MUTED, false);
-        g.text(font, Component.translatable("gui.simpleskills.rune_infusion.repaired", s.repairedCracks()),
+        g.text(font, RuneInfusionText.text("gui.simpleskills.rune_infusion.repaired", s.repairedCracks()),
                 left + 112, top + 174, GREEN, false);
-        g.text(font, Component.translatable("gui.simpleskills.rune_infusion.spread", s.propagatedCracks()),
+        g.text(font, RuneInfusionText.text("gui.simpleskills.rune_infusion.spread", s.propagatedCracks()),
                 left + 205, top + 174, RED, false);
 
         drawLegend(g);
 
-        centered(g, Component.translatable("gui.simpleskills.rune_infusion.hold_to_repair"),
+        centered(g, RuneInfusionText.text("gui.simpleskills.rune_infusion.hold_to_repair"),
                 top + PANEL_H - 19, MUTED);
     }
 
     private void drawLegend(GuiGraphicsExtractor g) {
         int[] colors = {0xFFBFB8A8, 0xFFF2C14E, 0xFFFF3B30};
         Component[] labels = {
-                Component.translatable("gui.simpleskills.rune_infusion.legend.growing"),
-                Component.translatable("gui.simpleskills.rune_infusion.legend.repairing"),
-                Component.translatable("gui.simpleskills.rune_infusion.legend.critical")
+                RuneInfusionText.text("gui.simpleskills.rune_infusion.legend.growing"),
+                RuneInfusionText.text("gui.simpleskills.rune_infusion.legend.repairing"),
+                RuneInfusionText.text("gui.simpleskills.rune_infusion.legend.critical")
         };
         int total = 0;
         for (Component label : labels) total += 10 + font.width(label) + 14;
