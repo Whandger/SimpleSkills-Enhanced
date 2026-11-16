@@ -101,9 +101,9 @@ public final class PrayerVisualEffects {
     public static int impactTickFor(PrayerAbility ability) {
         int duration = durationFor(ability);
         return switch (ability) {
-            case LIGHTNING_BOLT -> (int) Math.round(Math.max(10, duration * 0.52));
+            case LIGHTNING_BOLT -> 20;
             case SPARK -> 0;
-            case CHAIN_LIGHTNING -> (int) Math.round(duration * 0.42);
+            case CHAIN_LIGHTNING -> 0;
             case HOLY_BOLT -> (int) Math.round(duration * 0.56);
             case FIREBALL, ICE_SHARD -> (int) Math.round(duration * 0.58);
             case SHADOW_BOLT -> (int) Math.round(duration * 0.82); // Dano apenas na detonação do buraco negro
@@ -114,7 +114,7 @@ public final class PrayerVisualEffects {
             case DIVINE_SMITE -> Math.min(duration - 4, 18);
             case RADIANT_NOVA, FLAME_BURST, FROST_NOVA -> 12;
             case SOUL_EXPLOSION -> (int) Math.round(duration * 0.42);
-            case CELESTIAL_WRATH, THUNDERSTORM -> 18;
+            case CELESTIAL_WRATH, THUNDERSTORM -> 28;
             case STORM_JUDGMENT, ABSOLUTE_ZERO -> (int) Math.round(duration * 0.55);
             default -> 0; // Immediate self-buffs, heals, tethers, and ground zones
         };

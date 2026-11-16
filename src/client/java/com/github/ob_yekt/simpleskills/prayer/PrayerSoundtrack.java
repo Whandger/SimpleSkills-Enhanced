@@ -203,8 +203,8 @@ public final class PrayerSoundtrack {
                         .snd(LIGHTNING_BOLT_IMPACT, .9f, 1.2f, .2f).impact(.9f, 220, 0));
             }
             case STORM_JUDGMENT -> {
-                l.add(ticks(0).snd(BEACON_POWER_SELECT, 1f, 1.4f).snd(LIGHTNING_BOLT_THUNDER, 1f, .6f));
-                l.add(ticks(4).repeat(9, d -> d * .5).snd(LIGHTNING_BOLT_IMPACT, .5f, 1.5f, .25f));
+                l.add(ticks(30).snd(BEACON_POWER_SELECT, 1f, 1.4f).snd(LIGHTNING_BOLT_THUNDER, 1f, .6f));
+                l.add(ticks(400).repeat(9, d -> d * .5).snd(LIGHTNING_BOLT_IMPACT, .5f, 1.5f, .25f));
                 l.add(frac(.58).snd(LIGHTNING_BOLT_THUNDER, 1.6f, .7f).snd(LIGHTNING_BOLT_IMPACT, 1.4f, .6f)
                         .snd(GENERIC_EXPLODE, 1.2f, .7f).snd(TRIDENT_THUNDER, 1f, .8f)
                         .impact(3.2f, 560, 130).frame(4.0));
