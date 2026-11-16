@@ -382,16 +382,31 @@ Unlock levels, Dash cooldown and impulse, Dash immunity duration, exhaustion cos
 | `double_jump_vertical_velocity` | 0.9 | Maximum upward velocity applied by Double Jump; it scales with Agility up to level 40. |
 | `double_jump_exhaustion` | 1.0 | Hunger exhaustion caused by Double Jump. |
 
-### 🙏 Prayer — Divine Arts
-
-Prayer has been reworked into three selectable magic disciplines: **Divine**, **Unholy**, and **Elementalist**. The trees contain **35 spells** unlocked from levels 1 to 99, with one distinct icon per spell.
-
-- Open the Magic Skillbook with **B**, the Magic Wheel with **C**, and cast the equipped spell with **R** by default. These keys can be changed in Minecraft's Controls menu.
-- Equip spells into an eight-slot loadout and switch slots from the wheel.
-- Divine focuses on healing, cleansing, and protection; Unholy uses curses, soul magic, and shadow movement; Elementalist specializes in fire, ice, and lightning.
-- Every spell has a dedicated sound cue and an impact animation. Five animated, emissive sigil styles distinguish the disciplines and elements, while each spell varies the ring, spiral, and burst pattern.
-- Spell effects and progression are validated by the server. The skillbook, wheel, and spell names follow the player's Minecraft language across the included translations.
-- Prayer no longer uses the original candle-sacrifice buff mechanic in this fork.
+🙏 Prayer — Divine Arts
+Prayer has been reworked into three magic disciplines: Divine, Unholy, and Elementalist. The trees contain 35 spells unlocked from levels 1 to 99. Each player follows one discipline at a time, and switching disciplines clears the eight-slot loadout.
+Controls
+These keys can be changed in Minecraft's Controls menu.
+B — Magic Skillbook: Choose a discipline, browse unlocked spells, and equip them into the active slot.
+C — Magic Wheel: Shows the eight loadout slots.
+Left-click a slot to open the spell picker for that slot.
+Right-click a slot to make it the active slot.
+In the picker, click a spell to equip it into the slot.
+R — Cast: Casts the spell in the active slot.
+Casting Rules
+Casting requires empty main-hand and off-hand slots.
+Targeted spells use the first living entity or block in your line of sight, up to 24 blocks away. Some spells affect you or nearby allies instead.
+Offensive spells do not affect other players.
+Every valid cast grants Prayer XP. The reward starts at 360 XP and grows with the spell's required level and your Prayer level.
+Each spell has its own cooldown. Cooldowns shorten as Prayer level increases, by up to about 35% at level 99, with a minimum of 20 ticks.
+Spell damage and healing scale slightly with Prayer level, reaching about +59% at level 99.
+Timing and Feedback
+Each spell has a fixed impact moment. Damage, debuffs, and effects are applied on the same tick the visual effect and sound reach the target.
+Impacts shake the camera and flash the screen when they happen close to the player.
+The active spell's cooldown appears in a small HUD tile next to the Dash indicator.
+Every spell has its own sound cue and a procedurally generated 3D effect, so no particle spritesheets are used.
+Changes in This Version
+The original candle-sacrifice buff mechanic has been removed.
+The Magic Wheel was rebuilt with separate left-click and right-click actions, a spell picker, and a larger layout.
 
 ### 🌾 Farming
 
@@ -706,17 +721,6 @@ Diamond-to-Netherite upgrade durability bonuses:
 
 - Smithing bonuses stack with Crafting bonuses.
 
-#### 🙏 Prayer
-
-- Sacrifice rare items by right-clicking a lit candle.
-- Five buff tiers, lasting from 1 to 8 hours.
-- Examples:
-  - Rabbit Foot → Luck.
-  - Diamond → Speed II.
-  - Totem of Undying → Invisibility.
-  - Nether Star → Haste II.
-- All sacrifices and buffs are fully customizable.
-
 ---
 
 ## 💻 Commands
@@ -753,7 +757,7 @@ Configuration files are located in:
 server_root/config/simpleskills
 ```
 
-Customize XP progression, unlock requirements, loot tables, Prayer sacrifices, and Ironman difficulty.
+Customize XP progression, unlock requirements, loot tables, and Ironman difficulty.
 
 ### Ironman Configuration
 
