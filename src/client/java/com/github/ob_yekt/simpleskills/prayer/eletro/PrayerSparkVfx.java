@@ -15,7 +15,7 @@ public final class PrayerSparkVfx {
 
     private PrayerSparkVfx() {}
 
-    // 21. SPARK — Relâmpago instantâneo da mão ao alvo com 3 ramificações e impacto imediato.
+    // 21. SPARK — Relâmpago instantâneo da mão ao alvo com 3 ramificações e aterramento no chão.
     public static void draw(Matrix4fc m, VertexConsumer out, Vec3 hand, Vec3 destination,
                             float age, int duration) {
         float maxLife = Math.min(duration, VISUAL_TICKS);
@@ -82,20 +82,18 @@ public final class PrayerSparkVfx {
             }
         }
 
-        // 4. Hit imediato no mob desde o primeiro frame (anel de choque + 4 descargas curtas)
+        // 4. Hit imediato no mob: anel de choque no impacto + 3 descargas aterrando no chão
         double hitBurst = Math.min(1.0, age / 1.5);
-        double ringRadius = 0.18 + hitBurst * 0.38;
-        PrayerVfxGeometry.torus(m, out, target, ringRadius, 0.018 * (1.0 - progress * 0.65),
-                28, 0.0, 0.45f, 0.88f, 1.0f, 0.90f * fade);
+        PrayerVfxPrimitives.ringPlane(m, out, target.subtract(dir.scale(0.08)), dir.scale(-1.0),
+                0.14 + hitBurst * 0.48, 0.030 * (1.0 - progress * 0.6), age * 0.15,
+                0.45f, 0.88f, 1.0f, 0.85f * fade);
 
-        for (int s = 0; s < 4; s++) {
-            double ang = s * (Math.PI / 2.0) + 0.45;
-            double reach = 0.28 + hitBurst * 0.26;
-            Vec3 end = target.add(Math.cos(ang) * reach,
-                    ((s % 2 == 0) ? 0.22 : -0.22),
-                    Math.sin(ang) * reach);
-            List<Vec3> spark = buildBolt(target, end, 3, seed + s * 53L, 0.042);
-            drawBolt(m, out, spark, 0.036, 0.014, 0.004, fade * 0.90f);
+        for (int g = 0; g < 3; g++) {
+            double ang = g * (Math.PI * 2.0 / 3.0) + 0.5;
+            double reach = 0.35 + hitBurst * 0.22;
+            Vec3 end = target.add(Math.cos(ang) * reach, -0.75, Math.sin(ang) * reach);
+            List<Vec3> groundBolt = buildBolt(target, end, 4, seed + g * 199L, 0.05);
+            drawBolt(m, out, groundBolt, 0.034, 0.013, 0.004, fade * 0.80f);
         }
     }
 
