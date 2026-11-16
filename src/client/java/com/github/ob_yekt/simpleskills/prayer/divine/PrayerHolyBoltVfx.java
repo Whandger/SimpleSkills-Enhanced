@@ -10,200 +10,130 @@ import org.joml.Matrix4fc;
 public final class PrayerHolyBoltVfx {
     private PrayerHolyBoltVfx() {}
 
-    // 3. HOLY_BOLT — esfera de energia sagrada pulsante cercada por brilhinhos cintilantes e rastro estelar.
+    // Quantidade de feixes diagonais de luz que perfuram o alvo.
+    private static final int BEAM_COUNT = 7;
+
+    // 3. HOLY_BOLT — 7 feixes finos de luz sagrada disparam instantaneamente do céu
+    // em diagonais cruzadas, perfurando o inimigo na velocidade da luz.
     public static void draw(Matrix4fc m, VertexConsumer out, Vec3 destination, float age, int duration) {
-        float fade = PrayerVfxPrimitives.fade(age, duration, 2, 4);
-        double travel = PrayerVfxPrimitives.smooth(2, duration * 0.56, age);
-        Vec3 direction = PrayerVfxPrimitives.safeNormalize(destination.subtract(Vec3.ZERO), new Vec3(0, 0, -1));
-        Vec3 center = Vec3.ZERO.lerp(destination, travel);
-        Vec3[] frame = PrayerVfxPrimitives.basis(direction);
+        float fade = PrayerVfxPrimitives.fade(age, duration, 1, 3);
+        if (fade <= 0.01f) return;
 
-        // 1. Núcleo interno intenso e pulsante
-        double pulse = Math.sin(age * 0.85);
-        double coreRadius = 0.16 + pulse * 0.02;
-        drawEnergySphere(m, out, center, coreRadius, age * 0.22,
-                1.0f, 0.98f, 0.84f, 0.95f * fade);
+        double t = clamp01(age / Math.max(1.0, duration));
 
-        // 2. Aura externa de energia dourada translúcida
-        double auraRadius = 0.27 - pulse * 0.025;
-        drawEnergySphere(m, out, center, auraRadius, -age * 0.15,
-                1.0f, 0.82f, 0.24f, 0.42f * fade);
-
-        // 3. Anéis finos de energia orbitando a esfera
-        Vec3 tiltNormal1 = PrayerVfxPrimitives.safeNormalize(
-                direction.scale(0.65).add(frame[0].scale(0.75)), PrayerVfxPrimitives.UP);
-        Vec3 tiltNormal2 = PrayerVfxPrimitives.safeNormalize(
-                direction.scale(0.65).subtract(frame[1].scale(0.75)), PrayerVfxPrimitives.UP);
-
-        PrayerVfxPrimitives.ringPlane(m, out, center, tiltNormal1, 0.34, 0.011,
-                age * 0.45, 1.0f, 0.88f, 0.35f, 0.78f * fade);
-        PrayerVfxPrimitives.ringPlane(m, out, center, tiltNormal2, 0.31, 0.009,
-                -age * 0.52, 1.0f, 0.96f, 0.68f, 0.72f * fade);
-
-        // 4. Brilhinhos orbitando ao redor da bola de energia
-        drawOrbitingSparkles(m, out, center, age, fade);
-
-        // 5. Rastro de brilhinhos ficando para trás durante o trajeto
-        if (travel > 0.05) {
-            drawTrailSparkles(m, out, center, direction, frame, travel, age, fade);
+        // Selo rápido de mira sob o alvo enquanto os feixes disparam
+        double lockFade = Math.sin(clamp01(t / 0.75) * Math.PI);
+        if (lockFade > 0.01) {
+            Vec3 ground = new Vec3(destination.x, destination.y - 0.85, destination.z);
+            PrayerVfxPrimitives.ringPlane(m, out, ground, PrayerVfxPrimitives.UP,
+                    0.90 - lockFade * 0.20, 0.018, age * 0.16,
+                    1.0f, 0.88f, 0.42f, (float) (0.65 * lockFade) * fade);
         }
 
-        // 6. Explosão de luz e brilhinhos no impacto
-        if (travel > 0.88) {
-            double impact = PrayerVfxPrimitives.smooth(0.88, 1.0, travel);
-            float impactAlpha = (float) ((1.0 - impact) * fade);
+        // 7 feixes de luz disparando em rajada ultrarrápida
+        for (int i = 0; i < BEAM_COUNT; i++) {
+            double startT = i * 0.028;
+            double strikeDuration = 0.06; // Praticamente instantâneo (velocidade da luz)
+            double lingerDuration = 0.34; // Pós-imagem incandescente do rastro cortando o ar
 
-            PrayerVfxPrimitives.starburst(m, out, destination, PrayerVfxPrimitives.UP,
-                    0.35 + impact * 0.95, 0.92f * impactAlpha, 1.0f, 0.88f, 0.36f);
-            PrayerVfxPrimitives.ringPlane(m, out, destination, direction,
-                    0.18 + impact * 0.62, 0.02, age * 0.15, 1.0f, 0.97f, 0.72f, 0.85f * impactAlpha);
+            double localAge = t - startT;
+            if (localAge < 0.0 || localAge > strikeDuration + lingerDuration) {
+                continue;
+            }
 
-            drawImpactSparkles(m, out, destination, impact, age, impactAlpha);
-        }
-    }
+            // 0 -> 1 em fração de segundo (disparo imediato)
+            double strike = clamp01(localAge / strikeDuration);
+            double strikeEase = 1.0 - Math.pow(1.0 - strike, 3.5);
 
-    private static void drawOrbitingSparkles(Matrix4fc m, VertexConsumer out, Vec3 center, float age, float fade) {
-        int count = 16;
-        double goldenAngle = Math.PI * (3.0 - Math.sqrt(5.0));
+            // 0 -> 1 enquanto o rastro de luz dissipa
+            double dissipate = clamp01((localAge - strikeDuration) / lingerDuration);
+            float beamAlpha = (float) Math.pow(1.0 - dissipate, 1.5) * fade;
+            if (beamAlpha <= 0.01f) continue;
 
-        for (int i = 0; i < count; i++) {
-            double t = (i + 0.5) / count;
-            double y = 1.0 - 2.0 * t;
-            double radial = Math.sqrt(Math.max(0.0, 1.0 - y * y));
-            double theta = goldenAngle * i + age * (0.14 + (i % 3) * 0.04);
+            // Direção diagonal vinda do céu
+            double azimuth = i * 2.399963 + 0.4;
+            double tilt = 0.34 + (i % 3) * 0.11;
+            Vec3 skyDir = new Vec3(
+                    Math.cos(azimuth) * Math.sin(tilt),
+                    Math.cos(tilt),
+                    Math.sin(azimuth) * Math.sin(tilt)
+            ).normalize();
+            Vec3 pierceDir = skyDir.scale(-1.0);
 
-            double orbitRadius = 0.31 + (i % 4) * 0.045 + Math.sin(age * 0.35 + i) * 0.025;
-            Vec3 offset = new Vec3(
-                    Math.cos(theta) * radial * orbitRadius,
-                    y * orbitRadius,
-                    Math.sin(theta) * radial * orbitRadius
+            // Ponto exato no corpo do inimigo onde este feixe perfura
+            double spreadR = (i == 0) ? 0.0 : (0.14 + (i % 3) * 0.10);
+            Vec3 piercePoint = destination.add(
+                    Math.cos(azimuth + 1.2) * spreadR,
+                    -0.15 + ((i % 4) - 1.5) * 0.18,
+                    Math.sin(azimuth + 1.2) * spreadR
             );
 
-            // Efeito de piscar (twinkle) independente para cada brilhinho
-            double twinkle = 0.5 + 0.5 * Math.sin(age * 0.85 + i * 2.3);
-            if (twinkle < 0.15) continue;
+            Vec3 skyOrigin = piercePoint.add(skyDir.scale(10.0));
+            Vec3 exitPoint = piercePoint.add(pierceDir.scale(1.85));
 
-            double size = (0.026 + (i % 3) * 0.011) * (0.45 + 0.75 * twinkle);
-            float alpha = (float) (twinkle * 0.95 * fade);
+            // Ponta atravessa o alvo quase no frame 1; a cauda encolhe rapidamente para o ponto de impacto
+            Vec3 tip = skyOrigin.lerp(exitPoint, strikeEase);
+            double tailProgress = PrayerVfxPrimitives.smooth(0.05, 1.0, dissipate);
+            Vec3 tail = skyOrigin.lerp(exitPoint, tailProgress * 0.96);
 
-            // Alterna entre branco brilhante, dourado claro e ouro quente
-            float r = 1.0f;
-            float g = (i % 3 == 0) ? 0.99f : (i % 3 == 1 ? 0.91f : 0.80f);
-            float b = (i % 3 == 0) ? 0.90f : (i % 3 == 1 ? 0.52f : 0.25f);
+            // Pulso inicial mais intenso no instante do disparo, afinando logo em seguida
+            double flashBoost = 1.0 + (1.0 - dissipate) * 0.45;
+            double thinness = (0.032 + (i % 2) * 0.008) * (1.0 - dissipate * 0.72) * flashBoost;
 
-            drawSparkle(m, out, center.add(offset), size, age * 0.3 + i, r, g, b, alpha);
-        }
-    }
+            // 1) Aura dourada externa do feixe
+            PrayerVfxGeometry.taperedTube(m, out, tail, tip,
+                    thinness * 2.3, thinness * 0.30,
+                    1.0f, 0.82f, 0.26f, 0.36f * beamAlpha);
+            // 2) Lâmina principal dourado-claro
+            PrayerVfxGeometry.taperedTube(m, out, tail, tip,
+                    thinness * 1.2, thinness * 0.10,
+                    1.0f, 0.94f, 0.60f, 0.88f * beamAlpha);
+            // 3) Filamento central branco cortante (velocidade da luz)
+            PrayerVfxGeometry.taperedTube(m, out, tail, tip,
+                    thinness * 0.50, 0.003,
+                    1.0f, 1.0f, 0.96f, 1.0f * beamAlpha);
 
-    private static void drawTrailSparkles(Matrix4fc m, VertexConsumer out, Vec3 center, Vec3 direction,
-                                          Vec3[] frame, double travel, float age, float fade) {
-        int count = 14;
-        double maxTrailLength = Math.min(1.25, travel * 2.2);
+            // Anel de disparo no céu
+            if (dissipate < 0.4) {
+                float portalAlpha = (float) (1.0 - dissipate / 0.4) * fade * 0.75f;
+                PrayerVfxPrimitives.ringPlane(m, out, skyOrigin, pierceDir,
+                        0.14 + dissipate * 0.22, 0.012, age * 0.25 + i,
+                        1.0f, 0.94f, 0.65f, portalAlpha);
+            }
 
-        for (int i = 0; i < count; i++) {
-            double progress = (i + 1.0) / count;
-            double distBack = progress * maxTrailLength;
-            double spiralAngle = i * 1.9 - age * 0.35;
-            double spread = 0.05 + progress * 0.18;
+            // Perfuração imediata assim que o feixe cruza o alvo
+            if (strike >= 0.75) {
+                double impactP = clamp01((localAge - strikeDuration * 0.75) / lingerDuration);
+                float impactAlpha = (float) Math.pow(1.0 - impactP, 1.45) * fade;
 
-            Vec3 radialOffset = frame[0].scale(Math.cos(spiralAngle) * spread)
-                    .add(frame[1].scale(Math.sin(spiralAngle) * spread));
-            Vec3 pos = center.subtract(direction.scale(distBack)).add(radialOffset);
+                // Clarão estelar intenso no ponto perfurado
+                if (impactP < 0.38) {
+                    float starA = (float) (1.0 - impactP / 0.38) * fade;
+                    PrayerVfxPrimitives.starburst(m, out, piercePoint, pierceDir,
+                            0.32 + impactP * 1.35, starA, 1.0f, 0.96f, 0.74f);
+                }
 
-            double twinkle = 0.55 + 0.45 * Math.sin(age * 0.95 - i * 1.7);
-            double size = (0.032 * (1.0 - progress * 0.65)) * twinkle;
-            float alpha = (float) ((1.0 - progress) * twinkle * 0.9 * fade);
+                // Anel de choque inclinado no ângulo da perfuração
+                PrayerVfxPrimitives.ringPlane(m, out, piercePoint, pierceDir,
+                        0.12 + impactP * 0.62, 0.014, age * 0.2 + i,
+                        1.0f, 0.90f, 0.46f, 0.85f * impactAlpha);
 
-            if (alpha <= 0.02f) continue;
+                // 3 faíscas de luz atravessando para o lado de saída do golpe
+                for (int s = 0; s < 3; s++) {
+                    double sAng = azimuth + (s - 1) * 0.85;
+                    Vec3 radial = new Vec3(Math.cos(sAng), 0.2, Math.sin(sAng)).normalize();
+                    Vec3 sparkDir = pierceDir.scale(0.88).add(radial.scale(0.42)).normalize();
+                    Vec3 sparkPos = piercePoint.add(sparkDir.scale(0.22 + impactP * 1.35));
 
-            drawSparkle(m, out, pos, size, -age * 0.25 + i,
-                    1.0f, 0.93f, 0.58f, alpha);
-        }
-    }
-
-    private static void drawImpactSparkles(Matrix4fc m, VertexConsumer out, Vec3 destination,
-                                           double impact, float age, float impactAlpha) {
-        int count = 10;
-        double goldenAngle = Math.PI * (3.0 - Math.sqrt(5.0));
-
-        for (int i = 0; i < count; i++) {
-            double t = (i + 0.5) / count;
-            double y = 1.0 - 2.0 * t;
-            double radial = Math.sqrt(Math.max(0.0, 1.0 - y * y));
-            double theta = goldenAngle * i;
-
-            double burstDist = 0.2 + impact * (0.55 + (i % 3) * 0.18);
-            Vec3 pos = destination.add(
-                    Math.cos(theta) * radial * burstDist,
-                    y * burstDist,
-                    Math.sin(theta) * radial * burstDist
-            );
-
-            double size = 0.042 * (1.0 - impact * 0.5);
-            drawSparkle(m, out, pos, size, age * 0.4 + i, 1.0f, 0.96f, 0.72f, impactAlpha);
-        }
-    }
-
-    private static void drawSparkle(Matrix4fc m, VertexConsumer out, Vec3 center, double size, double spin,
-                                    float r, float g, float b, float alpha) {
-        double thin = size * 0.22;
-        double cos = Math.cos(spin);
-        double sin = Math.sin(spin);
-
-        Vec3 ax = new Vec3(cos, 0, sin);
-        Vec3 ay = new Vec3(0, 1, 0);
-        Vec3 az = new Vec3(-sin, 0, cos);
-
-        // 3 losangos cruzados em 3D para que o brilhinho apareça nítido de qualquer ângulo
-        drawDiamond(m, out, center, ax, ay, size, thin, r, g, b, alpha);
-        drawDiamond(m, out, center, ay, az, size, thin, r, g, b, alpha);
-        drawDiamond(m, out, center, az, ax, size, thin, r, g, b, alpha);
-    }
-
-    private static void drawDiamond(Matrix4fc m, VertexConsumer out, Vec3 center, Vec3 majorAxis, Vec3 minorAxis,
-                                    double majorRadius, double minorRadius,
-                                    float r, float g, float b, float alpha) {
-        Vec3 p1 = center.add(majorAxis.scale(majorRadius));
-        Vec3 p2 = center.add(minorAxis.scale(minorRadius));
-        Vec3 p3 = center.subtract(majorAxis.scale(majorRadius));
-        Vec3 p4 = center.subtract(minorAxis.scale(minorRadius));
-        PrayerVfxGeometry.quad(m, out, p1, p2, p3, p4, r, g, b, alpha);
-    }
-
-    private static void drawEnergySphere(Matrix4fc m, VertexConsumer out, Vec3 center, double radius, double spin,
-                                         float r, float g, float b, float alpha) {
-        int stacks = 6;
-        int slices = 10;
-
-        for (int i = 0; i < stacks; i++) {
-            double phi0 = Math.PI * i / stacks;
-            double phi1 = Math.PI * (i + 1) / stacks;
-
-            for (int j = 0; j < slices; j++) {
-                double theta0 = (2.0 * Math.PI * j / slices) + spin;
-                double theta1 = (2.0 * Math.PI * (j + 1) / slices) + spin;
-
-                Vec3 v00 = spherePoint(center, radius, phi0, theta0);
-                Vec3 v10 = spherePoint(center, radius, phi1, theta0);
-                Vec3 v11 = spherePoint(center, radius, phi1, theta1);
-                Vec3 v01 = spherePoint(center, radius, phi0, theta1);
-
-                if (i == 0) {
-                    PrayerVfxGeometry.triangle(m, out, v00, v10, v11, r, g, b, alpha);
-                } else if (i == stacks - 1) {
-                    PrayerVfxGeometry.triangle(m, out, v00, v10, v01, r, g, b, alpha);
-                } else {
-                    PrayerVfxGeometry.quad(m, out, v00, v10, v11, v01, r, g, b, alpha);
+                    PrayerVfxPrimitives.crystal(m, out, sparkPos, sparkDir,
+                            0.19 * (1.0 - impactP * 0.55), 0.016 * (1.0 - impactP * 0.55),
+                            1.0f, 0.97f, 0.76f, impactAlpha);
                 }
             }
         }
     }
 
-    private static Vec3 spherePoint(Vec3 center, double radius, double phi, double theta) {
-        double sinPhi = Math.sin(phi);
-        double x = radius * sinPhi * Math.cos(theta);
-        double y = radius * Math.cos(phi);
-        double z = radius * sinPhi * Math.sin(theta);
-        return center.add(x, y, z);
+    private static double clamp01(double value) {
+        return Math.max(0.0, Math.min(1.0, value));
     }
 }
