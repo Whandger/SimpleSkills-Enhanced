@@ -27,8 +27,12 @@ import net.minecraft.world.phys.Vec3;
 /** Server-authoritative Prayer progression, loadout, cooldowns, and synchronized cast loop. */
 public final class PrayerManager {
     private static final Map<UUID, Map<String, Long>> COOLDOWNS = new ConcurrentHashMap<>();
-    private static final Map<UUID, Long> LAST_XP_TICK = new ConcurrentHashMap<>();
     private PrayerManager() {}
+
+    /** XP por cast válido: base 360, cresce com o tier da magia e com o nível de Prayer. */
+    public static int castXp(PrayerAbility ability, int prayerLevel) {
+        return 360 + ability.requiredLevel() * 2 + prayerLevel * 6;
+    }
 
     public static void registerPayloads() {
         PayloadTypeRegistry.serverboundPlay().register(PrayerActionPayload.TYPE, PrayerActionPayload.CODEC);
@@ -108,7 +112,7 @@ public final class PrayerManager {
         LivingEntity target = aim.entity();
         Vec3 castPoint = aim.point();
 
-        int impactTick = PrayerVisualEffects.impactTickFor(ability);
+        int impactTick = ability.impactTick();
         boolean validCast = false;
 
         // 1. Validate target / apply immediate self-effects (if impactTick == 0)
@@ -201,16 +205,12 @@ public final class PrayerManager {
             visual.setSpellPayload(player.getUUID(), targetUuid, impact, ability, level, impactTick);
         }
 
-        // 3. Apply cooldown & grant XP
+        // 3. Apply cooldown & grant XP (a cada cast válido; a recarga já limita a frequência)
         int cooldown = Math.max(20, (int) (ability.baseCooldownTicks() * Math.max(0.65, 1.0 - (level - 1) * 0.0035)));
         COOLDOWNS.get(player.getUUID()).put(ability.id(), now + cooldown);
         if (ServerPlayNetworking.canSend(player, PrayerCooldownPayload.TYPE))
             ServerPlayNetworking.send(player, new PrayerCooldownPayload(ability.id(), cooldown));
-        long lastXp = LAST_XP_TICK.getOrDefault(player.getUUID(), Long.MIN_VALUE / 2);
-        if (now - lastXp >= 60) {
-            LAST_XP_TICK.put(player.getUUID(), now);
-            XPManager.addXPWithNotification(player, Skills.PRAYER, Math.max(1, 8 + level / 5));
-        }
+        XPManager.addXPWithNotification(player, Skills.PRAYER, castXp(ability, level));
         sendMenu(player);
     }
 
@@ -349,7 +349,7 @@ public final class PrayerManager {
                     if (array.get(i).isJsonPrimitive()) slots.set(i, array.get(i).getAsString());
                 }
             } else if (json.isJsonPrimitive()) {
-                // Migrate the early single-spell Prayer loadout to slot 1.
+                // Migra o loadout antigo de magia única para o slot 1.
                 slots.set(0, json.getAsString());
             }
         } catch (RuntimeException ignored) {

@@ -46,7 +46,7 @@ public final class PrayerVisualEffects {
         PrayerVfxEntity visual = new PrayerVfxEntity(level, style, start, end, owner, duration);
         level.addFreshEntity(visual);
 
-        // If the spell hits immediately (tick 0), spawn impact particles now; otherwise emit cast particles at the hand.
+        // Impacto imediato (tick 0): partículas agora; caso contrário, partículas de conjuração na mão.
         if (impactTickFor(ability) <= 0) {
             spawnImpactParticles(level, impact, ability);
         } else {
@@ -97,41 +97,13 @@ public final class PrayerVisualEffects {
         return ordinal >= 0 && ordinal < abilities.length ? abilities[ordinal] : null;
     }
 
-    /** Exact tick when the 3D projectile/strike makes visual contact with the target. */
+    /** Tick exato em que o golpe encosta no alvo. Delegado para PrayerAbility (fonte única). */
     public static int impactTickFor(PrayerAbility ability) {
-        int duration = durationFor(ability);
-        return switch (ability) {
-            case LIGHTNING_BOLT -> 20;
-            case SPARK -> 0;
-            case CHAIN_LIGHTNING -> 0;
-            case HOLY_BOLT -> (int) Math.round(duration * 0.56);
-            case FIREBALL, ICE_SHARD -> (int) Math.round(duration * 0.58);
-            case SHADOW_BOLT -> (int) Math.round(duration * 0.82); // Dano apenas na detonação do buraco negro
-            case METEOR -> (int) Math.round(duration * 0.64);
-            case CURSE_OF_WEAKNESS -> (int) Math.round(duration * 0.32);
-            case CORRUPTION -> (int) Math.round(duration * 0.46);
-            case ICE_PRISON -> (int) Math.round(duration * 0.35);
-            case DIVINE_SMITE -> Math.min(duration - 4, 18);
-            case RADIANT_NOVA, FLAME_BURST, FROST_NOVA -> 12;
-            case SOUL_EXPLOSION -> (int) Math.round(duration * 0.42);
-            case CELESTIAL_WRATH, THUNDERSTORM -> 28;
-            case STORM_JUDGMENT, ABSOLUTE_ZERO -> (int) Math.round(duration * 0.55);
-            default -> 0; // Immediate self-buffs, heals, tethers, and ground zones
-        };
+        return ability.impactTick();
     }
 
-    private static int durationFor(PrayerAbility ability) {
-        return switch (ability) {
-            case LIGHTNING_BOLT -> 30;
-            case DIVINE_HEALING -> 42;
-            case SHADOW_BOLT -> 44; // ~0.55s voo + ~1.25s sucção 4x4 + ~0.40s explosão
-            case METEOR -> 52;
-            case DIVINE_PROTECTION, SANCTUARY, DARK_PACT -> 76;
-            case CELESTIAL_WRATH, APOCALYPSE, THUNDERSTORM, ABSOLUTE_ZERO, STORM_JUDGMENT -> 88;
-            case RADIANT_NOVA, HOLY_LIGHT, SOUL_HARVEST, SOUL_EXPLOSION, UNHOLY_GROUND,
-                    FLAME_BURST, BURNING_GROUND, INFERNO, FROST_NOVA, BLIZZARD -> 64;
-            case SHADOWSTEP, PURIFICATION -> 48;
-            default -> 38;
-        };
+    /** Duração da animação. Delegado para PrayerAbility (fonte única). */
+    public static int durationFor(PrayerAbility ability) {
+        return ability.durationTicks();
     }
 }

@@ -39,6 +39,8 @@ public final class PrayerVfxEntity extends Entity {
     private static final EntityDataAccessor<Integer> OWNER = SynchedEntityData.defineId(PrayerVfxEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> TARGET = SynchedEntityData.defineId(PrayerVfxEntity.class, EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DURATION = SynchedEntityData.defineId(PrayerVfxEntity.class, EntityDataSerializers.INT);
+    /** Tempo de vida autoritativo do servidor; o cliente usa para não atrasar pelo ping. */
+    private static final EntityDataAccessor<Integer> LIFE = SynchedEntityData.defineId(PrayerVfxEntity.class, EntityDataSerializers.INT);
 
     private int life;
     private int maxLife = 24;
@@ -99,7 +101,8 @@ public final class PrayerVfxEntity extends Entity {
                 .define(END, new Vector3f())
                 .define(OWNER, -1)
                 .define(TARGET, -1)
-                .define(DURATION, 24);
+                .define(DURATION, 24)
+                .define(LIFE, 0);
     }
 
     @Override protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {}
@@ -107,8 +110,15 @@ public final class PrayerVfxEntity extends Entity {
 
     @Override public void tick() {
         super.tick();
-        life++;
         maxLife = entityData.get(DURATION);
+
+        if (level().isClientSide()) {
+            // Usa o life do servidor quando ele estiver na frente, para a animação não atrasar pelo ping.
+            life = Math.max(life + 1, entityData.get(LIFE));
+        } else {
+            life++;
+            entityData.set(LIFE, life);
+        }
 
         if (!level().isClientSide() && level() instanceof ServerLevel server) {
             if (style() == 1 && ownerId() >= 0) {
@@ -116,7 +126,7 @@ public final class PrayerVfxEntity extends Entity {
                 if (owner instanceof LivingEntity) setPos(owner.getX(), owner.getY(), owner.getZ());
             }
 
-            // Mantém o alvo sincronizado e atualiza o ponto de impacto no servidor enquanto o projétil/raio voa
+            // Mantém o alvo sincronizado e atualiza o ponto de impacto enquanto o projétil/raio voa
             if (targetUuid != null) {
                 Entity target = server.getEntity(targetUuid);
                 if (target != null && entityData.get(TARGET) != target.getId()) {

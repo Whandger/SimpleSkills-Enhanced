@@ -68,6 +68,44 @@ public enum PrayerAbility {
     }
     public boolean isUnlocked(int prayerLevel) { return prayerLevel >= requiredLevel; }
 
+    /** Duração visual e de vida da entidade VFX, em ticks. Servidor e cliente usam este valor. */
+    public int durationTicks() {
+        return switch (this) {
+            case LIGHTNING_BOLT -> 30;
+            case DIVINE_HEALING -> 42;
+            case SHADOW_BOLT -> 44;
+            case METEOR -> 52;
+            case DIVINE_PROTECTION, SANCTUARY, DARK_PACT -> 76;
+            case CELESTIAL_WRATH, APOCALYPSE, THUNDERSTORM, ABSOLUTE_ZERO, STORM_JUDGMENT -> 88;
+            case RADIANT_NOVA, HOLY_LIGHT, SOUL_HARVEST, SOUL_EXPLOSION, UNHOLY_GROUND,
+                 FLAME_BURST, BURNING_GROUND, INFERNO, FROST_NOVA, BLIZZARD -> 64;
+            case SHADOWSTEP, PURIFICATION -> 48;
+            default -> 38;
+        };
+    }
+
+    /** Tick absoluto em que o golpe encosta no alvo. Servidor, visual e som usam este valor. 0 = imediato. */
+    public int impactTick() {
+        int d = durationTicks();
+        return switch (this) {
+            case LIGHTNING_BOLT -> 20;
+            case SPARK, CHAIN_LIGHTNING -> 0;
+            case HOLY_BOLT -> (int) Math.round(d * 0.56);
+            case FIREBALL, ICE_SHARD -> (int) Math.round(d * 0.58);
+            case SHADOW_BOLT -> (int) Math.round(d * 0.82);
+            case METEOR -> (int) Math.round(d * 0.64);
+            case CURSE_OF_WEAKNESS -> (int) Math.round(d * 0.32);
+            case CORRUPTION -> (int) Math.round(d * 0.46);
+            case ICE_PRISON -> (int) Math.round(d * 0.35);
+            case DIVINE_SMITE -> Math.min(d - 4, 18);
+            case RADIANT_NOVA, FLAME_BURST, FROST_NOVA -> 12;
+            case SOUL_EXPLOSION -> (int) Math.round(d * 0.42);
+            case CELESTIAL_WRATH, THUNDERSTORM -> 28;
+            case STORM_JUDGMENT, ABSOLUTE_ZERO -> (int) Math.round(d * 0.55);
+            default -> 0;
+        };
+    }
+
     public static List<PrayerAbility> forSpecialization(PrayerSpecialization specialization) {
         return List.of(values()).stream().filter(ability -> ability.specialization == specialization).toList();
     }
