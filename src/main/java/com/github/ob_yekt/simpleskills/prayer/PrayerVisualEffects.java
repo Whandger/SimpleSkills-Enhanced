@@ -102,7 +102,7 @@ public final class PrayerVisualEffects {
         int duration = durationFor(ability);
         return switch (ability) {
             case LIGHTNING_BOLT -> (int) Math.round(Math.max(10, duration * 0.52));
-            case SPARK -> (int) Math.round(duration * 0.40);
+            case SPARK -> 0;
             case CHAIN_LIGHTNING -> (int) Math.round(duration * 0.42);
             case HOLY_BOLT -> (int) Math.round(duration * 0.56);
             case FIREBALL, ICE_SHARD -> (int) Math.round(duration * 0.58);

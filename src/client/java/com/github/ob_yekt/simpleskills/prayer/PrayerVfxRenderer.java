@@ -29,8 +29,8 @@ public final class PrayerVfxRenderer extends EntityRenderer<PrayerVfxEntity, Pra
     public void extractRenderState(PrayerVfxEntity entity, State state, float partialTick) {
         super.extractRenderState(entity, state, partialTick);
         state.style = entity.style();
-        state.end = entity.endOffset();
-        state.hand = entity.handOffset();
+        state.end = entity.endOffset(partialTick);
+        state.hand = entity.handOffset(partialTick);
         state.age = entity.life() + partialTick;
         state.duration = entity.maxLife();
         PrayerSoundtrack.update(entity, abilityOf(state.style), state.hand, state.end, state.age, state.duration);
@@ -53,7 +53,6 @@ public final class PrayerVfxRenderer extends EntityRenderer<PrayerVfxEntity, Pra
             PrayerAbility ability = abilityOf(state.style);
             if (ability != null) {
                 PrayerAbilityVfx.draw(transform, vertices, ability, state.hand, state.end, age, state.duration);
-                PrayerVfxFlair.draw(transform, vertices, ability, state.end, age, state.duration);
                 PrayerSoundtrack.drawWorldFrames(transform, vertices, ability, state.hand, state.end, age, state.duration);
             }
         });
