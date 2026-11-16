@@ -17,7 +17,7 @@ final class PrayerAbilityVfx {
     static void draw(Matrix4fc m, VertexConsumer out, PrayerAbility ability, Vec3 hand,
                      Vec3 destination, float age, int duration) {
         switch (ability) {
-            case LIGHT_ORB -> PrayerLightOrbVfx.draw(m, out, destination, age, duration);
+            case LIGHT_ORB -> PrayerLightOrbVfx.draw(m, out, age, duration);
             case DIVINE_HEALING -> PrayerDivineHealingVfx.draw(m, out, age, duration);
             case HOLY_BOLT -> PrayerHolyBoltVfx.draw(m, out, destination, age, duration);
             case PURIFICATION -> PrayerPurificationVfx.draw(m, out, age, duration);
@@ -28,7 +28,7 @@ final class PrayerAbilityVfx {
             case HOLY_LIGHT -> PrayerHolyLightVfx.draw(m, out, age, duration);
             case CELESTIAL_WRATH -> PrayerCelestialWrathVfx.draw(m, out, age, duration);
             case SHADOW_BOLT -> PrayerShadowBoltVfx.draw(m, out, destination, age, duration);
-            case LIFE_DRAIN -> PrayerLifeDrainVfx.draw(m, out, destination, age, duration);
+            case LIFE_DRAIN -> PrayerLifeDrainVfx.draw(m, out, destination.subtract(hand), age, duration);
             case CURSE_OF_WEAKNESS -> PrayerCurseOfWeaknessVfx.draw(m, out, destination, age, duration);
             case CORRUPTION -> PrayerCorruptionVfx.draw(m, out, destination, age, duration);
             case SHADOWSTEP -> PrayerShadowstepVfx.draw(m, out, destination, age, duration);
