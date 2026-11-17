@@ -6,11 +6,16 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.fish.AbstractSchoolingFish;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -19,26 +24,48 @@ import net.minecraft.world.level.Level;
  * Shared base for the added catchable fish species.
  *
  * <p>Extending AbstractSchoolingFish reuses vanilla fish water physics, swim control,
- * navigation, wandering and group-following behaviour instead of approximating a school manually.
- * Bucket interaction is disabled because these species are not designed to be bucket items.</p>
+ * navigation, wandering and school-following behaviour instead of approximating them with a
+ * generic WaterAnimal. Bucket interaction is disabled because these species are not designed
+ * to be bucket items.</p>
  */
-public final class FishingFishEntity extends AbstractSchoolingFish {
+public final class FishingFishEntity extends AbstractSchoolingFish implements AquaticSizeHolder {
+    private static final EntityDataAccessor<Float> DATA_AQUATIC_SCALE =
+            SynchedEntityData.defineId(FishingFishEntity.class, EntityDataSerializers.FLOAT);
+
     public FishingFishEntity(EntityType<? extends FishingFishEntity> type, Level level) {
         super(type, level);
     }
 
-
-    /** Maximum number of same-species fish that can remain in this natural school. */
     @Override
-    public int getMaxSchoolSize() {
-        FishSpecies species = FishSpecies.of(this);
-        return species == null ? 4 : species.spawnProfile().maxSchoolSize();
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_AQUATIC_SCALE, 1.0F);
     }
 
-    /** Keep the natural spawn cluster consistent with the school limit. */
     @Override
-    public int getMaxSpawnClusterSize() {
-        return getMaxSchoolSize();
+    public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+        super.onSyncedDataUpdated(accessor);
+        if (DATA_AQUATIC_SCALE.equals(accessor)) {
+            this.refreshDimensions();
+        }
+    }
+
+    @Override
+    public float simpleskills$getAquaticScale() {
+        return this.entityData.get(DATA_AQUATIC_SCALE);
+    }
+
+    @Override
+    public void simpleskills$setAquaticScale(float scale) {
+        if (this.level().isClientSide()) return;
+        float clamped = Math.max(0.72F, Math.min(1.48F, scale));
+        if (Math.abs(this.entityData.get(DATA_AQUATIC_SCALE) - clamped) < 0.001F) return;
+        this.entityData.set(DATA_AQUATIC_SCALE, clamped);
+    }
+
+    @Override
+    protected EntityDimensions getDefaultDimensions(Pose pose) {
+        return super.getDefaultDimensions(pose).scale(this.simpleskills$getAquaticScale());
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -46,6 +73,21 @@ public final class FishingFishEntity extends AbstractSchoolingFish {
                 .add(Attributes.MAX_HEALTH, 4.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.18D)
                 .add(Attributes.FOLLOW_RANGE, 20.0D);
+    }
+
+    /**
+     * Uses the per-species school size from the spawn profile. The vanilla schooling-fish AI
+     * then keeps spawned followers swimming with their leader instead of scattering immediately.
+     */
+    @Override
+    public int getMaxSchoolSize() {
+        FishSpecies species = FishSpecies.of(this);
+        return species == null ? 1 : species.spawnProfile().maxSchoolSize();
+    }
+
+    @Override
+    public int getMaxSpawnClusterSize() {
+        return getMaxSchoolSize();
     }
 
     private boolean usesSalmonSounds() {

@@ -6,11 +6,16 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.fish.AbstractFish;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.core.particles.ParticleTypes;
@@ -20,7 +25,14 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
 /** Ambient whale/orca entity. It is deliberately not registered in FishSpecies or fish loot tables. */
-public final class MarineMammalEntity extends AbstractFish {
+public final class MarineMammalEntity extends AbstractFish implements AquaticSizeHolder {
+    private static final EntityDataAccessor<Float> DATA_AQUATIC_SCALE =
+            SynchedEntityData.defineId(MarineMammalEntity.class, EntityDataSerializers.FLOAT);
+    private static final FishSizeModel.Profile ORCA_SIZE =
+            new FishSizeModel.Profile(450.0, 900.0, 1.6e-5, 3.0);
+    private static final FishSizeModel.Profile HUMPBACK_SIZE =
+            new FishSizeModel.Profile(1100.0, 1600.0, 1.2e-5, 3.0);
+
     private final boolean orca;
 
     public MarineMammalEntity(EntityType<? extends MarineMammalEntity> type, Level level) {
@@ -29,6 +41,47 @@ public final class MarineMammalEntity extends AbstractFish {
     }
 
     public boolean isOrca() { return orca; }
+
+    public FishSizeModel.Profile sizeProfile() {
+        return orca ? ORCA_SIZE : HUMPBACK_SIZE;
+    }
+
+    /** Orcas are scaled up substantially; humpbacks remain the largest of the two mammals. */
+    public float getBaseVisualScale() {
+        return orca ? 1.90F : 2.10F;
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_AQUATIC_SCALE, 1.0F);
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+        super.onSyncedDataUpdated(accessor);
+        if (DATA_AQUATIC_SCALE.equals(accessor)) {
+            this.refreshDimensions();
+        }
+    }
+
+    @Override
+    public float simpleskills$getAquaticScale() {
+        return this.entityData.get(DATA_AQUATIC_SCALE);
+    }
+
+    @Override
+    public void simpleskills$setAquaticScale(float scale) {
+        if (this.level().isClientSide()) return;
+        float clamped = Math.max(1.25F, Math.min(3.15F, scale));
+        if (Math.abs(this.entityData.get(DATA_AQUATIC_SCALE) - clamped) < 0.001F) return;
+        this.entityData.set(DATA_AQUATIC_SCALE, clamped);
+    }
+
+    @Override
+    protected EntityDimensions getDefaultDimensions(Pose pose) {
+        return super.getDefaultDimensions(pose).scale(this.simpleskills$getAquaticScale());
+    }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()

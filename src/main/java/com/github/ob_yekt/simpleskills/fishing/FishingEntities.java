@@ -24,8 +24,8 @@ public final class FishingEntities {
     public static final EntityType<FishingFishEntity> GREAT_WHITE_SHARK = fish("great_white_shark", 2.80F, 1.55F);
     public static final EntityType<FishingFishEntity> WHALE_SHARK = fish("whale_shark", 4.00F, 2.20F);
 
-    public static final EntityType<MarineMammalEntity> HUMPBACK_WHALE = mammal("humpback_whale", 6.8F, 3.2F);
-    public static final EntityType<MarineMammalEntity> ORCA = mammal("orca", 3.2F, 1.8F);
+    public static final EntityType<MarineMammalEntity> HUMPBACK_WHALE = mammal("humpback_whale", 5.1F, 1.8F);
+    public static final EntityType<MarineMammalEntity> ORCA = mammal("orca", 3.8F, 1.3F);
 
     private FishingEntities() {}
 
@@ -36,7 +36,7 @@ public final class FishingEntities {
     private static EntityType<FishingFishEntity> fish(String path, float width, float height) {
         Identifier id = Identifier.fromNamespaceAndPath(Simpleskills.MOD_ID, path);
         EntityType<FishingFishEntity> type = Registry.register(BuiltInRegistries.ENTITY_TYPE, id,
-                EntityType.Builder.<FishingFishEntity>of(FishingFishEntity::new, MobCategory.WATER_AMBIENT)
+                EntityType.Builder.<FishingFishEntity>of(FishingFishEntity::new, MobCategory.WATER_CREATURE)
                         .sized(width, height).clientTrackingRange(10).updateInterval(3)
                         .build(ResourceKey.create(Registries.ENTITY_TYPE, id)));
         FabricDefaultAttributeRegistry.register(type, FishingFishEntity.createAttributes());

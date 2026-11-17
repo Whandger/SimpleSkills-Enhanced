@@ -65,6 +65,14 @@ public final class FishSizeModel {
     }
 
     /**
+     * Render/body scale derived from the weight ratio. Since weight follows approximately length cubed,
+     * the cube root produces a length-like multiplier. Clamps keep rare outliers visually plausible.
+     */
+    public static double visualScale(Profile profile, double weightKg) {
+        return clamp(Math.cbrt(sizeRatio(profile, weightKg)), 0.72, 1.48);
+    }
+
+    /**
      * Fight strength multiplier: a typical fish is 1.0, a 4x heavier one 1.35 (limit), a 4x lighter one 0.80.
      * It scales how hard the fish pulls and how well it resists the player's counter-movements.
      */

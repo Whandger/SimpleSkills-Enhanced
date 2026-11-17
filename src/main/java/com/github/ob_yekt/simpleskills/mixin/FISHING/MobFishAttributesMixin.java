@@ -2,7 +2,8 @@ package com.github.ob_yekt.simpleskills.mixin.FISHING;
 
 import com.github.ob_yekt.simpleskills.fishing.FishAttributeHolder;
 import com.github.ob_yekt.simpleskills.fishing.FishAttributes;
-import com.github.ob_yekt.simpleskills.fishing.FishSpecies;
+import com.github.ob_yekt.simpleskills.fishing.FishSizeModel;
+import com.github.ob_yekt.simpleskills.fishing.AquaticSizeHolder;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -14,8 +15,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 /**
- * Gives every fish of a registered species its own weight and length, stored on the entity and saved
- * with it.
+ * Gives every custom fish and marine mammal its own weight and length, stored on the entity and saved
+ * with it. The resulting body scale is also synchronized to clients.
  *
  * <p>The size is rolled once, the first time the fish is ticked on the server, unless it was already
  * loaded from NBT. Mobs that are not registered fish only pay one boolean check, once.</p>
@@ -32,9 +33,10 @@ public abstract class MobFishAttributesMixin implements FishAttributeHolder {
         this.simpleskills$checked = true;
         Mob self = (Mob) (Object) this;
         if (self.level().isClientSide() || this.simpleskills$attributes != null) return;
-        FishSpecies species = FishSpecies.of(self);
-        if (species != null) {
-            this.simpleskills$attributes = FishAttributes.generate(species, self.getRandom());
+        FishSizeModel.Profile profile = FishAttributes.profileFor(self);
+        if (profile != null) {
+            this.simpleskills$attributes = FishAttributes.generate(profile, self.getRandom());
+            simpleskills$syncAquaticScale(self, this.simpleskills$attributes);
         }
     }
 
@@ -54,6 +56,8 @@ public abstract class MobFishAttributesMixin implements FishAttributeHolder {
                 input.getFloatOr(FishAttributes.NBT_LENGTH, 0.0F));
         if (loaded.isValid()) {
             this.simpleskills$attributes = loaded;
+            this.simpleskills$checked = true;
+            simpleskills$syncAquaticScale((Mob) (Object) this, loaded);
         }
     }
 
@@ -66,5 +70,15 @@ public abstract class MobFishAttributesMixin implements FishAttributeHolder {
     public void simpleskills$setFishAttributes(@Nullable FishAttributes attributes) {
         this.simpleskills$attributes = attributes;
         this.simpleskills$checked = true;
+        if (attributes != null) {
+            simpleskills$syncAquaticScale((Mob) (Object) this, attributes);
+        }
+    }
+
+    @Unique
+    private static void simpleskills$syncAquaticScale(Mob mob, FishAttributes attributes) {
+        if (mob instanceof AquaticSizeHolder holder) {
+            holder.simpleskills$setAquaticScale(FishAttributes.visualScaleFor(mob, attributes));
+        }
     }
 }

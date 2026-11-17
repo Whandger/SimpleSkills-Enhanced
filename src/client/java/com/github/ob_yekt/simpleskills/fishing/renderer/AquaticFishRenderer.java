@@ -24,6 +24,12 @@ public final class AquaticFishRenderer extends MobRenderer<FishingFishEntity, Li
     @Override public LivingEntityRenderState createRenderState() { return new LivingEntityRenderState(); }
     @Override public Identifier getTextureLocation(LivingEntityRenderState state) { return texture; }
 
+    @Override
+    public void extractRenderState(FishingFishEntity entity, LivingEntityRenderState state, float partialTick) {
+        super.extractRenderState(entity, state, partialTick);
+        state.scale *= entity.simpleskills$getAquaticScale();
+    }
+
 @Override
     protected void setupRotations(LivingEntityRenderState state, PoseStack poseStack, float bodyRot, float entityScale) {
         super.setupRotations(state, poseStack, bodyRot, entityScale);

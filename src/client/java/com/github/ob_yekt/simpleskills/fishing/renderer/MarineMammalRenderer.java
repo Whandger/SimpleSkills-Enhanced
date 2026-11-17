@@ -25,6 +25,12 @@ public final class MarineMammalRenderer extends MobRenderer<MarineMammalEntity, 
     @Override public Identifier getTextureLocation(LivingEntityRenderState state) { return texture; }
 
     @Override
+    public void extractRenderState(MarineMammalEntity entity, LivingEntityRenderState state, float partialTick) {
+        super.extractRenderState(entity, state, partialTick);
+        state.scale *= entity.simpleskills$getAquaticScale();
+    }
+
+    @Override
     protected void setupRotations(LivingEntityRenderState state, PoseStack poseStack, float bodyRot, float entityScale) {
         super.setupRotations(state, poseStack, bodyRot, entityScale);
         poseStack.rotateDegrees(Axis.YP, 1.2F * Mth.sin(0.28F * state.ageInTicks));
