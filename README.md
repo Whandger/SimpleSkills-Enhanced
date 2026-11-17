@@ -241,17 +241,17 @@ Each species has its own fight characteristics, XP multiplier, habitat preferenc
 | Salmon | 1.20× | 0.85× | 1.15× | 1 |
 | Tropical Fish | 0.85× | 1.15× | 1.30× | 1 |
 | Pufferfish | 1.10× | 0.90× | 1.50× | 25 |
-| Trout | 1.05× | 1.00× | 1.05× | 5 |
-| Largemouth Bass | 1.20× | 0.90× | 1.15× | 10 |
-| Catfish | 1.35× | 0.75× | 1.35× | 20 |
-| Northern Pike | 1.55× | 0.82× | 1.45× | 30 |
-| Carp | 1.15× | 0.88× | 1.10× | 10 |
-| Tuna | 1.65× | 0.72× | 1.80× | 35 |
-| Swordfish | 1.95× | 0.68× | 2.10× | 55 |
-| Mahi-mahi | 1.35× | 0.84× | 1.55× | 30 |
-| Reef Shark | 2.00× | 0.62× | 2.30× | 60 |
-| Great White Shark | 2.65× | 0.55× | 2.80× | 80 |
-| Whale Shark | 2.80× | 0.50× | 3.00× | 90 |
+| Trout | 1.05× | 1.00× | 1.05× | 1 |
+| Largemouth Bass | 1.20× | 0.90× | 1.15× | 1 |
+| Catfish | 1.35× | 0.75× | 1.35× | 5 |
+| Northern Pike | 1.55× | 0.82× | 1.45× | 5 |
+| Carp | 1.15× | 0.88× | 1.10× | 1 |
+| Tuna | 1.65× | 0.72× | 1.80× | 15 |
+| Swordfish | 1.95× | 0.68× | 2.10× | 15 |
+| Mahi-mahi | 1.35× | 0.84× | 1.55× | 10 |
+| Reef Shark | 2.00× | 0.62× | 2.30× | 20 |
+| Great White Shark | 2.65× | 0.55× | 2.80× | 25 |
+| Whale Shark | 2.80× | 0.50× | 3.00× | 25 |
 
 ![New Fish Species](https://media.forgecdn.net/attachments/2225/242/preview_all_species-png.png)
 
