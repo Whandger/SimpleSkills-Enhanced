@@ -180,7 +180,6 @@ Every completed investigation grants **40 base XP**, even when Nothing is found.
 - Fish movement is controlled during an active fishing session and returns to normal AI when the session ends.
 
 ![Fishing Minigame](docs/images/fish-minigame.gif)
-![Fishing Minigame Preview](https://media.forgecdn.net/attachments/2172/431/ezgif-81ba8e1b218f3059-gif.gif)
 
 #### Individual Fish Attributes — Weight & Length
 
@@ -229,7 +228,6 @@ The screen includes:
 The results screen makes each successful fishing session more rewarding by showing the characteristics of the fish and the experience gained.
 
 ![Fishing Catch Results](docs/images/fish-catch-hub.gif)
-![Fishing Catch Results Preview](https://media.forgecdn.net/attachments/2172/442/fish-catch-hub-gif.gif)
 
 #### Supported Fish Species
 
