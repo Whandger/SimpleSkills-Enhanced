@@ -159,27 +159,28 @@ Every completed investigation grants **40 base XP**, even when Nothing is found.
 #### Real-Time Fishing Minigame
 
 - Replaces the vanilla random fishing-bite process with a minigame driven by real fish entities in the world.
-- Supports **Cod, Salmon, Tropical Fish, and Pufferfish**.
+- Supports **15 catchable fish species**, including the four original vanilla species and eleven additional species.
 - The actual fish species determines the main fish item delivered after a successful catch.
 - Fishing sessions progress through five stages:
 
-  **Settling → Waiting → Approaching → Biting → Fighting**
+  **Settling → Waiting → Approaching → Biting → Fighting**
 
 - Fish swim toward the bait before biting.
 - The player must right-click during the bite window to start the fight.
 - During the fight, fish pull left, pull right, or pause.
 - Players counter their movement by turning the camera in the opposite direction and reel using the use key.
 - The HUD displays:
-  - Line tension.
-  - Fish fatigue.
-  - Reeling progress.
-  - Fish movement.
+  - Line tension.
+  - Fish fatigue.
+  - Reeling progress.
+  - Fish movement.
 - Excessive line tension breaks the fishing line.
 - Failed catches allow the fish to escape without rewards.
 - Fish can react to nearby players through configurable hearing and vision behavior.
 - Fish movement is controlled during an active fishing session and returns to normal AI when the session ends.
 
 ![Fishing Minigame](docs/images/fish-minigame.gif)
+![Fishing Minigame Preview](https://media.forgecdn.net/attachments/2172/431/ezgif-81ba8e1b218f3059-gif.gif)
 
 #### Individual Fish Attributes — Weight & Length
 
@@ -188,7 +189,7 @@ Every caught fish has its own individual physical characteristics.
 - Each fish receives individual **weight and length attributes**.
 - These attributes make catches more varied: two fish of the same species can have different sizes and weights.
 - Fish attributes are associated with the individual fish rather than being fixed values for the entire species.
-- Supported fish include Cod, Salmon, Tropical Fish, and Pufferfish.
+- Individual attributes are supported by all catchable fish species.
 - Tropical Fish variants are also supported.
 
 #### Size-Based Fishing Difficulty
@@ -210,13 +211,13 @@ Fishing XP is calculated using the individual characteristics of the caught fish
 - Smaller catches generally provide less XP.
 - XP scaling uses a square-root-based size calculation.
 - Size-based XP scaling is clamped between **0.6× and 2.0×**.
-- The maximum reward is capped at **3× the base XP**.
+- The maximum reward is capped at **3× the base XP**, including the species XP multiplier.
 - The final XP reward is calculated server-side and integrated into the normal Fishing skill progression.
 - The actual XP awarded is displayed on the fishing catch results screen.
 
 #### Fishing Catch Results Screen
 
-After successfully catching a fish, a new results screen displays information about the catch.
+After successfully catching a fish, a results screen displays information about the catch.
 
 The screen includes:
 
@@ -228,18 +229,11 @@ The screen includes:
 The results screen makes each successful fishing session more rewarding by showing the characteristics of the fish and the experience gained.
 
 ![Fishing Catch Results](docs/images/fish-catch-hub.gif)
-
-#### Fishing Ecosystem
-
-- Validates fishing locations using connected water volume and water depth.
-- Searches for eligible fish already present in the environment before replenishing the local population.
-- Can discreetly spawn supported fish when the local population is below the configured target.
-- Spawn positions are selected away from the bait and player, with preference for deeper water and locations outside the player's field of view.
-- Small puddles, shallow water, and locations without sufficient connected water are rejected.
-- The configured minimum fish count is a replenishment target, not a strict requirement.
-- Fishing can proceed when at least one eligible fish is available.
+![Fishing Catch Results Preview](https://media.forgecdn.net/attachments/2172/442/fish-catch-hub-gif.gif)
 
 #### Supported Fish Species
+
+Each species has its own fight characteristics, XP multiplier, habitat preferences, and default minimum Fishing level.
 
 | Species | Pull Strength | Fatigue Factor | XP Multiplier | Default Minimum Level |
 |:--|--:|--:|--:|--:|
@@ -247,6 +241,41 @@ The results screen makes each successful fishing session more rewarding by showi
 | Salmon | 1.20× | 0.85× | 1.15× | 1 |
 | Tropical Fish | 0.85× | 1.15× | 1.30× | 1 |
 | Pufferfish | 1.10× | 0.90× | 1.50× | 25 |
+| Trout | 1.05× | 1.00× | 1.05× | 5 |
+| Largemouth Bass | 1.20× | 0.90× | 1.15× | 10 |
+| Catfish | 1.35× | 0.75× | 1.35× | 20 |
+| Northern Pike | 1.55× | 0.82× | 1.45× | 30 |
+| Carp | 1.15× | 0.88× | 1.10× | 10 |
+| Tuna | 1.65× | 0.72× | 1.80× | 35 |
+| Swordfish | 1.95× | 0.68× | 2.10× | 55 |
+| Mahi-mahi | 1.35× | 0.84× | 1.55× | 30 |
+| Reef Shark | 2.00× | 0.62× | 2.30× | 60 |
+| Great White Shark | 2.65× | 0.55× | 2.80× | 80 |
+| Whale Shark | 2.80× | 0.50× | 3.00× | 90 |
+
+![New Fish Species](https://media.forgecdn.net/attachments/2225/242/preview_all_species-png.png)
+
+#### Marine Wildlife
+
+The aquatic ecosystem also includes marine mammals that inhabit the oceans:
+
+- **Humpback Whale:** A large marine mammal entity with its own model and texture.
+- **Orca:** A marine mammal entity with its own model and texture.
+- These animals are ambient wildlife and are **not catchable fish species**.
+
+#### Fishing Ecosystem
+
+- Validates fishing locations using connected water volume and water depth.
+- Fish species have habitat preferences based on biome, water temperature, and habitat conditions.
+- Natural spawning adds supported species to suitable biome spawn tables according to their habitat profiles and configured spawn weights.
+- Species with depth requirements only spawn where the available water column is deep enough.
+- Searches for eligible fish already present in the environment before replenishing the local population.
+- Can discreetly spawn supported fish when the local population is below the configured target.
+- Spawn positions are selected away from the bait and player, with preference for deeper water and locations outside the player's field of view.
+- Small puddles, shallow water, and locations without sufficient connected water are rejected.
+- The configured minimum fish count is a replenishment target, not a strict requirement.
+- Fishing can proceed when at least one eligible fish is available.
+- A configurable maximum population prevents unlimited spawning.
 
 #### Fishing Progression
 
@@ -259,9 +288,12 @@ Fishing levels improve several aspects of the minigame:
 
 These bonuses can be individually configured.
 
+The original fishing speed bonus can also be disabled independently through `fishing_speed_bonus_enabled`.
+
 #### Fishing Rewards
 
 - Successfully caught fish are delivered as their corresponding fish items.
+- The additional fish species have their own raw and cooked food items.
 - Each successful catch performs a single bonus-loot roll.
 - Bonus loot can include junk and treasure.
 - Fish-category rewards are excluded because the main fish is already delivered separately.
@@ -270,9 +302,9 @@ These bonuses can be individually configured.
 - Successful catches grant Fishing XP based on configured catch XP, the caught species' XP multiplier, and the individual fish's size and weight.
 - Successful catches consume 1 fishing rod durability point.
 - Escaped fish grant no catch rewards or XP.
-- When the fishing line breaks, the configured durability penalty is applied.
+- When the fishing line breaks, the configured durability penalty is applied (default: 3).
 
-#### Fishing Diagnostics
+#### Fishing Diagnostics & Configuration
 
 Use the following command to toggle detailed fishing diagnostics for your player:
 
@@ -287,6 +319,15 @@ Diagnostic messages help investigate:
 - Fish approach.
 - Bite timing.
 - Fight behavior.
+
+Fishing configuration includes:
+
+- Detection range, attraction speed, flee range, hearing, and vision.
+- Fish fatigue, line tension, line recovery, and bite window.
+- Fishing rod durability penalties.
+- Minimum water volume and depth, fish population targets, and maximum population.
+- Natural spawning settings and species-specific minimum Fishing levels.
+
 
 ### ⚔️ Slaying
 
