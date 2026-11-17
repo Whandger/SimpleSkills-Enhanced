@@ -5,17 +5,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.core.Holder;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -26,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import com.github.ob_yekt.simpleskills.Skills;
+import com.github.ob_yekt.simpleskills.managers.XPManager;
 
 /**
  * Decides whether a spot is a real fishing spot and keeps its fish population healthy.
@@ -48,7 +45,7 @@ public final class FishingEcosystem {
     private static final int FILL_RADIUS_H = 8;
     private static final int FILL_RADIUS_V = 6;
     /** How far under the bait fish are searched for. */
-    public static final double SEARCH_DEPTH = 14.0;
+    public static final double SEARCH_DEPTH = 26.0;
     private static final int DEEP_SPAWN_DEPTH = 10;
     private static final long CACHE_TICKS = 400L;
     private static final int CACHE_MAX = 512;
@@ -89,7 +86,11 @@ public final class FishingEcosystem {
         }
 
         int minFish = FishingConfig.minFishCount();
-        int existing = nearbyFish(level, bait).size();
+        int fishingLevel = XPManager.getSkillLevel(player.getStringUUID(), Skills.FISHING);
+        int existing = (int) nearbyFish(level, bait).stream()
+                .map(FishSpecies::of)
+                .filter(species -> species != null && fishingLevel >= FishingConfig.minLevelFor(species))
+                .count();
         int count = existing;
         int spawned = 0;
         if (count < minFish && FishingConfig.isSpawnEnabled()) {
@@ -103,7 +104,7 @@ public final class FishingEcosystem {
         return count >= 1 ? Result.OK : Result.NO_FISH;
     }
 
-    /** Every handled fish near the bait (alive, swimming, vanilla species). */
+    /** Every alive, swimming fish species registered for the fishing minigame. */
     public static List<Mob> nearbyFish(ServerLevel level, BlockPos bait) {
         double range = FishingConfig.detectionRange();
         // Wide on the horizontal plane, deep downwards: ocean fish live up to ~13 blocks under the surface.
@@ -202,54 +203,66 @@ public final class FishingEcosystem {
         Vec3 eye = player.getEyePosition();
         Vec3 look = player.getLookAngle();
         Vec3 baitCenter = Vec3.atCenterOf(bait);
+        int fishingLevel = XPManager.getSkillLevel(player.getStringUUID(), Skills.FISHING);
 
         int spawned = 0;
-        int attempts = want * 12;
+        int attempts = Math.max(18, want * 18);
         while (spawned < want && attempts-- > 0) {
             double angle = random.nextDouble() * Math.PI * 2.0;
             double distance = 4.5 + random.nextDouble() * Math.max(1.0, range - 4.5);
             int x = Mth.floor(bait.getX() + 0.5 + Math.cos(angle) * distance);
             int z = Mth.floor(bait.getZ() + 0.5 + Math.sin(angle) * distance);
-            int y = bait.getY() - (1 + random.nextInt(11));
+            int y = bait.getY() - (1 + random.nextInt(15));
             BlockPos pos = new BlockPos(x, y, z);
 
             if (!isWater(level, pos) || !isWater(level, pos.above())) continue;
-
-            int surfaceDepth = waterDepthAbove(level, pos, 14) + 1; // blocks of water over the fish
-            if (surfaceDepth < 2) continue; // never in the top layer
+            int waterColumn = waterDepthAbove(level, pos, 32) + waterDepthBelow(level, pos, 32);
+            if (waterColumn < 2) continue;
 
             Vec3 center = Vec3.atCenterOf(pos);
-            if (center.distanceToSqr(player.position()) < 36.0) continue;       // >= 6 blocks from the player
-            if (center.distanceToSqr(baitCenter) < 4.0 * 4.0) continue;         // >= 4 blocks from the bait
+            if (center.distanceToSqr(player.position()) < 36.0) continue;
+            if (center.distanceToSqr(baitCenter) < 16.0) continue;
 
-            // Must not pop up in front of the player unless it is deep enough to be unnoticeable.
+            int depthFromSurface = waterDepthAbove(level, pos, 32) + 1;
             boolean inView = look.dot(center.subtract(eye).normalize()) > 0.30;
-            if (inView && surfaceDepth < DEEP_SPAWN_DEPTH) continue;
 
-            EntityType<? extends Mob> type = pickSpecies(level, pos, random);
-            Mob fish = type.spawn(level, pos, EntitySpawnReason.EVENT);
+            FishHabitat habitat = FishHabitat.fromBiome(level.getBiome(pos));
+            // Keep the sampled position effectively final for the species-selection predicate.
+            // The spawn position may be adjusted for preferred depth later in this loop.
+            BlockPos populationCheckPos = pos;
+            FishSpecies species = FishSpecies.pickWeighted(habitat, waterColumn, random::nextDouble, candidate ->
+                    fishingLevel >= FishingConfig.minLevelFor(candidate)
+                            && countSpecies(level, populationCheckPos, candidate)
+                                    < FishingConfig.maxPopulationFor(candidate));
+            if (species == null) continue;
+
+            int preferred = species.spawnProfile().preferredDepth();
+            if (species.spawnProfile().large() && waterColumn < preferred) continue;
+            int targetDepth = species.spawnProfile().large() ? preferred : Math.max(1, preferred / 2);
+            if (depthFromSurface < targetDepth) {
+                pos = pos.below(targetDepth - depthFromSurface);
+                if (!isWater(level, pos) || !isWater(level, pos.above())) continue;
+                depthFromSurface = targetDepth;
+            }
+            if (inView && depthFromSurface < DEEP_SPAWN_DEPTH) continue;
+            Mob fish = species.entityType().spawn(level, pos, EntitySpawnReason.EVENT);
             if (fish != null) {
                 spawned++;
+                traceSpawn(player, species, habitat, waterColumn);
             }
         }
         return spawned;
     }
 
-    /** Species that fits the biome: warm waters get tropical fish and pufferfish, the rest cod and salmon. */
-    private static EntityType<? extends Mob> pickSpecies(ServerLevel level, BlockPos pos, RandomSource random) {
-        Holder<Biome> biome = level.getBiome(pos);
-        float temperature = biome.value().getBaseTemperature();
-        double roll = random.nextDouble();
-        if (biome.is(BiomeTags.IS_RIVER)) {
-            return roll < 0.65 ? EntityTypes.SALMON : EntityTypes.COD;
-        }
-        if (temperature >= 0.95F) {
-            return roll < 0.65 ? EntityTypes.TROPICAL_FISH : EntityTypes.PUFFERFISH;
-        }
-        if (temperature <= 0.3F) {
-            return roll < 0.5 ? EntityTypes.SALMON : EntityTypes.COD;
-        }
-        return roll < 0.65 ? EntityTypes.COD : EntityTypes.SALMON;
+    private static int countSpecies(ServerLevel level, BlockPos center, FishSpecies species) {
+        AABB box = new AABB(center).inflate(36.0, 18.0, 36.0);
+        return level.getEntitiesOfClass(Mob.class, box,
+                mob -> mob.isAlive() && mob.getType() == species.entityType()).size();
+    }
+
+    private static void traceSpawn(ServerPlayer player, FishSpecies species, FishHabitat habitat, int depth) {
+        FishingDebug.trace(player, "ecosystem replenished " + species.configKey()
+                + " | habitat=" + habitat + " | water column=" + depth);
     }
 
     /** Forget cached results (server stop / reload). */

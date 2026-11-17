@@ -1,0 +1,157 @@
+package com.github.ob_yekt.simpleskills.fishing;
+
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.animal.fish.AbstractSchoolingFish;
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+
+/**
+ * Shared base for the added catchable fish species.
+ *
+ * <p>Extending AbstractSchoolingFish reuses vanilla fish water physics, swim control,
+ * navigation, wandering and school-following behaviour instead of approximating them with a
+ * generic WaterAnimal. Bucket interaction is disabled because these species are not designed
+ * to be bucket items.</p>
+ */
+public final class FishingFishEntity extends AbstractSchoolingFish implements AquaticSizeHolder {
+    private static final EntityDataAccessor<Float> DATA_AQUATIC_SCALE =
+            SynchedEntityData.defineId(FishingFishEntity.class, EntityDataSerializers.FLOAT);
+
+    public FishingFishEntity(EntityType<? extends FishingFishEntity> type, Level level) {
+        super(type, level);
+    }
+
+    @Override
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+        super.defineSynchedData(builder);
+        builder.define(DATA_AQUATIC_SCALE, 1.0F);
+    }
+
+    @Override
+    public void onSyncedDataUpdated(EntityDataAccessor<?> accessor) {
+        super.onSyncedDataUpdated(accessor);
+        if (DATA_AQUATIC_SCALE.equals(accessor)) {
+            this.refreshDimensions();
+        }
+    }
+
+    @Override
+    public float simpleskills$getAquaticScale() {
+        return this.entityData.get(DATA_AQUATIC_SCALE);
+    }
+
+    @Override
+    public void simpleskills$setAquaticScale(float scale) {
+        if (this.level().isClientSide()) return;
+        float clamped = Math.max(0.72F, Math.min(1.48F, scale));
+        if (Math.abs(this.entityData.get(DATA_AQUATIC_SCALE) - clamped) < 0.001F) return;
+        this.entityData.set(DATA_AQUATIC_SCALE, clamped);
+    }
+
+    @Override
+    protected EntityDimensions getDefaultDimensions(Pose pose) {
+        return super.getDefaultDimensions(pose).scale(this.simpleskills$getAquaticScale());
+    }
+
+    public static AttributeSupplier.Builder createAttributes() {
+        return Mob.createMobAttributes()
+                .add(Attributes.MAX_HEALTH, 4.0D)
+                .add(Attributes.MOVEMENT_SPEED, 0.18D)
+                .add(Attributes.FOLLOW_RANGE, 20.0D);
+    }
+
+    /**
+     * Uses the per-species school size from the spawn profile. The vanilla schooling-fish AI
+     * then keeps spawned followers swimming with their leader instead of scattering immediately.
+     */
+    @Override
+    public int getMaxSchoolSize() {
+        FishSpecies species = FishSpecies.of(this);
+        return species == null ? 1 : species.spawnProfile().maxSchoolSize();
+    }
+
+    @Override
+    public int getMaxSpawnClusterSize() {
+        return getMaxSchoolSize();
+    }
+
+    private boolean usesSalmonSounds() {
+        String path = BuiltInRegistries.ENTITY_TYPE.getKey(getType()).getPath();
+        return path.equals("trout") || path.equals("tuna")
+                || path.equals("swordfish") || path.equals("mahi_mahi");
+    }
+
+    @Override
+    protected SoundEvent getAmbientSound() {
+        return usesSalmonSounds() ? SoundEvents.SALMON_AMBIENT : SoundEvents.COD_AMBIENT;
+    }
+
+    @Override
+    protected SoundEvent getHurtSound(DamageSource source) {
+        return usesSalmonSounds() ? SoundEvents.SALMON_HURT : SoundEvents.COD_HURT;
+    }
+
+    @Override
+    protected SoundEvent getDeathSound() {
+        return usesSalmonSounds() ? SoundEvents.SALMON_DEATH : SoundEvents.COD_DEATH;
+    }
+
+    @Override
+    protected SoundEvent getFlopSound() {
+        return usesSalmonSounds() ? SoundEvents.SALMON_FLOP : SoundEvents.COD_FLOP;
+    }
+
+    /** AbstractFish implements Bucketable; these ambient species deliberately have no bucket item. */
+    @Override
+    public ItemStack getBucketItemStack() {
+        return ItemStack.EMPTY;
+    }
+
+    /** Explicitly reject bucket pickup even if another interaction path checks Bucketable directly. */
+    @Override
+    public boolean canBePickedUpWithBucket(ItemStack bucket) {
+        return false;
+    }
+
+    /** These fish intentionally cannot be picked up with a water bucket. */
+    @Override
+    protected InteractionResult mobInteract(Player player, InteractionHand hand) {
+        return InteractionResult.PASS;
+    }
+
+    /** Keep the rendered fish targetable by vanilla player and projectile hit tests. */
+    @Override
+    public boolean isPickable() {
+        return this.isAlive();
+    }
+
+    @Override
+    public boolean isAttackable() {
+        return this.isAlive();
+    }
+
+    @Override
+    public boolean canBeHitByProjectile() {
+        return this.isAlive();
+    }
+
+    @Override
+    public boolean isPushedByFluid() {
+        return false;
+    }
+}

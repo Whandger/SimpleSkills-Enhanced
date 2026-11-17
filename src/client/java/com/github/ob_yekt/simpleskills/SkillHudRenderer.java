@@ -15,12 +15,12 @@ import net.minecraft.resources.Identifier;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Locale;
 import java.util.UUID;
 
 public class SkillHudRenderer implements HudElement {
     private static final Identifier HUD_ID = Identifier.fromNamespaceAndPath("simpleskills", "skill_hud");
     private static final Map<UUID, Boolean> playerHudVisibility = new HashMap<>();
-    private static final int MAX_SKILL_NAME_LENGTH = getMaxSkillNameLength();
     private static final int PADDING = 3;
     private static final int LINE_HEIGHT = 8;
     private static final int BAR_WIDTH = 40;
@@ -70,14 +70,6 @@ public class SkillHudRenderer implements HudElement {
 
     public static void register() {
         HudElementRegistry.attachElementAfter(VanillaHudElements.BOSS_BAR, HUD_ID, new SkillHudRenderer());
-    }
-
-    private static int getMaxSkillNameLength() {
-        int maxLength = 0;
-        for (Skills skill : Skills.values()) {
-            maxLength = Math.max(maxLength, skill.getDisplayName().length());
-        }
-        return maxLength;
     }
 
     public static void toggleHudVisibility() {
@@ -180,18 +172,22 @@ public class SkillHudRenderer implements HudElement {
         for (Skills skillEnum : Skills.values()) {
             String skillName = skillEnum.getId();
             DatabaseManager.SkillData skill = skills.getOrDefault(skillName, new DatabaseManager.SkillData(0, 1));
-            String skillDisplayName = skillEnum.getDisplayName();
+            Component skillDisplayName = getSkillDisplayName(skillEnum);
             int lineWidth;
 
             if (skill.level() == XPManager.getMaxLevel()) {
-                String skillText = String.format("⭐ %s Lvl 99 [XP: %,d]", skillDisplayName, skill.xp());
+                Component skillText = Component.literal("⭐ ")
+                        .append(skillDisplayName)
+                        .append(Component.literal(String.format(" Lvl 99 [XP: %,d]", skill.xp())));
                 lineWidth = font.width(skillText);
             } else {
                 int xpForCurrentLevel = XPManager.getExperienceForLevel(skill.level());
                 int xpToNextLevel = XPManager.getExperienceForLevel(skill.level() + 1) - xpForCurrentLevel;
                 int progressToNextLevel = skill.xp() - xpForCurrentLevel;
-                String skillText = String.format("%s Lvl %d [%,d/%,d]",
-                        skillDisplayName, skill.level(), progressToNextLevel, xpToNextLevel);
+                Component skillText = Component.empty()
+                        .append(skillDisplayName)
+                        .append(Component.literal(String.format(" Lvl %d [%,d/%,d]",
+                                skill.level(), progressToNextLevel, xpToNextLevel)));
                 lineWidth = font.width(skillText) + ELEMENT_SPACING + BAR_WIDTH;
             }
 
@@ -309,7 +305,7 @@ public class SkillHudRenderer implements HudElement {
             String skillName = skillEnum.getId();
             DatabaseManager.SkillData skill = skills.getOrDefault(skillName, new DatabaseManager.SkillData(0, 1));
 
-            currentY = renderSkillLine(context, x + PADDING, currentY, skill, skillEnum.getDisplayName());
+            currentY = renderSkillLine(context, x + PADDING, currentY, skill, getSkillDisplayName(skillEnum));
             currentY += 1;
         }
 
@@ -322,18 +318,23 @@ public class SkillHudRenderer implements HudElement {
         context.text(font, totalText, x + PADDING, currentY, LEVEL_COLOR, false);
     }
 
-    private int renderSkillLine(GuiGraphicsExtractor context, int x, int y, DatabaseManager.SkillData skill, String skillDisplayName) {
+    private int renderSkillLine(GuiGraphicsExtractor context, int x, int y,
+                                DatabaseManager.SkillData skill, Component skillDisplayName) {
         Font font = Minecraft.getInstance().font;
 
         if (skill.level() == XPManager.getMaxLevel()) {
-            String skillText = String.format("⭐ %s Lvl 99 [XP: %,d]", skillDisplayName, skill.xp());
+            Component skillText = Component.literal("⭐ ")
+                    .append(skillDisplayName)
+                    .append(Component.literal(String.format(" Lvl 99 [XP: %,d]", skill.xp())));
             context.text(font, skillText, x, y, 0xFFFFD700, false);
         } else {
             int xpForCurrentLevel = XPManager.getExperienceForLevel(skill.level());
             int xpToNextLevel = XPManager.getExperienceForLevel(skill.level() + 1) - xpForCurrentLevel;
             int progressToNextLevel = skill.xp() - xpForCurrentLevel;
 
-            String skillText = String.format("%s Lvl %d", skillDisplayName, skill.level());
+            Component skillText = Component.empty()
+                    .append(skillDisplayName)
+                    .append(Component.literal(String.format(" Lvl %d", skill.level())));
             context.text(font, skillText, x, y, TEXT_COLOR, false);
 
             int barX = x + font.width(skillText) + ELEMENT_SPACING;
@@ -346,6 +347,11 @@ public class SkillHudRenderer implements HudElement {
         }
 
         return y + LINE_HEIGHT;
+    }
+
+    private static Component getSkillDisplayName(Skills skill) {
+        String translationKey = "skill.simpleskills.name." + skill.name().toLowerCase(Locale.ROOT);
+        return Component.translatable(translationKey);
     }
 
     private void renderProgressBar(GuiGraphicsExtractor context, int x, int y, int width, int height, int progress, int total) {

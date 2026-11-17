@@ -11,6 +11,11 @@ import com.github.ob_yekt.simpleskills.runes.RuneMiningManager;
 import com.github.ob_yekt.simpleskills.farming.BoneMealMastery;
 import com.github.ob_yekt.simpleskills.agility.AgilityManager;
 import com.github.ob_yekt.simpleskills.fishing.FishingManager;
+import com.github.ob_yekt.simpleskills.fishing.FishingEntities;
+import com.github.ob_yekt.simpleskills.fishing.FishingItems;
+import com.github.ob_yekt.simpleskills.fishing.FishingSpeciesRegistration;
+import com.github.ob_yekt.simpleskills.fishing.FishingFaunaSpawner;
+import com.github.ob_yekt.simpleskills.fishing.FishingNaturalSpawns;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionMinigameRuntime;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionStatePayload;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionNetworking;
@@ -38,6 +43,11 @@ public class Simpleskills implements ModInitializer {
 		LOGGER.info("Initializing SimpleSkills mod...");
 		SimpleSkillsSounds.register();
 
+		// Register aquatic content before FishingConfig reads the registered species list.
+		FishingEntities.register();
+		FishingItems.register();
+		FishingSpeciesRegistration.register();
+
 		// Blocks must be registered during initialization, before the registries freeze.
 		ModBlocks.register();
 		RuneContent.register();
@@ -56,6 +66,7 @@ public class Simpleskills implements ModInitializer {
 		AttributeManager.registerPlayerEvents();
 		LoreManager.initialize();
 		ConfigManager.initialize();
+		FishingNaturalSpawns.register();
 		EventHandlers.registerAll();
 		DefenseCombat.register();
 		AgilityManager.register();
@@ -66,6 +77,7 @@ public class Simpleskills implements ModInitializer {
 		TreeFeller.register();
 		ExcavatingManager.register();
 		FishingManager.register();
+		FishingFaunaSpawner.register();
 		RuneInfusionNetworking.registerPayloads();
 		PayloadTypeRegistry.clientboundPlay().register(RuneInfusionStatePayload.TYPE, RuneInfusionStatePayload.CODEC);
 		RuneInfusionNetworking.registerReceivers();

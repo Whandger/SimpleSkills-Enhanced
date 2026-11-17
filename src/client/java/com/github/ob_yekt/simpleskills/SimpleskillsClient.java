@@ -5,6 +5,7 @@ import com.github.ob_yekt.simpleskills.excavating.InvestigationPayload;
 import com.github.ob_yekt.simpleskills.fishing.FishingCatchPayload;
 import com.github.ob_yekt.simpleskills.fishing.FishingCatchScreen;
 import com.github.ob_yekt.simpleskills.fishing.FishingHud;
+import com.github.ob_yekt.simpleskills.fishing.FishingEntityClient;
 import com.github.ob_yekt.simpleskills.fishing.FishingStatePayload;
 import com.github.ob_yekt.simpleskills.agility.AgilityLevelPayload;
 import com.github.ob_yekt.simpleskills.agility.AgilityDashCooldownPayload;
@@ -32,6 +33,7 @@ import net.minecraft.network.chat.Component;
 public class SimpleskillsClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        FishingEntityClient.register();
         EntityRendererRegistry.register(PrayerVfxEntity.TYPE, PrayerVfxRenderer::new);
         Keybinds.register();
         SkillHudRenderer.register();

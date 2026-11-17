@@ -619,7 +619,12 @@ public final class FishingManager {
     private static Vec3 mouthOf(Mob fish) {
         float yaw = fish.getYRot() * ((float) Math.PI / 180.0F);
         Vec3 forward = new Vec3(-Mth.sin(yaw), 0.0, Mth.cos(yaw));
-        return fish.position().add(forward.scale(fish.getBbWidth() * 0.55)).add(0.0, fish.getBbHeight() * 0.5, 0.0);
+        FishSpecies species = FishSpecies.of(fish);
+        FishSpecies.MouthAnchor anchor = species == null ? null : species.mouthAnchor();
+        double forwardOffset = anchor == null ? 0.55 : anchor.forwardWidth();
+        double verticalOffset = anchor == null ? 0.50 : anchor.verticalHeight();
+        return fish.position().add(forward.scale(fish.getBbWidth() * forwardOffset))
+                .add(0.0, fish.getBbHeight() * verticalOffset, 0.0);
     }
 
     private static void snapHookToMouth(Session s) {
@@ -660,16 +665,14 @@ public final class FishingManager {
         faceTowards(fish, step, 25.0F);
     }
 
-    /** Moves the (AI-paused) fish by {@code step}, never letting it leave the water. */
+    /** Moves the AI-paused fish only when its body remains inside loaded water. */
     private static boolean moveFish(Mob fish, ServerLevel level, Vec3 step) {
-        Vec3 pos = fish.position();
-        Vec3 eye = fish.getEyePosition();
-        if (!waterAt(level, pos.add(step)) || !waterAt(level, eye.add(step))) {
+        if (!waterVolumeAt(fish, level, step)) {
             Vec3 flat = new Vec3(step.x, 0.0, step.z);
             Vec3 vertical = new Vec3(0.0, step.y, 0.0);
-            if (waterAt(level, pos.add(flat)) && waterAt(level, eye.add(flat))) {
+            if (waterVolumeAt(fish, level, flat)) {
                 step = flat;
-            } else if (waterAt(level, pos.add(vertical)) && waterAt(level, eye.add(vertical))) {
+            } else if (waterVolumeAt(fish, level, vertical)) {
                 step = vertical;
             } else {
                 return false;
@@ -677,6 +680,23 @@ public final class FishingManager {
         }
         fish.move(MoverType.SELF, step);
         fish.setDeltaMovement(Vec3.ZERO);
+        return true;
+    }
+
+    /** Samples the corners, side midpoints and centre of a proposed bounding box. */
+    private static boolean waterVolumeAt(Mob fish, ServerLevel level, Vec3 movement) {
+        var box = fish.getBoundingBox().move(movement).deflate(0.08, 0.08, 0.08);
+        double[] xs = {box.minX, (box.minX + box.maxX) * 0.5, box.maxX};
+        double[] ys = {box.minY, (box.minY + box.maxY) * 0.5, box.maxY};
+        double[] zs = {box.minZ, (box.minZ + box.maxZ) * 0.5, box.maxZ};
+        for (double x : xs) {
+            for (double y : ys) {
+                for (double z : zs) {
+                    BlockPos block = BlockPos.containing(x, y, z);
+                    if (!level.hasChunkAt(block) || !level.getFluidState(block).is(FluidTags.WATER)) return false;
+                }
+            }
+        }
         return true;
     }
 

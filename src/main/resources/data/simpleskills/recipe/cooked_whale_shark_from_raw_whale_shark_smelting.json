@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:smelting",
+  "category": "food",
+  "cookingtime": 200,
+  "ingredient": "simpleskills:raw_whale_shark",
+  "result": {
+    "id": "simpleskills:cooked_whale_shark"
+  },
+  "experience": 0.35
+}
