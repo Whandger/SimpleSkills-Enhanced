@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "simpleskills:raw_trout",
+    "simpleskills:raw_bass",
+    "simpleskills:raw_catfish",
+    "simpleskills:raw_pike",
+    "simpleskills:raw_carp",
+    "simpleskills:raw_tuna",
+    "simpleskills:raw_swordfish",
+    "simpleskills:raw_mahi_mahi",
+    "simpleskills:raw_reef_shark",
+    "simpleskills:raw_great_white_shark",
+    "simpleskills:raw_whale_shark"
+  ]
+}

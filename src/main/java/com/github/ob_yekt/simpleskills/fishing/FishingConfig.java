@@ -32,6 +32,12 @@ public final class FishingConfig {
     public static final String BITE_WINDOW_TICKS = "fishing_bite_window_ticks";
     public static final String SPECIES_MIN_LEVEL = "fishing_species_min_level";
     public static final String CATCH_SCREEN_ENABLED = "fishing_catch_screen_enabled";
+    public static final String SPECIES_SPAWN_WEIGHT = "fishing_species_spawn_weight";
+    public static final String SPECIES_MAX_POPULATION = "fishing_species_max_population";
+    public static final String NATURAL_SPAWNING_ENABLED = "fishing_ecosystem_natural_spawning_enabled";
+    public static final String NATURAL_SPAWN_INTERVAL = "fishing_ecosystem_natural_spawn_interval_ticks";
+    public static final String MEGAFAUNA_ENABLED = "fishing_ecosystem_megafauna_enabled";
+    public static final String MAX_MEGAFAUNA_PER_AREA = "fishing_ecosystem_max_megafauna_per_area";
 
     private static volatile boolean fightEnabled = true;
     private static volatile double detectionRange = 12.0;
@@ -50,7 +56,13 @@ public final class FishingConfig {
     private static volatile int maxPopulation = 12;
     private static volatile int biteWindowTicks = 40;
     private static volatile boolean catchScreenEnabled = true;
+    private static volatile boolean naturalSpawningEnabled = true;
+    private static volatile int naturalSpawnInterval = 900;
+    private static volatile boolean megafaunaEnabled = true;
+    private static volatile int maxMegafaunaPerArea = 1;
     private static volatile JsonObject speciesMinLevel = new JsonObject();
+    private static volatile JsonObject speciesSpawnWeight = new JsonObject();
+    private static volatile JsonObject speciesMaxPopulation = new JsonObject();
 
     private FishingConfig() {}
 
@@ -73,11 +85,21 @@ public final class FishingConfig {
         json.addProperty(MAX_POPULATION, 12);
         json.addProperty(BITE_WINDOW_TICKS, 40);
         json.addProperty(CATCH_SCREEN_ENABLED, true);
+        json.addProperty(NATURAL_SPAWNING_ENABLED, true);
+        json.addProperty(NATURAL_SPAWN_INTERVAL, 900);
+        json.addProperty(MEGAFAUNA_ENABLED, true);
+        json.addProperty(MAX_MEGAFAUNA_PER_AREA, 1);
         JsonObject species = new JsonObject();
+        JsonObject weights = new JsonObject();
+        JsonObject populations = new JsonObject();
         for (FishSpecies s : FishSpecies.all()) {
             species.addProperty(s.configKey(), s.defaultMinLevel());
+            weights.addProperty(s.configKey(), 1.0);
+            populations.addProperty(s.configKey(), s.spawnProfile().maxPopulation());
         }
         json.add(SPECIES_MIN_LEVEL, species);
+        json.add(SPECIES_SPAWN_WEIGHT, weights);
+        json.add(SPECIES_MAX_POPULATION, populations);
     }
 
     /** Re-reads every option from {@link ConfigManager#getFeatureConfig()}. */
@@ -100,8 +122,16 @@ public final class FishingConfig {
         maxPopulation = (int) num(cfg, MAX_POPULATION, 12, 1, 64);
         biteWindowTicks = (int) num(cfg, BITE_WINDOW_TICKS, 40, 10, 200);
         catchScreenEnabled = bool(cfg, CATCH_SCREEN_ENABLED, true);
+        naturalSpawningEnabled = bool(cfg, NATURAL_SPAWNING_ENABLED, true);
+        naturalSpawnInterval = (int) num(cfg, NATURAL_SPAWN_INTERVAL, 900, 200, 7200);
+        megafaunaEnabled = bool(cfg, MEGAFAUNA_ENABLED, true);
+        maxMegafaunaPerArea = (int) num(cfg, MAX_MEGAFAUNA_PER_AREA, 1, 0, 8);
         JsonElement species = cfg.get(SPECIES_MIN_LEVEL);
         speciesMinLevel = species != null && species.isJsonObject() ? species.getAsJsonObject() : new JsonObject();
+        JsonElement weights = cfg.get(SPECIES_SPAWN_WEIGHT);
+        speciesSpawnWeight = weights != null && weights.isJsonObject() ? weights.getAsJsonObject() : new JsonObject();
+        JsonElement populations = cfg.get(SPECIES_MAX_POPULATION);
+        speciesMaxPopulation = populations != null && populations.isJsonObject() ? populations.getAsJsonObject() : new JsonObject();
     }
 
     public static boolean isFightEnabled() { return fightEnabled; }
@@ -122,6 +152,28 @@ public final class FishingConfig {
     public static int biteWindowTicks() { return biteWindowTicks; }
     /** Whether the server sends the catch result screen to players that have the mod. */
     public static boolean isCatchScreenEnabled() { return catchScreenEnabled; }
+    public static boolean isNaturalSpawningEnabled() { return naturalSpawningEnabled; }
+    public static int naturalSpawnIntervalTicks() { return naturalSpawnInterval; }
+    public static boolean isMegafaunaEnabled() { return megafaunaEnabled; }
+    public static int maxMegafaunaPerArea() { return maxMegafaunaPerArea; }
+
+    /** Multiplier applied to the species' habitat/depth weight. */
+    public static double spawnWeightMultiplier(FishSpecies species) {
+        JsonElement value = speciesSpawnWeight.get(species.configKey());
+        if (value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isNumber()) {
+            return Math.max(0.0, Math.min(10.0, value.getAsDouble()));
+        }
+        return 1.0;
+    }
+
+    /** Configurable local population cap, bounded by the species profile's safe maximum. */
+    public static int maxPopulationFor(FishSpecies species) {
+        JsonElement value = speciesMaxPopulation.get(species.configKey());
+        if (value != null && value.isJsonPrimitive() && value.getAsJsonPrimitive().isNumber()) {
+            return Math.max(0, Math.min(64, value.getAsInt()));
+        }
+        return species.spawnProfile().maxPopulation();
+    }
 
     /** Minimum Fishing level needed to hook the given species. */
     public static int minLevelFor(FishSpecies species) {

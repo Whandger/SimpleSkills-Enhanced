@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:entity",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "simpleskills:raw_mahi_mahi"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "simpleskills:entities/mahi_mahi"
+}

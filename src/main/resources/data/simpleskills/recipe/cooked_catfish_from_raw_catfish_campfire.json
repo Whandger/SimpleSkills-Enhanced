@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "category": "food",
+  "cookingtime": 600,
+  "ingredient": "simpleskills:raw_catfish",
+  "result": {
+    "id": "simpleskills:cooked_catfish"
+  }
+}

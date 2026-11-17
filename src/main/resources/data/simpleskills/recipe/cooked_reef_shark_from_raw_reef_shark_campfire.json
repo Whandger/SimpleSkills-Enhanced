@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:campfire_cooking",
+  "category": "food",
+  "cookingtime": 600,
+  "ingredient": "simpleskills:raw_reef_shark",
+  "result": {
+    "id": "simpleskills:cooked_reef_shark"
+  }
+}
