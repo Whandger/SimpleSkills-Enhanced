@@ -19,13 +19,26 @@ import net.minecraft.world.level.Level;
  * Shared base for the added catchable fish species.
  *
  * <p>Extending AbstractSchoolingFish reuses vanilla fish water physics, swim control,
- * navigation, wandering and school-following behaviour instead of approximating them with a
- * generic WaterAnimal. Bucket interaction is disabled because these species are not designed
- * to be bucket items.</p>
+ * navigation, wandering and group-following behaviour instead of approximating a school manually.
+ * Bucket interaction is disabled because these species are not designed to be bucket items.</p>
  */
 public final class FishingFishEntity extends AbstractSchoolingFish {
     public FishingFishEntity(EntityType<? extends FishingFishEntity> type, Level level) {
         super(type, level);
+    }
+
+
+    /** Maximum number of same-species fish that can remain in this natural school. */
+    @Override
+    public int getMaxSchoolSize() {
+        FishSpecies species = FishSpecies.of(this);
+        return species == null ? 4 : species.spawnProfile().maxSchoolSize();
+    }
+
+    /** Keep the natural spawn cluster consistent with the school limit. */
+    @Override
+    public int getMaxSpawnClusterSize() {
+        return getMaxSchoolSize();
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -33,21 +46,6 @@ public final class FishingFishEntity extends AbstractSchoolingFish {
                 .add(Attributes.MAX_HEALTH, 4.0D)
                 .add(Attributes.MOVEMENT_SPEED, 0.18D)
                 .add(Attributes.FOLLOW_RANGE, 20.0D);
-    }
-
-    /**
-     * Uses the per-species school size from the spawn profile. The vanilla schooling-fish AI
-     * then keeps spawned followers swimming with their leader instead of scattering immediately.
-     */
-    @Override
-    public int getMaxSchoolSize() {
-        FishSpecies species = FishSpecies.of(this);
-        return species == null ? 1 : species.spawnProfile().maxSchoolSize();
-    }
-
-    @Override
-    public int getMaxSpawnClusterSize() {
-        return getMaxSchoolSize();
     }
 
     private boolean usesSalmonSounds() {

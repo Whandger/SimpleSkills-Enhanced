@@ -188,7 +188,7 @@ public final class FishSpecies {
         public Builder minLevel(int level) { this.minLevel = level; return this; }
         public Builder size(FishSizeModel.Profile profile) { this.size = profile; return this; }
         public Builder spawn(FishSpawnProfile profile) { this.spawnProfile = profile; return this; }
-        /** Whether the separate ambient spawner may naturally add this custom species near players. */
+        /** Whether this species participates in natural biome-based aquatic spawning. */
         public Builder ambientSpawn(boolean enabled) { this.ambientSpawnable = enabled; return this; }
         public Builder mouth(double forwardWidth, double verticalHeight) { this.mouthAnchor = new MouthAnchor(forwardWidth, verticalHeight); return this; }
         public Builder variant(ToIntFunction<Mob> getter, VariantSetter setter) { this.variantGetter = getter; this.variantSetter = setter; return this; }

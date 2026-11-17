@@ -36,7 +36,7 @@ public final class FishingEntities {
     private static EntityType<FishingFishEntity> fish(String path, float width, float height) {
         Identifier id = Identifier.fromNamespaceAndPath(Simpleskills.MOD_ID, path);
         EntityType<FishingFishEntity> type = Registry.register(BuiltInRegistries.ENTITY_TYPE, id,
-                EntityType.Builder.<FishingFishEntity>of(FishingFishEntity::new, MobCategory.WATER_CREATURE)
+                EntityType.Builder.<FishingFishEntity>of(FishingFishEntity::new, MobCategory.WATER_AMBIENT)
                         .sized(width, height).clientTrackingRange(10).updateInterval(3)
                         .build(ResourceKey.create(Registries.ENTITY_TYPE, id)));
         FabricDefaultAttributeRegistry.register(type, FishingFishEntity.createAttributes());

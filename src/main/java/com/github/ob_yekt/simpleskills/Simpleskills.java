@@ -15,6 +15,7 @@ import com.github.ob_yekt.simpleskills.fishing.FishingEntities;
 import com.github.ob_yekt.simpleskills.fishing.FishingItems;
 import com.github.ob_yekt.simpleskills.fishing.FishingSpeciesRegistration;
 import com.github.ob_yekt.simpleskills.fishing.FishingFaunaSpawner;
+import com.github.ob_yekt.simpleskills.fishing.FishingNaturalSpawns;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionMinigameRuntime;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionStatePayload;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionNetworking;
@@ -65,6 +66,7 @@ public class Simpleskills implements ModInitializer {
 		AttributeManager.registerPlayerEvents();
 		LoreManager.initialize();
 		ConfigManager.initialize();
+		FishingNaturalSpawns.register();
 		EventHandlers.registerAll();
 		DefenseCombat.register();
 		AgilityManager.register();

@@ -4,11 +4,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 
-/**
- * Data-driven habitat, depth and natural school preferences for one fish species.
- * The school range is used by the ambient spawner; vanilla AbstractSchoolingFish AI keeps
- * the spawned followers together after they are created.
- */
+/** Data-driven habitat, depth and natural school preferences for one fish species. */
 public record FishSpawnProfile(
         Map<FishHabitat, Double> habitatWeights,
         int minDepth,
@@ -39,7 +35,7 @@ public record FishSpawnProfile(
         habitatWeights = Collections.unmodifiableMap(copy);
     }
 
-    /** Returns this profile with the natural school size used by the ambient fish spawner. */
+    /** Returns this profile with the minimum and maximum natural group size. */
     public FishSpawnProfile withSchoolSize(int minimum, int maximum) {
         return new FishSpawnProfile(habitatWeights, minDepth, preferredDepth, maxPopulation,
                 large, minimum, maximum);
@@ -49,8 +45,9 @@ public record FishSpawnProfile(
         if (depth < minDepth) return 0.0;
         double weight = habitatWeights.getOrDefault(habitat, 0.0);
         if (weight <= 0.0) return 0.0;
-        // Species prefer their designed depth, but deeper water remains valid.
-        if (depth < preferredDepth) weight *= 0.70 + 0.30 * ((depth - minDepth + 1.0) / (preferredDepth - minDepth + 1.0));
+        if (depth < preferredDepth) {
+            weight *= 0.70 + 0.30 * ((depth - minDepth + 1.0) / (preferredDepth - minDepth + 1.0));
+        }
         return weight;
     }
 
@@ -65,7 +62,6 @@ public record FishSpawnProfile(
             double weight = ((Number) habitatAndWeights[i + 1]).doubleValue();
             weights.put(habitat, weight);
         }
-        // Profiles default to solitary spawning; species that form schools opt in explicitly.
         return new FishSpawnProfile(weights, minDepth, preferredDepth, maxPopulation, large, 1, 1);
     }
 }
