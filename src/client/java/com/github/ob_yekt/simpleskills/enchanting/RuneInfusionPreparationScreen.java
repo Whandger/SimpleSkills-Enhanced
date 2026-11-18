@@ -55,7 +55,6 @@ public final class RuneInfusionPreparationScreen extends Screen {
     private int selectedStyle;
     private int currentStyle;
     private int runeLoreCount;
-    private ItemStack stylePreviewStack = ItemStack.EMPTY;
     private boolean stylePending;
     private Button start;
     private Button applyStyle;
@@ -144,7 +143,6 @@ public final class RuneInfusionPreparationScreen extends Screen {
     private void switchTab(int tab) {
         activeTab = tab;
         status = Component.empty();
-        if (activeTab == 1) rebuildStylePreview();
         refreshTabVisibility();
     }
 
@@ -164,27 +162,23 @@ public final class RuneInfusionPreparationScreen extends Screen {
     }
 
     /**
-     * Builds a client-only display copy. The selected style is visible immediately,
-     * even when the source stack currently has no glint. The inventory stack is never
-     * changed here; only the server-side Apply Style handler can persist a style or
-     * consume Rune Lore Ore.
+     * Creates the large equipment preview from the currently selected style.
+     * This intentionally mirrors the exact copy-and-style path used by the
+     * small style-card previews, but is rebuilt for every extraction frame so
+     * the left panel can never retain the equipment's previously applied style.
+     * The inventory stack is never modified here.
      */
-    private void rebuildStylePreview() {
-        ItemStack equipment = selectedEquipment();
-        if (equipment.isEmpty()) {
-            stylePreviewStack = ItemStack.EMPTY;
-            return;
-        }
-
-        stylePreviewStack = equipment.copy();
-        RuneVisualStyles.setStyle(stylePreviewStack, selectedStyle);
-        stylePreviewStack.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
-    }
-
     private ItemStack equipmentPreviewStack() {
-        if (activeTab != 1) return selectedEquipment();
-        if (stylePreviewStack.isEmpty()) rebuildStylePreview();
-        return stylePreviewStack;
+        ItemStack equipment = selectedEquipment();
+        if (equipment.isEmpty() || activeTab != 1) return equipment;
+
+        // Match drawStyleList(): use a fresh copy rather than a cached mutable stack.
+        // Gui extraction can retain item render state between frames, so reusing the
+        // same preview stack can leave the left panel showing its previously baked glint.
+        ItemStack preview = equipment.copy();
+        RuneVisualStyles.setStyle(preview, selectedStyle);
+        preview.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
+        return preview;
     }
 
     private boolean itemHasEnchantments() {
@@ -294,7 +288,6 @@ public final class RuneInfusionPreparationScreen extends Screen {
                 currentStyle = payload.grade();
                 selectedStyle = currentStyle;
                 runeLoreCount = payload.runeCost();
-                rebuildStylePreview();
                 status = RuneInfusionText.text("gui.simpleskills.rune_infusion.style_applied");
             }
             case RuneInfusionResultPayload.STYLE_NOT_ENOUGH_LORE -> {
@@ -339,7 +332,6 @@ public final class RuneInfusionPreparationScreen extends Screen {
             if (style >= 0) {
                 selectedStyle = style;
                 status = Component.empty();
-                rebuildStylePreview();
                 updateStyleButton();
                 return true;
             }
@@ -526,7 +518,6 @@ public final class RuneInfusionPreparationScreen extends Screen {
 
     private void drawStyleList(GuiGraphicsExtractor g, int mouseX, int mouseY) {
         int colWidth = (listX1() - listX0() - 6) / 2;
-        ItemStack equipment = selectedEquipment();
         for (int style = 0; style < STYLE_COUNT; style++) {
             int col = style % 2, row = style / 2;
             int x = listX0() + col * (colWidth + 6);
@@ -543,17 +534,6 @@ public final class RuneInfusionPreparationScreen extends Screen {
             Component label = RuneInfusionText.text(RuneVisualStyles.translationKey(style));
             g.text(font, label, x + 32, y + 7, selectedCard ? GOLD : TEXT, false);
             if (currentCard) g.text(font, Component.literal("✓"), x + colWidth - 14, y + 7, GREEN, false);
-            // The preview uses a copy, so the selected style is only a visual preview.
-            if (!equipment.isEmpty()) {
-                ItemStack preview = equipment.copy();
-                RuneVisualStyles.setStyle(preview, style);
-                preview.set(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true);
-                g.pose().pushMatrix();
-                g.pose().translate(x + colWidth - 24, y + 10);
-                g.pose().scale(0.9f, 0.9f);
-                g.item(preview, 0, 0);
-                g.pose().popMatrix();
-            }
         }
     }
 
