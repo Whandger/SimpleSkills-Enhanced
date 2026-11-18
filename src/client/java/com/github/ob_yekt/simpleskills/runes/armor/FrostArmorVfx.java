@@ -11,8 +11,10 @@ import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4fc;
 
 import static com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.boundsCenter;
-import static com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.drawSnowflakeStar;
-import static com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.lerpVec;
+import static com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.fract;
+import static com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.lerp;
+import static com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.mix;
+import static com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.unit;
 
 public final class FrostArmorVfx {
     private FrostArmorVfx() {}
@@ -25,83 +27,104 @@ public final class FrostArmorVfx {
 
     private static void draw(Matrix4fc matrix, VertexConsumer out, EquipmentPart part,
                              Bounds bounds, double time, int seed) {
-        double pulse = 0.76 + 0.20 * Math.sin(time * 0.9 + seed * 0.02);
+        double pulse = 0.80 + 0.20 * Math.sin(time * 0.9 + seed * 0.02);
 
         switch (part) {
-            case HELMET -> {
-                for (int side = -1; side <= 1; side += 2) {
-                    Vec3 p0 = new Vec3(side * 0.245, -0.34, -0.02);
-                    Vec3 p1 = new Vec3(side * 0.345, -0.40, -0.055);
-                    Vec3 p2 = new Vec3(side * 0.405, -0.52, -0.075);
-                    Vec3 p3 = new Vec3(side * 0.375, -0.65, -0.055);
-
-                    drawIceHornSegment(matrix, out, p0, p1, 0.036, 0.026, pulse);
-                    drawIceHornSegment(matrix, out, p1, p2, 0.026, 0.015, pulse);
-                    drawIceHornSegment(matrix, out, p2, p3, 0.015, 0.001, pulse);
-
-                    Vec3 barbBase = new Vec3(side * 0.245, -0.30, 0.025);
-                    Vec3 barbTip = new Vec3(side * 0.340, -0.34, 0.055);
-                    drawIceCrystalSpike(matrix, out, barbBase, barbTip, 0.018, pulse);
-                }
-            }
-            case ARM_RIGHT -> {
-                drawIceCrystalSpike(matrix, out,
-                        new Vec3(-0.18, -0.06, 0.00), new Vec3(-0.37, -0.21, 0.00), 0.026, pulse);
-                drawIceCrystalSpike(matrix, out,
-                        new Vec3(-0.17, -0.02, -0.065), new Vec3(-0.31, -0.12, -0.115), 0.019, pulse);
-                drawIceCrystalSpike(matrix, out,
-                        new Vec3(-0.17, -0.02, 0.065), new Vec3(-0.31, -0.12, 0.115), 0.019, pulse);
-                drawIceCrystalSpike(matrix, out,
-                        new Vec3(-0.18, 0.04, 0.00), new Vec3(-0.30, 0.00, 0.00), 0.016, pulse);
-            }
-            case ARM_LEFT -> {
-                drawIceCrystalSpike(matrix, out,
-                        new Vec3(0.18, -0.06, 0.00), new Vec3(0.37, -0.21, 0.00), 0.026, pulse);
-                drawIceCrystalSpike(matrix, out,
-                        new Vec3(0.17, -0.02, -0.065), new Vec3(0.31, -0.12, -0.115), 0.019, pulse);
-                drawIceCrystalSpike(matrix, out,
-                        new Vec3(0.17, -0.02, 0.065), new Vec3(0.31, -0.12, 0.115), 0.019, pulse);
-                drawIceCrystalSpike(matrix, out,
-                        new Vec3(0.18, 0.04, 0.00), new Vec3(0.30, 0.00, 0.00), 0.016, pulse);
-            }
-            case KNEE_RIGHT, KNEE_LEFT -> {
-                drawIceCrystalSpike(matrix, out,
-                        new Vec3(0.0, 0.35, -0.14), new Vec3(0.0, 0.42, -0.28), 0.022, pulse);
-                drawIceCrystalSpike(matrix, out,
-                        new Vec3(-0.055, 0.34, -0.135), new Vec3(-0.085, 0.40, -0.225), 0.015, pulse);
-                drawIceCrystalSpike(matrix, out,
-                        new Vec3(0.055, 0.34, -0.135), new Vec3(0.085, 0.40, -0.225), 0.015, pulse);
-            }
-            case CHEST_TORSO, LEG_WAIST, BOOT_RIGHT, BOOT_LEFT -> {
-                Vec3 c = boundsCenter(bounds);
-                for (int i = 0; i < 3; i++) {
-                    double ang = time * 0.06 + i * (Math.PI * 2.0 / 3.0) + seed * 0.01;
-                    Vec3 pos = c.add(
-                            Math.cos(ang) * bounds.width() * 0.56,
-                            Math.sin(time * 0.09 + i * 2.1) * bounds.height() * 0.25,
-                            Math.sin(ang) * bounds.depth() * 0.62);
-                    drawSnowflakeStar(matrix, out, pos, 0.014, time * 0.08 + i, pulse);
-                }
-            }
+            case CHEST_TORSO -> drawFrostAura(matrix, out, part, bounds, time, seed, 14, 12, pulse);
+            case HELMET -> drawFrostAura(matrix, out, part, bounds, time, seed, 9, 8, pulse);
+            case ARM_RIGHT, ARM_LEFT, LEG_WAIST, KNEE_RIGHT, KNEE_LEFT, BOOT_RIGHT, BOOT_LEFT ->
+                    drawFrostAura(matrix, out, part, bounds, time, seed, 7, 6, pulse);
             default -> {
             }
         }
     }
 
-    private static void drawIceHornSegment(Matrix4fc matrix, VertexConsumer out, Vec3 from, Vec3 to,
-                                           double r0, double r1, double pulse) {
-        PrayerVfxGeometry.taperedTube(matrix, out, from, to, r0, r1,
-                0.34f, 0.84f, 1.0f, (float) (0.76 * pulse));
-        PrayerVfxGeometry.taperedTube(matrix, out, from, to, r0 * 0.46, r1 * 0.46,
-                0.90f, 0.98f, 1.0f, (float) (0.94 * pulse));
+    private static void drawFrostAura(Matrix4fc matrix, VertexConsumer out, EquipmentPart part,
+                                      Bounds bounds, double time, int seed,
+                                      int flakeCount, int shardCount, double pulse) {
+        Vec3 center = boundsCenter(bounds);
+        // Fica ligeiramente por fora da caixa de cada peça para não cortar dentro da armadura
+        double rx = bounds.width() * 0.54 + 0.026;
+        double rz = bounds.depth() * 0.54 + 0.026;
+
+        // 1. Pequenos flocos de neve finos (6 pontas afiladas) caindo suavemente ao redor da armadura
+        for (int i = 0; i < flakeCount; i++) {
+            long pSeed = mix(seed * 67L + part.ordinal() * 1277L + i * 331L);
+            double life = fract(time * 0.026 + i * (1.0 / flakeCount) + unit(pSeed, 1));
+
+            double baseAngle = unit(pSeed, 2) * Math.PI * 2.0 + time * 0.022;
+            double windSweep = Math.sin(time * 0.07 + i * 1.9) * 0.22 + (life - 0.5) * 0.28;
+            double angle = baseAngle + windSweep;
+
+            double radialScale = 0.95 + unit(pSeed, 3) * 0.34;
+            double startY = lerp(bounds.minY() - 0.02, bounds.maxY() - 0.02, unit(pSeed, 4));
+            // +Y aponta para baixo no espaço do modelo de entidade do Minecraft
+            double fallY = life * (0.14 + unit(pSeed, 5) * 0.08);
+
+            double cosA = Math.cos(angle);
+            double sinA = Math.sin(angle);
+            Vec3 pos = new Vec3(
+                    center.x + cosA * rx * radialScale,
+                    startY + fallY,
+                    center.z + sinA * rz * radialScale);
+
+            // Orienta o plano do floco tangente à superfície da armadura para ficar visível de qualquer ângulo
+            Vec3 tangentH = new Vec3(-sinA, 0.0, cosA);
+            Vec3 tangentV = new Vec3(0.0, 1.0, 0.0);
+
+            double fade = Math.sin(Math.PI * life);
+            double radius = (0.010 + unit(pSeed, 6) * 0.0055) * (0.78 + 0.22 * fade);
+            drawFineSnowflake(matrix, out, pos, tangentH, tangentV,
+                    radius, time * 0.10 + i, 0.94 * pulse * fade);
+        }
+
+        // 2. Micro-cristais de gelo em losango cintilando bem próximos à superfície da armadura
+        for (int i = 0; i < shardCount; i++) {
+            long sSeed = mix(seed * 97L + part.ordinal() * 1499L + i * 733L);
+            double life = fract(time * 0.038 + i * (1.0 / shardCount) + unit(sSeed, 1));
+
+            double angle = unit(sSeed, 2) * Math.PI * 2.0 + time * 0.018 + (life - 0.5) * 0.18;
+            double radialScale = 0.92 + unit(sSeed, 3) * 0.24;
+            double startY = lerp(bounds.minY(), bounds.maxY(), unit(sSeed, 4));
+            double fallY = life * (0.09 + unit(sSeed, 5) * 0.05);
+
+            Vec3 pos = new Vec3(
+                    center.x + Math.cos(angle) * rx * radialScale,
+                    startY + fallY,
+                    center.z + Math.sin(angle) * rz * radialScale);
+
+            double fade = Math.sin(Math.PI * life);
+            double r = (0.0034 + unit(sSeed, 6) * 0.0016) * fade;
+            drawTinyIceShard(matrix, out, pos, r, 0.92 * pulse * fade);
+        }
     }
 
-    private static void drawIceCrystalSpike(Matrix4fc matrix, VertexConsumer out, Vec3 base, Vec3 tip,
-                                            double baseRadius, double pulse) {
-        PrayerVfxGeometry.taperedTube(matrix, out, base, tip, baseRadius, 0.0005,
-                0.32f, 0.82f, 1.0f, (float) (0.78 * pulse));
-        PrayerVfxGeometry.taperedTube(matrix, out, base, lerpVec(base, tip, 0.82),
-                baseRadius * 0.44, 0.0004,
-                0.92f, 0.99f, 1.0f, (float) (0.95 * pulse));
+    /** Desenha um floco de neve de 6 pontas fino e afilado orientado na superfície da peça. */
+    private static void drawFineSnowflake(Matrix4fc matrix, VertexConsumer out, Vec3 center,
+                                          Vec3 axisU, Vec3 axisV,
+                                          double radius, double spin, double alpha) {
+        double centerThickness = Math.max(0.00065, radius * 0.075);
+        double tipThickness = 0.00018;
+        float a = (float) alpha;
+
+        for (int k = 0; k < 6; k++) {
+            double ang = spin + k * (Math.PI / 3.0);
+            Vec3 offset = axisU.scale(Math.cos(ang) * radius).add(axisV.scale(Math.sin(ang) * radius));
+            Vec3 tip = center.add(offset);
+            PrayerVfxGeometry.taperedTube(matrix, out, center, tip,
+                    centerThickness, tipThickness,
+                    0.82f, 0.97f, 1.0f, a);
+        }
+    }
+
+    /** Desenha um micro-cristal de gelo em formato de losango afilado. */
+    private static void drawTinyIceShard(Matrix4fc matrix, VertexConsumer out, Vec3 center,
+                                         double radius, double alpha) {
+        double h = radius * 1.45;
+        float a = (float) alpha;
+        PrayerVfxGeometry.taperedTube(matrix, out, center, center.add(0, h, 0),
+                radius, 0.00015, 0.76f, 0.96f, 1.0f, a);
+        PrayerVfxGeometry.taperedTube(matrix, out, center, center.add(0, -h, 0),
+                radius, 0.00015, 0.76f, 0.96f, 1.0f, a);
     }
 }

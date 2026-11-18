@@ -162,11 +162,11 @@ public final class RuneInfusionPreparationScreen extends Screen {
     }
 
     /**
-     * Creates the large equipment preview from the currently selected style.
-     * This intentionally mirrors the exact copy-and-style path used by the
-     * small style-card previews, but is rebuilt for every extraction frame so
-     * the left panel can never retain the equipment's previously applied style.
-     * The inventory stack is never modified here.
+- Creates the large equipment preview from the currently selected style.
+- This intentionally mirrors the exact copy-and-style path used by the
+- small style-card previews, but is rebuilt for every extraction frame so
+- the left panel can never retain the equipment's previously applied style.
+- The inventory stack is never modified here.
      */
     private ItemStack equipmentPreviewStack() {
         ItemStack equipment = selectedEquipment();
@@ -465,12 +465,6 @@ public final class RuneInfusionPreparationScreen extends Screen {
             // Display the selected style rather than the stored one: this is the live preview.
             g.text(font, RuneVisualStylesClientText.styleLabel(selectedStyle), bx, top + 198,
                     RuneVisualStyles.color(selectedStyle), false);
-            Component costLabel = selectedStyle == RuneVisualStyles.VANILLA
-                    ? RuneInfusionText.text("gui.simpleskills.rune_infusion.style_free")
-                    : selectedStyle == currentStyle
-                    ? RuneInfusionText.text("gui.simpleskills.rune_infusion.style_unchanged")
-                    : RuneInfusionText.text("gui.simpleskills.rune_infusion.style_cost");
-            g.text(font, costLabel, bx, top + 221, MUTED, false);
         }
     }
 

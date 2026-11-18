@@ -1,8 +1,6 @@
 package com.github.ob_yekt.simpleskills.runes.tools;
 
 import com.github.ob_yekt.simpleskills.prayer.PrayerVfxGeometry;
-import com.github.ob_yekt.simpleskills.runes.RuneEquipmentVfxRenderTypes;
-import com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.Bounds;
 import com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.ItemGeometryInfo;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -11,13 +9,12 @@ import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4fc;
 
-import static com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.boundsCenter;
+import java.util.List;
+
 import static com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.fract;
 import static com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.lerp;
 import static com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.mix;
-import static com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.orthogonalVector;
 import static com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.safeNormalize;
-import static com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.texturedRibbonSegment;
 import static com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.unit;
 
 public final class DivineToolVfx {
@@ -25,124 +22,131 @@ public final class DivineToolVfx {
 
     public static void submit(SubmitNodeCollector collector, PoseStack poseStack,
                               ItemGeometryInfo info, double time, int seed) {
-        Bounds bounds = info.bounds();
-        collector.submitCustomGeometry(poseStack, RuneEquipmentVfxRenderTypes.shadow(), (pose, vertices) ->
-                drawVeil(pose.pose(), vertices, bounds, time, seed));
         collector.submitCustomGeometry(poseStack, RenderTypes.lightning(), (pose, vertices) ->
-                drawFilaments(pose.pose(), vertices, bounds, time, seed));
+                draw(pose.pose(), vertices, info, time, seed));
     }
 
-    private static void drawVeil(Matrix4fc matrix, VertexConsumer out, Bounds bounds,
-                                 double time, int seed) {
-        int strands = 3;
-        double pulse = 0.58 + 0.28 * Math.sin(time * 0.46 + seed * 0.013);
-        double centerX = (bounds.minX() + bounds.maxX()) * 0.5;
-        double centerZ = (bounds.minZ() + bounds.maxZ()) * 0.5;
+    private static void draw(Matrix4fc matrix, VertexConsumer out, ItemGeometryInfo info,
+                             double time, int seed) {
+        List<Vec3> head = info.headSamples();
+        List<Vec3> pool = head.isEmpty() ? info.allSamples() : head;
+        if (pool.isEmpty()) return;
 
-        for (int strand = 0; strand < strands; strand++) {
-            long strandSeed = mix(seed * 211L + strand * 811L);
-            double phase = time * 0.085 + strand * (Math.PI * 2.0 / strands) + unit(strandSeed, 1);
-            int segments = 16;
+        Vec3 bladeAxis = safeNormalize(info.bladeTip().subtract(info.bladeStart()), new Vec3(1, 1, 0));
+        Vec3 perpXY = new Vec3(-bladeAxis.y, bladeAxis.x, 0.0).normalize();
+        double zOut = info.halfDepth() + 0.006;
 
-            Vec3 prevCenter = null;
-            Vec3 prevSideA = null;
-            Vec3 prevSideB = null;
-            double prevWidth = 0;
-            double prevV = 0;
-            float prevR = 0.92f, prevG = 0.68f, prevB = 0.16f, prevAlpha = 0.0f;
+        // 24 pontos de luz dourada assíncronos:
+        // ~2.0s brilhando suavemente perto da lâmina -> ~0.4s explodindo em estrela
+        int count = 24;
+        double cycleRate = 0.021;     // ~2.38s no total (20 ticks/s)
+        double explodeStart = 0.82;   // ~1.95s carregando antes de estourar
 
-            for (int i = 0; i <= segments; i++) {
-                double t = i / (double) segments;
-                double y = lerp(bounds.maxY(), bounds.minY(), t);
-                double angle = phase + t * 5.1 + Math.sin(time * 0.55 + t * 4.2) * 0.35;
-                double envelope = Math.sin(Math.PI * t);
+        for (int i = 0; i < count; i++) {
+            long pSeed = mix(seed * 79L + i * 353L);
+            double life = fract(time * cycleRate + i * (1.0 / count) + unit(pSeed, 1));
 
-                double x = centerX + Math.cos(angle) * Math.max(0.016, bounds.width() * 0.52);
-                double z = centerZ + Math.sin(angle * 0.85) * Math.max(0.020, bounds.depth() * 0.76);
-                Vec3 center = new Vec3(x, y, z);
+            int idx = (int) (unit(pSeed, 2) * pool.size()) % pool.size();
+            Vec3 anchor = pool.get(idx);
 
-                double baseWidth = Math.max(0.020, Math.min(bounds.width(), bounds.height()) * 0.26);
-                double width = envelope * baseWidth * (0.74 + 0.26 * Math.sin(time * 0.8 + strand * 2.0 + t * 6.5));
-                double v = fract(t * 1.4 - time * 0.022 + strand * 0.31);
+            double zSign = (i % 2 == 0) ? 1.0 : -1.0;
+            double sideSign = ((i / 2) % 2 == 0) ? 1.0 : -1.0;
 
-                // Transição de dourado âmbar nas bordas para branco-dourado radiante no centro
-                float r = (float) lerp(0.88, 1.00, envelope);
-                float g = (float) lerp(0.62, 0.92, envelope);
-                float b = (float) lerp(0.14, 0.52, envelope);
-                float alpha = (float) (envelope * pulse);
+            // Posiciona próximo às bordas/frente e nas duas faces da lâmina
+            double edgeOffset = sideSign * (0.010 + unit(pSeed, 3) * 0.024);
+            double alongOffset = (unit(pSeed, 4) - 0.5) * 0.018;
+            double zOffset = zSign * (zOut + unit(pSeed, 5) * 0.012);
 
-                Vec3 tangent = (prevCenter != null)
-                        ? safeNormalize(center.subtract(prevCenter), new Vec3(0, -1, 0))
-                        : new Vec3(0, -1, 0);
-                Vec3 sideA = orthogonalVector(tangent);
-                Vec3 sideB = tangent.cross(sideA).normalize();
+            // Flutuação leve enquanto espera para estourar
+            double driftProgress = Math.min(life / explodeStart, 1.0);
+            double driftAlong = driftProgress * (0.014 + unit(pSeed, 6) * 0.012);
+            double driftOut = sideSign * driftProgress * 0.008
+                    + Math.sin(time * 0.14 + i * 2.1) * 0.003;
 
-                if (prevCenter != null) {
-                    texturedRibbonSegment(matrix, out, prevCenter, center, prevSideA, sideA,
-                            prevWidth, width, prevV, v,
-                            prevR, prevG, prevB, prevAlpha, r, g, b, alpha);
-                    texturedRibbonSegment(matrix, out, prevCenter, center, prevSideB, sideB,
-                            prevWidth * 0.75, width * 0.75, prevV, v,
-                            prevR * 0.92f, prevG * 0.80f, prevB * 0.65f, prevAlpha * 0.75f,
-                            r * 0.92f, g * 0.80f, b * 0.65f, alpha * 0.75f);
+            Vec3 pos = anchor
+                    .add(perpXY.scale(edgeOffset + driftOut))
+                    .add(bladeAxis.scale(alongOffset + driftAlong))
+                    .add(0, 0, zOffset);
+
+            double starTilt = unit(pSeed, 7) * (Math.PI * 0.25);
+
+            if (life < explodeStart) {
+                // FASE 1 (0s -> ~2s): Pequeno brilho dourado pulsante
+                double t = life / explodeStart;
+                double fadeIn = Math.min(1.0, t / 0.12);
+                double shimmer = 0.78 + 0.22 * Math.sin(time * 0.35 + i * 2.7);
+                // Dá uma leve intensificada nos últimos 0.3s antes da explosão
+                double prePop = t > 0.85 ? 1.0 + ((t - 0.85) / 0.15) * 0.45 : 1.0;
+
+                double r = (0.0020 + unit(pSeed, 8) * 0.0010) * fadeIn * prePop;
+                float alpha = (float) (fadeIn * shimmer);
+
+                // Halo dourado quente
+                PrayerVfxGeometry.ellipsoid(matrix, out, pos, new Vec3(r * 1.55, r * 1.55, r * 0.6),
+                        4, 6, 1.00f, 0.80f, 0.22f, alpha * 0.48f, 0.0);
+                // Núcleo claro
+                PrayerVfxGeometry.ellipsoid(matrix, out, pos, new Vec3(r * 0.72, r * 0.72, r * 0.4),
+                        4, 6, 1.00f, 0.96f, 0.68f, alpha * 0.95f, 0.0);
+
+                // Micro-cintilação em cruz bem sutil
+                drawDelicateStar(matrix, out, pos, r * 2.6, starTilt, alpha * 0.55f);
+            } else {
+                // FASE 2 (~2.0s -> ~2.4s): Explosão em estrela
+                double burstT = (life - explodeStart) / (1.0 - explodeStart);
+                double expand = 1.0 - Math.pow(1.0 - burstT, 2.6);
+                double fadeOut = Math.pow(1.0 - burstT, 1.25);
+
+                double maxRadius = 0.020 + unit(pSeed, 8) * 0.010;
+                double currentRadius = lerp(0.003, maxRadius, expand);
+                double spin = starTilt + burstT * 0.35;
+
+                // Flash central rápido no início do estouro
+                if (burstT < 0.45) {
+                    double flashFade = 1.0 - (burstT / 0.45);
+                    double flashR = 0.0042 * (1.0 - burstT * 0.5);
+                    PrayerVfxGeometry.ellipsoid(matrix, out, pos, new Vec3(flashR, flashR, flashR * 0.4),
+                            4, 6, 1.00f, 0.99f, 0.85f, (float) (flashFade * 0.95), 0.0);
                 }
 
-                prevCenter = center;
-                prevSideA = sideA;
-                prevSideB = sideB;
-                prevWidth = width;
-                prevV = v;
-                prevR = r;
-                prevG = g;
-                prevB = b;
-                prevAlpha = alpha;
+                // Estrela de 8 pontas (4 raios principais longos + 4 diagonais curtos)
+                drawExplosionStar(matrix, out, pos, currentRadius, spin, (float) fadeOut);
             }
         }
     }
 
-    private static void drawFilaments(Matrix4fc matrix, VertexConsumer out, Bounds bounds,
-                                      double time, int seed) {
-        double scale = bounds.strokeScale();
-        Vec3 center = boundsCenter(bounds);
+    /** Cruz luminosa fina durante a fase de brilho. */
+    private static void drawDelicateStar(Matrix4fc matrix, VertexConsumer out, Vec3 center,
+                                         double radius, double angle, float alpha) {
+        double thick = Math.max(0.00022, radius * 0.07);
+        for (int k = 0; k < 4; k++) {
+            double a = angle + k * (Math.PI * 0.5);
+            Vec3 tip = center.add(Math.cos(a) * radius, Math.sin(a) * radius, 0.0);
+            PrayerVfxGeometry.taperedTube(matrix, out, center, tip,
+                    thick, 0.00006, 1.00f, 0.92f, 0.52f, alpha);
+        }
+    }
 
-        for (int filament = 0; filament < 4; filament++) {
-            long filamentSeed = mix(seed * 41L + filament * 613L);
-            double x = lerp(bounds.minX(), bounds.maxX(), unit(filamentSeed, 1));
-            double z = lerp(bounds.minZ(), bounds.maxZ(), unit(filamentSeed, 2));
-            double phase = time * 0.48 + unit(filamentSeed, 3) * Math.PI * 2.0;
+    /** Estrela pontiaguda de 8 raios (4 principais + 4 diagonais) da explosão. */
+    private static void drawExplosionStar(Matrix4fc matrix, VertexConsumer out, Vec3 center,
+                                          double radius, double angle, float alpha) {
+        double mainThick = Math.max(0.00042, radius * 0.028);
+        double diagThick = mainThick * 0.65;
 
-            Vec3 p0 = new Vec3(x, bounds.maxY(), z);
-            Vec3 p1 = new Vec3(
-                    x + Math.sin(phase) * 0.032 * scale,
-                    lerp(bounds.maxY(), bounds.minY(), 0.35),
-                    z + Math.cos(phase) * 0.026 * scale);
-            Vec3 p2 = new Vec3(
-                    x + Math.sin(phase + 1.4) * 0.048 * scale,
-                    lerp(bounds.maxY(), bounds.minY(), 0.72),
-                    z + Math.cos(phase + 1.4) * 0.036 * scale);
-            Vec3 p3 = new Vec3(
-                    x + Math.sin(phase + 2.6) * 0.028 * scale,
-                    bounds.minY(),
-                    z + Math.cos(phase + 2.6) * 0.024 * scale);
-
-            // Filamentos de luz dourada (base âmbar -> meio ouro vivo -> ponta branco-quente)
-            PrayerVfxGeometry.taperedTube(matrix, out, p0, p1,
-                    0.0048 * scale, 0.0032 * scale, 0.92f, 0.66f, 0.14f, 0.38f);
-            PrayerVfxGeometry.taperedTube(matrix, out, p1, p2,
-                    0.0032 * scale, 0.0018 * scale, 1.00f, 0.85f, 0.34f, 0.48f);
-            PrayerVfxGeometry.taperedTube(matrix, out, p2, p3,
-                    0.0018 * scale, 0.0004 * scale, 1.00f, 0.96f, 0.68f, 0.34f);
+        // 4 pontas principais longas (branco-dourado intenso)
+        for (int k = 0; k < 4; k++) {
+            double a = angle + k * (Math.PI * 0.5);
+            Vec3 tip = center.add(Math.cos(a) * radius, Math.sin(a) * radius, 0.0);
+            PrayerVfxGeometry.taperedTube(matrix, out, center, tip,
+                    mainThick, 0.00008, 1.00f, 0.96f, 0.70f, alpha * 0.95f);
         }
 
-        for (int i = 0; i < 3; i++) {
-            double angle = -time * 0.42 + i * (Math.PI * 2.0 / 3.0) + seed * 0.01;
-            Vec3 mote = new Vec3(
-                    center.x + Math.cos(angle) * Math.max(0.022, bounds.width() * 0.56),
-                    center.y + Math.sin(time * 0.65 + i * 2.1) * bounds.height() * 0.28,
-                    center.z + Math.sin(angle) * Math.max(0.022, bounds.depth() * 0.64));
-            double r = 0.0065 * scale;
-            PrayerVfxGeometry.ellipsoid(matrix, out, mote, new Vec3(r, r * 1.4, r),
-                    4, 6, 1.00f, 0.90f, 0.45f, 0.72f, angle);
+        // 4 pontas diagonais menores (ouro quente)
+        double diagRadius = radius * 0.52;
+        for (int k = 0; k < 4; k++) {
+            double a = angle + Math.PI * 0.25 + k * (Math.PI * 0.5);
+            Vec3 tip = center.add(Math.cos(a) * diagRadius, Math.sin(a) * diagRadius, 0.0);
+            PrayerVfxGeometry.taperedTube(matrix, out, center, tip,
+                    diagThick, 0.00006, 1.00f, 0.82f, 0.28f, alpha * 0.80f);
         }
     }
 }
