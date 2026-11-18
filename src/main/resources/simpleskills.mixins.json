@@ -68,6 +68,7 @@
     "RuneMiningClientMixin",
     "RuneOreDestroyProgressMixin",
     "RuneItemModelResolverMixin",
+    "RuneEquipmentLayerRendererMixin",
     "ItemStackRenderStateAccessor",
     "ItemStackLayerRenderStateAccessor"
   ]
