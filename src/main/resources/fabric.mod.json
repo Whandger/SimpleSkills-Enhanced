@@ -12,7 +12,7 @@
     "homepage": "https://steamcommunity.com/id/obujekuto/",
     "sources": "https://github.com/Whandger/SimpleSkills-Enhanced"
   },
-  "license": "CC0-1.0",
+  "license": "Apache-2.0",
   "icon": "assets/simpleskills/icon.png",
   "environment": "*",
   "entrypoints": {

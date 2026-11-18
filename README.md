@@ -163,17 +163,17 @@ Every completed investigation grants **40 base XP**, even when Nothing is found.
 - The actual fish species determines the main fish item delivered after a successful catch.
 - Fishing sessions progress through five stages:
 
-  **Settling → Waiting → Approaching → Biting → Fighting**
+  **Settling → Waiting → Approaching → Biting → Fighting**
 
 - Fish swim toward the bait before biting.
 - The player must right-click during the bite window to start the fight.
 - During the fight, fish pull left, pull right, or pause.
 - Players counter their movement by turning the camera in the opposite direction and reel using the use key.
 - The HUD displays:
-  - Line tension.
-  - Fish fatigue.
-  - Reeling progress.
-  - Fish movement.
+  - Line tension.
+  - Fish fatigue.
+  - Reeling progress.
+  - Fish movement.
 - Excessive line tension breaks the fishing line.
 - Failed catches allow the fish to escape without rewards.
 - Fish can react to nearby players through configurable hearing and vision behavior.
@@ -326,7 +326,6 @@ Fishing configuration includes:
 - Minimum water volume and depth, fish population targets, and maximum population.
 - Natural spawning settings and species-specific minimum Fishing levels.
 
-
 ### ⚔️ Slaying
 
 - **Sword Damage:** +0.3% per level, up to **+29.7% at level 99**.
@@ -421,31 +420,41 @@ Unlock levels, Dash cooldown and impulse, Dash immunity duration, exhaustion cos
 | `double_jump_vertical_velocity` | 0.9 | Maximum upward velocity applied by Double Jump; it scales with Agility up to level 40. |
 | `double_jump_exhaustion` | 1.0 | Hunger exhaustion caused by Double Jump. |
 
-🙏 Prayer — Divine Arts
-Prayer has been reworked into three magic disciplines: Divine, Unholy, and Elementalist. The trees contain 35 spells unlocked from levels 1 to 99. Each player follows one discipline at a time, and switching disciplines clears the eight-slot loadout.
-Controls
+### 🙏 Prayer — Divine Arts
+
+Prayer has been reworked into three magic disciplines: **Divine**, **Unholy**, and **Elementalist**. The trees contain **35 spells** unlocked from levels 1 to 99. Each player follows one discipline at a time, and switching disciplines clears the eight-slot loadout.
+
+#### Controls
+
 These keys can be changed in Minecraft's Controls menu.
-B — Magic Skillbook: Choose a discipline, browse unlocked spells, and equip them into the active slot.
-C — Magic Wheel: Shows the eight loadout slots.
-Left-click a slot to open the spell picker for that slot.
-Right-click a slot to make it the active slot.
-In the picker, click a spell to equip it into the slot.
-R — Cast: Casts the spell in the active slot.
-Casting Rules
-Casting requires empty main-hand and off-hand slots.
-Targeted spells use the first living entity or block in your line of sight, up to 24 blocks away. Some spells affect you or nearby allies instead.
-Offensive spells do not affect other players.
-Every valid cast grants Prayer XP. The reward starts at 360 XP and grows with the spell's required level and your Prayer level.
-Each spell has its own cooldown. Cooldowns shorten as Prayer level increases, by up to about 35% at level 99, with a minimum of 20 ticks.
-Spell damage and healing scale slightly with Prayer level, reaching about +59% at level 99.
-Timing and Feedback
-Each spell has a fixed impact moment. Damage, debuffs, and effects are applied on the same tick the visual effect and sound reach the target.
-Impacts shake the camera and flash the screen when they happen close to the player.
-The active spell's cooldown appears in a small HUD tile next to the Dash indicator.
-Every spell has its own sound cue and a procedurally generated 3D effect, so no particle spritesheets are used.
-Changes in This Version
-The original candle-sacrifice buff mechanic has been removed.
-The Magic Wheel was rebuilt with separate left-click and right-click actions, a spell picker, and a larger layout.
+
+- **B — Magic Skillbook:** Choose a discipline, browse unlocked spells, and equip them into the active slot.
+- **C — Magic Wheel:** Shows the eight loadout slots.
+  - Left-click a slot to open the spell picker for that slot.
+  - Right-click a slot to make it the active slot.
+  - In the picker, click a spell to equip it into the slot.
+- **R — Cast:** Casts the spell in the active slot.
+
+#### Casting Rules
+
+- Casting requires empty main-hand and off-hand slots.
+- Targeted spells use the first living entity or block in your line of sight, up to 24 blocks away. Some spells affect you or nearby allies instead.
+- Offensive spells do not affect other players.
+- Every valid cast grants Prayer XP. The reward starts at 360 XP and grows with the spell's required level and your Prayer level.
+- Each spell has its own cooldown. Cooldowns shorten as Prayer level increases, by up to about 35% at level 99, with a minimum of 20 ticks.
+- Spell damage and healing scale slightly with Prayer level, reaching about +59% at level 99.
+
+#### Timing & Feedback
+
+- Each spell has a fixed impact moment. Damage, debuffs, and effects are applied on the same tick the visual effect and sound reach the target.
+- Impacts shake the camera and flash the screen when they happen close to the player.
+- The active spell's cooldown appears in a small HUD tile next to the Dash indicator.
+- Every spell has its own sound cue and a procedurally generated 3D effect, so no particle spritesheets are used.
+
+#### Changes in This Version
+
+- The original candle-sacrifice buff mechanic has been removed.
+- The Magic Wheel was rebuilt with separate left-click and right-click actions, a spell picker, and a larger layout.
 
 ### 🌾 Farming
 
@@ -469,7 +478,7 @@ SimpleSkills Enhanced expands Farming with additional harvesting bonuses, animal
 
 Both perks unlock at **Farming Level 5**.
 
-# Bone Meal Mastery
+##### Bone Meal Mastery
 
 - Use any hoe and right-click a compatible crop to accelerate its growth without consuming Bone Meal.
 - Hunger cost decreases as Farming level increases:
@@ -483,11 +492,9 @@ Both perks unlock at **Farming Level 5**.
 
 - Hunger is consumed only when the crop successfully grows.
 
-# Auto Plant
-
 ![Bone Meal Mastery](docs/images/bone-meal.gif)
 
-**Auto Plant**
+##### Auto Plant
 
 - Use any hoe and left-click a fully grown crop on farmland to harvest and automatically replant it.
 - Replanting uses matching seeds from the harvested crop's drops when available.
@@ -509,17 +516,18 @@ SimpleSkills Enhanced completely overhauls Minecraft's vanilla enchanting system
 - Grants significant Mining XP:
   - Rune Ore: **900 XP**
   - Deepslate Rune Ore: **1,100 XP**
+- Each Rune Ore and Deepslate Rune Ore has a **5% chance** to also drop a **Rune Lore Ore**, used to change Glint Styles.
 
 <p align="center">
   <img src="docs/images/mining_rune_ore_stone.gif" alt="Rune stone block" width="600">
   <br>
-  <em>Rune Infusion — Enchantment Selection</em>
+  <em>Mining Rune Ore</em>
 </p>
 
 <p align="center">
   <img src="docs/images/rune_ore.gif" alt="Rune ore" width="600">
   <br>
-  <em>Rune Infusion — Enchantment Selection</em>
+  <em>Rune Ore</em>
 </p>
 
 #### 🔮 Rune Infusion Minigame
@@ -544,6 +552,24 @@ Interacting with an Enchanting Table now opens the **Rune Infusion** menu.
   <br>
   <em>Rune Infusion — Magical Stabilization Minigame</em>
 </p>
+
+#### 🌈 Glint Styles
+
+Give your enchanted gear a unique look. Glint Styles are a **cosmetic-only** system that changes how an item's enchantment glint and effects appear. They never change stats or enchantments.
+
+- Open an Enchanting Table and switch to the **Glint Styles** tab in the Rune Infusion menu.
+- Select an enchanted item, choose a style, and click **Apply Style**. The left panel previews the selected style on your item before you apply it.
+- Items must have at least one enchantment to receive a style.
+- **Six styles are available:**
+  - **Arcane:** Violet runic circles, orbiting glyphs, and crystals.
+  - **Inferno:** Rising embers and crackling heat sparks.
+  - **Frost:** Drifting snowflakes and ice shards.
+  - **Storm:** Electric arcs that flicker across the equipment.
+  - **Divine:** Golden halos, angelic wings on chestplates, and star bursts.
+  - **Shadow:** Dark smoke, void filaments, and violet embers.
+- **Cost:** Each themed style costs **1 Rune Lore Ore**. Switching back to **Vanilla** is always free.
+- Styles are saved on the item and stay with it when you move it, store it, or trade it.
+- Styled armor shows effects on every worn piece, and styled tools and weapons show effects while held and on the dropped item.
 
 #### 📈 Over-level Enchanting & Progression
 
@@ -809,8 +835,7 @@ Important Ironman configuration options:
 }
 ```
 
-
-
+---
 
 ## 🚀 Installation
 
@@ -832,7 +857,7 @@ The current development environment uses:
 | Fabric Loader | 0.19.5 |
 | Fabric API | 0.160.6+26.3 |
 | Fabric Loom | 1.17.21 |
-| SimpleSkills Enhanced | 1.1.6 |
+| SimpleSkills Enhanced | 1.1.7 |
 
 ---
 
@@ -869,6 +894,7 @@ Responsible for the additional improvements introduced in this fork, including:
 - Agility Dash and Double Jump action abilities, Agility ranks, and progressive ability strength.
 - Prayer Divine Arts rework with three disciplines, 35 spells, a skillbook, an eight-slot magic wheel, custom spell icons, animated sigils, and individual spell sound cues.
 - Farming bonuses, milking XP improvements, Bone Meal Mastery, and Auto Plant.
+- Glint Styles with procedural armor and item effects, and Rune Lore Ore.
 - HUD and TAB interface improvements.
 - Rebalanced equipment progression based on player testing.
 - Supporting technical implementations and compatibility work.

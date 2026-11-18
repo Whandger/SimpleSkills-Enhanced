@@ -66,6 +66,11 @@
   "priority": 900,
   "client": [
     "RuneMiningClientMixin",
-    "RuneOreDestroyProgressMixin"
+    "RuneOreDestroyProgressMixin",
+    "RuneItemModelResolverMixin",
+    "ItemStackRenderStateAccessor",
+    "ItemStackLayerRenderStateAccessor",
+    "RuneEquipmentLayerRendererMixin",
+    "RuneItemStackLayerVfxMixin"
   ]
 }

@@ -3,6 +3,7 @@ package com.github.ob_yekt.simpleskills.enchanting;
 import com.github.ob_yekt.simpleskills.Skills;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
 import com.github.ob_yekt.simpleskills.runes.RuneContent;
+import com.github.ob_yekt.simpleskills.runes.RuneVisualStyles;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.Holder;
@@ -33,6 +34,8 @@ public final class RuneInfusionNetworking {
                 RuneInfusionStartPayload.TYPE, RuneInfusionStartPayload.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(
                 RuneInfusionInputPayload.TYPE, RuneInfusionInputPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(
+                RuneInfusionStylePayload.TYPE, RuneInfusionStylePayload.CODEC);
         // Kept registered for protocol compatibility; the server no longer answers it (no hotkey).
         PayloadTypeRegistry.serverboundPlay().register(
                 RuneInfusionCatalogRequestPayload.TYPE, RuneInfusionCatalogRequestPayload.CODEC);
@@ -48,6 +51,10 @@ public final class RuneInfusionNetworking {
 
         ServerPlayNetworking.registerGlobalReceiver(RuneInfusionInputPayload.TYPE,
                 (payload, context) -> context.server().execute(() -> handleInput(context.player(), payload)));
+
+        ServerPlayNetworking.registerGlobalReceiver(RuneInfusionStylePayload.TYPE,
+                (payload, context) -> context.server().execute(() -> handleStyle(context.player(), payload)));
+
 
         // Enchanting Table -> Rune Infusion (vanilla menu is never opened).
         RuneInfusionTable.register();
@@ -115,7 +122,8 @@ public final class RuneInfusionNetworking {
         }
 
         ServerPlayNetworking.send(player,
-                new RuneInfusionCatalogResponsePayload(slot, countRunes(inventory), unlocked, rows.toString()));
+                new RuneInfusionCatalogResponsePayload(slot, countRunes(inventory), countRuneLoreOre(inventory),
+                        RuneVisualStyles.getStyle(equipment), unlocked, rows.toString()));
     }
 
     /** Pairwise incompatibility among the offered enchantments, so the UI can block bad picks. */
@@ -138,6 +146,77 @@ public final class RuneInfusionNetworking {
             }
         }
         return result;
+    }
+
+    private static int countRuneLoreOre(Inventory inventory) {
+        int count = 0;
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
+            ItemStack stack = inventory.getItem(slot);
+            if (stack.is(RuneContent.RUNE_LORE_ORE)) count += stack.getCount();
+        }
+        return count;
+    }
+
+    private static boolean consumeRuneLoreOre(Inventory inventory, int amount) {
+        if (amount <= 0) return true;
+        if (countRuneLoreOre(inventory) < amount) return false;
+        int remaining = amount;
+        for (int slot = 0; slot < inventory.getContainerSize() && remaining > 0; slot++) {
+            ItemStack stack = inventory.getItem(slot);
+            if (!stack.is(RuneContent.RUNE_LORE_ORE)) continue;
+            int taken = Math.min(stack.getCount(), remaining);
+            stack.shrink(taken);
+            remaining -= taken;
+        }
+        inventory.setChanged();
+        return remaining == 0;
+    }
+
+    /** Cosmetic style changes are separate from enchantment infusion and have no gameplay effect. */
+    private static void handleStyle(ServerPlayer player, RuneInfusionStylePayload payload) {
+        if (player == null || payload == null) return;
+        if (!RuneInfusionTable.isNearOpenedTable(player)) {
+            send(player, RuneInfusionResultPayload.STYLE_INVALID, 0, -1);
+            return;
+        }
+
+        Inventory inventory = player.getInventory();
+        int slot = payload.inventorySlot();
+        int style = payload.styleId();
+        if (slot < 0 || slot >= inventory.getNonEquipmentItems().size()
+                || style < RuneVisualStyles.VANILLA || style > RuneVisualStyles.MAX_STYLE) {
+            send(player, RuneInfusionResultPayload.STYLE_INVALID, countRuneLoreOre(inventory), -1);
+            return;
+        }
+
+        RuneInfusionSession session = RuneInfusionService.getActiveSession(player);
+        if (session != null && !session.isTerminal()) {
+            send(player, RuneInfusionResultPayload.STYLE_BUSY, countRuneLoreOre(inventory), -1);
+            return;
+        }
+
+        ItemStack equipment = inventory.getItem(slot);
+        if (equipment.isEmpty() || !EnchantmentHelper.canStoreEnchantments(equipment)
+                || EnchantmentHelper.getEnchantmentsForCrafting(equipment).isEmpty()) {
+            send(player, RuneInfusionResultPayload.STYLE_INVALID, countRuneLoreOre(inventory), -1);
+            return;
+        }
+
+        int currentStyle = RuneVisualStyles.getStyle(equipment);
+        if (style == currentStyle) {
+            send(player, RuneInfusionResultPayload.STYLE_APPLIED, countRuneLoreOre(inventory), style);
+            return;
+        }
+
+        // Vanilla is a free reset. Any themed style costs one Rune Lore Ore.
+        if (style != RuneVisualStyles.VANILLA && !consumeRuneLoreOre(inventory, 1)) {
+            send(player, RuneInfusionResultPayload.STYLE_NOT_ENOUGH_LORE, countRuneLoreOre(inventory), -1);
+            return;
+        }
+
+        RuneVisualStyles.setStyle(equipment, style);
+        inventory.setChanged();
+        send(player, RuneInfusionResultPayload.STYLE_APPLIED, countRuneLoreOre(inventory), style);
     }
 
     private static int countRunes(Inventory inventory) {
