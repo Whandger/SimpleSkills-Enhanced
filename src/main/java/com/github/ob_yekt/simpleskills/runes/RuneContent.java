@@ -25,12 +25,14 @@ public final class RuneContent {
     public static final ResourceKey<Item> RUNE_ORE_ITEM_KEY = itemKey("rune_ore");
     public static final ResourceKey<Item> DEEPSLATE_RUNE_ORE_ITEM_KEY = itemKey("deepslate_rune_ore");
     public static final ResourceKey<Item> RUNE_ITEM_KEY = itemKey("rune");
+    public static final ResourceKey<Item> RUNE_LORE_ORE_ITEM_KEY = itemKey("rune_lore_ore");
 
     public static Block RUNE_ORE;
     public static Block DEEPSLATE_RUNE_ORE;
     public static Item RUNE_ORE_ITEM;
     public static Item DEEPSLATE_RUNE_ORE_ITEM;
     public static Item RUNE;
+    public static Item RUNE_LORE_ORE;
     private static boolean registered;
 
     private static ResourceKey<Block> blockKey(String path) {
@@ -44,6 +46,7 @@ public final class RuneContent {
     public static synchronized void register() {
         if (registered) return;
         registered = true;
+        RuneVisualStyles.register();
 
         RUNE_ORE = Registry.register(BuiltInRegistries.BLOCK, RUNE_ORE_BLOCK_KEY,
                 new RuneOreBlock(BlockBehaviour.Properties.of()
@@ -67,14 +70,19 @@ public final class RuneContent {
         DEEPSLATE_RUNE_ORE_ITEM = registerBlockItem(DEEPSLATE_RUNE_ORE, DEEPSLATE_RUNE_ORE_ITEM_KEY);
         RUNE = Registry.register(BuiltInRegistries.ITEM, RUNE_ITEM_KEY,
                 new Item(new Item.Properties().setId(RUNE_ITEM_KEY)));
+        RUNE_LORE_ORE = Registry.register(BuiltInRegistries.ITEM, RUNE_LORE_ORE_ITEM_KEY,
+                new Item(new Item.Properties().setId(RUNE_LORE_ORE_ITEM_KEY)));
 
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(entries -> {
             entries.accept(RUNE_ORE_ITEM);
             entries.accept(DEEPSLATE_RUNE_ORE_ITEM);
         });
-        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(entries -> entries.accept(RUNE));
+        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(entries -> {
+            entries.accept(RUNE);
+            entries.accept(RUNE_LORE_ORE);
+        });
 
-        Simpleskills.LOGGER.info("Registered Rune, Rune Ore and Deepslate Rune Ore.");
+        Simpleskills.LOGGER.info("Registered Rune, Rune Ore, Deepslate Rune Ore and Rune Lore Ore.");
     }
 
     private static Item registerBlockItem(Block block, ResourceKey<Item> key) {

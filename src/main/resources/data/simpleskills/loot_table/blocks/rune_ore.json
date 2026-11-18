@@ -29,6 +29,19 @@
           ]
         }
       ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:random_chance",
+        "chance": 0.05
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "simpleskills:rune_lore_ore"
+        }
+      ]
     }
   ],
   "random_sequence": "simpleskills:blocks/rune_ore"

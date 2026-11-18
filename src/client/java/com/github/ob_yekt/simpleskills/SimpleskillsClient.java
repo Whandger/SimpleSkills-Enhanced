@@ -82,6 +82,23 @@ public class SimpleskillsClient implements ClientModInitializer {
         ClientPlayNetworking.registerGlobalReceiver(RuneInfusionResultPayload.TYPE, (payload, context) ->
             context.client().execute(() -> {
                 if (context.client().player == null) return;
+                if (payload.resultCode() == RuneInfusionResultPayload.STYLE_APPLIED
+                        || payload.resultCode() == RuneInfusionResultPayload.STYLE_NOT_ENOUGH_LORE
+                        || payload.resultCode() == RuneInfusionResultPayload.STYLE_INVALID
+                        || payload.resultCode() == RuneInfusionResultPayload.STYLE_BUSY) {
+                    RuneInfusionPreparationScreen.acceptStyleResult(payload);
+                    if (!(context.client().gui.screen() instanceof RuneInfusionPreparationScreen)) {
+                        String styleKey = payload.resultCode() == RuneInfusionResultPayload.STYLE_APPLIED
+                                ? "message.simpleskills.rune_infusion.style_applied"
+                                : payload.resultCode() == RuneInfusionResultPayload.STYLE_NOT_ENOUGH_LORE
+                                ? "message.simpleskills.rune_infusion.style_not_enough"
+                                : payload.resultCode() == RuneInfusionResultPayload.STYLE_BUSY
+                                ? "message.simpleskills.rune_infusion.busy"
+                                : "message.simpleskills.rune_infusion.style_invalid";
+                        context.client().player.sendSystemMessage(Component.translatable(styleKey));
+                    }
+                    return;
+                }
                 String key = switch (payload.resultCode()) {
                     case RuneInfusionResultPayload.STARTED -> "message.simpleskills.rune_infusion.started";
                     case RuneInfusionResultPayload.PLAYER_BUSY -> "message.simpleskills.rune_infusion.busy";
