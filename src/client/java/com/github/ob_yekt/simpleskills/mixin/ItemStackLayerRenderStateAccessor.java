@@ -4,6 +4,8 @@ import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.resources.model.geometry.ItemQuads;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import com.mojang.blaze3d.vertex.PoseStack;
 
 @Mixin(ItemStackRenderState.LayerRenderState.class)
 public interface ItemStackLayerRenderStateAccessor {
@@ -18,4 +20,10 @@ public interface ItemStackLayerRenderStateAccessor {
 
     @Accessor("foilType")
     void simpleskills$setFoilType(net.minecraft.client.renderer.item.ItemStackRenderState.FoilType foilType);
+
+    @Accessor("this$0")
+    ItemStackRenderState simpleskills$getParentState();
+
+    @Invoker("applyTransform")
+    void simpleskills$applyTransform(PoseStack.Pose pose);
 }

@@ -1,5 +1,6 @@
 package com.github.ob_yekt.simpleskills.mixin;
 
+import com.github.ob_yekt.simpleskills.runes.RuneEquipmentVfxRenderer;
 import com.github.ob_yekt.simpleskills.runes.RuneVisualStyles;
 import com.github.ob_yekt.simpleskills.runes.RuneVisualStylesClient;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -26,8 +27,10 @@ public abstract class RuneItemModelResolverMixin {
     private void simpleskills$applyRuneGlintStyle(ItemStackRenderState output, ItemStack item,
                                                   ItemDisplayContext displayContext, Level level,
                                                   ItemOwner owner, int seed, CallbackInfo ci) {
+        RuneEquipmentVfxRenderer.clearItemStyle(output);
         int style = RuneVisualStyles.getStyle(item);
         if (style == RuneVisualStyles.VANILLA) return;
+        RuneEquipmentVfxRenderer.captureItemStyle(output, item, style);
 
         ItemStackRenderStateAccessor state = (ItemStackRenderStateAccessor) output;
         ItemStackRenderState.LayerRenderState[] layers = state.simpleskills$getLayers();
