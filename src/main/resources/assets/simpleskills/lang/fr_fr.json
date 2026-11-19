@@ -455,5 +455,7 @@
   "message.simpleskills.rune_infusion.style_not_enough": "Vous avez besoin d’un minerai de savoir runique.",
   "message.simpleskills.tree_feller.unlocked": "Bûcheron débloqué ! Maintenez Maj et cassez le tronc d’un arbre avec une hache pour faire tomber l’arbre entier.",
   "message.simpleskills.vein_mining.improved": "Mineur de filons amélioré ! Maintenez Maj pendant l’extraction pour casser jusqu’à %s minerais connectés supplémentaires.",
-  "message.simpleskills.vein_mining.unlocked": "Mineur de filons débloqué ! Maintenez Maj pendant l’extraction pour casser jusqu’à %s minerais connectés supplémentaires."
+  "message.simpleskills.vein_mining.unlocked": "Mineur de filons débloqué ! Maintenez Maj pendant l’extraction pour casser jusqu’à %s minerais connectés supplémentaires.",
+  "gui.simpleskills.rune_infusion.invalid_selection": "Cette sélection d’enchantements n’est plus valide.",
+  "message.simpleskills.rune_infusion.style_too_far": "Vous devez être plus proche de la table d’enchantement."
 }

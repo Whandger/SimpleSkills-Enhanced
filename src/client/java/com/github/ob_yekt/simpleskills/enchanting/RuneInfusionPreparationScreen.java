@@ -61,6 +61,7 @@ public final class RuneInfusionPreparationScreen extends Screen {
     private Button enchantmentsTab;
     private Button stylesTab;
     private Component status = Component.empty();
+    private boolean statusOk;
 
     public RuneInfusionPreparationScreen(RuneInfusionCatalogResponsePayload catalog) {
         super(RuneInfusionText.text("gui.simpleskills.rune_infusion.prepare"));
@@ -283,6 +284,7 @@ public final class RuneInfusionPreparationScreen extends Screen {
 
     private void onStyleResult(RuneInfusionResultPayload payload) {
         stylePending = false;
+        statusOk = payload.resultCode() == RuneInfusionResultPayload.STYLE_APPLIED;
         switch (payload.resultCode()) {
             case RuneInfusionResultPayload.STYLE_APPLIED -> {
                 currentStyle = payload.grade();
@@ -298,6 +300,8 @@ public final class RuneInfusionPreparationScreen extends Screen {
                     status = RuneInfusionText.text("gui.simpleskills.rune_infusion.style_invalid");
             case RuneInfusionResultPayload.STYLE_BUSY ->
                     status = RuneInfusionText.text("message.simpleskills.rune_infusion.busy");
+            case RuneInfusionResultPayload.STYLE_TOO_FAR ->
+                    status = RuneInfusionText.text("message.simpleskills.rune_infusion.style_too_far");
             default -> status = RuneInfusionText.text("gui.simpleskills.rune_infusion.invalid_selection");
         }
         updateStyleButton();
@@ -409,7 +413,7 @@ public final class RuneInfusionPreparationScreen extends Screen {
                 g.text(font, RuneInfusionText.text("gui.simpleskills.rune_infusion.style_requires_enchantments"),
                         listX0(), top + 208, RED, false);
             } else if (!status.getString().isEmpty()) {
-                g.text(font, status, listX0(), top + 208, status.getString().contains("updated") || status.getString().contains("atualizado") ? GREEN : RED, false);
+                g.text(font, status, listX0(), top + 208, statusOk ? GREEN : RED, false);
             } else if (selectedStyle == RuneVisualStyles.VANILLA) {
                 g.text(font, RuneInfusionText.text("gui.simpleskills.rune_infusion.style_free"), listX0(), top + 208, GOLD, false);
             } else if (selectedStyle == currentStyle) {

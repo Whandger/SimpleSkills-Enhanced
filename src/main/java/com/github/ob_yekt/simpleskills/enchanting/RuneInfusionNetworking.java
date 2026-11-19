@@ -176,7 +176,7 @@ public final class RuneInfusionNetworking {
     private static void handleStyle(ServerPlayer player, RuneInfusionStylePayload payload) {
         if (player == null || payload == null) return;
         if (!RuneInfusionTable.isNearOpenedTable(player)) {
-            send(player, RuneInfusionResultPayload.STYLE_INVALID, 0, -1);
+            send(player, RuneInfusionResultPayload.STYLE_TOO_FAR, 0, -1);
             return;
         }
 

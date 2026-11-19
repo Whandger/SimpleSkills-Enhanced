@@ -85,7 +85,8 @@ public class SimpleskillsClient implements ClientModInitializer {
                 if (payload.resultCode() == RuneInfusionResultPayload.STYLE_APPLIED
                         || payload.resultCode() == RuneInfusionResultPayload.STYLE_NOT_ENOUGH_LORE
                         || payload.resultCode() == RuneInfusionResultPayload.STYLE_INVALID
-                        || payload.resultCode() == RuneInfusionResultPayload.STYLE_BUSY) {
+                        || payload.resultCode() == RuneInfusionResultPayload.STYLE_BUSY
+                        || payload.resultCode() == RuneInfusionResultPayload.STYLE_TOO_FAR) {
                     RuneInfusionPreparationScreen.acceptStyleResult(payload);
                     if (!(context.client().gui.screen() instanceof RuneInfusionPreparationScreen)) {
                         String styleKey = payload.resultCode() == RuneInfusionResultPayload.STYLE_APPLIED
@@ -94,6 +95,8 @@ public class SimpleskillsClient implements ClientModInitializer {
                                 ? "message.simpleskills.rune_infusion.style_not_enough"
                                 : payload.resultCode() == RuneInfusionResultPayload.STYLE_BUSY
                                 ? "message.simpleskills.rune_infusion.busy"
+                                : payload.resultCode() == RuneInfusionResultPayload.STYLE_TOO_FAR
+                                ? "message.simpleskills.rune_infusion.style_too_far"
                                 : "message.simpleskills.rune_infusion.style_invalid";
                         context.client().player.sendSystemMessage(Component.translatable(styleKey));
                     }

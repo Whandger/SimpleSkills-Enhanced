@@ -184,6 +184,12 @@ public abstract class ProjectileWeaponItemMixin {
             );
         }
 
+        // Duplicated arrows are bonus shots: only the original arrow may be picked up again.
+        if (duplicate instanceof AbstractArrow duplicateArrow) {
+            ((AbstractArrowAccessor) duplicateArrow)
+                    .simpleskills$setPickup(AbstractArrow.Pickup.DISALLOWED);
+        }
+
         // Prevent duplicate projectiles from granting additional Ranged XP.
         Ranged.markDuplicateProjectile(duplicate);
 

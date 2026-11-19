@@ -455,5 +455,7 @@
   "key.simpleskills.toggle_hud": "Ativar/desativar HUD",
   "message.simpleskills.tree_feller.unlocked": "Derrubada de Árvores desbloqueada! Segure Shift e quebre o tronco de uma árvore com um machado para derrubar a árvore inteira.",
   "message.simpleskills.vein_mining.improved": "Minerador de Veios aprimorado! Segure Shift enquanto minera para quebrar até %s minérios conectados adicionais.",
-  "message.simpleskills.vein_mining.unlocked": "Minerador de Veios desbloqueado! Segure Shift enquanto minera para quebrar até %s minérios conectados adicionais."
+  "message.simpleskills.vein_mining.unlocked": "Minerador de Veios desbloqueado! Segure Shift enquanto minera para quebrar até %s minérios conectados adicionais.",
+  "gui.simpleskills.rune_infusion.invalid_selection": "A seleção de encantamentos não é mais válida.",
+  "message.simpleskills.rune_infusion.style_too_far": "Você precisa estar mais perto da Mesa de Encantamentos."
 }
