@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import com.github.ob_yekt.simpleskills.agility.AgilityActionPayload;
 import com.github.ob_yekt.simpleskills.ui.RankTitleMenuActionPayload;
+import com.github.ob_yekt.simpleskills.ui.SkillOverviewRequestPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerActionPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerClientState;
 import net.minecraft.world.phys.Vec3;
@@ -51,6 +52,9 @@ public class Keybinds {
     public static final KeyMapping OPEN_PRAYER_WHEEL_KEY = new KeyMapping(
             "key.simpleskills.prayer_wheel", InputConstants.Type.KEYBOARD, InputConstants.KEY_C, KeyMapping.Category.MISC);
 
+    public static final KeyMapping OPEN_SKILL_OVERVIEW_KEY = new KeyMapping(
+            "key.simpleskills.skill_overview", InputConstants.Type.KEYBOARD, InputConstants.KEY_K, KeyMapping.Category.MISC);
+
     private static boolean wasJumpDown;
     private static boolean canDoubleJump = true;
     private static boolean wasOnGround;
@@ -64,6 +68,7 @@ public class Keybinds {
         KeyMappingHelper.registerKeyMapping(OPEN_PRAYER_BOOK_KEY);
         KeyMappingHelper.registerKeyMapping(CAST_PRAYER_KEY);
         KeyMappingHelper.registerKeyMapping(OPEN_PRAYER_WHEEL_KEY);
+        KeyMappingHelper.registerKeyMapping(OPEN_SKILL_OVERVIEW_KEY);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null) {
@@ -85,6 +90,14 @@ public class Keybinds {
             if (OPEN_RANK_TITLES_KEY.consumeClick()
                     && ClientPlayNetworking.canSend(RankTitleMenuActionPayload.TYPE)) {
                 ClientPlayNetworking.send(new RankTitleMenuActionPayload(RankTitleMenuActionPayload.OPEN, ""));
+            }
+            if (OPEN_SKILL_OVERVIEW_KEY.consumeClick()) {
+                if (client.gui.screen() instanceof SkillOverviewScreen) {
+                    client.gui.setScreen(null);
+                } else if (client.gui.screen() == null
+                        && ClientPlayNetworking.canSend(SkillOverviewRequestPayload.TYPE)) {
+                    ClientPlayNetworking.send(new SkillOverviewRequestPayload(SkillOverviewRequestPayload.OPEN));
+                }
             }
             if (OPEN_PRAYER_BOOK_KEY.consumeClick() && client.gui.screen() == null && ClientPlayNetworking.canSend(PrayerActionPayload.TYPE)) {
                 PrayerClientState.requestOpen();

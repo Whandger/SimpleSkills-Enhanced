@@ -9,6 +9,8 @@
     "RangedProjectileDamageMixin",
     "RangedDuplicateIFrameMixin",
     "ProjectileWeaponItemMixin",
+    "FireworkRocketAccessor",
+    "AbstractArrowAccessor",
     "AlchemyXPMixin",
     "BlockTransformerMixin",
     "BlockDropMixin",

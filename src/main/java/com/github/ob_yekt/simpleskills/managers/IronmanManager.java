@@ -1,7 +1,6 @@
 package com.github.ob_yekt.simpleskills.managers;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
-import com.github.ob_yekt.simpleskills.ui.SkillTabMenu;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.server.level.ServerPlayer;
 
@@ -40,7 +39,6 @@ public class IronmanManager {
     public static void applyIronmanMode(ServerPlayer player) {
         if (player == null) return;
         AttributeManager.applyIronmanAttributes(player);
-        SkillTabMenu.updateTabMenu(player);
         NamePrefixManager.updatePlayerNameDecorations(player);
         Simpleskills.LOGGER.debug("Applied Ironman mode for player: {}", player.getName().getString());
     }
@@ -55,7 +53,6 @@ public class IronmanManager {
 
         DatabaseManager.getInstance().setIronmanMode(player.getStringUUID(), false);
         AttributeManager.clearIronmanAttributes(player);
-        SkillTabMenu.updateTabMenu(player);
         NamePrefixManager.updatePlayerNameDecorations(player);
         Simpleskills.LOGGER.debug("Disabled Ironman mode for player: {}", player.getName().getString());
     }

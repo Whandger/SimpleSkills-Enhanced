@@ -21,6 +21,7 @@ public record RuneInfusionResultPayload(int resultCode, int runeCost, int grade)
     public static final int STYLE_NOT_ENOUGH_LORE = 9;
     public static final int STYLE_INVALID = 10;
     public static final int STYLE_BUSY = 11;
+    public static final int STYLE_TOO_FAR = 12;
 
     public static final Type<RuneInfusionResultPayload> TYPE = new Type<>(
             Identifier.fromNamespaceAndPath(Simpleskills.MOD_ID, "rune_infusion_result"));

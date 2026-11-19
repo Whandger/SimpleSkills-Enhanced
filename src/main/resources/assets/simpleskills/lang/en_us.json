@@ -455,5 +455,8 @@
   "message.simpleskills.rune_infusion.style_not_enough": "You need 1 Rune Lore Ore.",
   "message.simpleskills.rune_infusion.style_invalid": "This item cannot receive a glint style.",
   "gui.simpleskills.rune_infusion.style_unchanged": "This style is already applied.",
-  "gui.simpleskills.rune_infusion.style_cosmetic": "Cosmetic only — no stat changes."
+  "gui.simpleskills.rune_infusion.style_cosmetic": "Cosmetic only — no stat changes.",
+  "gui.simpleskills.rune_infusion.invalid_selection": "That enchantment selection is no longer valid.",
+  "message.simpleskills.rune_infusion.style_too_far": "You need to be closer to the Enchanting Table.",
+  "key.simpleskills.skill_overview": "Skill Overview"
 }

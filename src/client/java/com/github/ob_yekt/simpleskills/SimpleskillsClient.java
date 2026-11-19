@@ -16,6 +16,7 @@ import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionPreparationScreen;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionResultPayload;
 import com.github.ob_yekt.simpleskills.runes.RuneMiningClient;
 import com.github.ob_yekt.simpleskills.ui.RankTitleMenuDataPayload;
+import com.github.ob_yekt.simpleskills.ui.SkillOverviewDataPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerMenuDataPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerClientState;
 import com.github.ob_yekt.simpleskills.prayer.PrayerCooldownPayload;
@@ -50,6 +51,8 @@ public class SimpleskillsClient implements ClientModInitializer {
                 context.client().execute(() -> AgilityDashHud.onCooldown(payload)));
         ClientPlayNetworking.registerGlobalReceiver(RankTitleMenuDataPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> RankTitleMenuScreen.showOrUpdate(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(SkillOverviewDataPayload.TYPE, (payload, context) ->
+                context.client().execute(() -> SkillOverviewScreen.showOrUpdate(payload)));
         ClientPlayNetworking.registerGlobalReceiver(PrayerMenuDataPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> PrayerClientState.accept(payload)));
         ClientPlayNetworking.registerGlobalReceiver(PrayerCooldownPayload.TYPE, (payload, context) ->
@@ -85,7 +88,8 @@ public class SimpleskillsClient implements ClientModInitializer {
                 if (payload.resultCode() == RuneInfusionResultPayload.STYLE_APPLIED
                         || payload.resultCode() == RuneInfusionResultPayload.STYLE_NOT_ENOUGH_LORE
                         || payload.resultCode() == RuneInfusionResultPayload.STYLE_INVALID
-                        || payload.resultCode() == RuneInfusionResultPayload.STYLE_BUSY) {
+                        || payload.resultCode() == RuneInfusionResultPayload.STYLE_BUSY
+                        || payload.resultCode() == RuneInfusionResultPayload.STYLE_TOO_FAR) {
                     RuneInfusionPreparationScreen.acceptStyleResult(payload);
                     if (!(context.client().gui.screen() instanceof RuneInfusionPreparationScreen)) {
                         String styleKey = payload.resultCode() == RuneInfusionResultPayload.STYLE_APPLIED
@@ -94,6 +98,8 @@ public class SimpleskillsClient implements ClientModInitializer {
                                 ? "message.simpleskills.rune_infusion.style_not_enough"
                                 : payload.resultCode() == RuneInfusionResultPayload.STYLE_BUSY
                                 ? "message.simpleskills.rune_infusion.busy"
+                                : payload.resultCode() == RuneInfusionResultPayload.STYLE_TOO_FAR
+                                ? "message.simpleskills.rune_infusion.style_too_far"
                                 : "message.simpleskills.rune_infusion.style_invalid";
                         context.client().player.sendSystemMessage(Component.translatable(styleKey));
                     }

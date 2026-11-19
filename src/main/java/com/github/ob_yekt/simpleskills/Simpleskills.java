@@ -20,6 +20,7 @@ import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionMinigameRuntime;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionStatePayload;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionNetworking;
 import com.github.ob_yekt.simpleskills.ui.RankTitleManager;
+import com.github.ob_yekt.simpleskills.ui.SkillOverviewManager;
 import com.github.ob_yekt.simpleskills.prayer.PrayerManager;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVisualEffects;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVfxEntity;
@@ -59,6 +60,7 @@ public class Simpleskills implements ModInitializer {
 		FishingManager.registerPayloads();
 		AgilityManager.registerPayloads();
 		RankTitleManager.registerPayloads();
+		SkillOverviewManager.registerPayloads();
 		PrayerManager.registerPayloads();
 		PrayerVfxEntity.register();
 		SimpleskillsCommands.registerCommands();
@@ -71,6 +73,7 @@ public class Simpleskills implements ModInitializer {
 		DefenseCombat.register();
 		AgilityManager.register();
 		RankTitleManager.registerReceivers();
+		SkillOverviewManager.registerReceivers();
 		PrayerManager.registerReceivers();
 		PrayerVisualEffects.register();
 		BoneMealMastery.register();

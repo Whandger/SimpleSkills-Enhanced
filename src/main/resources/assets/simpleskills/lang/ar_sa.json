@@ -455,5 +455,8 @@
   "message.simpleskills.rune_infusion.style_not_enough": "تحتاج إلى خام نقوش رون واحد.",
   "message.simpleskills.tree_feller.unlocked": "تم فتح قاطع الأشجار! اضغط باستمرار على Shift واكسر جذع شجرة بفأس لإسقاط الشجرة بأكملها.",
   "message.simpleskills.vein_mining.improved": "تم تحسين تعدين العروق! اضغط باستمرار على Shift أثناء التعدين لكسر ما يصل إلى %s من الخامات المتصلة الإضافية.",
-  "message.simpleskills.vein_mining.unlocked": "تم فتح تعدين العروق! اضغط باستمرار على Shift أثناء التعدين لكسر ما يصل إلى %s من الخامات المتصلة الإضافية."
+  "message.simpleskills.vein_mining.unlocked": "تم فتح تعدين العروق! اضغط باستمرار على Shift أثناء التعدين لكسر ما يصل إلى %s من الخامات المتصلة الإضافية.",
+  "gui.simpleskills.rune_infusion.invalid_selection": "اختيار التعويذات لم يعد صالحًا.",
+  "message.simpleskills.rune_infusion.style_too_far": "يجب أن تكون أقرب إلى طاولة التعويذات.",
+  "key.simpleskills.skill_overview": "نظرة عامة على المهارات"
 }

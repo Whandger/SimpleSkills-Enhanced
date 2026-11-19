@@ -8,6 +8,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 
 /** Persistent, synchronized cosmetic enchantment-glint style stored on each equipment stack. */
 public final class RuneVisualStyles {
@@ -39,6 +40,8 @@ public final class RuneVisualStyles {
 
     public static int getStyle(ItemStack stack) {
         if (stack == null || stack.isEmpty() || ENCHANTMENT_STYLE == null) return VANILLA;
+        // The style is kept on the stack, but it only applies while the item still has enchantments.
+        if (EnchantmentHelper.getEnchantmentsForCrafting(stack).isEmpty()) return VANILLA;
         int style = stack.getOrDefault(ENCHANTMENT_STYLE, VANILLA);
         return style < VANILLA || style > MAX_STYLE ? VANILLA : style;
     }
