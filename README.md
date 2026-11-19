@@ -601,14 +601,43 @@ Progress through **10 unique ranks** as you master the art of Rune Infusion.
 - Refreshed visual appearance.
 - Removed the original yellow border.
 
-#### Reworked TAB Menu — SkillTabMenu
+## 📊 Skill Overview
 
-- Currently displayed exclusively on the multiplayer player TAB screen.
-- Shows the benefits of each profession.
-- Displays progression information and per-level bonuses.
-- Improved visual organization of skill information.
+SimpleSkills Enhanced features a dedicated **Skill Overview GUI**, allowing players to inspect their character progression, skill levels, XP, ranks, and unlocked benefits through an interactive interface.
 
-![SimpleSkills Enhanced — SkillTabMenu](docs/images/tab-interface.jpg)
+Press **K** (default keybind) to open the Skill Overview.
+
+### ✨ Interface Features
+
+- **Complete Skill Grid:** View all available skills in an organized three-column layout.
+- **Individual Skill Progression:** Each skill displays its icon, current level, and XP progress.
+- **Detailed Skill Information:** Select any skill to inspect its current bonuses, ranks, abilities, and unlock requirements.
+- **Progression Tracking:** Monitor your progress toward the next level with visual XP bars.
+- **Character Overview:** Displays total skill levels, Ironman status, and Prestige information.
+- **Dynamic Skill Bonuses:** View bonuses and progression values based on your current skill level and server configuration.
+- **Localization Support:** Automatically displays information using the client's selected language.
+
+### 🎨 Interface Design
+
+The Skill Overview features a redesigned interface inspired by the Rune Infusion system:
+
+- Golden decorative borders and dark panels.
+- Individual skill cards with item icons.
+- Highlighted selection and hover states.
+- Dedicated progression and XP panels.
+- Rank colors consistent with the skill progression system.
+
+### 🔧 Keybind
+
+| Action | Default Key |
+|---|---|
+| Open Skill Overview | `K` |
+
+The keybind can be customized through Minecraft's Controls menu.
+
+**Note:** The previous skill information display in the multiplayer TAB list has been replaced by this dedicated interface.
+
+![Skill hud](docs/images/skill_hud.png)
 
 #### Profession Rank Titles
 
