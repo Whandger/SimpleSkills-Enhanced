@@ -457,5 +457,6 @@
   "message.simpleskills.vein_mining.improved": "¡Minero de vetas mejorado! Mantén Shift mientras minas para romper hasta %s minerales conectados adicionales.",
   "message.simpleskills.vein_mining.unlocked": "¡Minero de vetas desbloqueado! Mantén Shift mientras minas para romper hasta %s minerales conectados adicionales.",
   "gui.simpleskills.rune_infusion.invalid_selection": "La selección de encantamientos ya no es válida.",
-  "message.simpleskills.rune_infusion.style_too_far": "Necesitas estar más cerca de la mesa de encantamientos."
+  "message.simpleskills.rune_infusion.style_too_far": "Necesitas estar más cerca de la mesa de encantamientos.",
+  "key.simpleskills.skill_overview": "Resumen de habilidades"
 }

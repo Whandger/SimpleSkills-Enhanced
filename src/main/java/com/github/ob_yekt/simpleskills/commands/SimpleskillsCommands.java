@@ -11,7 +11,6 @@ import com.github.ob_yekt.simpleskills.managers.DatabaseManager;
 import com.github.ob_yekt.simpleskills.managers.AttributeManager;
 import com.github.ob_yekt.simpleskills.managers.IronmanManager;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
-import com.github.ob_yekt.simpleskills.ui.SkillTabMenu;
 import com.github.ob_yekt.simpleskills.ui.RankTitleManager;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -46,11 +45,6 @@ public class SimpleskillsCommands {
                 dispatcher.register(
                         Commands.literal("simpleskills")
                                 .requires(source -> source.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.ALL)))
-                                .then(Commands.literal("togglehud")
-                                        .executes(context -> {
-                                            SkillTabMenu.toggleTabMenuVisibility(context.getSource());
-                                            return 1;
-                                        }))
                                 .then(Commands.literal("ironman")
                                         .then(Commands.literal("enable")
                                                 .executes(SimpleskillsCommands::enableIronman))
@@ -212,7 +206,6 @@ public class SimpleskillsCommands {
         db.resetPlayerSkills(playerUuid);
 
         AttributeManager.refreshAllAttributes(player);
-        SkillTabMenu.updateTabMenu(player);
         com.github.ob_yekt.simpleskills.managers.NamePrefixManager.updatePlayerNameDecorations(player);
 
         int newPrestige = db.getPrestige(playerUuid);
@@ -289,7 +282,6 @@ public class SimpleskillsCommands {
         db.resetPlayerSkills(playerUuid);
         db.setPrestige(playerUuid, 0);
         AttributeManager.refreshAllAttributes(targetPlayer);
-        SkillTabMenu.updateTabMenu(targetPlayer);
         com.github.ob_yekt.simpleskills.managers.NamePrefixManager.updatePlayerNameDecorations(targetPlayer);
 
         source.sendSuccess(() -> Component.literal("§6[simpleskills]§f Reset skills and prestige for " + playerName + "."), true);
@@ -316,7 +308,6 @@ public class SimpleskillsCommands {
 
         XPManager.addXPWithNotification(targetPlayer, skill, amount);
         AttributeManager.refreshAllAttributes(targetPlayer);
-        SkillTabMenu.updateTabMenu(targetPlayer);
 
         source.sendSuccess(() -> Component.literal("§6[simpleskills]§f Added " + amount + " XP to " + playerName + "'s '" + skill.getDisplayName() + "'."), true);
         targetPlayer.sendSystemMessage(Component.literal("§6[simpleskills]§f You gained " + amount + " XP in " + skill.getDisplayName() + "!"), false);
@@ -345,7 +336,6 @@ public class SimpleskillsCommands {
                 if (skill == Skills.DEFENSE) XPManager.notifyDefenseUnlocks(targetPlayer, oldLevel, newLevel);
             }
             AttributeManager.refreshAllAttributes(targetPlayer);
-            SkillTabMenu.updateTabMenu(targetPlayer);
             source.sendSuccess(() -> Component.literal("§6[simpleskills]§f Set all skills for " + playerName + " to level " + newLevel + "."), true);
             targetPlayer.sendSystemMessage(Component.literal("§6[simpleskills]§f All your skills are now level " + newLevel + "!"), false);
             Simpleskills.LOGGER.info("Set all skills to level {} for player {}", newLevel, playerName);
@@ -359,7 +349,6 @@ public class SimpleskillsCommands {
         db.savePlayerSkill(playerUuid, skill.getId(), newXP, newLevel);
         if (skill == Skills.DEFENSE) XPManager.notifyDefenseUnlocks(targetPlayer, oldLevel, newLevel);
         AttributeManager.refreshAllAttributes(targetPlayer);
-        SkillTabMenu.updateTabMenu(targetPlayer);
 
         source.sendSuccess(() -> Component.literal("§6[simpleskills]§f Set " + playerName + "'s '" + skill.getDisplayName() + "' to level " + newLevel + "."), true);
         targetPlayer.sendSystemMessage(Component.literal("§6[simpleskills]§f Your skill '" + skill.getDisplayName() + "' is now level " + newLevel + "!"), false);
@@ -383,7 +372,6 @@ public class SimpleskillsCommands {
 
         // Refresh UI/attributes/name decorations to reflect new prestige
         AttributeManager.refreshAllAttributes(targetPlayer);
-        SkillTabMenu.updateTabMenu(targetPlayer);
         com.github.ob_yekt.simpleskills.managers.NamePrefixManager.updatePlayerNameDecorations(targetPlayer);
 
         source.sendSuccess(() -> Component.literal("§6[simpleskills]§f Set prestige for " + playerName + " to §6★" + value + "§f."), true);

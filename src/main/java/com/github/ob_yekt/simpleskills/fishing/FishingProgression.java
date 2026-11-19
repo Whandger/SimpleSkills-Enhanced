@@ -4,7 +4,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Level based benefits of the Fishing skill (levels 1-99). Every benefit grows linearly with the
- * level and is shown in the SkillTabMenu through the same numbers used by the fight itself.
+ * level and is shown in the Skill Overview screen through the same numbers used by the fight itself.
  */
 public final class FishingProgression {
     public static final int MAX_LEVEL = 99;
@@ -49,7 +49,7 @@ public final class FishingProgression {
         return (1.0 + bonus) * FishingConfig.attractionSpeed();
     }
 
-    // ---- Percentages for the SkillTabMenu ------------------------------------------------------
+    // ---- Percentages for the Skill Overview screen ------------------------------------------------------
     public static double fatiguePercent(int level) { return FATIGUE_BONUS_AT_MAX * fraction(level) * 100.0; }
     public static double tensionReductionPercent(int level) { return TENSION_REDUCTION_AT_MAX * fraction(level) * 100.0; }
     public static double recoveryPercent(int level) { return RECOVERY_BONUS_AT_MAX * fraction(level) * 100.0; }

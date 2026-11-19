@@ -457,5 +457,6 @@
   "message.simpleskills.vein_mining.improved": "Mineur de filons amélioré ! Maintenez Maj pendant l’extraction pour casser jusqu’à %s minerais connectés supplémentaires.",
   "message.simpleskills.vein_mining.unlocked": "Mineur de filons débloqué ! Maintenez Maj pendant l’extraction pour casser jusqu’à %s minerais connectés supplémentaires.",
   "gui.simpleskills.rune_infusion.invalid_selection": "Cette sélection d’enchantements n’est plus valide.",
-  "message.simpleskills.rune_infusion.style_too_far": "Vous devez être plus proche de la table d’enchantement."
+  "message.simpleskills.rune_infusion.style_too_far": "Vous devez être plus proche de la table d’enchantement.",
+  "key.simpleskills.skill_overview": "Aperçu des compétences"
 }

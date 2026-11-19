@@ -5,7 +5,6 @@ import com.github.ob_yekt.simpleskills.managers.ConfigManager;
 import com.github.ob_yekt.simpleskills.managers.DatabaseManager;
 import com.github.ob_yekt.simpleskills.managers.AttributeManager;
 import com.github.ob_yekt.simpleskills.managers.IronmanManager;
-import com.github.ob_yekt.simpleskills.ui.SkillTabMenu;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -36,7 +35,6 @@ public class ServerPlayerEntityMixin {
             AttributeManager.clearSkillAttributes(player);
             AttributeManager.clearIronmanAttributes(player);
             AttributeManager.refreshAllAttributes(player);
-            SkillTabMenu.updateTabMenu(player);
             com.github.ob_yekt.simpleskills.managers.NamePrefixManager.updatePlayerNameDecorations(player);
             return;
         }
@@ -85,7 +83,6 @@ public class ServerPlayerEntityMixin {
 
         // Always refresh UI and attributes after death
         AttributeManager.refreshAllAttributes(player);
-        SkillTabMenu.updateTabMenu(player);
         com.github.ob_yekt.simpleskills.managers.NamePrefixManager.updatePlayerNameDecorations(player);
 
         Simpleskills.LOGGER.info("Ironman death processed for {} (Total Level: {}, Prestige: {}, Force Mode: {})",

@@ -457,5 +457,6 @@
   "message.simpleskills.rune_infusion.style_invalid": "Este objeto no puede recibir un estilo de brillo.",
   "message.simpleskills.rune_infusion.style_not_enough": "Necesitas 1 mineral de saber rúnico.",
   "gui.simpleskills.rune_infusion.invalid_selection": "La selección de encantamientos ya no es válida.",
-  "message.simpleskills.rune_infusion.style_too_far": "Necesitas estar más cerca de la mesa de encantamiento."
+  "message.simpleskills.rune_infusion.style_too_far": "Necesitas estar más cerca de la mesa de encantamiento.",
+  "key.simpleskills.skill_overview": "Resumen de habilidades"
 }

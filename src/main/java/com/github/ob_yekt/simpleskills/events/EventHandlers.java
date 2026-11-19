@@ -10,7 +10,6 @@ import com.github.ob_yekt.simpleskills.TreeFeller;
 import com.github.ob_yekt.simpleskills.Slaying;
 import com.github.ob_yekt.simpleskills.managers.*;
 import com.github.ob_yekt.simpleskills.requirements.SkillRequirement;
-import com.github.ob_yekt.simpleskills.ui.SkillTabMenu;
 import com.github.ob_yekt.simpleskills.utils.BlockSkillClassifier;
 import com.github.ob_yekt.simpleskills.Ranged;
 
@@ -703,7 +702,6 @@ public class EventHandlers {
 
             AttributeManager.refreshAllAttributes(player);
 
-            SkillTabMenu.updateTabMenu(player);
 
             com.github.ob_yekt.simpleskills.managers.NamePrefixManager
                     .updatePlayerNameDecorations(player);
@@ -745,7 +743,6 @@ public class EventHandlers {
             AttributeManager.clearSkillAttributes(player);
             AttributeManager.clearIronmanAttributes(player);
 
-            SkillTabMenu.clearPlayerVisibility(player.getUUID());
 
             GatheringSpeed.clearServerLevels(player.getUUID());
             Slaying.clearServerLevels(player.getUUID());

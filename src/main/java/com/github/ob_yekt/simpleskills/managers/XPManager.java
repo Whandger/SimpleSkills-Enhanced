@@ -7,7 +7,6 @@ import com.github.ob_yekt.simpleskills.VeinMining;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingManager;
 import com.github.ob_yekt.simpleskills.farming.FarmingPerks;
 import com.github.ob_yekt.simpleskills.TreeFeller;
-import com.github.ob_yekt.simpleskills.ui.SkillTabMenu;
 import com.github.ob_yekt.simpleskills.Skills;
 import com.google.gson.JsonObject;
 import java.util.Map;
@@ -212,7 +211,6 @@ public class XPManager {
 
         // Update attributes and UI
         AttributeManager.updatePlayerAttributes(player, skill, new DatabaseManager.SkillData(newXP, newLevel));
-        SkillTabMenu.updateTabMenu(player);
 
         // Notify listener
         if (onXPChangeListener != null) {

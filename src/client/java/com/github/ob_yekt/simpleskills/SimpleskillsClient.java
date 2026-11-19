@@ -16,6 +16,7 @@ import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionPreparationScreen;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionResultPayload;
 import com.github.ob_yekt.simpleskills.runes.RuneMiningClient;
 import com.github.ob_yekt.simpleskills.ui.RankTitleMenuDataPayload;
+import com.github.ob_yekt.simpleskills.ui.SkillOverviewDataPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerMenuDataPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerClientState;
 import com.github.ob_yekt.simpleskills.prayer.PrayerCooldownPayload;
@@ -50,6 +51,8 @@ public class SimpleskillsClient implements ClientModInitializer {
                 context.client().execute(() -> AgilityDashHud.onCooldown(payload)));
         ClientPlayNetworking.registerGlobalReceiver(RankTitleMenuDataPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> RankTitleMenuScreen.showOrUpdate(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(SkillOverviewDataPayload.TYPE, (payload, context) ->
+                context.client().execute(() -> SkillOverviewScreen.showOrUpdate(payload)));
         ClientPlayNetworking.registerGlobalReceiver(PrayerMenuDataPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> PrayerClientState.accept(payload)));
         ClientPlayNetworking.registerGlobalReceiver(PrayerCooldownPayload.TYPE, (payload, context) ->

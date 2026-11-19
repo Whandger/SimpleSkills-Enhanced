@@ -83,14 +83,9 @@ public class SkillHudRenderer implements HudElement {
         if (client.player == null) return;
 
         UUID playerUuid = client.player.getUUID();
-        DatabaseManager dbManager = DatabaseManager.getInstance();
-        if (dbManager == null) return;
-
-        boolean isVisible = playerHudVisibility.getOrDefault(playerUuid,
-                dbManager.isTabMenuVisible(playerUuid.toString()));
+        boolean isVisible = playerHudVisibility.getOrDefault(playerUuid, true);
 
         playerHudVisibility.put(playerUuid, !isVisible);
-        dbManager.setTabMenuVisibility(playerUuid.toString(), !isVisible);
 
         // Clear cache when visibility changes
         cachedPlayerUuid = null;
@@ -112,12 +107,8 @@ public class SkillHudRenderer implements HudElement {
         Minecraft client = Minecraft.getInstance();
         if (client.player == null || client.level == null) return false;
 
-        DatabaseManager dbManager = DatabaseManager.getInstance();
-        if (dbManager == null) return false;
-
         UUID playerUuid = client.player.getUUID();
-        return playerHudVisibility.getOrDefault(playerUuid,
-                dbManager.isTabMenuVisible(playerUuid.toString()));
+        return playerHudVisibility.getOrDefault(playerUuid, true);
     }
 
     private HudSize calculateHudSize(UUID playerUuid) {
