@@ -84,42 +84,85 @@ public enum PrayerAbility {
         };
     }
 
-    /** Tick absoluto em que o golpe encosta no alvo. Servidor, visual e som usam este valor. 0 = imediato. */
+    /**
+     * Tick absoluto do primeiro golpe (0 = imediato). Em magia de golpe único é o próprio golpe;
+     * em magia de vários golpes é o primeiro de {@link #impactTicks()}.
+     */
     public int impactTick() {
+        int[] hits = multiHitTicks();
+        return hits != null ? hits[0] : singleImpactTick();
+    }
+
+    /**
+     * Ticks em que cada golpe encosta no alvo ou na área. Dano (servidor), visual (raios, pilares,
+     * colapsos), sons e impact frames do cliente usam esta mesma lista: tudo acontece no mesmo tick.
+     * O dano total da magia é dividido igualmente entre os golpes.
+     */
+    public int[] impactTicks() {
+        int[] hits = multiHitTicks();
+        return hits != null ? hits : new int[] { singleImpactTick() };
+    }
+
+    /** Golpes múltiplos. Retorna null para magias de golpe único. */
+    private int[] multiHitTicks() {
         int d = durationTicks();
         return switch (this) {
-            case LIGHTNING_BOLT -> 20;
+            // 7 feixes: mesmos instantes da fase de perfuração de cada feixe (PrayerHolyBoltVfx).
+            case HOLY_BOLT -> {
+                int[] ticks = new int[7];
+                for (int i = 0; i < ticks.length; i++) {
+                    ticks[i] = (int) Math.round((i * 0.028 + 0.045) * d);
+                }
+                yield ticks;
+            }
+            // 10 raios: tick em que cada raio toca o chão (PrayerThunderstormVfx).
+            case THUNDERSTORM -> spread(10, 9, 58);
+            // 16 pilares: tick em que cada pilar toca o chão (PrayerCelestialWrathVfx: início + 0,05).
+            case CELESTIAL_WRATH -> {
+                int[] ticks = new int[16];
+                for (int i = 0; i < ticks.length; i++) {
+                    ticks[i] = (int) Math.round((0.14 + i / 16.0 * 0.42 + 0.05) * d);
+                }
+                yield ticks;
+            }
+            case APOCALYPSE -> new int[] { 10, (int) Math.round(d * 0.50), (int) Math.round(d * 0.78) };
+            // Vórtice e chão ativos: golpes periódicos durante a animação.
+            case INFERNO -> spread(6, 12, 52);
+            case BURNING_GROUND -> spread(6, 6, 56);
+            case UNHOLY_GROUND -> spread(5, 11, 51);
+            case BLIZZARD -> spread(8, 12, 54);
+            default -> null;
+        };
+    }
+
+    private int singleImpactTick() {
+        int d = durationTicks();
+        return switch (this) {
+            case LIGHTNING_BOLT -> (int) Math.round(Math.max(10, d * 0.52));
             case SPARK, CHAIN_LIGHTNING -> 0;
-            case HOLY_BOLT -> (int) Math.round(d * 0.56);
             case FIREBALL, ICE_SHARD -> (int) Math.round(d * 0.58);
             case SHADOW_BOLT -> (int) Math.round(d * 0.82);
             case METEOR -> (int) Math.round(d * 0.64);
             case CURSE_OF_WEAKNESS -> (int) Math.round(d * 0.32);
             case CORRUPTION -> (int) Math.round(d * 0.46);
             case ICE_PRISON -> (int) Math.round(d * 0.35);
-            case DIVINE_SMITE -> Math.min(d - 4, 18);
-            case RADIANT_NOVA, FLAME_BURST, FROST_NOVA -> 12;
-            case SOUL_EXPLOSION -> (int) Math.round(d * 0.42);
-            case CELESTIAL_WRATH, THUNDERSTORM -> 28;
-            case STORM_JUDGMENT, ABSOLUTE_ZERO -> (int) Math.round(d * 0.75);
+            case DIVINE_SMITE -> Math.min(d - 4, (int) Math.round(Math.max(6.5, d * 0.34) + 1.2));
+            case RADIANT_NOVA -> (int) Math.round(d * 0.24);
+            case FLAME_BURST, FROST_NOVA -> 12;
+            case SOUL_EXPLOSION -> (int) Math.round(d * 0.52);
+            case SOUL_HARVEST, STORM_JUDGMENT -> (int) Math.round(d * 0.42);
+            case ABSOLUTE_ZERO -> (int) Math.round(d * 0.68);
             default -> 0;
         };
     }
 
-    /**
-     * Ticks em que cada golpe encosta no alvo. O Holy Bolt tem um golpe por feixe
-     * (7 feixes, mesmos instantes do PrayerHolyBoltVfx: fase de perfuração de cada feixe).
-     */
-    public int[] impactTicks() {
-        if (this == HOLY_BOLT) {
-            int d = durationTicks();
-            int[] ticks = new int[7];
-            for (int i = 0; i < ticks.length; i++) {
-                ticks[i] = (int) Math.round((i * 0.028 + 0.045) * d);
-            }
-            return ticks;
+    /** count golpes igualmente espaçados de first até last (inclusive). */
+    private static int[] spread(int count, int first, int last) {
+        int[] ticks = new int[count];
+        for (int i = 0; i < count; i++) {
+            ticks[i] = first + (int) Math.round(i * (last - first) / (double) (count - 1));
         }
-        return new int[] { impactTick() };
+        return ticks;
     }
 
     /** IDs antigos salvos nos loadouts: holy_light virou sacred_healing. */

@@ -1,12 +1,10 @@
 package com.github.ob_yekt.simpleskills.prayer;
 
-import com.github.ob_yekt.simpleskills.SimpleSkillsSounds;
 import java.util.Set;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.phys.Vec3;
 
 /** Creates server-tracked carriers for client-side procedural Prayer spell renderers. */
@@ -53,9 +51,8 @@ public final class PrayerVisualEffects {
             level.sendParticles(particleFor(ability), hand.x, hand.y, hand.z, 4, 0.15, 0.15, 0.15, 0.02);
         }
 
-        float volume = ability.requiredLevel() >= 90 ? 1.0f : ability.requiredLevel() >= 50 ? 0.85f : 0.7f;
-        level.playSound(null, hand.x, hand.y, hand.z, SimpleSkillsSounds.prayerSpell(ability),
-                SoundSource.PLAYERS, volume, 1.0f);
+        // Sem som aqui: o PrayerSoundtrack (cliente) toca cada som no tick da animação em que ele
+        // acontece. Antes o cast tocava no servidor e chegava antes do visual e do dano.
         return visual;
     }
 

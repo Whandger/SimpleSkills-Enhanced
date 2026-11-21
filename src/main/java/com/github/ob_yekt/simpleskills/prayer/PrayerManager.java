@@ -17,6 +17,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -292,7 +293,7 @@ public final class PrayerManager {
             AABB blastBox = AABB.ofSize(impactPos, 4.2, 3.5, 4.2);
             for (LivingEntity victim : serverLevel.getEntitiesOfClass(LivingEntity.class, blastBox,
                     entity -> entity != player && entity.isAlive() && !(entity instanceof Player))) {
-                if (victim.hurtServer(serverLevel, player.damageSources().indirectMagic(player, player), damage)) {
+                if (hurtPrayer(serverLevel, victim, player.damageSources().indirectMagic(player, player), damage, false)) {
                     applyEffect(victim, "minecraft:slowness", 40, 1);
                     Vec3 knock = victim.position().add(0, victim.getBbHeight() * 0.5, 0).subtract(impactPos);
                     if (knock.lengthSqr() > 1.0E-4) {
@@ -309,10 +310,12 @@ public final class PrayerManager {
         if (isAreaSpell(ability)) {
             double radius = PrayerScaling.areaRadius(ability);
             float damage = (3.0f + level * 0.15f) * scaling * hitShare;
+            // Área com vários golpes (raios, pulsos): o mob fica no lugar, sem ser empurrado a cada golpe
+            boolean keepVelocity = hitShare < 1.0f;
             for (LivingEntity victim : serverLevel.getEntitiesOfClass(LivingEntity.class,
                     new AABB(BlockPos.containing(impactPos)).inflate(radius),
                     entity -> entity != player && entity.isAlive() && !(entity instanceof Player))) {
-                if (victim.hurtServer(serverLevel, player.damageSources().indirectMagic(player, player), damage)) {
+                if (hurtPrayer(serverLevel, victim, player.damageSources().indirectMagic(player, player), damage, keepVelocity)) {
                     if (ability.element() == PrayerElement.FIRE)
                         victim.igniteForSeconds(3.0f);
                     if (ability.element() == PrayerElement.ICE || ability.id().equals("radiant_nova"))
@@ -343,10 +346,9 @@ public final class PrayerManager {
                 if (ability.id().equals("divine_smite"))
                     damage *= 1.75f;
 
-                // Feixes do Holy Bolt chegam em ticks seguidos: a invencibilidade pós-golpe
-                // rejeitaria os próximos (dano igual ao anterior). Zera para cada feixe contar.
-                if (ability.id().equals("holy_bolt")) target.damageCooldownTime = 0;
-                boolean hit = target.hurtServer(serverLevel, player.damageSources().indirectMagic(player, player), damage);
+                // Cada golpe conta, mesmo dentro da invencibilidade pós-dano do mob (feixes do Holy Bolt,
+                // raios e pulsos de área). Ver hurtPrayer.
+                boolean hit = hurtPrayer(serverLevel, target, player.damageSources().indirectMagic(player, player), damage, false);
                 if (hit) {
                     if (ability.specialization() == PrayerSpecialization.UNHOLY && ability.id().equals("life_drain")) {
                         player.heal(Math.max(1.0f, damage * 0.35f));
@@ -374,7 +376,7 @@ public final class PrayerManager {
                             Vec3 from = source.position().add(0, source.getBbHeight() * 0.55, 0);
                             Vec3 to = chained.position().add(0, chained.getBbHeight() * 0.55, 0);
                             PrayerVisualEffects.playConnection(serverLevel, from, to, ability);
-                            chained.hurtServer(serverLevel, player.damageSources().indirectMagic(player, player), damage * 0.65f);
+                            hurtPrayer(serverLevel, chained, player.damageSources().indirectMagic(player, player), damage * 0.65f, false);
                             source = chained;
                         }
                     }
@@ -383,6 +385,22 @@ public final class PrayerManager {
         }
 
         PrayerVisualEffects.spawnImpactParticles(serverLevel, particlePos, ability);
+    }
+
+    /**
+     * Dano de magia que ignora a invencibilidade pós-dano do mob: zera o contador antes do golpe,
+     * para cada raio, feixe ou pulso contar. keepVelocity segura a velocidade do mob (sem knockback).
+     */
+    private static boolean hurtPrayer(ServerLevel level, LivingEntity victim, DamageSource source,
+                                      float amount, boolean keepVelocity) {
+        victim.damageCooldownTime = 0;
+        Vec3 velocity = victim.getDeltaMovement();
+        boolean hit = victim.hurtServer(level, source, amount);
+        if (hit && keepVelocity) {
+            victim.setDeltaMovement(velocity);
+            victim.needsSync = true;
+        }
+        return hit;
     }
 
     private static boolean applyEffect(ServerPlayer player, String effectId, int duration, int amplifier) {

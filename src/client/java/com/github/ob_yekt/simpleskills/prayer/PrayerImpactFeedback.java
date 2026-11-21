@@ -20,10 +20,12 @@ public final class PrayerImpactFeedback implements HudElement {
     private static final Identifier ID = Identifier.fromNamespaceAndPath("simpleskills", "prayer_impact_feedback");
     private static boolean registered = false;
 
-    private static long impactStartTimeMs = 0L;
+    private static long lastTriggerMs = 0L;
+    private static long shakeStartMs = 0L;
     private static long shakeDurationMs = 450L;
-    private static long flashDurationMs = 145L;
     private static float shakeIntensity = 0.0f;
+    private static long flashStartMs = 0L;
+    private static long flashDurationMs = 0L;
     private static Vec3 lastImpactPos = Vec3.ZERO;
 
     private static float appliedYaw = 0.0f;
@@ -48,15 +50,31 @@ public final class PrayerImpactFeedback implements HudElement {
         trigger(impactWorldPos, intensity, (long) (300 + intensity * 75), 145L);
     }
 
+    /**
+     * Impacto de um efeito que se repete a cada frame (ex.: o Divine Smite): ignora repetições
+     * do mesmo ponto em até 320 ms.
+     */
     public static void trigger(Vec3 impactWorldPos, float maxShakeDegrees,
                                long shakeDuration, long flashDuration) {
         long now = System.currentTimeMillis();
-
-        if (now - impactStartTimeMs < 320L && impactWorldPos != null
+        if (now - lastTriggerMs < 320L && impactWorldPos != null
                 && impactWorldPos.distanceToSqr(lastImpactPos) < 1.5) {
             return;
         }
+        apply(impactWorldPos, maxShakeDegrees, shakeDuration, flashDuration, now);
+    }
 
+    /**
+     * Impacto de um golpe de magia (um por tick de dano, via PrayerSoundtrack). Não usa o filtro de
+     * repetição: golpes em sequência rápida, como os raios do Thunderstorm, não podem ser engolidos.
+     */
+    public static void triggerCue(Vec3 impactWorldPos, float maxShakeDegrees,
+                                  long shakeDuration, long flashDuration) {
+        apply(impactWorldPos, maxShakeDegrees, shakeDuration, flashDuration, System.currentTimeMillis());
+    }
+
+    private static void apply(Vec3 impactWorldPos, float maxShakeDegrees, long shakeDuration,
+                              long flashDuration, long now) {
         float attenuation = 1.0f;
         Minecraft mc = Minecraft.getInstance();
         if (mc.player != null && impactWorldPos != null) {
@@ -65,11 +83,31 @@ public final class PrayerImpactFeedback implements HudElement {
             attenuation = (float) Math.max(0.30, 1.0 - (dist / 32.0));
         }
 
-        impactStartTimeMs = now;
+        // Tremor: um impacto mais fraco não interrompe um tremor mais forte que ainda está ativo
+        float newShake = maxShakeDegrees * attenuation;
+        if (newShake > 0.001f && newShake >= currentShake(now)) {
+            shakeStartMs = now;
+            shakeIntensity = newShake;
+            shakeDurationMs = Math.max(50L, shakeDuration);
+        }
+
+        // Flash: só reinicia a tela quando o impacto traz um flash (duração > 0). Antes, um cue sem
+        // flash zerava a duração e apagava o flash que já estava rodando.
+        if (flashDuration > 0L) {
+            flashStartMs = now;
+            flashDurationMs = flashDuration;
+        }
+
         lastImpactPos = impactWorldPos != null ? impactWorldPos : Vec3.ZERO;
-        shakeIntensity = maxShakeDegrees * attenuation;
-        shakeDurationMs = Math.max(50L, shakeDuration);
-        flashDurationMs = Math.max(0L, flashDuration);
+        lastTriggerMs = now;
+    }
+
+    /** Amplitude restante do tremor (graus) no instante {@code now}. */
+    private static float currentShake(long now) {
+        long elapsed = now - shakeStartMs;
+        if (elapsed < 0 || elapsed > shakeDurationMs || shakeIntensity <= 0.001f) return 0.0f;
+        double progress = (double) elapsed / shakeDurationMs;
+        return (float) (shakeIntensity * Math.pow(1.0 - progress, 1.85));
     }
 
     @Override
@@ -77,7 +115,7 @@ public final class PrayerImpactFeedback implements HudElement {
         updateCameraShake();
 
         if (flashDurationMs <= 0L) return;
-        long elapsed = System.currentTimeMillis() - impactStartTimeMs;
+        long elapsed = System.currentTimeMillis() - flashStartMs;
         if (elapsed < 0 || elapsed > flashDurationMs) return;
 
         int w = g.guiWidth();
@@ -185,7 +223,7 @@ public final class PrayerImpactFeedback implements HudElement {
     }
 
     public static float[] getCameraShakeOffsets() {
-        long elapsed = System.currentTimeMillis() - impactStartTimeMs;
+        long elapsed = System.currentTimeMillis() - shakeStartMs;
         if (elapsed < 0 || elapsed > shakeDurationMs || shakeIntensity <= 0.001f) {
             return new float[]{0.0f, 0.0f};
         }
