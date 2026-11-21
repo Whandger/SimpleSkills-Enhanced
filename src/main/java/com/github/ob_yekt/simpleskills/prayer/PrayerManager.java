@@ -32,6 +32,17 @@ import net.minecraft.world.phys.Vec3;
 public final class PrayerManager {
     private static final Map<UUID, Map<String, Long>> COOLDOWNS = new ConcurrentHashMap<>();
 
+    /**
+     * Verdadeiro só enquanto um golpe de magia do Prayer está sendo aplicado. O evento de dano
+     * usa essa marca para não conceder XP de combate (Slaying/Ranged) por magia; o XP do Prayer
+     * continua vindo do cast.
+     */
+    private static final ThreadLocal<Boolean> APPLYING_PRAYER_DAMAGE = ThreadLocal.withInitial(() -> false);
+
+    public static boolean isApplyingPrayerDamage() {
+        return APPLYING_PRAYER_DAMAGE.get();
+    }
+
     private PrayerManager() {
     }
 
@@ -401,7 +412,13 @@ public final class PrayerManager {
                                       float amount, boolean keepVelocity) {
         victim.damageCooldownTime = 0;
         Vec3 velocity = victim.getDeltaMovement();
-        boolean hit = victim.hurtServer(level, source, amount);
+        boolean hit;
+        APPLYING_PRAYER_DAMAGE.set(true);
+        try {
+            hit = victim.hurtServer(level, source, amount);
+        } finally {
+            APPLYING_PRAYER_DAMAGE.set(false);
+        }
         if (hit && keepVelocity) {
             victim.setDeltaMovement(velocity);
             victim.needsSync = true;

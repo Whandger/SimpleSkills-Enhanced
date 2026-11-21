@@ -8,6 +8,7 @@ import com.github.ob_yekt.simpleskills.Skills;
 import com.github.ob_yekt.simpleskills.VeinMining;
 import com.github.ob_yekt.simpleskills.TreeFeller;
 import com.github.ob_yekt.simpleskills.Slaying;
+import com.github.ob_yekt.simpleskills.prayer.PrayerManager;
 import com.github.ob_yekt.simpleskills.managers.*;
 import com.github.ob_yekt.simpleskills.requirements.SkillRequirement;
 import com.github.ob_yekt.simpleskills.utils.BlockSkillClassifier;
@@ -469,6 +470,12 @@ public class EventHandlers {
             // Firework rockets never grant combat XP.
             // This check is independent of who launched the rocket.
             if (source.getDirectEntity() instanceof FireworkRocketEntity) {
+                return true;
+            }
+
+            // Dano de magia do Prayer não concede XP de combate (Slaying/Ranged).
+            // O XP do Prayer vem do cast, em PrayerManager.cast.
+            if (PrayerManager.isApplyingPrayerDamage()) {
                 return true;
             }
 
