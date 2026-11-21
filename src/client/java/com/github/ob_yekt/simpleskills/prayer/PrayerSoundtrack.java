@@ -94,7 +94,7 @@ public final class PrayerSoundtrack {
                 l.add(ticks(0).snd(BEACON_ACTIVATE, 1f, 1.2f).snd(PLAYER_LEVELUP, .5f, 1f));
                 l.add(ticks(12).repeat(25, d -> d * .92).snd(AMETHYST_BLOCK_CHIME, .5f, 1.3f, .2f));
             }
-            case HOLY_LIGHT -> l.add(ticks(0).snd(BEACON_ACTIVATE, .7f, 2f).snd(AMETHYST_BLOCK_CHIME, .8f, 1.6f));
+            case SACRED_HEALING -> l.add(ticks(0).snd(BEACON_ACTIVATE, .7f, 2f).snd(AMETHYST_BLOCK_CHIME, .8f, 1.6f));
             case DIVINE_SMITE -> {
                 // o impact frame/tremor do Smite já é disparado dentro do próprio PrayerDivineSmiteVfx
                 l.add(ticks(0).snd(BEACON_POWER_SELECT, 1f, .8f).snd(ENCHANTMENT_TABLE_USE, 1f, .7f));

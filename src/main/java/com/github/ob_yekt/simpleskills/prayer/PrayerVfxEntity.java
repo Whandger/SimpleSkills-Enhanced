@@ -53,6 +53,8 @@ public final class PrayerVfxEntity extends Entity {
     private int prayerLevel;
     private int impactTick = -1;
     private boolean impactFired = false;
+    private int[] impactTicks = new int[0];
+    private int nextImpact = 0;
 
     // Client-side cache para manter a última posição caso o alvo morra no meio da animação
     private Vec3 lastKnownHandOffset = null;
@@ -79,6 +81,9 @@ public final class PrayerVfxEntity extends Entity {
         this.payloadAbility = ability;
         this.prayerLevel = prayerLevel;
         this.impactTick = impactTick;
+        this.impactTicks = ability != null ? ability.impactTicks() : new int[0];
+        this.nextImpact = 0;
+        this.impactFired = false;
 
         if (level() instanceof ServerLevel server) {
             if (targetUuid != null) {
@@ -146,9 +151,14 @@ public final class PrayerVfxEntity extends Entity {
                 tickShadowBolt(server);
             }
 
-            if (!impactFired && payloadAbility != null && life >= impactTick) {
-                impactFired = true;
-                PrayerManager.executeDelayedImpact(server, casterUuid, targetUuid, impactPos, payloadAbility, prayerLevel);
+            if (!impactFired && payloadAbility != null) {
+                // Cada golpe dispara no seu tick com a sua fração do dano (1 golpe = dano inteiro)
+                while (nextImpact < impactTicks.length && life >= impactTicks[nextImpact]) {
+                    nextImpact++;
+                    PrayerManager.executeDelayedImpact(server, casterUuid, targetUuid, impactPos,
+                            payloadAbility, prayerLevel, 1.0f / impactTicks.length);
+                }
+                if (nextImpact >= impactTicks.length) impactFired = true;
             }
 
             if (life >= maxLife) discard();

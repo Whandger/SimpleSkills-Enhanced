@@ -13,7 +13,7 @@ public enum PrayerAbility {
     SANCTUARY("sanctuary", PrayerSpecialization.DIVINE, null, 30, 900),
     DIVINE_SMITE("divine_smite", PrayerSpecialization.DIVINE, null, 40, 300),
     RADIANT_NOVA("radiant_nova", PrayerSpecialization.DIVINE, null, 50, 500),
-    HOLY_LIGHT("holy_light", PrayerSpecialization.DIVINE, null, 60, 400),
+    SACRED_HEALING("sacred_healing", PrayerSpecialization.DIVINE, null, 60, 400),
     CELESTIAL_WRATH("celestial_wrath", PrayerSpecialization.DIVINE, null, 99, 1800),
 
     SHADOW_BOLT("shadow_bolt", PrayerSpecialization.UNHOLY, null, 1, 80),
@@ -30,18 +30,18 @@ public enum PrayerAbility {
     SPARK("spark", PrayerSpecialization.ELEMENTALIST, PrayerElement.ELECTRICITY, 1, 60),
     FIREBALL("fireball", PrayerSpecialization.ELEMENTALIST, PrayerElement.FIRE, 1, 100),
     ICE_SHARD("ice_shard", PrayerSpecialization.ELEMENTALIST, PrayerElement.ICE, 1, 80),
-    FLAME_BURST("flame_burst", PrayerSpecialization.ELEMENTALIST, PrayerElement.FIRE, 5, 240),
     LIGHTNING_BOLT("lightning_bolt", PrayerSpecialization.ELEMENTALIST, PrayerElement.ELECTRICITY, 10, 200),
-    FROST_NOVA("frost_nova", PrayerSpecialization.ELEMENTALIST, PrayerElement.ICE, 15, 300),
+    FLAME_BURST("flame_burst", PrayerSpecialization.ELEMENTALIST, PrayerElement.FIRE, 10, 240),
+    FROST_NOVA("frost_nova", PrayerSpecialization.ELEMENTALIST, PrayerElement.ICE, 10, 300),
+    CHAIN_LIGHTNING("chain_lightning", PrayerSpecialization.ELEMENTALIST, PrayerElement.ELECTRICITY, 20, 400),
     BURNING_GROUND("burning_ground", PrayerSpecialization.ELEMENTALIST, PrayerElement.FIRE, 20, 500),
-    CHAIN_LIGHTNING("chain_lightning", PrayerSpecialization.ELEMENTALIST, PrayerElement.ELECTRICITY, 30, 400),
-    ICE_PRISON("ice_prison", PrayerSpecialization.ELEMENTALIST, PrayerElement.ICE, 40, 600),
-    INFERNO("inferno", PrayerSpecialization.ELEMENTALIST, PrayerElement.FIRE, 50, 800),
-    BLIZZARD("blizzard", PrayerSpecialization.ELEMENTALIST, PrayerElement.ICE, 60, 900),
-    METEOR("meteor", PrayerSpecialization.ELEMENTALIST, PrayerElement.FIRE, 70, 1000),
-    THUNDERSTORM("thunderstorm", PrayerSpecialization.ELEMENTALIST, PrayerElement.ELECTRICITY, 80, 1200),
-    ABSOLUTE_ZERO("absolute_zero", PrayerSpecialization.ELEMENTALIST, PrayerElement.ICE, 90, 1500),
-    STORM_JUDGMENT("storm_judgment", PrayerSpecialization.ELEMENTALIST, PrayerElement.ELECTRICITY, 99, 1800);
+    ICE_PRISON("ice_prison", PrayerSpecialization.ELEMENTALIST, PrayerElement.ICE, 20, 600),
+    THUNDERSTORM("thunderstorm", PrayerSpecialization.ELEMENTALIST, PrayerElement.ELECTRICITY, 30, 1200),
+    INFERNO("inferno", PrayerSpecialization.ELEMENTALIST, PrayerElement.FIRE, 30, 800),
+    BLIZZARD("blizzard", PrayerSpecialization.ELEMENTALIST, PrayerElement.ICE, 30, 900),
+    STORM_JUDGMENT("storm_judgment", PrayerSpecialization.ELEMENTALIST, PrayerElement.ELECTRICITY, 40, 1800),
+    METEOR("meteor", PrayerSpecialization.ELEMENTALIST, PrayerElement.FIRE, 40, 1000),
+    ABSOLUTE_ZERO("absolute_zero", PrayerSpecialization.ELEMENTALIST, PrayerElement.ICE, 40, 1500);
 
     private final String id;
     private final PrayerSpecialization specialization;
@@ -77,7 +77,7 @@ public enum PrayerAbility {
             case METEOR -> 52;
             case DIVINE_PROTECTION, SANCTUARY, DARK_PACT -> 76;
             case CELESTIAL_WRATH, APOCALYPSE, THUNDERSTORM, ABSOLUTE_ZERO, STORM_JUDGMENT -> 88;
-            case RADIANT_NOVA, HOLY_LIGHT, SOUL_HARVEST, SOUL_EXPLOSION, UNHOLY_GROUND,
+            case RADIANT_NOVA, SACRED_HEALING, SOUL_HARVEST, SOUL_EXPLOSION, UNHOLY_GROUND,
                  FLAME_BURST, BURNING_GROUND, INFERNO, FROST_NOVA, BLIZZARD -> 64;
             case SHADOWSTEP, PURIFICATION -> 48;
             default -> 38;
@@ -104,6 +104,27 @@ public enum PrayerAbility {
             case STORM_JUDGMENT, ABSOLUTE_ZERO -> (int) Math.round(d * 0.75);
             default -> 0;
         };
+    }
+
+    /**
+     * Ticks em que cada golpe encosta no alvo. O Holy Bolt tem um golpe por feixe
+     * (7 feixes, mesmos instantes do PrayerHolyBoltVfx: fase de perfuração de cada feixe).
+     */
+    public int[] impactTicks() {
+        if (this == HOLY_BOLT) {
+            int d = durationTicks();
+            int[] ticks = new int[7];
+            for (int i = 0; i < ticks.length; i++) {
+                ticks[i] = (int) Math.round((i * 0.028 + 0.045) * d);
+            }
+            return ticks;
+        }
+        return new int[] { impactTick() };
+    }
+
+    /** IDs antigos salvos nos loadouts: holy_light virou sacred_healing. */
+    public static String migrateLegacyId(String id) {
+        return "holy_light".equals(id) ? "sacred_healing" : id;
     }
 
     public static List<PrayerAbility> forSpecialization(PrayerSpecialization specialization) {

@@ -25,7 +25,7 @@ final class PrayerAbilityVfx {
             case SANCTUARY -> PrayerSanctuaryVfx.draw(m, out, age, duration);
             case DIVINE_SMITE -> PrayerDivineSmiteVfx.draw(m, out, age, duration);
             case RADIANT_NOVA -> PrayerRadiantNovaVfx.draw(m, out, age, duration);
-            case HOLY_LIGHT -> PrayerHolyLightVfx.draw(m, out, age, duration);
+            case SACRED_HEALING -> PrayerSacredHealingVfx.draw(m, out, age, duration);
             case CELESTIAL_WRATH -> PrayerCelestialWrathVfx.draw(m, out, age, duration);
             case SHADOW_BOLT -> PrayerShadowBoltVfx.draw(m, out, destination, age, duration);
             case LIFE_DRAIN -> PrayerLifeDrainVfx.draw(m, out, destination.subtract(hand), age, duration);

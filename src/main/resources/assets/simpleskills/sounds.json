@@ -94,7 +94,7 @@
       }
     ]
   },
-  "prayer_holy_light": {
+  "prayer_sacred_healing": {
     "sounds": [
       {
         "name": "minecraft:entity.allay.item_given",

@@ -39,7 +39,7 @@ public final class PrayerManager {
      * Prayer.
      */
     public static int castXp(PrayerAbility ability, int prayerLevel) {
-        return 360 + ability.requiredLevel() * 2 + prayerLevel * 6;
+        return PrayerScaling.castXp(ability, prayerLevel);
     }
 
     public static void registerPayloads() {
@@ -150,7 +150,7 @@ public final class PrayerManager {
             return;
 
         ServerLevel serverLevel = (ServerLevel) player.level();
-        float scaling = 1.0f + Math.max(0, level - 1) * 0.006f;
+        float scaling = PrayerScaling.damageScale(level);
         Vec3 castStart = player.position();
         PrayerTargeting.Aim aim = PrayerTargeting.aim(player, 24.0);
         LivingEntity target = aim.entity();
@@ -167,15 +167,16 @@ public final class PrayerManager {
                         ability, level);
             }
         } else if (ability.id().equals("light_orb")) {
-            validCast = applyEffect(player, "minecraft:night_vision", 400, 0);
+            validCast = applyEffect(player, "minecraft:night_vision", PrayerScaling.buffDurationTicks(400, level), 0);
         } else if (ability.id().equals("purification")) {
             for (String effect : List.of("minecraft:poison", "minecraft:wither", "minecraft:slowness",
                     "minecraft:weakness", "minecraft:blindness", "minecraft:mining_fatigue")) {
                 validCast |= removeEffect(player, effect);
             }
         } else if (ability.id().equals("divine_protection")) {
-            validCast = applyEffect(player, "minecraft:resistance", 160, Math.min(2, level / 35));
-        } else if (ability.id().equals("holy_light")) {
+            validCast = applyEffect(player, "minecraft:resistance", PrayerScaling.buffDurationTicks(160, level),
+                    Math.min(PrayerScaling.DIVINE_PROTECTION_MAX_POWER, PrayerScaling.buffPower(level)));
+        } else if (ability.id().equals("sacred_healing")) {
             LivingEntity recipient = target instanceof Player ? target : player;
             float before = recipient.getHealth();
             recipient.heal(Math.min(8.0f, (3.0f + level * 0.08f) * scaling));
@@ -199,10 +200,10 @@ public final class PrayerManager {
         } else if (ability.id().equals("dark_pact")) {
             if (player.getHealth() > 6.0f) {
                 player.hurtServer(serverLevel, player.damageSources().magic(), 4.0f);
-                validCast = applyEffect(player, "minecraft:strength", 160, Math.min(2, level / 35));
+                validCast = applyEffect(player, "minecraft:strength", PrayerScaling.buffDurationTicks(160, level), PrayerScaling.buffPower(level));
             }
         } else if (isAreaSpell(ability)) {
-            double radius = ability.requiredLevel() >= 70 ? 9.0 : ability.requiredLevel() >= 30 ? 6.0 : 4.0;
+            double radius = PrayerScaling.areaRadius(ability);
             Vec3 areaOrigin = ability.id().equals("meteor") ? castPoint : player.position();
             List<LivingEntity> victims = serverLevel.getEntitiesOfClass(LivingEntity.class,
                     new AABB(BlockPos.containing(areaOrigin)).inflate(radius),
@@ -229,7 +230,7 @@ public final class PrayerManager {
         boolean areaSpell = isAreaSpell(ability);
         LivingEntity visualTarget = ability.id().equals("divine_healing") ? player
                 : !areaSpell && target != null && target.isAlive()
-                        && (!ability.id().equals("holy_light") || target instanceof Player) ? target : player;
+                        && (!ability.id().equals("sacred_healing") || target instanceof Player) ? target : player;
 
         Vec3 impact = switch (ability) {
             case SHADOW_BOLT -> target != null
@@ -257,7 +258,7 @@ public final class PrayerManager {
 
         // 3. Apply cooldown & grant XP (a cada cast válido; a recarga já limita a
         // frequência)
-        int cooldown = Math.max(20, (int) (ability.baseCooldownTicks() * Math.max(0.65, 1.0 - (level - 1) * 0.0035)));
+        int cooldown = PrayerScaling.cooldownTicks(ability, level);
         COOLDOWNS.get(player.getUUID()).put(ability.id(), now + cooldown);
         if (ServerPlayNetworking.canSend(player, PrayerCooldownPayload.TYPE))
             ServerPlayNetworking.send(player, new PrayerCooldownPayload(ability.id(), cooldown));
@@ -271,21 +272,27 @@ public final class PrayerManager {
      */
     public static void executeDelayedImpact(ServerLevel serverLevel, UUID casterUuid, UUID targetUuid,
             Vec3 impactPos, PrayerAbility ability, int level) {
+        executeDelayedImpact(serverLevel, casterUuid, targetUuid, impactPos, ability, level, 1.0f);
+    }
+
+    /** hitShare: fração do dano deste golpe (1 para golpe único; 1/7 por feixe do Holy Bolt). */
+    public static void executeDelayedImpact(ServerLevel serverLevel, UUID casterUuid, UUID targetUuid,
+            Vec3 impactPos, PrayerAbility ability, int level, float hitShare) {
         if (casterUuid == null || impactPos == null || ability == null)
             return;
         Entity casterEntity = serverLevel.getEntity(casterUuid);
         if (!(casterEntity instanceof ServerPlayer player) || !player.isAlive())
             return;
 
-        float scaling = 1.0f + Math.max(0, level - 1) * 0.006f;
+        float scaling = PrayerScaling.damageScale(level);
         Vec3 particlePos = impactPos;
 
         if (ability == PrayerAbility.SHADOW_BOLT) {
-            float damage = (4.0f + level * 0.13f) * scaling;
+            float damage = (4.0f + level * 0.13f) * scaling * hitShare;
             AABB blastBox = AABB.ofSize(impactPos, 4.2, 3.5, 4.2);
             for (LivingEntity victim : serverLevel.getEntitiesOfClass(LivingEntity.class, blastBox,
                     entity -> entity != player && entity.isAlive() && !(entity instanceof Player))) {
-                if (victim.hurtServer(serverLevel, player.damageSources().magic(), damage)) {
+                if (victim.hurtServer(serverLevel, player.damageSources().indirectMagic(player, player), damage)) {
                     applyEffect(victim, "minecraft:slowness", 40, 1);
                     Vec3 knock = victim.position().add(0, victim.getBbHeight() * 0.5, 0).subtract(impactPos);
                     if (knock.lengthSqr() > 1.0E-4) {
@@ -300,12 +307,12 @@ public final class PrayerManager {
         }
 
         if (isAreaSpell(ability)) {
-            double radius = ability.requiredLevel() >= 70 ? 9.0 : ability.requiredLevel() >= 30 ? 6.0 : 4.0;
-            float damage = (3.0f + level * 0.15f) * scaling;
+            double radius = PrayerScaling.areaRadius(ability);
+            float damage = (3.0f + level * 0.15f) * scaling * hitShare;
             for (LivingEntity victim : serverLevel.getEntitiesOfClass(LivingEntity.class,
                     new AABB(BlockPos.containing(impactPos)).inflate(radius),
                     entity -> entity != player && entity.isAlive() && !(entity instanceof Player))) {
-                if (victim.hurtServer(serverLevel, player.damageSources().magic(), damage)) {
+                if (victim.hurtServer(serverLevel, player.damageSources().indirectMagic(player, player), damage)) {
                     if (ability.element() == PrayerElement.FIRE)
                         victim.igniteForSeconds(3.0f);
                     if (ability.element() == PrayerElement.ICE || ability.id().equals("radiant_nova"))
@@ -328,7 +335,7 @@ public final class PrayerManager {
             if (targetEntity instanceof LivingEntity target && target != player && target.isAlive()
                     && !(target instanceof Player) && target.position().distanceToSqr(impactPos) <= 20.25) {
                 particlePos = target.position().add(0, target.getBbHeight() * 0.5, 0);
-                float damage = (4.0f + level * 0.12f) * scaling;
+                float damage = (4.0f + level * 0.12f) * scaling * hitShare;
                 if (ability.specialization() == PrayerSpecialization.UNHOLY && ability.id().equals("life_drain"))
                     damage *= 0.7f;
                 if (ability.id().equals("holy_bolt"))
@@ -336,7 +343,10 @@ public final class PrayerManager {
                 if (ability.id().equals("divine_smite"))
                     damage *= 1.75f;
 
-                boolean hit = target.hurtServer(serverLevel, player.damageSources().magic(), damage);
+                // Feixes do Holy Bolt chegam em ticks seguidos: a invencibilidade pós-golpe
+                // rejeitaria os próximos (dano igual ao anterior). Zera para cada feixe contar.
+                if (ability.id().equals("holy_bolt")) target.damageCooldownTime = 0;
+                boolean hit = target.hurtServer(serverLevel, player.damageSources().indirectMagic(player, player), damage);
                 if (hit) {
                     if (ability.specialization() == PrayerSpecialization.UNHOLY && ability.id().equals("life_drain")) {
                         player.heal(Math.max(1.0f, damage * 0.35f));
@@ -364,7 +374,7 @@ public final class PrayerManager {
                             Vec3 from = source.position().add(0, source.getBbHeight() * 0.55, 0);
                             Vec3 to = chained.position().add(0, chained.getBbHeight() * 0.55, 0);
                             PrayerVisualEffects.playConnection(serverLevel, from, to, ability);
-                            chained.hurtServer(serverLevel, player.damageSources().magic(), damage * 0.65f);
+                            chained.hurtServer(serverLevel, player.damageSources().indirectMagic(player, player), damage * 0.65f);
                             source = chained;
                         }
                     }
@@ -426,6 +436,8 @@ public final class PrayerManager {
             if (!raw.contains(",") && raw.length() <= 64)
                 slots.set(0, raw);
         }
+        for (int i = 0; i < slots.size(); i++)
+            slots.set(i, PrayerAbility.migrateLegacyId(slots.get(i)));
         for (int i = 0; i < slots.size(); i++)
             if (find(slots.get(i)) == null)
                 slots.set(i, "");

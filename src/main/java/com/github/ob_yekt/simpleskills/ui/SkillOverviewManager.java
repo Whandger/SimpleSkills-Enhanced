@@ -81,6 +81,7 @@ public final class SkillOverviewManager {
         config.add("cooking", table(ConfigManager::getCookingMultiplier));
         config.add("crafting_durability", table(ConfigManager::getCraftingDurabilityMultiplier));
         config.add("crafting_recovery", table(ConfigManager::getCraftingRecoveryChance));
+        config.add("alchemy", table(ConfigManager::getAlchemyMultiplier));
         root.add("config", config);
 
         return root.toString();
