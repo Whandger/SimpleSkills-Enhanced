@@ -7,10 +7,10 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Matrix4fc;
 
-public final class PrayerHolyLightVfx {
-    private PrayerHolyLightVfx() {}
+public final class PrayerSacredHealingVfx {
+    private PrayerSacredHealingVfx() {}
 
-    // 9. HOLY_LIGHT — Pilar de luz sagrada descendo dos céus com coroa celeste no topo,
+    // 9. SACRED_HEALING — Pilar de luz sagrada descendo dos céus com coroa celeste no topo,
     // selo cruciforme de purificação no solo, anéis litúrgicos e motas ascendentes.
     public static void draw(Matrix4fc m, VertexConsumer out, float age, int duration) {
         double safeDuration = Math.max(1.0, duration);

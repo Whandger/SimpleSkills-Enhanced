@@ -747,46 +747,37 @@ public class ConfigManager {
     private static JsonObject getDefaultCraftingMultipliersConfig() {
         JsonObject json = new JsonObject();
         JsonObject durability = new JsonObject();
-        durability.addProperty("level_25", 1.05f);
-        durability.addProperty("level_50", 1.10f);
-        durability.addProperty("level_75", 1.15f);
         durability.addProperty("level_99", 1.25f);
         JsonObject recovery = new JsonObject();
-        recovery.addProperty("level_25", 0.05f);
-        recovery.addProperty("level_50", 0.10f);
-        recovery.addProperty("level_75", 0.15f);
         recovery.addProperty("level_99", 0.25f);
         json.add("durability_multipliers", durability);
         json.add("recovery_chances", recovery);
         return json;
     }
 
-    // Get durability multiplier based on level
+    // Durability multiplier, linear per level: 1.0 at level 0, the level_99 value at level 99
     public static float getCraftingDurabilityMultiplier(int level) {
-        JsonObject durability = craftingMultipliersConfig.getAsJsonObject("durability_multipliers");
-        if (durability == null) {
-            Simpleskills.LOGGER.warn("Missing durability_multipliers in crafting_multipliers.json, using defaults");
-            return level >= 99 ? 1.20f : level >= 75 ? 1.15f : level >= 50 ? 1.10f : level >= 25 ? 1.05f : 1.0f;
-        }
-        if (level >= 99 && durability.has("level_99")) return durability.get("level_99").getAsFloat();
-        else if (level >= 75 && durability.has("level_75")) return durability.get("level_75").getAsFloat();
-        else if (level >= 50 && durability.has("level_50")) return durability.get("level_50").getAsFloat();
-        else if (level >= 25 && durability.has("level_25")) return durability.get("level_25").getAsFloat();
-        return 1.0f;
+        float max = getCraftingCap("durability_multipliers", "level_99", 1.25f);
+        return 1.0f + (max - 1.0f) * clampCraftingLevel(level) / 99.0f;
     }
 
-    // Get recovery chance based on level
+    // Recovery chance, linear per level: 0 at level 0, the level_99 value at level 99
     public static float getCraftingRecoveryChance(int level) {
-        JsonObject recovery = craftingMultipliersConfig.getAsJsonObject("recovery_chances");
-        if (recovery == null) {
-            Simpleskills.LOGGER.warn("Missing recovery_chances in crafting_multipliers.json, using defaults");
-            return level >= 99 ? 0.15f : level >= 75 ? 0.075f : level >= 50 ? 0.05f : level >= 25 ? 0.025f : 0.0f;
+        float max = getCraftingCap("recovery_chances", "level_99", 0.25f);
+        return max * clampCraftingLevel(level) / 99.0f;
+    }
+
+    private static float getCraftingCap(String section, String key, float fallback) {
+        JsonObject values = craftingMultipliersConfig.getAsJsonObject(section);
+        if (values == null || !values.has(key)) {
+            Simpleskills.LOGGER.warn("Missing {}.{} in crafting_multipliers.json, using default {}", section, key, fallback);
+            return fallback;
         }
-        if (level >= 99 && recovery.has("level_99")) return recovery.get("level_99").getAsFloat();
-        else if (level >= 75 && recovery.has("level_75")) return recovery.get("level_75").getAsFloat();
-        else if (level >= 50 && recovery.has("level_50")) return recovery.get("level_50").getAsFloat();
-        else if (level >= 25 && recovery.has("level_25")) return recovery.get("level_25").getAsFloat();
-        return 0.0f;
+        return values.get(key).getAsFloat();
+    }
+
+    private static int clampCraftingLevel(int level) {
+        return Math.max(0, Math.min(99, level));
     }
 
     // New method to load crafting recovery blacklist

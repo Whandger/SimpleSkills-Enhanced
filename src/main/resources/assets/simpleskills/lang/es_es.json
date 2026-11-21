@@ -362,7 +362,7 @@
   "skill.simpleskills.prayer.ability.sanctuary": "Santuario",
   "skill.simpleskills.prayer.ability.divine_smite": "Golpe divino",
   "skill.simpleskills.prayer.ability.radiant_nova": "Nova radiante",
-  "skill.simpleskills.prayer.ability.holy_light": "Luz sagrada",
+  "skill.simpleskills.prayer.ability.sacred_healing": "Curación sagrada",
   "skill.simpleskills.prayer.ability.celestial_wrath": "Ira celestial",
   "skill.simpleskills.prayer.ability.shadow_bolt": "Proyectil sombrío",
   "skill.simpleskills.prayer.ability.life_drain": "Drenaje vital",
@@ -458,5 +458,12 @@
   "message.simpleskills.vein_mining.unlocked": "¡Minero de vetas desbloqueado! Mantén Shift mientras minas para romper hasta %s minerales conectados adicionales.",
   "gui.simpleskills.rune_infusion.invalid_selection": "La selección de encantamientos ya no es válida.",
   "message.simpleskills.rune_infusion.style_too_far": "Necesitas estar más cerca de la mesa de encantamientos.",
-  "key.simpleskills.skill_overview": "Resumen de habilidades"
+  "key.simpleskills.skill_overview": "Resumen de habilidades",
+  "gui.simpleskills.tab.alchemy_potion_duration": "Duración de las pociones",
+  "gui.simpleskills.tab.next_bonus": "Próxima bonificación (Nv. %d): +%.0f%%",
+  "gui.simpleskills.tab.prayer_buff_power": "Potencia de los efectos beneficiosos",
+  "gui.simpleskills.tab.prayer_cooldown": "Reducción del tiempo de reutilización",
+  "gui.simpleskills.tab.prayer_damage": "Daño y curación de hechizos",
+  "gui.simpleskills.tab.prayer_unlocked": "Hechizos desbloqueados",
+  "gui.simpleskills.tab.prayer_xp_per_cast": "XP por lanzamiento"
 }

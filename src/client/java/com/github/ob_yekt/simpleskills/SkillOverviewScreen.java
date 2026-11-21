@@ -8,6 +8,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.github.ob_yekt.simpleskills.prayer.PrayerAbility;
+import com.github.ob_yekt.simpleskills.prayer.PrayerScaling;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +59,7 @@ public final class SkillOverviewScreen extends Screen {
 
     private record Config(boolean fishingFight, boolean fishingSpeedBonus, int dashUnlockedAt,
                           int doubleJumpUnlockedAt, double[] smithing, double[] cooking,
-                          double[] craftingDurability, double[] craftingRecovery) {}
+                          double[] craftingDurability, double[] craftingRecovery, double[] alchemy) {}
 
     private record Entry(String id, String name, int level, boolean max, double progress,
                          String xpText, String rank, List<String> buffs, ItemStack icon) {}
@@ -174,7 +176,8 @@ public final class SkillOverviewScreen extends Screen {
                 table(c, "smithing", 1.0),
                 table(c, "cooking", 1.0),
                 table(c, "crafting_durability", 1.0),
-                table(c, "crafting_recovery", 0.0));
+                table(c, "crafting_recovery", 0.0),
+                table(c, "alchemy", 1.0));
     }
 
     private static double[] table(JsonObject c, String key, double fallback) {
@@ -510,6 +513,39 @@ public final class SkillOverviewScreen extends Screen {
                             SkillOverviewText.get("gui.simpleskills.tab.food_nutrition_saturation"), food));
                 }
             }
+            case "alchemy" -> {
+                double current = cfg.alchemy()[safe];
+                int next = nextStep(cfg.alchemy(), safe);
+                String label = SkillOverviewText.get("gui.simpleskills.tab.alchemy_potion_duration");
+                if (current > 1.0) {
+                    out.append(String.format(Locale.US, "   §8↳ §7%s: §a+%.0f%%\n", label, (current - 1.0) * 100.0));
+                } else {
+                    out.append(String.format("   §8↳ §7%s: %s\n", label, lockedAt(next < 0 ? 25 : next)));
+                }
+                if (next >= 0) {
+                    out.append("   §8↳ §7").append(SkillOverviewText.format("gui.simpleskills.tab.next_bonus",
+                            next, (cfg.alchemy()[next] - 1.0) * 100.0)).append("\n");
+                }
+            }
+            case "prayer" -> {
+                out.append(String.format(Locale.US, "   §8↳ §7%s: §a+%.1f%%\n",
+                        SkillOverviewText.get("gui.simpleskills.tab.prayer_damage"),
+                        (PrayerScaling.damageScale(safe) - 1.0f) * 100.0f));
+                out.append(String.format(Locale.US, "   §8↳ §7%s: §a-%.1f%%\n",
+                        SkillOverviewText.get("gui.simpleskills.tab.prayer_cooldown"),
+                        (1.0 - PrayerScaling.cooldownMultiplier(safe)) * 100.0));
+                out.append(String.format(Locale.US, "   §8↳ §7%s: §a%.2fx\n",
+                        SkillOverviewText.get("gui.simpleskills.tab.prayer_xp_per_cast"),
+                        PrayerScaling.xpMultiplier(safe)));
+                out.append(String.format(Locale.US, "   §8↳ §7%s: §a%s\n",
+                        SkillOverviewText.get("gui.simpleskills.tab.prayer_buff_power"),
+                        toRoman(PrayerScaling.buffPower(safe) + 1)));
+                long unlocked = java.util.Arrays.stream(PrayerAbility.values())
+                        .filter(a -> a.isUnlocked(safe)).count();
+                out.append(String.format(Locale.US, "   §8↳ §7%s: §a%d§7/%d\n",
+                        SkillOverviewText.get("gui.simpleskills.tab.prayer_unlocked"),
+                        unlocked, PrayerAbility.values().length));
+            }
             case "crafting" -> {
                 float durability = (float) ((cfg.craftingDurability()[safe] - 1.0) * 100.0);
                 float recovery = (float) (cfg.craftingRecovery()[safe] * 100.0);
@@ -556,6 +592,14 @@ public final class SkillOverviewScreen extends Screen {
         } else {
             out.append(lockedAt(requiredLevel)).append("\n");
         }
+    }
+
+    /** Next index after {@code level} whose table value differs from the value at {@code level}, or -1. */
+    private static int nextStep(double[] table, int level) {
+        for (int l = level + 1; l < table.length; l++) {
+            if (table[l] != table[level]) return l;
+        }
+        return -1;
     }
 
     private static String lockedAt(int level) {

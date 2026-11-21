@@ -43,6 +43,7 @@ public final class PrayerSoundtrack {
         long shakeMs = 350L;
         long flashMs = 0L;
         double frameRadius = 0.0;
+        float gain = 1f;
 
         Cue where(At a) { where = a; return this; }
         Cue snd(Object e, float vol, float pitch) { sounds.add(new Snd(e, vol, pitch, 0f)); return this; }
@@ -55,6 +56,21 @@ public final class PrayerSoundtrack {
     private static Cue ticks(double t) { Cue c = new Cue(); c.start = d -> t; return c; }
     private static Cue frac(double f) { Cue c = new Cue(); c.start = d -> d * f; return c; }
     private static Cue when(IntToDoubleFunction f) { Cue c = new Cue(); c.start = f; return c; }
+
+    /** Monta o cue de um golpe: índice do golpe e número total de golpes da magia. */
+    @FunctionalInterface
+    private interface HitSpec { void apply(Cue c, int index, int count); }
+
+    /** Um cue por golpe do servidor, no mesmo tick do dano (vem de PrayerAbility.impactTicks). */
+    private static void hits(List<Cue> l, PrayerAbility ab, HitSpec spec) {
+        int[] hitTicks = ab.impactTicks();
+        for (int i = 0; i < hitTicks.length; i++) {
+            Cue c = ticks(hitTicks[i]);
+            c.gain = hitTicks.length > 1 ? 0.8f : 1f;
+            spec.apply(c, i, hitTicks.length);
+            l.add(c);
+        }
+    }
 
     // ------------------------------------------------------------------ cues por magia
     private static final Map<PrayerAbility, List<Cue>> CACHE = new EnumMap<>(PrayerAbility.class);
@@ -78,8 +94,9 @@ public final class PrayerSoundtrack {
             }
             case HOLY_BOLT -> {
                 l.add(ticks(0).where(At.HAND).snd(ENCHANTMENT_TABLE_USE, .9f, 1.7f).snd(AMETHYST_BLOCK_RESONATE, .8f, 1.6f));
-                l.add(frac(.56).where(At.TARGET).snd(AMETHYST_CLUSTER_BREAK, .9f, 1.4f)
-                        .snd(EXPERIENCE_ORB_PICKUP, .8f, .9f).impact(.9f, 260, 0));
+                // 7 feixes: um golpe por feixe, no tick em que ele perfura o alvo
+                hits(l, ab, (c, i, n) -> c.where(At.TARGET).snd(AMETHYST_CLUSTER_BREAK, .9f, 1.4f)
+                        .snd(EXPERIENCE_ORB_PICKUP, .8f, .9f).impact(.6f, 150, i == 0 ? 110 : 0).frame(i == 0 ? 1.2 : 0));
             }
             case PURIFICATION -> {
                 l.add(ticks(0).snd(BEACON_ACTIVATE, .8f, 1.8f).snd(PLAYER_LEVELUP, .45f, 1.4f));
@@ -94,28 +111,27 @@ public final class PrayerSoundtrack {
                 l.add(ticks(0).snd(BEACON_ACTIVATE, 1f, 1.2f).snd(PLAYER_LEVELUP, .5f, 1f));
                 l.add(ticks(12).repeat(25, d -> d * .92).snd(AMETHYST_BLOCK_CHIME, .5f, 1.3f, .2f));
             }
-            case HOLY_LIGHT -> l.add(ticks(0).snd(BEACON_ACTIVATE, .7f, 2f).snd(AMETHYST_BLOCK_CHIME, .8f, 1.6f));
+            case SACRED_HEALING -> l.add(ticks(0).snd(BEACON_ACTIVATE, .7f, 2f).snd(AMETHYST_BLOCK_CHIME, .8f, 1.6f));
             case DIVINE_SMITE -> {
                 // o impact frame/tremor do Smite já é disparado dentro do próprio PrayerDivineSmiteVfx
                 l.add(ticks(0).snd(BEACON_POWER_SELECT, 1f, .8f).snd(ENCHANTMENT_TABLE_USE, 1f, .7f));
-                l.add(when(d -> Math.max(6.5, d * .34) + 1.0).snd(LIGHTNING_BOLT_THUNDER, 1.4f, 1.2f)
+                // Impacto visual e tremor são do próprio PrayerDivineSmiteVfx; aqui só o som no tick do golpe
+                hits(l, ab, (c, i, n) -> c.snd(LIGHTNING_BOLT_THUNDER, 1.4f, 1.2f)
                         .snd(LIGHTNING_BOLT_IMPACT, 1.2f, 1.3f).snd(AMETHYST_CLUSTER_BREAK, 1f, .8f)
                         .snd(GENERIC_EXPLODE, .7f, 1.5f));
             }
             case RADIANT_NOVA -> {
                 l.add(ticks(0).snd(BEACON_POWER_SELECT, .9f, 1.2f).snd(ENCHANTMENT_TABLE_USE, 1f, 1f));
-                l.add(ticks(10).snd(GENERIC_EXPLODE, .9f, 1.5f).snd(FIREWORK_ROCKET_LARGE_BLAST, 1.3f, .9f)
+                hits(l, ab, (c, i, n) -> c.snd(GENERIC_EXPLODE, .9f, 1.5f).snd(FIREWORK_ROCKET_LARGE_BLAST, 1.3f, .9f)
                         .snd(AMETHYST_CLUSTER_BREAK, 1f, 1.1f).impact(2.2f, 380, 95).frame(3.0));
-                l.add(ticks(13).repeat(2.5, d -> d * .7).snd(FIREWORK_ROCKET_TWINKLE, .7f, 1.2f, .25f));
+                l.add(ticks(ab.impactTick() + 3).repeat(2.5, d -> d * .7).snd(FIREWORK_ROCKET_TWINKLE, .7f, 1.2f, .25f));
             }
             case CELESTIAL_WRATH -> {
                 l.add(ticks(0).snd(BEACON_ACTIVATE, 1f, .7f).snd(ENCHANTMENT_TABLE_USE, 1f, .6f));
-                l.add(ticks(17).snd(LIGHTNING_BOLT_THUNDER, 1.2f, 1.1f).snd(LIGHTNING_BOLT_IMPACT, .9f, 1.2f)
-                        .impact(1.8f, 320, 90).frame(2.5));
-                for (double t : new double[]{23, 29, 35}) {
-                    l.add(ticks(t).snd(LIGHTNING_BOLT_THUNDER, 1.1f, 1.1f).snd(LIGHTNING_BOLT_IMPACT, .8f, 1.2f)
-                            .impact(1.3f, 260, 0));
-                }
+                // 16 pilares: um trovão por pilar, no tick em que ele toca o chão
+                hits(l, ab, (c, i, n) -> c.snd(LIGHTNING_BOLT_THUNDER, i == 0 ? 1.2f : 1.0f, 1.1f)
+                        .snd(LIGHTNING_BOLT_IMPACT, i == 0 ? .9f : .8f, 1.2f)
+                        .impact(i == 0 ? 1.8f : 1.1f, i == 0 ? 320 : 240, i == 0 ? 90 : 0).frame(i == 0 ? 2.5 : 0));
                 l.add(ticks(42).repeat(14, d -> d * .9).snd(LIGHTNING_BOLT_THUNDER, .8f, 1f, .2f)
                         .snd(LIGHTNING_BOLT_IMPACT, .6f, 1.2f, .15f).impact(.8f, 200, 0));
             }
@@ -126,7 +142,7 @@ public final class PrayerSoundtrack {
                         .snd(RESPAWN_ANCHOR_DEPLETE, .9f, .6f).impact(1.1f, 240, 0));
                 l.add(frac(.32).repeat(6, d -> d * .76).where(At.TARGET)
                         .snd(RESPAWN_ANCHOR_AMBIENT, .65f, .55f, .1f));
-                l.add(frac(.82).where(At.TARGET).snd(GENERIC_EXPLODE, 1.15f, .65f)
+                hits(l, ab, (c, i, n) -> c.where(At.TARGET).snd(GENERIC_EXPLODE, 1.15f, .65f)
                         .snd(WITHER_BREAK_BLOCK, 1f, .75f).snd(RESPAWN_ANCHOR_DEPLETE, 1f, .5f)
                         .impact(2.6f, 440, 115).frame(2.4));
             }
@@ -137,15 +153,16 @@ public final class PrayerSoundtrack {
             }
             case CURSE_OF_WEAKNESS -> {
                 l.add(ticks(0).where(At.HAND).snd(EVOKER_PREPARE_ATTACK, .8f, .8f));
-                l.add(frac(.32).where(At.TARGET).snd(CHAIN_PLACE, 1.2f, .7f).snd(ELDER_GUARDIAN_CURSE, .4f, 1.2f)
-                        .impact(1.0f, 220, 0));
+                hits(l, ab, (c, i, n) -> c.where(At.TARGET).snd(CHAIN_PLACE, 1.2f, .7f).snd(ELDER_GUARDIAN_CURSE, .4f, 1.2f)
+                        .impact(1.0f, 220, 0).frame(1.2));
                 l.add(when(d -> d * .32 + 5).repeat(2, d -> d * .32 + 9).where(At.TARGET).snd(CHAIN_PLACE, .8f, .8f, .2f));
             }
             case CORRUPTION -> {
                 l.add(ticks(0).snd(RESPAWN_ANCHOR_CHARGE, 1f, .6f).snd(ENCHANTMENT_TABLE_USE, .8f, .6f));
-                l.add(ticks(5).snd(ANVIL_LAND, .8f, .5f).snd(WITHER_SPAWN, .5f, 1.6f).snd(ELDER_GUARDIAN_CURSE, .5f, 1f)
-                        .impact(2.6f, 420, 110).frame(4.0));
-                l.add(ticks(14).repeat(12, d -> d * .95).snd(WITHER_AMBIENT, .35f, .6f, .2f));
+                // O núcleo implanta no alvo quando o projétil chega (mesmo tick do dano)
+                hits(l, ab, (c, i, n) -> c.where(At.TARGET).snd(ANVIL_LAND, .8f, .5f).snd(WITHER_SPAWN, .5f, 1.6f)
+                        .snd(ELDER_GUARDIAN_CURSE, .5f, 1f).impact(2.6f, 420, 110).frame(4.0));
+                l.add(ticks(ab.impactTick() + 9).repeat(12, d -> d * .95).snd(WITHER_AMBIENT, .35f, .6f, .2f));
             }
             case SHADOWSTEP -> {
                 l.add(ticks(0).snd(ENDERMAN_TELEPORT, 1f, .7f));
@@ -153,8 +170,8 @@ public final class PrayerSoundtrack {
             }
             case SOUL_HARVEST -> {
                 l.add(ticks(0).where(At.TARGET).snd(SOUL_ESCAPE, .9f, .7f).snd(WITHER_AMBIENT, .5f, .7f));
-                l.add(frac(.42).where(At.TARGET).snd(PLAYER_ATTACK_SWEEP, 1.3f, .6f).snd(PLAYER_ATTACK_CRIT, .9f, .7f)
-                        .snd(SOUL_ESCAPE, 1f, 1f).impact(1.6f, 260, 70));
+                hits(l, ab, (c, i, n) -> c.where(At.TARGET).snd(PLAYER_ATTACK_SWEEP, 1.3f, .6f).snd(PLAYER_ATTACK_CRIT, .9f, .7f)
+                        .snd(SOUL_ESCAPE, 1f, 1f).impact(1.6f, 260, 70).frame(1.6));
             }
             case DARK_PACT -> {
                 l.add(ticks(0).snd(ENCHANTMENT_TABLE_USE, 1f, .6f).snd(ELDER_GUARDIAN_CURSE, .35f, 1.3f));
@@ -164,20 +181,26 @@ public final class PrayerSoundtrack {
             }
             case SOUL_EXPLOSION -> {
                 l.add(ticks(0).repeat(7, d -> d * .5).snd(GLASS_BREAK, .35f, .6f, .15f));
-                l.add(frac(.52).snd(GENERIC_EXPLODE, .9f, .7f).snd(SOUL_ESCAPE, 1f, .7f).snd(WITHER_BREAK_BLOCK, .7f, .9f)
+                hits(l, ab, (c, i, n) -> c.snd(GENERIC_EXPLODE, .9f, .7f).snd(SOUL_ESCAPE, 1f, .7f).snd(WITHER_BREAK_BLOCK, .7f, .9f)
                         .impact(2.4f, 400, 100).frame(2.4));
             }
             case UNHOLY_GROUND -> {
                 l.add(ticks(0).snd(RESPAWN_ANCHOR_DEPLETE, .9f, .6f).snd(WITHER_AMBIENT, .6f, .6f));
-                l.add(ticks(11).repeat(14, d -> d * .92).snd(VEX_CHARGE, .5f, .7f, .2f).snd(WITHER_HURT, .3f, 1.5f, .2f));
+                hits(l, ab, (c, i, n) -> c.snd(VEX_CHARGE, .5f, .7f, .2f).snd(WITHER_HURT, .3f, 1.5f, .2f)
+                        .impact(i == 0 ? .9f : .4f, 180, 0).frame(i == 0 ? 2.0 : 0));
             }
             case APOCALYPSE -> {
                 l.add(ticks(0).snd(WITHER_SPAWN, .9f, .7f).snd(ELDER_GUARDIAN_CURSE, .6f, .8f));
-                l.add(ticks(10).snd(LIGHTNING_BOLT_THUNDER, 1.3f, .5f).snd(GENERIC_EXPLODE, 1f, .5f)
-                        .impact(3.0f, 520, 140).frame(5.0));
-                l.add(ticks(18).repeat(11, d -> d * .75).snd(WITHER_BREAK_BLOCK, .45f, .6f, .2f));
-                l.add(frac(.5).impact(2f, 300, 0));
-                l.add(frac(.78).impact(2f, 300, 0));
+                // Três golpes: o impacto principal (tick 10) e dois tremores de chão
+                hits(l, ab, (c, i, n) -> {
+                    if (i == 0) {
+                        c.snd(LIGHTNING_BOLT_THUNDER, 1.3f, .5f).snd(GENERIC_EXPLODE, 1f, .5f)
+                                .impact(3.0f, 520, 140).frame(5.0);
+                    } else {
+                        c.snd(GENERIC_EXPLODE, .9f, .6f).impact(2f, 300, 0).frame(3.0);
+                    }
+                });
+                l.add(ticks(ab.impactTick() + 8).repeat(11, d -> d * .75).snd(WITHER_BREAK_BLOCK, .45f, .6f, .2f));
             }
             // ---------------------------------------------------------------- ELETRO
             case SPARK -> {
@@ -185,10 +208,12 @@ public final class PrayerSoundtrack {
                 l.add(ticks(0).where(At.TARGET).snd(PLAYER_ATTACK_CRIT, .6f, 1.9f));
             }
             case LIGHTNING_BOLT -> {
-                l.add(ticks(0).where(At.HAND).snd(LIGHTNING_BOLT_THUNDER, .5f, 1.8f).snd(AMETHYST_BLOCK_RESONATE, .7f, 1.8f));
-                l.add(when(d -> Math.max(10, d * .52)).where(At.TARGET).snd(LIGHTNING_BOLT_IMPACT, 1f, 1.3f)
-                        .snd(LIGHTNING_BOLT_THUNDER, .8f, 1.5f).snd(PLAYER_ATTACK_CRIT, .8f, 1.6f).impact(1.0f, 250, 0));
-                l.add(when(d -> Math.max(10, d * .52) + 2).repeat(4, d -> d * .9).where(At.TARGET)
+                // Carga na mão: só um estalo leve (o trovão é do impacto, não do cast)
+                l.add(ticks(0).where(At.HAND).snd(LIGHTNING_BOLT_IMPACT, .2f, 2f).snd(AMETHYST_BLOCK_RESONATE, .7f, 1.8f));
+                hits(l, ab, (c, i, n) -> c.where(At.TARGET).snd(LIGHTNING_BOLT_IMPACT, 1f, 1.3f)
+                        .snd(LIGHTNING_BOLT_THUNDER, .8f, 1.5f).snd(PLAYER_ATTACK_CRIT, .8f, 1.6f)
+                        .impact(1.0f, 250, 0).frame(1.6));
+                l.add(ticks(ab.impactTick() + 2).repeat(4, d -> d * .9).where(At.TARGET)
                         .snd(PLAYER_ATTACK_CRIT, .22f, 1.9f, .1f));
             }
             case CHAIN_LIGHTNING -> {
@@ -198,44 +223,48 @@ public final class PrayerSoundtrack {
                 l.add(ticks(2).where(At.TARGET).impact(.8f, 220, 0));
             }
             case THUNDERSTORM -> {
-                l.add(ticks(0).snd(LIGHTNING_BOLT_THUNDER, .9f, .9f).snd(WEATHER_RAIN, .9f, 1f));
-                l.add(ticks(10).repeat(16, d -> d * .93).snd(LIGHTNING_BOLT_THUNDER, .9f, .9f, .25f)
-                        .snd(LIGHTNING_BOLT_IMPACT, .9f, 1.2f, .2f).impact(.9f, 220, 0));
+                l.add(ticks(0).snd(AMETHYST_BLOCK_RESONATE, .5f, .7f).snd(WEATHER_RAIN, .9f, 1f));
+                // Um trovão por raio, no tick em que ele toca o chão (mesmos ticks do dano no servidor)
+                hits(l, ab, (c, i, n) -> c.snd(LIGHTNING_BOLT_THUNDER, .85f, .9f, .25f)
+                        .snd(LIGHTNING_BOLT_IMPACT, .85f, 1.2f, .2f).impact(.9f, 220, i == 0 ? 95 : 0));
             }
             case STORM_JUDGMENT -> {
+                l.add(ticks(0).snd(AMETHYST_BLOCK_RESONATE, .5f, .7f));
                 l.add(ticks(30).snd(BEACON_POWER_SELECT, 1f, 1.4f).snd(LIGHTNING_BOLT_THUNDER, 1f, .6f));
                 l.add(ticks(400).repeat(9, d -> d * .5).snd(LIGHTNING_BOLT_IMPACT, .5f, 1.5f, .25f));
-                l.add(frac(.58).snd(LIGHTNING_BOLT_THUNDER, 1.6f, .7f).snd(LIGHTNING_BOLT_IMPACT, 1.4f, .6f)
+                hits(l, ab, (c, i, n) -> c.snd(LIGHTNING_BOLT_THUNDER, 1.6f, .7f).snd(LIGHTNING_BOLT_IMPACT, 1.4f, .6f)
                         .snd(GENERIC_EXPLODE, 1.2f, .7f).snd(TRIDENT_THUNDER, 1f, .8f)
                         .impact(3.2f, 560, 130).frame(4.0));
             }
             // ---------------------------------------------------------------- FIRE
             case FIREBALL -> {
                 l.add(ticks(0).where(At.HAND).snd(BLAZE_SHOOT, .9f, .9f).snd(FIRECHARGE_USE, .9f, 1f));
-                l.add(frac(.58).where(At.TARGET).snd(GENERIC_EXPLODE, .55f, 1.4f).snd(LAVA_POP, .8f, 1f)
-                        .impact(1.3f, 260, 0));
+                hits(l, ab, (c, i, n) -> c.where(At.TARGET).snd(GENERIC_EXPLODE, .55f, 1.4f).snd(LAVA_POP, .8f, 1f)
+                        .impact(1.3f, 260, 0).frame(1.4));
             }
             case FLAME_BURST -> {
                 l.add(ticks(0).snd(FIRECHARGE_USE, 1f, .7f).snd(BLAZE_SHOOT, 1f, .8f));
                 l.add(ticks(2).repeat(3, d -> d * .5).snd(FIRECHARGE_USE, .45f, 1f, .3f).snd(FIRE_AMBIENT, .5f, 1f, .2f));
-                l.add(ticks(4).impact(.8f, 200, 0));
+                hits(l, ab, (c, i, n) -> c.snd(FIRECHARGE_USE, .8f, 1.2f).impact(.8f, 200, 0).frame(2.0));
             }
             case BURNING_GROUND -> {
                 l.add(ticks(0).snd(LAVA_AMBIENT, .9f, .9f).snd(FIRECHARGE_USE, 1f, .7f).snd(GENERIC_EXPLODE, .4f, 1.6f)
                         .impact(1.2f, 280, 0));
-                l.add(ticks(8).repeat(10, d -> d * .92).snd(LAVA_POP, .6f, 1f, .4f));
+                hits(l, ab, (c, i, n) -> c.snd(LAVA_POP, .6f, 1f, .4f).impact(i == 0 ? .9f : .5f, 200, 0)
+                        .frame(i == 0 ? 2.2 : 0));
                 l.add(ticks(8).repeat(22, d -> d * .92).snd(FIRE_AMBIENT, .8f, .9f, .1f).snd(LAVA_AMBIENT, .5f, 1f));
             }
             case INFERNO -> {
                 l.add(ticks(0).snd(BLAZE_SHOOT, 1.1f, .5f).snd(FIRECHARGE_USE, 1.2f, .6f));
-                l.add(ticks(6).snd(GENERIC_EXPLODE, .8f, .7f).snd(BLAZE_BURN, .9f, .7f)
-                        .impact(2.0f, 380, 100).frame(3.0));
+                // Vórtice: cada golpe é um pulso de fogo na base do tornado
+                hits(l, ab, (c, i, n) -> c.snd(BLAZE_BURN, .9f, .7f).snd(GENERIC_EXPLODE, i == 0 ? .8f : .35f, .7f)
+                        .impact(i == 0 ? 2.0f : 1.0f, i == 0 ? 380 : 220, i == 0 ? 100 : 0).frame(i == 0 ? 3.0 : 0));
                 l.add(ticks(14).repeat(14, d -> d * .95).snd(LAVA_AMBIENT, .8f, .8f, .1f).snd(BLAZE_BURN, .5f, .8f, .15f));
             }
             case METEOR -> {
                 l.add(ticks(0).snd(FIRECHARGE_USE, 1f, .5f).snd(GHAST_WARN, .7f, .6f));
                 l.add(ticks(4).snd(FIREWORK_ROCKET_LAUNCH, 1.2f, .5f).snd(ENDER_DRAGON_FLAP, .9f, .6f));
-                l.add(frac(.64).snd(GENERIC_EXPLODE, 2f, .5f).snd(DRAGON_FIREBALL_EXPLODE, 1.5f, .6f)
+                hits(l, ab, (c, i, n) -> c.snd(GENERIC_EXPLODE, 2f, .5f).snd(DRAGON_FIREBALL_EXPLODE, 1.5f, .6f)
                         .snd(LIGHTNING_BOLT_IMPACT, 1.2f, .6f).impact(4.2f, 720, 160).frame(6.0));
                 l.add(frac(.72).snd(LAVA_POP, 1f, .8f, .3f).snd(FIRE_AMBIENT, 1f, .8f));
             }
@@ -243,25 +272,31 @@ public final class PrayerSoundtrack {
             case ICE_SHARD -> {
                 l.add(ticks(0).where(At.HAND).snd(AMETHYST_BLOCK_RESONATE, .8f, 1.2f).snd(PLAYER_HURT_FREEZE, .6f, 1.3f));
                 l.add(ticks(2).repeat(2, d -> d * .58).where(At.HAND).snd(AMETHYST_CLUSTER_PLACE, .45f, 1.6f, .3f));
-                l.add(frac(.58).where(At.TARGET).snd(GLASS_BREAK, 1f, .9f).snd(AMETHYST_CLUSTER_BREAK, 1f, .8f)
-                        .snd(PLAYER_HURT_FREEZE, .7f, 1.1f).impact(1.4f, 260, 0));
+                hits(l, ab, (c, i, n) -> c.where(At.TARGET).snd(GLASS_BREAK, 1f, .9f).snd(AMETHYST_CLUSTER_BREAK, 1f, .8f)
+                        .snd(PLAYER_HURT_FREEZE, .7f, 1.1f).impact(1.4f, 260, 0).frame(1.4));
                 l.add(frac(.86).where(At.TARGET).snd(GLASS_BREAK, .9f, 1.4f).snd(AMETHYST_BLOCK_BREAK, .9f, 1.2f));
             }
             case FROST_NOVA -> {
                 l.add(ticks(0).snd(PLAYER_HURT_FREEZE, 1f, .8f).snd(AMETHYST_BLOCK_RESONATE, 1f, .7f));
                 l.add(ticks(4).snd(GLASS_BREAK, 1f, .6f).snd(AMETHYST_CLUSTER_BREAK, 1.2f, .6f));
-                l.add(frac(.55).snd(GLASS_BREAK, 1.3f, .5f).snd(AMETHYST_CLUSTER_BREAK, 1.3f, .6f).snd(GENERIC_EXPLODE, .6f, 1.7f)
+                hits(l, ab, (c, i, n) -> c.snd(GLASS_BREAK, 1.3f, .5f).snd(AMETHYST_CLUSTER_BREAK, 1.3f, .6f).snd(GENERIC_EXPLODE, .6f, 1.7f)
                         .impact(2.6f, 420, 110).frame(3.5));
             }
             case ICE_PRISON -> {
                 l.add(ticks(0).where(At.TARGET).snd(PLAYER_HURT_FREEZE, 1f, 1f).snd(AMETHYST_BLOCK_RESONATE, .8f, 1f));
                 l.add(ticks(3).repeat(3, d -> d * .46).where(At.TARGET).snd(AMETHYST_CLUSTER_PLACE, .5f, 1.5f, .3f));
-                l.add(frac(.78).where(At.TARGET).snd(GLASS_BREAK, 1.3f, .7f).snd(ANVIL_LAND, .5f, 1.4f)
-                        .snd(AMETHYST_CLUSTER_BREAK, 1f, .8f).impact(1.8f, 300, 0));
+                // A cúpula fecha sobre a vítima no tick do dano
+                hits(l, ab, (c, i, n) -> c.where(At.TARGET).snd(ANVIL_LAND, .5f, 1.4f).snd(GLASS_BREAK, 1f, 1.1f)
+                        .impact(1.8f, 300, 0).frame(2.2));
+                // Estilhaço da prisão, no fim (só som)
+                l.add(frac(.78).where(At.TARGET).snd(GLASS_BREAK, 1.3f, .7f).snd(AMETHYST_CLUSTER_BREAK, 1f, .8f));
             }
             case BLIZZARD -> {
                 l.add(ticks(0).snd(PLAYER_HURT_FREEZE, .8f, .7f).snd(WEATHER_RAIN, .6f, .6f));
                 l.add(ticks(4).repeat(12, d -> d * .95).snd(PHANTOM_FLAP, .5f, .5f, .2f));
+                // Cada rajada de cristais que se estilhaça atinge a área neste tick
+                hits(l, ab, (c, i, n) -> c.snd(GLASS_BREAK, .5f, 1.4f, .3f).snd(AMETHYST_CLUSTER_BREAK, .4f, 1.2f, .2f)
+                        .impact(i == 0 ? .9f : .4f, 160, 0).frame(i == 0 ? 2.5 : 0));
                 l.add(ticks(8).repeat(22, d -> d * .95).snd(AMETHYST_BLOCK_CHIME, .3f, .6f, .1f));
             }
             case ABSOLUTE_ZERO -> {
@@ -270,6 +305,9 @@ public final class PrayerSoundtrack {
                         .impact(3.5f, 560, 160).frame(6.0));
                 l.add(frac(.5).snd(AMETHYST_BLOCK_RESONATE, 1.3f, .5f).snd(PLAYER_HURT_FREEZE, 1f, .6f)
                         .impact(1.5f, 300, 0));
+                // Colapso da singularidade: é o golpe de área (mesmo tick do dano)
+                hits(l, ab, (c, i, n) -> c.snd(GLASS_BREAK, 1.2f, .8f).snd(GENERIC_EXPLODE, .8f, .9f)
+                        .impact(3.0f, 500, 120).frame(5.0));
                 l.add(ticks(20).repeat(20, d -> d * .88).snd(AMETHYST_BLOCK_CHIME, .5f, .5f, .1f));
                 l.add(frac(.9).snd(GLASS_BREAK, 1.6f, .5f).snd(GLASS_BREAK, 1.4f, .8f).snd(GENERIC_EXPLODE, 1f, .8f)
                         .snd(AMETHYST_CLUSTER_BREAK, 1.4f, .5f).impact(4.0f, 640, 180).frame(6.5));
@@ -350,13 +388,13 @@ public final class PrayerSoundtrack {
             if (ev == null) continue;
             float pitch = s.pitch() + (s.jitter() > 0f ? (RNG.nextFloat() * 2f - 1f) * s.jitter() : 0f);
             pitch = Math.max(0.5f, Math.min(2.0f, pitch));
-            mc.level.playLocalSound(pos.x, pos.y, pos.z, ev, SoundSource.PLAYERS, s.vol(), pitch, false);
+            mc.level.playLocalSound(pos.x, pos.y, pos.z, ev, SoundSource.PLAYERS, s.vol() * c.gain, pitch, false);
         }
         if (c.shake > 0f || c.flashMs > 0L) {
             long flash = c.flashMs;
             // flash de tela inteira só para quem está perto (evita incomodar quem está longe)
             if (mc.player != null && mc.player.position().distanceTo(pos) > 18.0) flash = 0L;
-            PrayerImpactFeedback.trigger(pos, c.shake, c.shakeMs, flash);
+            PrayerImpactFeedback.triggerCue(pos, c.shake, c.shakeMs, flash);
         }
     }
 
