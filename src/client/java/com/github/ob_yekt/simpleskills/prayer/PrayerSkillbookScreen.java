@@ -25,17 +25,31 @@ public final class PrayerSkillbookScreen extends Screen {
     public void update(PrayerMenuDataPayload state) { this.state = state; }
 
     public static void showOrUpdate(PrayerMenuDataPayload payload) {
-        if (active != null) active.update(payload);
-        else {
-            active = new PrayerSkillbookScreen(payload);
-            net.minecraft.client.Minecraft.getInstance().gui.setScreen(active);
+        // Só atualiza se o livro ainda é a tela aberta. Se a tela saiu (ex.: tela de morte),
+        // a referência está presa e um novo livro precisa ser aberto.
+        if (isShowing()) {
+            active.update(payload);
+            return;
         }
+        active = new PrayerSkillbookScreen(payload);
+        net.minecraft.client.Minecraft.getInstance().gui.setScreen(active);
     }
 
     public static void clearActive() { active = null; }
-    public static void updateIfOpen(PrayerMenuDataPayload payload) { if (active != null) active.update(payload); }
+    private static boolean isShowing() {
+        return active != null && net.minecraft.client.Minecraft.getInstance().gui.screen() == active;
+    }
+
+    public static void updateIfOpen(PrayerMenuDataPayload payload) { if (isShowing()) active.update(payload); }
 
     @Override public void onClose() { active = null; super.onClose(); }
+
+    /** Tela trocada (ex.: morte com o livro aberto): solta a referência para o próximo abrir funcionar. */
+    @Override public void removed() {
+        if (active == this) active = null;
+        super.removed();
+    }
+
     @Override public boolean isPauseScreen() { return false; }
 
     @Override

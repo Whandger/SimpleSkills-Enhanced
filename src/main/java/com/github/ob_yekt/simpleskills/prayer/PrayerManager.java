@@ -57,6 +57,12 @@ public final class PrayerManager {
     private static void handle(ServerPlayer player, PrayerActionPayload payload) {
         if (payload == null || payload.value().length() > 64)
             return;
+        // Jogador morto não troca slot, não equipa e não conjura (cura/teleporte/XP em corpo).
+        // OPEN/OPEN_WHEEL são respondidos mesmo assim: o cliente recebe a resposta, zera o pedido
+        // pendente e não abre tela com o jogador morto. Sem resposta, o pedido ficaria preso.
+        if (!player.isAlive() && payload.action() != PrayerActionPayload.OPEN
+                && payload.action() != PrayerActionPayload.OPEN_WHEEL)
+            return;
         DatabaseManager db = DatabaseManager.getInstance();
         String uuid = player.getStringUUID();
         db.ensurePlayerInitialized(uuid);

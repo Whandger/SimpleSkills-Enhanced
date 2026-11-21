@@ -53,12 +53,19 @@ public final class PrayerMagicWheelScreen extends Screen {
     }
 
     public static void updateIfOpen(PrayerMenuDataPayload payload) {
-        if (active != null) active.state = payload;
+        if (active != null && Minecraft.getInstance().gui.screen() == active) active.state = payload;
     }
 
     public static void clearActive() { active = null; }
 
     @Override public void onClose() { active = null; super.onClose(); }
+
+    /** Tela trocada (ex.: morte com a roda aberta): não deixa a referência presa. */
+    @Override public void removed() {
+        if (active == this) active = null;
+        super.removed();
+    }
+
     @Override public boolean isPauseScreen() { return false; }
 
     private void layout() {

@@ -13,19 +13,22 @@ public final class PrayerClientState {
     public static String equipped() { return state == null ? "" : state.equipped(); }
     public static void accept(PrayerMenuDataPayload payload) {
         state = payload;
-        if (wheelRequested && Minecraft.getInstance().player != null) {
+        var player = Minecraft.getInstance().player;
+        if (wheelRequested && player != null) {
             wheelRequested = false;
-            PrayerMagicWheelScreen.show(payload);
+            // Morto: não abre a roda por cima da tela de morte (o jogador ficaria sem o botão de renascer).
+            if (player.isAlive()) PrayerMagicWheelScreen.show(payload);
             return;
         }
-        if (openRequested && Minecraft.getInstance().player != null) {
+        if (openRequested && player != null) {
             openRequested = false;
-            PrayerSkillbookScreen.showOrUpdate(payload);
-        } else {
-            PrayerSkillbookScreen.updateIfOpen(payload);
-            PrayerMagicWheelScreen.updateIfOpen(payload);
+            if (player.isAlive()) PrayerSkillbookScreen.showOrUpdate(payload);
+            return;
         }
+        PrayerSkillbookScreen.updateIfOpen(payload);
+        PrayerMagicWheelScreen.updateIfOpen(payload);
     }
+
     public static void optimisticSelectSlot(int slot) {
         if (state == null) return;
         var loadout = com.google.gson.JsonParser.parseString(state.loadoutJson()).getAsJsonArray();
