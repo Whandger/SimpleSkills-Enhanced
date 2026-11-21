@@ -39,25 +39,26 @@ public final class PrayerClientState {
         PrayerSkillbookScreen.updateIfOpen(state);
     }
 
+    /** Troca a aba do livro sem mexer na roda: a roda é a mesma para todas as escolas. */
     public static void optimisticSelectSpecialization(String specialization) {
         if (state == null) return;
         PrayerSpecialization selected = PrayerSpecialization.fromId(specialization);
         if (selected.id().equals(state.specialization())) return;
         String abilities = PrayerAbility.forSpecialization(selected).stream().map(PrayerAbility::id)
                 .collect(java.util.stream.Collectors.joining(","));
-        String emptyLoadout = "[\"\",\"\",\"\",\"\",\"\",\"\",\"\",\"\"]";
-        state = new PrayerMenuDataPayload(selected.id(), state.level(), "", abilities, emptyLoadout, 0);
-        PrayerMagicWheelScreen.updateIfOpen(state);
+        state = new PrayerMenuDataPayload(selected.id(), state.level(), state.equipped(),
+                abilities, state.loadoutJson(), state.activeSlot());
         PrayerSkillbookScreen.updateIfOpen(state);
     }
 
     public static void optimisticEquip(String abilityId) {
         if (state == null) return;
-        var loadout = com.google.gson.JsonParser.parseString(state.loadoutJson()).getAsJsonArray();
-        while (loadout.size() < 8) loadout.add("");
-        loadout.set(state.activeSlot(), new com.google.gson.JsonPrimitive(abilityId));
+        var array = com.google.gson.JsonParser.parseString(state.loadoutJson()).getAsJsonArray();
+        java.util.List<String> loadout = new java.util.ArrayList<>();
+        for (int i = 0; i < PrayerLoadout.SLOTS; i++) loadout.add(i < array.size() ? array.get(i).getAsString() : "");
+        PrayerLoadout.place(loadout, state.activeSlot(), abilityId);
         state = new PrayerMenuDataPayload(state.specialization(), state.level(), abilityId,
-                state.abilityIds(), loadout.toString(), state.activeSlot());
+                state.abilityIds(), new com.google.gson.Gson().toJson(loadout), state.activeSlot());
         PrayerMagicWheelScreen.updateIfOpen(state);
         PrayerSkillbookScreen.updateIfOpen(state);
     }

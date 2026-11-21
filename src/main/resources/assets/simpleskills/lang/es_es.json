@@ -465,5 +465,8 @@
   "gui.simpleskills.tab.prayer_cooldown": "Reducción del tiempo de reutilización",
   "gui.simpleskills.tab.prayer_damage": "Daño y curación de hechizos",
   "gui.simpleskills.tab.prayer_unlocked": "Hechizos desbloqueados",
-  "gui.simpleskills.tab.prayer_xp_per_cast": "XP por lanzamiento"
+  "gui.simpleskills.tab.prayer_xp_per_cast": "XP por lanzamiento",
+  "gui.simpleskills.prayer.target_empty": "La ranura S%s está vacía: haz clic en un hechizo para colocarlo aquí",
+  "gui.simpleskills.prayer.target_full": "Ranura S%s (%s): haz clic en un hechizo para reemplazarlo",
+  "gui.simpleskills.prayer.replaced": "%s reemplazó a %s en la ranura S%s"
 }

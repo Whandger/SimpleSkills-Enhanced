@@ -79,12 +79,20 @@ public final class PrayerSkillbookScreen extends Screen {
                     selected ? specs[i].color() : MUTED);
         }
         int slotWidth = 49;
+        List<String> placed = loadout();
         for (int slot = 0; slot < 8; slot++) {
             int x = left + 11 + slot * 51;
             boolean selected = slot == state.activeSlot();
+            PrayerAbility inSlot = findAbility(placed.get(slot));
             g.fill(x, top + 73, x + slotWidth, top + 92, selected ? 0xFF80612A : 0xFF120F0C);
-            g.centeredText(font, Component.literal("S" + (slot + 1)), x + slotWidth / 2, top + 79,
-                    selected ? GOLD : MUTED);
+            if (inSlot != null) {
+                // Mostra o que está no espaço: assim fica claro o que seria substituído ao colocar outra magia.
+                g.blit(RenderPipelines.GUI_TEXTURED, inSlot.icon(), x + 3, top + 75, 0, 0, 16, 16, 128, 128, 128, 128);
+                g.text(font, Component.literal("S" + (slot + 1)), x + 22, top + 79, selected ? GOLD : MUTED, false);
+            } else {
+                g.centeredText(font, Component.literal("S" + (slot + 1)), x + slotWidth / 2, top + 79,
+                        selected ? GOLD : MUTED);
+            }
         }
         g.fill(left + 10, top + 97, left + WIDTH - 10, top + HEIGHT - 32, 0xFF120F0C);
         List<PrayerAbility> abilities = Arrays.stream(state.abilityIds().split(",")).map(PrayerSkillbookScreen::findAbility)
@@ -112,6 +120,12 @@ public final class PrayerSkillbookScreen extends Screen {
             g.text(font, detail, left + WIDTH - 132, y + 6,
                     equipped ? 0xFF67D68B : unlocked ? MUTED : 0xFF8A665D, false);
         }
+        PrayerAbility target = findAbility(placed.get(state.activeSlot()));
+        Component targetLine = target == null
+                ? PrayerText.text("gui.simpleskills.prayer.target_empty", state.activeSlot() + 1)
+                : PrayerText.text("gui.simpleskills.prayer.target_full", state.activeSlot() + 1,
+                        PrayerText.text(target.translationKey()));
+        g.centeredText(font, targetLine, width / 2, top + HEIGHT - 31, GOLD);
         g.centeredText(font, PrayerText.text("gui.simpleskills.prayer.cast_hint",
                 PrayerText.text("key.simpleskills.prayer_cast")), width / 2,
                 top + HEIGHT - 21, MUTED);
@@ -185,6 +199,18 @@ public final class PrayerSkillbookScreen extends Screen {
     private static PrayerAbility findAbility(String id) {
         for (PrayerAbility ability : PrayerAbility.values()) if (ability.id().equals(id)) return ability;
         return null;
+    }
+
+    /** Magias nos 8 espaços, na ordem dos espaços ("" = vazio). */
+    private List<String> loadout() {
+        List<String> values = new java.util.ArrayList<>();
+        try {
+            var array = com.google.gson.JsonParser.parseString(state.loadoutJson()).getAsJsonArray();
+            for (int i = 0; i < PrayerLoadout.SLOTS; i++) values.add(i < array.size() ? array.get(i).getAsString() : "");
+        } catch (RuntimeException ignored) {
+            for (int i = 0; i < PrayerLoadout.SLOTS; i++) values.add("");
+        }
+        return values;
     }
 
     private int assignedSlot(String abilityId) {

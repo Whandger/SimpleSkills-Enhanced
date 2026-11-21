@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -63,6 +64,13 @@ public final class PrayerManager {
     public static void registerReceivers() {
         ServerPlayNetworking.registerGlobalReceiver(PrayerActionPayload.TYPE,
                 (payload, context) -> context.server().execute(() -> handle(context.player(), payload)));
+
+        // Ao entrar no mundo, envia o estado atual da roda. Sem isso o cliente não conhece a magia
+        // equipada até abrir um menu, e a tecla de conjurar não faz nada.
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            ServerPlayer player = handler.getPlayer();
+            if (player != null) server.execute(() -> sendMenu(player));
+        });
     }
 
     private static void handle(ServerPlayer player, PrayerActionPayload payload) {
@@ -111,10 +119,7 @@ public final class PrayerManager {
             case PrayerActionPayload.OPEN_WHEEL -> sendMenu(player);
             case PrayerActionPayload.SELECT_SPECIALIZATION -> {
                 PrayerSpecialization selected = PrayerSpecialization.fromId(payload.value());
-                if (!selected.id().equals(db.getPrayerSpecialization(uuid))) {
-                    db.setPrayerLoadout(uuid, "[]");
-                    db.setPrayerActiveSlot(uuid, 0);
-                }
+                // Uma roda só: a aba muda apenas quais magias aparecem para colocar nos espaços.
                 db.setPrayerSpecialization(uuid, selected.id());
                 sendMenu(player);
             }
@@ -126,12 +131,21 @@ public final class PrayerManager {
                     player.sendSystemMessage(Component.translatable("gui.simpleskills.prayer.unavailable"), true);
                     return;
                 }
+                // Coloca no espaço ativo sem apagar as outras magias (ver PrayerLoadout.place).
+                int slot = db.getPrayerActiveSlot(uuid);
                 List<String> loadout = readLoadout(db.getPrayerLoadout(uuid));
-                loadout.set(db.getPrayerActiveSlot(uuid), ability.id());
+                String replaced = PrayerLoadout.place(loadout, slot, ability.id());
                 db.setPrayerLoadout(uuid, writeLoadout(loadout));
                 sendMenu(player);
-                player.sendSystemMessage(Component.translatable("gui.simpleskills.prayer.equip_success",
-                        Component.translatable(ability.translationKey())), true);
+                PrayerAbility replacedAbility = find(replaced);
+                if (replacedAbility != null) {
+                    player.sendSystemMessage(Component.translatable("gui.simpleskills.prayer.replaced",
+                            Component.translatable(ability.translationKey()),
+                            Component.translatable(replacedAbility.translationKey()), slot + 1), true);
+                } else {
+                    player.sendSystemMessage(Component.translatable("gui.simpleskills.prayer.equip_success",
+                            Component.translatable(ability.translationKey())), true);
+                }
             }
             case PrayerActionPayload.SELECT_SLOT -> {
                 try {
@@ -158,8 +172,7 @@ public final class PrayerManager {
             return;
         PrayerAbility ability = find(abilityId);
         int level = XPManager.getSkillLevel(uuid, Skills.PRAYER);
-        if (ability == null || !ability.isUnlocked(level)
-                || ability.specialization() != PrayerSpecialization.fromId(db.getPrayerSpecialization(uuid)))
+        if (ability == null || !ability.isUnlocked(level))
             return;
         long now = player.level().getGameTime();
         long readyAt = COOLDOWNS.computeIfAbsent(player.getUUID(), ignored -> new ConcurrentHashMap<>())
