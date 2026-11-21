@@ -27,6 +27,7 @@ import com.github.ob_yekt.simpleskills.prayer.PrayerVfxEntity;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 
 import net.fabricmc.api.ModInitializer;
+import com.github.ob_yekt.simpleskills.prayer.PrayerLighting;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 
 import org.slf4j.Logger;
@@ -93,6 +94,8 @@ public class Simpleskills implements ModInitializer {
 			db.initializeDatabase(server);
 			LOGGER.info("Database and config initialized for server.");
 		});
+
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> PrayerLighting.clearAll());
 
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			db.close();

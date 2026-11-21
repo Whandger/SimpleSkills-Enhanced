@@ -147,7 +147,7 @@ public final class PrayerManager {
         long now = player.level().getGameTime();
         long readyAt = COOLDOWNS.computeIfAbsent(player.getUUID(), ignored -> new ConcurrentHashMap<>())
                 .getOrDefault(ability.id(), 0L);
-        if (now < readyAt || !player.getMainHandItem().isEmpty() || !player.getOffhandItem().isEmpty())
+        if (now < readyAt || !player.getMainHandItem().isEmpty() || player.isBlocking())
             return;
 
         ServerLevel serverLevel = (ServerLevel) player.level();

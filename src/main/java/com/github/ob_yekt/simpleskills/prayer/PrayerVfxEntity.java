@@ -55,6 +55,7 @@ public final class PrayerVfxEntity extends Entity {
     private boolean impactFired = false;
     private int[] impactTicks = new int[0];
     private int nextImpact = 0;
+    private boolean lightEnabled = true;
 
     // Client-side cache para manter a última posição caso o alvo morra no meio da animação
     private Vec3 lastKnownHandOffset = null;
@@ -71,6 +72,12 @@ public final class PrayerVfxEntity extends Entity {
         entityData.set(TARGET, -1);
         entityData.set(DURATION, duration);
         maxLife = duration;
+    }
+
+    /** Visual puramente cosmético (conexões): não ocupa uma luz de magia. */
+    public PrayerVfxEntity lightless() {
+        this.lightEnabled = false;
+        return this;
     }
 
     public void setSpellPayload(UUID casterUuid, UUID targetUuid, Vec3 impactPos,
@@ -112,6 +119,41 @@ public final class PrayerVfxEntity extends Entity {
 
     @Override protected void readAdditionalSaveData(net.minecraft.world.level.storage.ValueInput input) {}
     @Override protected void addAdditionalSaveData(net.minecraft.world.level.storage.ValueOutput output) {}
+
+    @Override public void remove(Entity.RemovalReason reason) {
+        if (level() instanceof ServerLevel) PrayerLighting.release(getUUID());
+        super.remove(reason);
+    }
+
+    /** Luz real do efeito: acompanha o voo nos projéteis e depois fica no ponto de impacto. */
+    private void updateLighting(ServerLevel server) {
+        if (!lightEnabled) return;
+        PrayerAbility ability = payloadAbility != null ? payloadAbility : PrayerLighting.abilityOf(style());
+        if (ability == null) return;
+        int peak = impactTicks.length > 0 ? impactTicks[impactTicks.length / 2] : Math.max(1, maxLife / 3);
+
+        Vec3 center;
+        if (payloadAbility != null && impactPos != null) {
+            if (PrayerLighting.isProjectile(ability) && life < peak) {
+                Entity caster = casterUuid != null ? server.getEntity(casterUuid) : null;
+                Vec3 from = ability == PrayerAbility.METEOR ? impactPos.add(0, 12, 0)
+                        : (caster != null ? caster.getEyePosition() : impactPos);
+                double p = Math.min(1.0, life / (double) Math.max(1, peak));
+                center = from.add(impactPos.subtract(from).scale(p));
+            } else {
+                center = impactPos.add(0, 0.5, 0);
+            }
+        } else {
+            // Sem payload (ex.: Spark): a luz percorre o trajeto até o alvo, guardado em END.
+            Vector3fc offset = entityData.get(END);
+            boolean fastBolt = ability == PrayerAbility.SPARK || ability == PrayerAbility.CHAIN_LIGHTNING;
+            int flight = fastBolt ? maxLife / 4 : maxLife / 2;
+            double p = Math.min(1.0, life / (double) Math.max(1, flight));
+            double lift = offset.lengthSquared() > 1.0E-4 ? 0.0 : 1.0;
+            center = position().add(offset.x() * p, offset.y() * p + lift, offset.z() * p);
+        }
+        PrayerLighting.update(getUUID(), server, ability, life, maxLife, peak, center);
+    }
 
     @Override public void tick() {
         super.tick();
@@ -161,6 +203,7 @@ public final class PrayerVfxEntity extends Entity {
                 if (nextImpact >= impactTicks.length) impactFired = true;
             }
 
+            updateLighting(server);
             if (life >= maxLife) discard();
         }
     }

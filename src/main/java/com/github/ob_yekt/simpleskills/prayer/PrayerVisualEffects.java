@@ -74,7 +74,7 @@ public final class PrayerVisualEffects {
     }
 
     public static void playConnection(ServerLevel level, Vec3 start, Vec3 end, PrayerAbility ability) {
-        PrayerVfxEntity connection = new PrayerVfxEntity(level, styleFor(ability), start, end, -1, 18);
+        PrayerVfxEntity connection = new PrayerVfxEntity(level, styleFor(ability), start, end, -1, 18).lightless();
         level.addFreshEntity(connection);
     }
 
