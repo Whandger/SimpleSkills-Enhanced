@@ -468,5 +468,6 @@
   "gui.simpleskills.tab.prayer_xp_per_cast": "XP por lanzamiento",
   "gui.simpleskills.prayer.target_empty": "La ranura S%s está vacía: haz clic en un hechizo para colocarlo aquí",
   "gui.simpleskills.prayer.target_full": "Ranura S%s (%s): haz clic en un hechizo para reemplazarlo",
-  "gui.simpleskills.prayer.replaced": "%s reemplazó a %s en la ranura S%s"
+  "gui.simpleskills.prayer.replaced": "%s reemplazó a %s en la ranura S%s",
+  "message.simpleskills.glowstone_shield.unlocked": "¡Escudo de Glowstone desbloqueado! Fabrícalo con 6 lingotes de hierro, 2 polvos de Glowstone y 1 bloque de Glowstone. La variante de diamante requiere 6 diamantes, 2 polvos de Glowstone y 1 bloque de Glowstone. Mejora esta variante en una mesa de herrería usando una plantilla de mejora de netherita y un lingote de netherita."
 }

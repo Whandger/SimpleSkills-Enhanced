@@ -474,5 +474,5 @@
   "gui.simpleskills.rune_infusion.invalid_selection": "That enchantment selection is no longer valid.",
   "message.simpleskills.rune_infusion.style_too_far": "You need to be closer to the Enchanting Table.",
   "key.simpleskills.skill_overview": "Skill Overview",
-  "message.simpleskills.glowstone_shield.unlocked": "Glowstone Shield unlocked! Craft it by combining a Shield + Glowstone in the crafting grid. You can also upgrade it by surrounding it with 8 Diamonds, and then in a Smithing Table with a Netherite Upgrade + Netherite Ingot."
+  "message.simpleskills.glowstone_shield.unlocked": "Glowstone Shield unlocked! Craft it using 6 Iron Ingots, 2 Glowstone Dust, and 1 Glowstone. The Diamond variant requires 6 Diamonds, 2 Glowstone Dust, and 1 Glowstone. Upgrade this variant in a Smithing Table using a Netherite Upgrade Template and a Netherite Ingot."
 }
