@@ -1,6 +1,5 @@
 package com.github.ob_yekt.simpleskills.prayer;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonParser;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,34 +12,30 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 
 /**
- * Roda de 8 slots.
- * Clique esquerdo num slot abre a escolha de magia para aquele slot.
- * Clique direito num slot seleciona o slot ativo.
+ * Roda de 8 espaços para escolher a magia ativa: basta passar o mouse sobre um espaço.
+ * Ao entrar num espaço, ele vira o ativo e a roda fecha. Para colocar magias nos espaços,
+ * use o grimório (tecla B), que mostra o que há em cada espaço antes de trocar.
  */
 public final class PrayerMagicWheelScreen extends Screen {
     private static PrayerMagicWheelScreen active;
     private PrayerMenuDataPayload state;
 
-    // Geometria
+    // Geometria: os espaços são retângulos fixos e a área de seleção é exatamente o retângulo desenhado.
     private static final int RING_RADIUS = 92;
     private static final int SLOT_W = 104, SLOT_H = 26;
-    private static final int INNER_DEAD = 30, OUTER_HIT = 160;
-
-    // Painel de escolha
-    private static final int PICK_W = 300, PICK_H = 230;
-    private static final int PICK_COLS = 3, PICK_CELL_W = 94, PICK_CELL_H = 30;
-    private static final int PICK_ROWS = 4;
+    private static final int CENTER_W = 116, CENTER_H = 44;
 
     // Cores
     private static final int GOLD = 0xFFFFD978, GOLD_DIM = 0xFF80612A, TEXT = 0xFFF3E8D2, MUTED = 0xFFB7A88D;
-    private static final int BG_OUTER = 0xE8100C08, BG_INNER = 0xF217120E, SLOT_BG = 0xFF1B150F, SLOT_ACTIVE = 0xFF3A2C18;
-
-    private static final int BUTTON_LEFT = 0, BUTTON_RIGHT = 1;
+    private static final int BG_INNER = 0xF217120E, SLOT_BG = 0xFF1B150F, SLOT_ACTIVE = 0xFF3A2C18;
 
     private int cx, cy;
-    private boolean pickerOpen;
-    private int pickerSlot;
-    private int pickerScroll;
+    // A seleção só vale depois que o cursor sai de um espaço. Assim a roda não fecha sozinha
+    // se abrir com o mouse já em cima de um espaço.
+    private boolean armed;
+    // Espaço escolhido por passagem do mouse; a escolha é aplicada no próximo tick.
+    private int pending = -1;
+    private boolean closing;
 
     private PrayerMagicWheelScreen(PrayerMenuDataPayload state) {
         super(PrayerText.text("gui.simpleskills.prayer.wheel_title"));
@@ -53,12 +48,19 @@ public final class PrayerMagicWheelScreen extends Screen {
     }
 
     public static void updateIfOpen(PrayerMenuDataPayload payload) {
-        if (active != null) active.state = payload;
+        if (active != null && Minecraft.getInstance().gui.screen() == active) active.state = payload;
     }
 
     public static void clearActive() { active = null; }
 
     @Override public void onClose() { active = null; super.onClose(); }
+
+    /** Tela trocada (ex.: morte com a roda aberta): não deixa a referência presa. */
+    @Override public void removed() {
+        if (active == this) active = null;
+        super.removed();
+    }
+
     @Override public boolean isPauseScreen() { return false; }
 
     private void layout() {
@@ -70,21 +72,11 @@ public final class PrayerMagicWheelScreen extends Screen {
         List<String> values = new ArrayList<>();
         try {
             var array = JsonParser.parseString(state.loadoutJson()).getAsJsonArray();
-            for (int i = 0; i < 8; i++) values.add(i < array.size() ? array.get(i).getAsString() : "");
+            for (int i = 0; i < PrayerLoadout.SLOTS; i++) values.add(i < array.size() ? array.get(i).getAsString() : "");
         } catch (RuntimeException ignored) {
-            for (int i = 0; i < 8; i++) values.add("");
+            for (int i = 0; i < PrayerLoadout.SLOTS; i++) values.add("");
         }
         return values;
-    }
-
-    private List<PrayerAbility> unlockedAbilities() {
-        List<PrayerAbility> list = new ArrayList<>();
-        if (state.abilityIds() == null || state.abilityIds().isEmpty()) return list;
-        for (String id : state.abilityIds().split(",")) {
-            PrayerAbility ability = findAbility(id);
-            if (ability != null && ability.isUnlocked(state.level())) list.add(ability);
-        }
-        return list;
     }
 
     private int[] slotCenter(int slot) {
@@ -95,19 +87,15 @@ public final class PrayerMagicWheelScreen extends Screen {
         };
     }
 
-    /** Slot sob o mouse pelo ângulo, ou -1 se fora do anel. */
+    /** Espaço sob o mouse (o retângulo desenhado), ou -1. O centro da roda não seleciona nada. */
     private int slotAt(double mx, double my) {
-        double dx = mx - cx, dy = my - cy;
-        double dist = Math.hypot(dx, dy);
-        if (dist < INNER_DEAD || dist > OUTER_HIT) return -1;
-        double rel = Math.atan2(dy, dx) - (-Math.PI / 2);
-        rel = ((rel % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
-        return (int) Math.round(rel / (Math.PI / 4)) % 8;
-    }
-
-    private int[] pickerBounds() {
-        int x0 = cx - PICK_W / 2, y0 = cy - PICK_H / 2;
-        return new int[]{x0, y0, x0 + PICK_W, y0 + PICK_H};
+        if (Math.abs(mx - cx) <= CENTER_W / 2.0 && Math.abs(my - cy) <= CENTER_H / 2.0) return -1;
+        for (int slot = 0; slot < PrayerLoadout.SLOTS; slot++) {
+            int[] c = slotCenter(slot);
+            int x0 = c[0] - SLOT_W / 2, y0 = c[1] - SLOT_H / 2;
+            if (mx >= x0 && mx < x0 + SLOT_W && my >= y0 && my < y0 + SLOT_H) return slot;
+        }
+        return -1;
     }
 
     @Override
@@ -115,12 +103,23 @@ public final class PrayerMagicWheelScreen extends Screen {
         super.extractBackground(g, mouseX, mouseY, partialTick);
         layout();
 
+        int hovered = slotAt(mouseX, mouseY);
+        if (hovered < 0) {
+            armed = true;
+        } else if (armed && pending < 0 && !closing) {
+            pending = hovered;
+        }
+
         drawRing(g);
-        drawSlots(g, mouseX, mouseY);
+        drawSlots(g, hovered);
         drawCenter(g);
         drawHint(g);
+    }
 
-        if (pickerOpen) drawPicker(g, mouseX, mouseY);
+    @Override
+    public void tick() {
+        super.tick();
+        if (pending >= 0) choose(pending);
     }
 
     private void drawRing(GuiGraphicsExtractor g) {
@@ -134,12 +133,11 @@ public final class PrayerMagicWheelScreen extends Screen {
         }
     }
 
-    private void drawSlots(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+    private void drawSlots(GuiGraphicsExtractor g, int hovered) {
         List<String> spells = loadout();
         int activeSlot = state.activeSlot();
-        int hovered = pickerOpen ? -1 : slotAt(mouseX, mouseY);
 
-        for (int slot = 0; slot < 8; slot++) {
+        for (int slot = 0; slot < PrayerLoadout.SLOTS; slot++) {
             int[] c = slotCenter(slot);
             int x0 = c[0] - SLOT_W / 2, y0 = c[1] - SLOT_H / 2;
             boolean selected = slot == activeSlot;
@@ -148,9 +146,9 @@ public final class PrayerMagicWheelScreen extends Screen {
 
             int border = selected ? GOLD : hover ? 0xFFB08A3E : 0xFF05070A;
             g.fill(x0 - 1, y0 - 1, x0 + SLOT_W + 1, y0 + SLOT_H + 1, border);
-            g.fill(x0, y0, x0 + SLOT_W, y0 + SLOT_H, selected ? SLOT_ACTIVE : SLOT_BG);
+            g.fill(x0, y0, x0 + SLOT_W, y0 + SLOT_H, selected ? SLOT_ACTIVE : hover ? 0xFF4A3A20 : SLOT_BG);
 
-            // Número do slot numa "placa" à esquerda
+            // Número do espaço numa "placa" à esquerda
             g.fill(x0 + 2, y0 + 2, x0 + 16, y0 + SLOT_H - 2, selected ? GOLD_DIM : 0xFF0A0806);
             g.centeredText(font, Component.literal(String.valueOf(slot + 1)), x0 + 9, y0 + 9,
                     selected ? GOLD : MUTED);
@@ -171,7 +169,7 @@ public final class PrayerMagicWheelScreen extends Screen {
     }
 
     private void drawCenter(GuiGraphicsExtractor g) {
-        int w = 116, h = 44;
+        int w = CENTER_W, h = CENTER_H;
         g.fill(cx - w / 2 - 1, cy - h / 2 - 1, cx + w / 2 + 1, cy + h / 2 + 1, GOLD_DIM);
         g.fill(cx - w / 2, cy - h / 2, cx + w / 2, cy + h / 2, BG_INNER);
 
@@ -190,130 +188,28 @@ public final class PrayerMagicWheelScreen extends Screen {
                 PrayerText.text("key.simpleskills.prayer_cast")), cx, cy + RING_RADIUS + 46, MUTED);
     }
 
-    private void drawPicker(GuiGraphicsExtractor g, int mouseX, int mouseY) {
-        int[] b = pickerBounds();
-        int x0 = b[0], y0 = b[1], x1 = b[2], y1 = b[3];
-        g.fill(x0 - 4, y0 - 4, x1 + 4, y1 + 4, GOLD_DIM);
-        g.fill(x0, y0, x1, y1, BG_OUTER);
-        g.fill(x0 + 4, y0 + 4, x1 - 4, y1 - 4, BG_INNER);
-
-        g.centeredText(font, Component.literal("Slot " + (pickerSlot + 1)), cx, y0 + 10, GOLD);
-
-        List<PrayerAbility> unlocked = unlockedAbilities();
-        List<String> spells = loadout();
-        int perPage = PICK_COLS * PICK_ROWS;
-        int maxScroll = Math.max(0, (unlocked.size() + PICK_COLS - 1) / PICK_COLS - PICK_ROWS);
-        pickerScroll = Math.min(pickerScroll, maxScroll);
-
-        if (unlocked.isEmpty()) {
-            g.centeredText(font, PrayerText.text("gui.simpleskills.prayer.empty"), cx, cy, MUTED);
-        }
-
-        int gridX = x0 + (PICK_W - PICK_COLS * PICK_CELL_W) / 2;
-        int gridY = y0 + 30;
-        int start = pickerScroll * PICK_COLS;
-        for (int i = 0; i < perPage && start + i < unlocked.size(); i++) {
-            PrayerAbility a = unlocked.get(start + i);
-            int col = i % PICK_COLS, row = i / PICK_COLS;
-            int cx0 = gridX + col * PICK_CELL_W, cy0 = gridY + row * PICK_CELL_H;
-            boolean hover = mouseX >= cx0 && mouseX < cx0 + PICK_CELL_W - 4
-                    && mouseY >= cy0 && mouseY < cy0 + PICK_CELL_H - 4;
-            boolean inSlot = a.id().equals(spells.get(pickerSlot));
-
-            g.fill(cx0, cy0, cx0 + PICK_CELL_W - 4, cy0 + PICK_CELL_H - 4,
-                    hover ? 0xFF4A3A20 : inSlot ? SLOT_ACTIVE : SLOT_BG);
-            g.blit(RenderPipelines.GUI_TEXTURED, a.icon(), cx0 + 4, cy0 + 4,
-                    0, 0, 16, 16, 128, 128, 128, 128);
-            String name = font.plainSubstrByWidth(PrayerText.text(a.translationKey()).getString(), PICK_CELL_W - 30);
-            g.text(font, Component.literal(name), cx0 + 24, cy0 + 8, inSlot ? GOLD : TEXT, false);
-        }
-
-        if (maxScroll > 0) {
-            g.centeredText(font, Component.literal((pickerScroll + 1) + " / " + (maxScroll + 1)),
-                    cx, y1 - 18, MUTED);
-        }
-        g.centeredText(font, Component.literal("Esc fecha • roda do mouse rola"), cx, y1 - 32, MUTED);
-    }
-
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
-        double mx = event.x(), my = event.y();
-        int button = event.button();
-
-        if (pickerOpen) {
-            int[] b = pickerBounds();
-            if (mx < b[0] || mx > b[2] || my < b[1] || my > b[3]) {
-                pickerOpen = false;
-                return true;
-            }
-            List<PrayerAbility> unlocked = unlockedAbilities();
-            int gridX = b[0] + (PICK_W - PICK_COLS * PICK_CELL_W) / 2;
-            int gridY = b[1] + 30;
-            for (int i = 0; i < PICK_COLS * PICK_ROWS; i++) {
-                int idx = pickerScroll * PICK_COLS + i;
-                if (idx >= unlocked.size()) break;
-                int col = i % PICK_COLS, row = i / PICK_COLS;
-                int cx0 = gridX + col * PICK_CELL_W, cy0 = gridY + row * PICK_CELL_H;
-                if (mx >= cx0 && mx < cx0 + PICK_CELL_W - 4 && my >= cy0 && my < cy0 + PICK_CELL_H - 4) {
-                    equipToSlot(pickerSlot, unlocked.get(idx));
-                    pickerOpen = false;
-                    return true;
-                }
-            }
-            return true;
-        }
-
-        int slot = slotAt(mx, my);
+        int slot = slotAt(event.x(), event.y());
         if (slot >= 0) {
-            if (button == BUTTON_LEFT) {
-                // Esquerdo: abre a escolha de magia para este slot
-                pickerSlot = slot;
-                pickerScroll = 0;
-                pickerOpen = true;
-            } else if (button == BUTTON_RIGHT) {
-                // Direito: seleciona este slot como o ativo
-                selectSlot(slot);
-            }
+            choose(slot);
             return true;
         }
         return super.mouseClicked(event, doubleClick);
     }
 
-    @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
-        if (pickerOpen) {
-            int rows = (unlockedAbilities().size() + PICK_COLS - 1) / PICK_COLS;
-            int maxScroll = Math.max(0, rows - PICK_ROWS);
-            pickerScroll = Math.max(0, Math.min(maxScroll, pickerScroll - (int) Math.signum(scrollY)));
-            return true;
-        }
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
-    }
-
-    private void selectSlot(int slot) {
+    /** Torna o espaço o ativo no servidor e fecha a roda. */
+    private void choose(int slot) {
+        if (closing) return;
+        closing = true;
+        pending = -1;
         if (ClientPlayNetworking.canSend(PrayerActionPayload.TYPE)) {
             ClientPlayNetworking.send(new PrayerActionPayload(PrayerActionPayload.SELECT_SLOT, Integer.toString(slot)));
             PrayerClientState.optimisticSelectSlot(slot);
         } else {
             connectionRequired();
         }
-    }
-
-    private void equipToSlot(int slot, PrayerAbility ability) {
-        if (!ClientPlayNetworking.canSend(PrayerActionPayload.TYPE)) {
-            connectionRequired();
-            return;
-        }
-        ClientPlayNetworking.send(new PrayerActionPayload(PrayerActionPayload.EQUIP_TO_SLOT,
-                slot + ":" + ability.id()));
-
-        // Atualização local imediata; o servidor confirma em seguida com o estado oficial.
-        List<String> spells = new ArrayList<>(loadout());
-        for (int i = 0; i < spells.size(); i++) if (ability.id().equals(spells.get(i))) spells.set(i, "");
-        spells.set(slot, ability.id());
-        PrayerMenuDataPayload updated = new PrayerMenuDataPayload(state.specialization(), state.level(),
-                ability.id(), state.abilityIds(), new Gson().toJson(spells), slot);
-        PrayerClientState.accept(updated);
+        onClose();
     }
 
     private void connectionRequired() {

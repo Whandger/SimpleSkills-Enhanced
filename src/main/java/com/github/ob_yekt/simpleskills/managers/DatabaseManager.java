@@ -23,6 +23,7 @@ public class DatabaseManager {
     private static final List<String> SKILLS = Arrays.stream(Skills.values())
             .map(Skills::getId)
             .toList();
+    private static final List<String> PRAYER_SPECIALIZATIONS = List.of("divine", "unholy", "elementalist");
     private static DatabaseManager instance;
     private Connection connection;
     private Path currentDatabasePath;
@@ -153,6 +154,37 @@ public class DatabaseManager {
                 stmt.execute("ALTER TABLE players ADD COLUMN prayer_active_slot INTEGER DEFAULT 0");
             } catch (SQLException ignored) {
                 // Column likely exists; ignore
+            }
+            // Uma roda só para todas as escolas. As colunas por escola (prayer_loadout_<escola> e
+            // prayer_active_slot_<escola>) são de versões anteriores: se a coluna atual estiver vazia,
+            // ela recebe a roda da escola atual do jogador (ou a primeira preenchida).
+            for (String id : PRAYER_SPECIALIZATIONS) {
+                try {
+                    stmt.execute("ALTER TABLE players ADD COLUMN prayer_loadout_" + id + " TEXT DEFAULT NULL");
+                } catch (SQLException ignored) {
+                    // Column likely exists; ignore
+                }
+                try {
+                    stmt.execute("ALTER TABLE players ADD COLUMN prayer_active_slot_" + id + " INTEGER DEFAULT NULL");
+                } catch (SQLException ignored) {
+                    // Column likely exists; ignore
+                }
+            }
+            try {
+                stmt.execute("UPDATE players SET prayer_loadout = COALESCE("
+                        + "CASE prayer_specialization WHEN 'divine' THEN prayer_loadout_divine "
+                        + "WHEN 'unholy' THEN prayer_loadout_unholy "
+                        + "WHEN 'elementalist' THEN prayer_loadout_elementalist END, "
+                        + "prayer_loadout_divine, prayer_loadout_unholy, prayer_loadout_elementalist, '[]') "
+                        + "WHERE prayer_loadout IS NULL");
+                stmt.execute("UPDATE players SET prayer_active_slot = COALESCE("
+                        + "CASE prayer_specialization WHEN 'divine' THEN prayer_active_slot_divine "
+                        + "WHEN 'unholy' THEN prayer_active_slot_unholy "
+                        + "WHEN 'elementalist' THEN prayer_active_slot_elementalist END, "
+                        + "prayer_active_slot_divine, prayer_active_slot_unholy, prayer_active_slot_elementalist, 0) "
+                        + "WHERE prayer_active_slot IS NULL");
+            } catch (SQLException e) {
+                Simpleskills.LOGGER.error("Failed to migrate Prayer loadout: {}", e.getMessage());
             }
             Simpleskills.LOGGER.debug("Created database tables and indexes if they didn't exist.");
         } catch (SQLException e) {
@@ -450,13 +482,16 @@ public class DatabaseManager {
         }
     }
 
+    /** Roda do jogador (JSON de 8 espaços); "[]" se ainda não foi montada. */
     public String getPrayerLoadout(String playerUuid) {
         checkConnection();
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT prayer_loadout FROM players WHERE player_uuid = ?")) {
             statement.setString(1, playerUuid);
             try (ResultSet result = statement.executeQuery()) {
-                return result.next() ? result.getString("prayer_loadout") : "[]";
+                if (!result.next()) return "[]";
+                String value = result.getString("prayer_loadout");
+                return value == null ? "[]" : value;
             }
         } catch (SQLException e) {
             Simpleskills.LOGGER.error("Failed to get Prayer loadout for UUID {}", playerUuid, e);
@@ -477,13 +512,15 @@ public class DatabaseManager {
         }
     }
 
+    /** Espaço selecionado do jogador (0 a 7). */
     public int getPrayerActiveSlot(String playerUuid) {
         checkConnection();
         try (PreparedStatement statement = connection.prepareStatement(
                 "SELECT prayer_active_slot FROM players WHERE player_uuid = ?")) {
             statement.setString(1, playerUuid);
             try (ResultSet result = statement.executeQuery()) {
-                return result.next() ? Math.max(0, Math.min(7, result.getInt("prayer_active_slot"))) : 0;
+                if (!result.next()) return 0;
+                return Math.max(0, Math.min(7, result.getInt("prayer_active_slot"))); // NULL vira 0
             }
         } catch (SQLException e) {
             Simpleskills.LOGGER.error("Failed to get Prayer active slot for UUID {}", playerUuid, e);

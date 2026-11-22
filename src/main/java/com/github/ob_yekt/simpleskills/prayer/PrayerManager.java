@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -32,6 +33,17 @@ import net.minecraft.world.phys.Vec3;
 public final class PrayerManager {
     private static final Map<UUID, Map<String, Long>> COOLDOWNS = new ConcurrentHashMap<>();
 
+    /**
+     * Verdadeiro só enquanto um golpe de magia do Prayer está sendo aplicado. O evento de dano
+     * usa essa marca para não conceder XP de combate (Slaying/Ranged) por magia; o XP do Prayer
+     * continua vindo do cast.
+     */
+    private static final ThreadLocal<Boolean> APPLYING_PRAYER_DAMAGE = ThreadLocal.withInitial(() -> false);
+
+    public static boolean isApplyingPrayerDamage() {
+        return APPLYING_PRAYER_DAMAGE.get();
+    }
+
     private PrayerManager() {
     }
 
@@ -52,10 +64,23 @@ public final class PrayerManager {
     public static void registerReceivers() {
         ServerPlayNetworking.registerGlobalReceiver(PrayerActionPayload.TYPE,
                 (payload, context) -> context.server().execute(() -> handle(context.player(), payload)));
+
+        // Ao entrar no mundo, envia o estado atual da roda. Sem isso o cliente não conhece a magia
+        // equipada até abrir um menu, e a tecla de conjurar não faz nada.
+        ServerPlayConnectionEvents.JOIN.register((handler, sender, server) -> {
+            ServerPlayer player = handler.getPlayer();
+            if (player != null) server.execute(() -> sendMenu(player));
+        });
     }
 
     private static void handle(ServerPlayer player, PrayerActionPayload payload) {
         if (payload == null || payload.value().length() > 64)
+            return;
+        // Jogador morto não troca slot, não equipa e não conjura (cura/teleporte/XP em corpo).
+        // OPEN/OPEN_WHEEL são respondidos mesmo assim: o cliente recebe a resposta, zera o pedido
+        // pendente e não abre tela com o jogador morto. Sem resposta, o pedido ficaria preso.
+        if (!player.isAlive() && payload.action() != PrayerActionPayload.OPEN
+                && payload.action() != PrayerActionPayload.OPEN_WHEEL)
             return;
         DatabaseManager db = DatabaseManager.getInstance();
         String uuid = player.getStringUUID();
@@ -94,10 +119,7 @@ public final class PrayerManager {
             case PrayerActionPayload.OPEN_WHEEL -> sendMenu(player);
             case PrayerActionPayload.SELECT_SPECIALIZATION -> {
                 PrayerSpecialization selected = PrayerSpecialization.fromId(payload.value());
-                if (!selected.id().equals(db.getPrayerSpecialization(uuid))) {
-                    db.setPrayerLoadout(uuid, "[]");
-                    db.setPrayerActiveSlot(uuid, 0);
-                }
+                // Uma roda só: a aba muda apenas quais magias aparecem para colocar nos espaços.
                 db.setPrayerSpecialization(uuid, selected.id());
                 sendMenu(player);
             }
@@ -109,12 +131,21 @@ public final class PrayerManager {
                     player.sendSystemMessage(Component.translatable("gui.simpleskills.prayer.unavailable"), true);
                     return;
                 }
+                // Coloca no espaço ativo sem apagar as outras magias (ver PrayerLoadout.place).
+                int slot = db.getPrayerActiveSlot(uuid);
                 List<String> loadout = readLoadout(db.getPrayerLoadout(uuid));
-                loadout.set(db.getPrayerActiveSlot(uuid), ability.id());
+                String replaced = PrayerLoadout.place(loadout, slot, ability.id());
                 db.setPrayerLoadout(uuid, writeLoadout(loadout));
                 sendMenu(player);
-                player.sendSystemMessage(Component.translatable("gui.simpleskills.prayer.equip_success",
-                        Component.translatable(ability.translationKey())), true);
+                PrayerAbility replacedAbility = find(replaced);
+                if (replacedAbility != null) {
+                    player.sendSystemMessage(Component.translatable("gui.simpleskills.prayer.replaced",
+                            Component.translatable(ability.translationKey()),
+                            Component.translatable(replacedAbility.translationKey()), slot + 1), true);
+                } else {
+                    player.sendSystemMessage(Component.translatable("gui.simpleskills.prayer.equip_success",
+                            Component.translatable(ability.translationKey())), true);
+                }
             }
             case PrayerActionPayload.SELECT_SLOT -> {
                 try {
@@ -141,8 +172,7 @@ public final class PrayerManager {
             return;
         PrayerAbility ability = find(abilityId);
         int level = XPManager.getSkillLevel(uuid, Skills.PRAYER);
-        if (ability == null || !ability.isUnlocked(level)
-                || ability.specialization() != PrayerSpecialization.fromId(db.getPrayerSpecialization(uuid)))
+        if (ability == null || !ability.isUnlocked(level))
             return;
         long now = player.level().getGameTime();
         long readyAt = COOLDOWNS.computeIfAbsent(player.getUUID(), ignored -> new ConcurrentHashMap<>())
@@ -395,7 +425,13 @@ public final class PrayerManager {
                                       float amount, boolean keepVelocity) {
         victim.damageCooldownTime = 0;
         Vec3 velocity = victim.getDeltaMovement();
-        boolean hit = victim.hurtServer(level, source, amount);
+        boolean hit;
+        APPLYING_PRAYER_DAMAGE.set(true);
+        try {
+            hit = victim.hurtServer(level, source, amount);
+        } finally {
+            APPLYING_PRAYER_DAMAGE.set(false);
+        }
         if (hit && keepVelocity) {
             victim.setDeltaMovement(velocity);
             victim.needsSync = true;

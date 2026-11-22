@@ -97,7 +97,8 @@ public class Simpleskills implements ModInitializer {
 
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> PrayerLighting.clearAll());
 
-		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+		// Fecha em SERVER_STOPPED, depois que o stopServer desconectou os jogadores.
+		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			db.close();
 			LOGGER.info("Database connection closed on server stop.");
 		});

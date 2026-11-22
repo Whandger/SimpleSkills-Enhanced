@@ -31,46 +31,33 @@ public abstract class InventoryCheckMixin {
             return;
         }
 
-        for (EquipmentSlot slot : EquipmentSlot.values()) {
-            if (!slot.isArmor()) {
-                continue;
-            }
+        // Este método também roda quando o jogador é removido do mundo: após a morte (respawn),
+        // na desconexão e no encerramento do servidor. Jogador morto já perdeu a armadura para o
+        // chão, então não há o que validar. Nessa hora a consulta ao banco também não deve rodar.
+        if (!serverPlayer.isAlive()) {
+            return;
+        }
 
-            ItemStack equippedItem = serverPlayer.getItemBySlot(slot);
-            if (equippedItem.isEmpty()) {
-                continue;
-            }
-
-            Identifier itemId = BuiltInRegistries.ITEM.getKey(equippedItem.getItem());
-            SkillRequirement requirement = ConfigManager.getArmorRequirement(itemId.toString());
-            if (requirement == null) {
-                continue;
-            }
-
-            int playerLevel = XPManager.getSkillLevel(serverPlayer.getStringUUID(), requirement.getSkill());
-            if (playerLevel < requirement.getLevel()) {
-                String removalReason = String.format("(requires %s level %d)", requirement.getSkill().getDisplayName(), requirement.getLevel());
-                serverPlayer.sendSystemMessage(Component.literal(String.format("§6[simpleskills]§f Removed invalid armor: %s %s",
-                        equippedItem.getHoverName().getString(), removalReason)), true);
-
-                ItemStack armorToMove = equippedItem.copy();
-                serverPlayer.setItemSlot(slot, ItemStack.EMPTY);
-                boolean addedToInventory = serverPlayer.getInventory().add(armorToMove);
-
-                if (!addedToInventory) {
-                    serverPlayer.drop(armorToMove, false, Prediction.SERVER_ONLY);
+        try {
+            for (EquipmentSlot slot : EquipmentSlot.values()) {
+                if (!slot.isArmor()) {
+                    continue;
                 }
 
-                Simpleskills.LOGGER.debug("Removed armor {} from player {} due to insufficient {} level (required: {}, actual: {})",
-                        itemId, serverPlayer.getName().getString(), requirement.getSkill().getDisplayName(), requirement.getLevel(), playerLevel);
-                continue;
-            }
+                ItemStack equippedItem = serverPlayer.getItemBySlot(slot);
+                if (equippedItem.isEmpty()) {
+                    continue;
+                }
 
-            int requiredPrestige = requirement.getRequiredPrestige();
-            if (requiredPrestige > 0) {
-                int playerPrestige = DatabaseManager.getInstance().getPrestige(player.getStringUUID());
-                if (playerPrestige < requiredPrestige) {
-                    String removalReason = String.format("(requires Prestige ★%d)", requiredPrestige);
+                Identifier itemId = BuiltInRegistries.ITEM.getKey(equippedItem.getItem());
+                SkillRequirement requirement = ConfigManager.getArmorRequirement(itemId.toString());
+                if (requirement == null) {
+                    continue;
+                }
+
+                int playerLevel = XPManager.getSkillLevel(serverPlayer.getStringUUID(), requirement.getSkill());
+                if (playerLevel < requirement.getLevel()) {
+                    String removalReason = String.format("(requires %s level %d)", requirement.getSkill().getDisplayName(), requirement.getLevel());
                     serverPlayer.sendSystemMessage(Component.literal(String.format("§6[simpleskills]§f Removed invalid armor: %s %s",
                             equippedItem.getHoverName().getString(), removalReason)), true);
 
@@ -82,10 +69,36 @@ public abstract class InventoryCheckMixin {
                         serverPlayer.drop(armorToMove, false, Prediction.SERVER_ONLY);
                     }
 
-                    Simpleskills.LOGGER.debug("Removed armor {} from player {} due to insufficient prestige (required: ★{}, actual: ★{})",
-                            itemId, serverPlayer.getName().getString(), requiredPrestige, playerPrestige);
+                    Simpleskills.LOGGER.debug("Removed armor {} from player {} due to insufficient {} level (required: {}, actual: {})",
+                            itemId, serverPlayer.getName().getString(), requirement.getSkill().getDisplayName(), requirement.getLevel(), playerLevel);
+                    continue;
+                }
+
+                int requiredPrestige = requirement.getRequiredPrestige();
+                if (requiredPrestige > 0) {
+                    int playerPrestige = DatabaseManager.getInstance().getPrestige(player.getStringUUID());
+                    if (playerPrestige < requiredPrestige) {
+                        String removalReason = String.format("(requires Prestige ★%d)", requiredPrestige);
+                        serverPlayer.sendSystemMessage(Component.literal(String.format("§6[simpleskills]§f Removed invalid armor: %s %s",
+                                equippedItem.getHoverName().getString(), removalReason)), true);
+
+                        ItemStack armorToMove = equippedItem.copy();
+                        serverPlayer.setItemSlot(slot, ItemStack.EMPTY);
+                        boolean addedToInventory = serverPlayer.getInventory().add(armorToMove);
+
+                        if (!addedToInventory) {
+                            serverPlayer.drop(armorToMove, false, Prediction.SERVER_ONLY);
+                        }
+
+                        Simpleskills.LOGGER.debug("Removed armor {} from player {} due to insufficient prestige (required: ★{}, actual: ★{})",
+                                itemId, serverPlayer.getName().getString(), requiredPrestige, playerPrestige);
+                    }
                 }
             }
+        } catch (DatabaseManager.DatabaseException e) {
+            // Banco já fechado (encerramento do servidor). Pular a validação não tira nada do jogador:
+            // um nível padrão aqui removeria a armadura de quem está saindo.
+            Simpleskills.LOGGER.warn("Validação de armadura ignorada: banco indisponível ({})", e.getMessage());
         }
     }
 }
