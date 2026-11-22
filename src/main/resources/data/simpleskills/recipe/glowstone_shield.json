@@ -1,10 +1,16 @@
 {
-  "type": "minecraft:crafting_shapeless",
+  "type": "minecraft:crafting_shaped",
   "category": "equipment",
-  "ingredients": [
-    "minecraft:shield",
-    "minecraft:glowstone"
+  "pattern": [
+    "IDI",
+    "IGI",
+    "IDI"
   ],
+  "key": {
+    "I": "minecraft:iron_ingot",
+    "D": "minecraft:glowstone_dust",
+    "G": "minecraft:glowstone"
+  },
   "result": {
     "id": "simpleskills:glowstone_shield",
     "count": 1

@@ -28,27 +28,33 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BannerPatternLayers;
 
 /**
- * Renders Glowstone Shields using Minecraft's shield model and the mod's shield-pattern textures.
- * This is required for ShieldItem in current Minecraft versions; a regular baked item model is not
- * used for the shield's in-hand/blocking rendering.
+ * Renderiza os Escudos Reais de Glowstone em 3D:
+ * 1) Corpo metalico, coroa, nervuras de ouro/lapis-lazuli e engastes (iluminacao normal do mundo).
+ * 2) Pedras de glowstone extrudadas em 3D em fullbright (brilham no escuro).
+ * 3) Suporte completo a padroes de banner e glint de encantamento.
  */
 public final class GlowstoneShieldSpecialRenderer implements SpecialModelRenderer<DataComponentMap> {
     public static final Transformation DEFAULT_TRANSFORMATION =
             new Transformation(null, null, new Vector3f(1.0F, -1.0F, -1.0F), null);
 
+    private static final int FULL_BRIGHT = 0x00F000F0;
+
     private final SpriteGetter sprites;
     private final ShieldModel model;
+    private final ShieldModel crystalModel;
     private final SpriteId baseSprite;
     private final SpriteId baseSpriteNoPattern;
 
     public GlowstoneShieldSpecialRenderer(
             SpriteGetter sprites,
             ShieldModel model,
+            ShieldModel crystalModel,
             SpriteId baseSprite,
             SpriteId baseSpriteNoPattern
     ) {
         this.sprites = sprites;
         this.model = model;
+        this.crystalModel = crystalModel;
         this.baseSprite = baseSprite;
         this.baseSpriteNoPattern = baseSpriteNoPattern;
     }
@@ -81,10 +87,19 @@ public final class GlowstoneShieldSpecialRenderer implements SpecialModelRendere
                     RenderTypes.entitySolidGlint(sprite.atlasLocation()),
                     lightCoords, overlayCoords, -1, this.sprites.get(sprite), outlineColor
             );
+            submitNodeCollector.submitModel(
+                    this.crystalModel, Unit.INSTANCE, poseStack,
+                    RenderTypes.entitySolidGlint(sprite.atlasLocation()),
+                    FULL_BRIGHT, overlayCoords, -1, this.sprites.get(sprite), outlineColor
+            );
         } else {
             submitNodeCollector.submitModel(
                     this.model, Unit.INSTANCE, poseStack,
                     lightCoords, overlayCoords, -1, sprite, this.sprites, outlineColor
+            );
+            submitNodeCollector.submitModel(
+                    this.crystalModel, Unit.INSTANCE, poseStack,
+                    FULL_BRIGHT, overlayCoords, -1, sprite, this.sprites, outlineColor
             );
         }
 
@@ -98,6 +113,10 @@ public final class GlowstoneShieldSpecialRenderer implements SpecialModelRendere
                         this.model, Unit.INSTANCE, poseStack, RenderTypes.patternedShieldGlint(),
                         lightCoords, overlayCoords, -1, this.sprites.get(sprite), 0
                 );
+                submitNodeCollector.order(patterns.layers().size() + 3).submitModel(
+                        this.crystalModel, Unit.INSTANCE, poseStack, RenderTypes.patternedShieldGlint(),
+                        FULL_BRIGHT, overlayCoords, -1, this.sprites.get(sprite), 0
+                );
             }
         }
     }
@@ -106,6 +125,7 @@ public final class GlowstoneShieldSpecialRenderer implements SpecialModelRendere
     public void getExtents(Consumer<Vector3fc> output) {
         PoseStack poseStack = new PoseStack();
         this.model.root().getExtentsForGui(poseStack, output);
+        this.crystalModel.root().getExtentsForGui(poseStack, output);
     }
 
     public record Unbaked(Identifier base, Identifier noPattern)
@@ -125,6 +145,7 @@ public final class GlowstoneShieldSpecialRenderer implements SpecialModelRendere
             return new GlowstoneShieldSpecialRenderer(
                     context.sprites(),
                     new ShieldModel(context.entityModelSet().bakeLayer(GlowstoneShieldLayers.GLOWSTONE_SHIELD)),
+                    new ShieldModel(context.entityModelSet().bakeLayer(GlowstoneShieldLayers.GLOWSTONE_SHIELD_CRYSTALS)),
                     Sheets.SHIELD_MAPPER.apply(this.base),
                     Sheets.SHIELD_MAPPER.apply(this.noPattern)
             );

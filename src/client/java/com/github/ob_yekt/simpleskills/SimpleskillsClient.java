@@ -27,7 +27,6 @@ import com.github.ob_yekt.simpleskills.prayer.PrayerVfxRenderer;
 import com.github.ob_yekt.simpleskills.shields.GlowstoneShieldLayers;
 import com.github.ob_yekt.simpleskills.shields.GlowstoneShieldSpecialRenderer;
 import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
-import net.minecraft.client.model.object.equipment.ShieldModel;
 import net.minecraft.client.renderer.special.SpecialModelRenderers;
 import net.minecraft.resources.Identifier;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
@@ -44,7 +43,14 @@ public class SimpleskillsClient implements ClientModInitializer {
                 Identifier.fromNamespaceAndPath(Simpleskills.MOD_ID, "glowstone_shield"),
                 GlowstoneShieldSpecialRenderer.Unbaked.MAP_CODEC
         );
-        ModelLayerRegistry.registerModelLayer(GlowstoneShieldLayers.GLOWSTONE_SHIELD, ShieldModel::createLayer);
+        ModelLayerRegistry.registerModelLayer(
+                GlowstoneShieldLayers.GLOWSTONE_SHIELD,
+                GlowstoneShieldLayers::createBodyLayer
+        );
+        ModelLayerRegistry.registerModelLayer(
+                GlowstoneShieldLayers.GLOWSTONE_SHIELD_CRYSTALS,
+                GlowstoneShieldLayers::createCrystalLayer
+        );
 
         FishingEntityClient.register();
         EntityRendererRegistry.register(PrayerVfxEntity.TYPE, PrayerVfxRenderer::new);

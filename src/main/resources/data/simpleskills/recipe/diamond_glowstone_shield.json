@@ -2,13 +2,14 @@
   "type": "minecraft:crafting_shaped",
   "category": "equipment",
   "pattern": [
-    "DDD",
-    "DSD",
-    "DDD"
+    "MDM",
+    "MGM",
+    "MDM"
   ],
   "key": {
-    "D": "minecraft:diamond",
-    "S": "simpleskills:glowstone_shield"
+    "M": "minecraft:diamond",
+    "D": "minecraft:glowstone_dust",
+    "G": "minecraft:glowstone"
   },
   "result": {
     "id": "simpleskills:diamond_glowstone_shield",
