@@ -24,6 +24,12 @@ import com.github.ob_yekt.simpleskills.prayer.PrayerCooldownHud;
 import com.github.ob_yekt.simpleskills.prayer.PrayerImpactFeedback;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVfxEntity;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVfxRenderer;
+import com.github.ob_yekt.simpleskills.shields.GlowstoneShieldLayers;
+import com.github.ob_yekt.simpleskills.shields.GlowstoneShieldSpecialRenderer;
+import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
+import net.minecraft.client.model.object.equipment.ShieldModel;
+import net.minecraft.client.renderer.special.SpecialModelRenderers;
+import net.minecraft.resources.Identifier;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
@@ -34,6 +40,12 @@ import net.minecraft.network.chat.Component;
 public class SimpleskillsClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
+        SpecialModelRenderers.ID_MAPPER.put(
+                Identifier.fromNamespaceAndPath(Simpleskills.MOD_ID, "glowstone_shield"),
+                GlowstoneShieldSpecialRenderer.Unbaked.MAP_CODEC
+        );
+        ModelLayerRegistry.registerModelLayer(GlowstoneShieldLayers.GLOWSTONE_SHIELD, ShieldModel::createLayer);
+
         FishingEntityClient.register();
         EntityRendererRegistry.register(PrayerVfxEntity.TYPE, PrayerVfxRenderer::new);
         Keybinds.register();

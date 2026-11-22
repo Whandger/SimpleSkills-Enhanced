@@ -24,6 +24,8 @@
     "CRAFTING.AbstractCraftingScreenHandlerAccessor",
     "CRAFTING.CraftingResultSlotMixin",
     "CRAFTING.CraftingScreenHandlerMixin",
+    "CRAFTING.CraftingResultLockMixin",
+    "CRAFTING.InventoryCraftingLockMixin",
     "DEFENSE.ArmorRestrictionMixin",
     "DEFENSE.InventoryCheckMixin",
     "DEFENSE.LivingEntityShieldMixin",

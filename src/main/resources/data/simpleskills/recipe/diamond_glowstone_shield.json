@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "DDD",
+    "DSD",
+    "DDD"
+  ],
+  "key": {
+    "D": "minecraft:diamond",
+    "S": "simpleskills:glowstone_shield"
+  },
+  "result": {
+    "id": "simpleskills:diamond_glowstone_shield",
+    "count": 1
+  }
+}

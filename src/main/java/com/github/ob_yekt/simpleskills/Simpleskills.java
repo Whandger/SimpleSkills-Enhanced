@@ -24,6 +24,8 @@ import com.github.ob_yekt.simpleskills.ui.SkillOverviewManager;
 import com.github.ob_yekt.simpleskills.prayer.PrayerManager;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVisualEffects;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVfxEntity;
+import com.github.ob_yekt.simpleskills.shields.GlowstoneShieldLight;
+import com.github.ob_yekt.simpleskills.shields.GlowstoneShields;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 
 import net.fabricmc.api.ModInitializer;
@@ -56,6 +58,11 @@ public class Simpleskills implements ModInitializer {
 		RuneMiningManager.register();
 		RuneWorldgen.register();
 
+		// Escudos de glowstone (itens); precisam existir antes do registro congelar.
+		GlowstoneShields.register();
+		// Aba própria do SimpleSkills no criativo (depois que os itens existem).
+		SimpleSkillsCreativeTab.register();
+
 		GatheringSpeed.registerPayloads();
 		ExcavatingManager.registerPayloads();
 		FishingManager.registerPayloads();
@@ -77,6 +84,7 @@ public class Simpleskills implements ModInitializer {
 		SkillOverviewManager.registerReceivers();
 		PrayerManager.registerReceivers();
 		PrayerVisualEffects.register();
+		GlowstoneShieldLight.register();
 		BoneMealMastery.register();
 		TreeFeller.register();
 		ExcavatingManager.register();
@@ -95,7 +103,10 @@ public class Simpleskills implements ModInitializer {
 			LOGGER.info("Database and config initialized for server.");
 		});
 
-		ServerLifecycleEvents.SERVER_STOPPING.register(server -> PrayerLighting.clearAll());
+		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
+			PrayerLighting.clearAll();
+			GlowstoneShieldLight.clearAll();
+		});
 
 		// Fecha em SERVER_STOPPED, depois que o stopServer desconectou os jogadores.
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {

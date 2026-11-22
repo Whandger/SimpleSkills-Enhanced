@@ -454,7 +454,7 @@
   "gui.simpleskills.rune_infusion.tab.enchantments": "Enchantements",
   "gui.simpleskills.rune_infusion.tab.styles": "Styles de scintillement",
   "item.simpleskills.rune_lore_ore": "Minerai de savoir runique",
-  "key.category.minecraft.simpleskills": "simpleskills",
+  "key.category.simpleskills.controls": "SimpleSkills",
   "key.simpleskills.cycle_hud_position": "Changer la position du HUD",
   "key.simpleskills.toggle_hud": "Afficher/masquer le HUD",
   "message.simpleskills.rune_infusion.style_applied": "Le style de scintillement a été mis à jour.",

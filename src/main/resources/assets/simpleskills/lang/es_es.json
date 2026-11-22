@@ -447,7 +447,7 @@
   "gui.simpleskills.rune_infusion.tab.enchantments": "Encantamientos",
   "gui.simpleskills.rune_infusion.tab.styles": "Estilos de brillo",
   "item.simpleskills.rune_lore_ore": "Mineral de saber rúnico",
-  "key.category.minecraft.simpleskills": "simpleskills",
+  "key.category.simpleskills.controls": "SimpleSkills",
   "key.simpleskills.cycle_hud_position": "Cambiar posición del HUD",
   "key.simpleskills.toggle_hud": "Mostrar/ocultar HUD",
   "message.simpleskills.rune_infusion.style_applied": "Estilo de brillo actualizado.",

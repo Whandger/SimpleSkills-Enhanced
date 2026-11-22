@@ -1,14 +1,12 @@
 package com.github.ob_yekt.simpleskills.runes;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
-import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
@@ -73,14 +71,6 @@ public final class RuneContent {
         RUNE_LORE_ORE = Registry.register(BuiltInRegistries.ITEM, RUNE_LORE_ORE_ITEM_KEY,
                 new Item(new Item.Properties().setId(RUNE_LORE_ORE_ITEM_KEY)));
 
-        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(entries -> {
-            entries.accept(RUNE_ORE_ITEM);
-            entries.accept(DEEPSLATE_RUNE_ORE_ITEM);
-        });
-        CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(entries -> {
-            entries.accept(RUNE);
-            entries.accept(RUNE_LORE_ORE);
-        });
 
         Simpleskills.LOGGER.info("Registered Rune, Rune Ore, Deepslate Rune Ore and Rune Lore Ore.");
     }

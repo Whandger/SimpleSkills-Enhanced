@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.client.keymapping.v1.KeyMappingHelper;
 import net.minecraft.client.KeyMapping;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import com.github.ob_yekt.simpleskills.agility.AgilityActionPayload;
 import com.github.ob_yekt.simpleskills.ui.RankTitleMenuActionPayload;
@@ -17,43 +18,47 @@ import java.util.UUID;
 public class Keybinds {
     public static final String KEY_CATEGORY = "key.categories.misc";
 
+    /** Categoria própria na tela de Controles (aparece como "SimpleSkills", não em "Misc"). */
+    public static final KeyMapping.Category CATEGORY =
+            KeyMapping.Category.register(Identifier.fromNamespaceAndPath(Simpleskills.MOD_ID, "controls"));
+
     public static final KeyMapping TOGGLE_HUD_KEY = new KeyMapping(
             "key.simpleskills.toggle_hud",
             InputConstants.Type.KEYBOARD,
             InputConstants.KEY_H,
-            KeyMapping.Category.MISC
+            CATEGORY
     );
 
     public static final KeyMapping CYCLE_HUD_POSITION_KEY = new KeyMapping(
             "key.simpleskills.cycle_hud_position",
             InputConstants.Type.KEYBOARD,
             InputConstants.KEY_J,
-            KeyMapping.Category.MISC
+            CATEGORY
     );
 
     public static final KeyMapping AGILITY_DASH_KEY = new KeyMapping(
             "key.simpleskills.agility_dash",
             InputConstants.Type.KEYBOARD,
             InputConstants.KEY_V,
-            KeyMapping.Category.MISC
+            CATEGORY
     );
 
     public static final KeyMapping OPEN_RANK_TITLES_KEY = new KeyMapping(
             "key.simpleskills.open_rank_titles",
             InputConstants.Type.KEYBOARD,
             InputConstants.KEY_U,
-            KeyMapping.Category.MISC
+            CATEGORY
     );
 
     public static final KeyMapping OPEN_PRAYER_BOOK_KEY = new KeyMapping(
-            "key.simpleskills.prayer_book", InputConstants.Type.KEYBOARD, InputConstants.KEY_B, KeyMapping.Category.MISC);
+            "key.simpleskills.prayer_book", InputConstants.Type.KEYBOARD, InputConstants.KEY_B, CATEGORY);
     public static final KeyMapping CAST_PRAYER_KEY = new KeyMapping(
-            "key.simpleskills.prayer_cast", InputConstants.Type.KEYBOARD, InputConstants.KEY_R, KeyMapping.Category.MISC);
+            "key.simpleskills.prayer_cast", InputConstants.Type.KEYBOARD, InputConstants.KEY_R, CATEGORY);
     public static final KeyMapping OPEN_PRAYER_WHEEL_KEY = new KeyMapping(
-            "key.simpleskills.prayer_wheel", InputConstants.Type.KEYBOARD, InputConstants.KEY_C, KeyMapping.Category.MISC);
+            "key.simpleskills.prayer_wheel", InputConstants.Type.KEYBOARD, InputConstants.KEY_C, CATEGORY);
 
     public static final KeyMapping OPEN_SKILL_OVERVIEW_KEY = new KeyMapping(
-            "key.simpleskills.skill_overview", InputConstants.Type.KEYBOARD, InputConstants.KEY_K, KeyMapping.Category.MISC);
+            "key.simpleskills.skill_overview", InputConstants.Type.KEYBOARD, InputConstants.KEY_K, CATEGORY);
 
     private static boolean wasJumpDown;
     private static boolean canDoubleJump = true;

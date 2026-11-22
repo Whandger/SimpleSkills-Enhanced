@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "minecraft:shield",
+    "minecraft:glowstone"
+  ],
+  "result": {
+    "id": "simpleskills:glowstone_shield",
+    "count": 1
+  }
+}
