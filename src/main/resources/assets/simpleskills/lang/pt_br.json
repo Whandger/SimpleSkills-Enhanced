@@ -1,7 +1,6 @@
 {
   "itemGroup.simpleskills.items": "SimpleSkills",
   "gui.simpleskills.tab.glowstone_shield": "Escudo de Glowstone",
-  "gui.simpleskills.tab.glowstone_shield_recipe": "Receita: 6 ferros + 2 pós de glowstone + glowstone",
   "item.simpleskills.glowstone_shield": "Escudo de Glowstone",
   "item.simpleskills.diamond_glowstone_shield": "Escudo de Glowstone de Diamante",
   "item.simpleskills.netherite_glowstone_shield": "Escudo de Glowstone de Netherite",
@@ -474,5 +473,6 @@
   "message.simpleskills.vein_mining.unlocked": "Minerador de Veios desbloqueado! Segure Shift enquanto minera para quebrar até %s minérios conectados adicionais.",
   "gui.simpleskills.rune_infusion.invalid_selection": "A seleção de encantamentos não é mais válida.",
   "message.simpleskills.rune_infusion.style_too_far": "Você precisa estar mais perto da Mesa de Encantamentos.",
-  "key.simpleskills.skill_overview": "Visão Geral das Perícias"
+  "key.simpleskills.skill_overview": "Visão Geral das Perícias",
+  "message.simpleskills.glowstone_shield.unlocked": "Escudo de Glowstone desbloqueado! Crie-o combinando um Escudo + Pedra Luminosa na bancada. Você também pode melhorá-lo cercando-o com 8 Diamantes e depois na Mesa de Ferraria com Molde de Netherita + Barra de Netherita."
 }

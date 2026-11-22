@@ -1,7 +1,6 @@
 {
   "itemGroup.simpleskills.items": "SimpleSkills",
   "gui.simpleskills.tab.glowstone_shield": "Glowstone Shield",
-  "gui.simpleskills.tab.glowstone_shield_recipe": "Recipe: 6 Iron + 2 Glowstone Dust + Glowstone",
   "item.simpleskills.glowstone_shield": "Glowstone Shield",
   "item.simpleskills.diamond_glowstone_shield": "Diamond Glowstone Shield",
   "item.simpleskills.netherite_glowstone_shield": "Netherite Glowstone Shield",
@@ -474,5 +473,6 @@
   "gui.simpleskills.rune_infusion.style_cosmetic": "Cosmetic only — no stat changes.",
   "gui.simpleskills.rune_infusion.invalid_selection": "That enchantment selection is no longer valid.",
   "message.simpleskills.rune_infusion.style_too_far": "You need to be closer to the Enchanting Table.",
-  "key.simpleskills.skill_overview": "Skill Overview"
+  "key.simpleskills.skill_overview": "Skill Overview",
+  "message.simpleskills.glowstone_shield.unlocked": "Glowstone Shield unlocked! Craft it by combining a Shield + Glowstone in the crafting grid. You can also upgrade it by surrounding it with 8 Diamonds, and then in a Smithing Table with a Netherite Upgrade + Netherite Ingot."
 }

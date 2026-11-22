@@ -2,6 +2,7 @@ package com.github.ob_yekt.simpleskills.shields;
 
 import com.github.ob_yekt.simpleskills.Skills;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -26,5 +27,17 @@ public final class CraftingLevelLock {
         player.sendSystemMessage(Component.literal(String.format(
                 "§6[simpleskills]§f You need Crafting level %d to craft the Glowstone Shield!",
                 GLOWSTONE_SHIELD_LEVEL)), true);
+    }
+
+    /** Envia no chat a receita de crafting quando o jogador atinge o nível 15 de Crafting. */
+    public static void notifyUnlocked(ServerPlayer player, int previousLevel, int newLevel) {
+        if (player == null || previousLevel >= GLOWSTONE_SHIELD_LEVEL || newLevel < GLOWSTONE_SHIELD_LEVEL) {
+            return;
+        }
+        player.sendSystemMessage(
+                Component.translatable("message.simpleskills.glowstone_shield.unlocked")
+                        .withStyle(ChatFormatting.GOLD),
+                false
+        );
     }
 }

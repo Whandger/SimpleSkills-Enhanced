@@ -570,7 +570,6 @@ public final class SkillOverviewScreen extends Screen {
                 } else {
                     out.append(lockedAt(CraftingLevelLock.GLOWSTONE_SHIELD_LEVEL)).append("\n");
                 }
-                out.append("   §8↳ §7").append(SkillOverviewText.get("gui.simpleskills.tab.glowstone_shield_recipe")).append("\n");
             }
             default -> {
             }

@@ -2,10 +2,7 @@ package com.github.ob_yekt.simpleskills.shields;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
@@ -23,20 +20,15 @@ import net.minecraft.world.level.block.state.BlockState;
 /**
  * Portable light while a glowstone shield is held in either hand.
  *
- * Minecraft's block-light scale ends at level 15. The base shield keeps the existing
- * level 14, the diamond shield uses level 15, and the netherite shield spreads level-15
- * light across the center plus available surrounding cells to illuminate a wider area.
- * Only air cells are used, and every temporary light block is restored afterwards.
+ * Uses a single temporary light block per player at the eye position (or adjacent air cell):
+ * - Glowstone Shield: light level 13
+ * - Diamond Glowstone Shield: light level 14
+ * - Netherite Glowstone Shield: light level 15
  */
 public final class GlowstoneShieldLight {
-    private static final int GLOWSTONE_LIGHT_LEVEL = 14;
-    private static final int DIAMOND_LIGHT_LEVEL = 15;
+    private static final int GLOWSTONE_LIGHT_LEVEL = 13;
+    private static final int DIAMOND_LIGHT_LEVEL = 14;
     private static final int NETHERITE_LIGHT_LEVEL = 15;
-
-    private static final List<Direction> DIAMOND_SPREAD = List.of(Direction.EAST, Direction.WEST);
-    private static final List<Direction> NETHERITE_SPREAD = List.of(
-            Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.UP, Direction.DOWN
-    );
 
     private static final class Source {
         final ServerLevel level;
@@ -52,7 +44,7 @@ public final class GlowstoneShieldLight {
         }
     }
 
-    private static final Map<UUID, List<Source>> SOURCES = new HashMap<>();
+    private static final Map<UUID, Source> SOURCES = new HashMap<>();
 
     private GlowstoneShieldLight() {}
 
@@ -74,43 +66,33 @@ public final class GlowstoneShieldLight {
             }
 
             int lightLevel = getLightLevel(heldShield);
-            List<Source> currentSources = SOURCES.getOrDefault(playerId, List.of());
-            Set<BlockPos> ownedCells = new HashSet<>();
-            for (Source source : currentSources) {
-                if (source.level == level) ownedCells.add(source.cell);
-            }
+            Source current = SOURCES.get(playerId);
+            BlockPos ownedCell = (current != null && current.level == level) ? current.cell : null;
 
             BlockPos eyeCell = BlockPos.containing(player.getX(), player.getEyeY(), player.getZ());
-            BlockPos anchor = findUsableCell(level, eyeCell, ownedCells);
-            if (anchor == null) {
+            BlockPos target = findUsableCell(level, eyeCell, ownedCell);
+            if (target == null) {
                 release(playerId);
                 continue;
             }
 
-            List<BlockPos> desiredCells = new ArrayList<>();
-            desiredCells.add(anchor);
-            for (Direction direction : spreadDirections(heldShield)) {
-                BlockPos neighbor = anchor.relative(direction);
-                if (!desiredCells.contains(neighbor) && canUse(level, neighbor, ownedCells)) {
-                    desiredCells.add(neighbor);
+            if (current != null && current.level == level && current.cell.equals(target) && current.lightLevel == lightLevel) {
+                BlockState state = level.getBlockState(target);
+                if (state.is(Blocks.LIGHT) && state.getValue(LightBlock.LEVEL) == lightLevel) {
+                    continue;
                 }
-            }
-
-            if (matchesCurrentSources(currentSources, desiredCells, level, lightLevel)) {
-                continue;
             }
 
             release(playerId);
-            List<Source> newSources = new ArrayList<>(desiredCells.size());
-            for (BlockPos cell : desiredCells) {
-                if (!level.isLoaded(cell) || !level.getBlockState(cell).isAir()) continue;
-                BlockState original = level.getBlockState(cell);
-                BlockState lightState = Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, lightLevel);
-                if (level.setBlock(cell, lightState, Block.UPDATE_CLIENTS)) {
-                    newSources.add(new Source(level, cell, original, lightLevel));
-                }
+            if (!level.isLoaded(target) || !level.getBlockState(target).isAir()) {
+                continue;
             }
-            if (!newSources.isEmpty()) SOURCES.put(playerId, newSources);
+
+            BlockState original = level.getBlockState(target);
+            BlockState lightState = Blocks.LIGHT.defaultBlockState().setValue(LightBlock.LEVEL, lightLevel);
+            if (level.setBlock(target, lightState, Block.UPDATE_CLIENTS)) {
+                SOURCES.put(playerId, new Source(level, target, original, lightLevel));
+            }
         }
     }
 
@@ -127,53 +109,26 @@ public final class GlowstoneShieldLight {
         return GLOWSTONE_LIGHT_LEVEL;
     }
 
-    private static List<Direction> spreadDirections(ItemStack stack) {
-        if (stack.is(GlowstoneShields.NETHERITE_GLOWSTONE_SHIELD)) return NETHERITE_SPREAD;
-        if (stack.is(GlowstoneShields.DIAMOND_GLOWSTONE_SHIELD)) return DIAMOND_SPREAD;
-        return List.of();
-    }
-
-    private static boolean matchesCurrentSources(
-            List<Source> current,
-            List<BlockPos> desired,
-            ServerLevel level,
-            int lightLevel
-    ) {
-        if (current.size() != desired.size()) return false;
-        for (int i = 0; i < desired.size(); i++) {
-            Source source = current.get(i);
-            if (source.level != level || !source.cell.equals(desired.get(i)) || source.lightLevel != lightLevel) {
-                return false;
-            }
-            BlockState state = level.getBlockState(source.cell);
-            if (!state.is(Blocks.LIGHT) || state.getValue(LightBlock.LEVEL) != lightLevel) return false;
-        }
-        return true;
-    }
-
-    private static BlockPos findUsableCell(ServerLevel level, BlockPos position, Set<BlockPos> ownedCells) {
-        if (canUse(level, position, ownedCells)) return position;
+    private static BlockPos findUsableCell(ServerLevel level, BlockPos position, BlockPos ownedCell) {
+        if (canUse(level, position, ownedCell)) return position;
         for (Direction direction : Direction.values()) {
             BlockPos neighbor = position.relative(direction);
-            if (canUse(level, neighbor, ownedCells)) return neighbor;
+            if (canUse(level, neighbor, ownedCell)) return neighbor;
         }
         return null;
     }
 
-    private static boolean canUse(ServerLevel level, BlockPos position, Set<BlockPos> ownedCells) {
+    private static boolean canUse(ServerLevel level, BlockPos position, BlockPos ownedCell) {
         if (!level.isLoaded(position)) return false;
-        return ownedCells.contains(position) || level.getBlockState(position).isAir();
+        return position.equals(ownedCell) || level.getBlockState(position).isAir();
     }
 
     private static void release(UUID playerId) {
-        List<Source> sources = SOURCES.remove(playerId);
-        if (sources == null) return;
-        for (Source source : sources) {
-            if (!source.level.isLoaded(source.cell)) continue;
-            BlockState current = source.level.getBlockState(source.cell);
-            if (current.is(Blocks.LIGHT) && current.getValue(LightBlock.LEVEL) == source.lightLevel) {
-                source.level.setBlock(source.cell, source.original, Block.UPDATE_CLIENTS);
-            }
+        Source source = SOURCES.remove(playerId);
+        if (source == null || !source.level.isLoaded(source.cell)) return;
+        BlockState current = source.level.getBlockState(source.cell);
+        if (current.is(Blocks.LIGHT) && current.getValue(LightBlock.LEVEL) == source.lightLevel) {
+            source.level.setBlock(source.cell, source.original, Block.UPDATE_CLIENTS);
         }
     }
 
