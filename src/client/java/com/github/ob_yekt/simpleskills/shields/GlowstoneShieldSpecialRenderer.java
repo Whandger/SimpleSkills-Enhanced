@@ -3,6 +3,9 @@ package com.github.ob_yekt.simpleskills.shields;
 import java.util.Objects;
 import java.util.function.Consumer;
 
+import com.github.ob_yekt.simpleskills.runes.RuneEquipmentVfxRenderer;
+import com.github.ob_yekt.simpleskills.runes.RuneVisualStyles;
+import com.github.ob_yekt.simpleskills.runes.RuneVisualStylesClient;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Transformation;
 import com.mojang.serialization.MapCodec;
@@ -15,6 +18,7 @@ import net.minecraft.client.model.object.equipment.ShieldModel;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BannerRenderer;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.special.SpecialModelRenderer;
 import net.minecraft.client.resources.model.sprite.SpriteGetter;
@@ -31,7 +35,7 @@ import net.minecraft.world.level.block.entity.BannerPatternLayers;
  * Renderiza os Escudos Reais de Glowstone em 3D:
  * 1) Corpo metalico, coroa, nervuras de ouro/lapis-lazuli e engastes (iluminacao normal do mundo).
  * 2) Pedras de glowstone extrudadas em 3D em fullbright (brilham no escuro).
- * 3) Suporte completo a padroes de banner e glint de encantamento.
+ * 3) Suporte completo a padroes de banner, glint customizado de runas e efeitos visuais 3D.
  */
 public final class GlowstoneShieldSpecialRenderer implements SpecialModelRenderer<DataComponentMap> {
     public static final Transformation DEFAULT_TRANSFORMATION =
@@ -80,16 +84,21 @@ public final class GlowstoneShieldSpecialRenderer implements SpecialModelRendere
         DyeColor baseColor = components != null ? components.get(DataComponents.BASE_COLOR) : null;
         boolean hasPatterns = !patterns.layers().isEmpty() || baseColor != null;
         SpriteId sprite = hasPatterns ? this.baseSprite : this.baseSpriteNoPattern;
+        int style = RuneVisualStyles.getStyle(components);
 
         if (hasFoil && !hasPatterns) {
+            RenderType glintType = RuneVisualStylesClient.shieldEntity(style, sprite.atlasLocation());
+            if (glintType == null) {
+                glintType = RenderTypes.entitySolidGlint(sprite.atlasLocation());
+            }
             submitNodeCollector.submitModel(
                     this.model, Unit.INSTANCE, poseStack,
-                    RenderTypes.entitySolidGlint(sprite.atlasLocation()),
+                    glintType,
                     lightCoords, overlayCoords, -1, this.sprites.get(sprite), outlineColor
             );
             submitNodeCollector.submitModel(
                     this.crystalModel, Unit.INSTANCE, poseStack,
-                    RenderTypes.entitySolidGlint(sprite.atlasLocation()),
+                    glintType,
                     FULL_BRIGHT, overlayCoords, -1, this.sprites.get(sprite), outlineColor
             );
         } else {
@@ -109,16 +118,22 @@ public final class GlowstoneShieldSpecialRenderer implements SpecialModelRendere
                     this.model, Unit.INSTANCE, false, Objects.requireNonNullElse(baseColor, DyeColor.WHITE), patterns
             );
             if (hasFoil) {
+                RenderType patternGlintType = RuneVisualStylesClient.patternedShield(style);
+                if (patternGlintType == null) {
+                    patternGlintType = RenderTypes.patternedShieldGlint();
+                }
                 submitNodeCollector.order(patterns.layers().size() + 2).submitModel(
-                        this.model, Unit.INSTANCE, poseStack, RenderTypes.patternedShieldGlint(),
+                        this.model, Unit.INSTANCE, poseStack, patternGlintType,
                         lightCoords, overlayCoords, -1, this.sprites.get(sprite), 0
                 );
                 submitNodeCollector.order(patterns.layers().size() + 3).submitModel(
-                        this.crystalModel, Unit.INSTANCE, poseStack, RenderTypes.patternedShieldGlint(),
+                        this.crystalModel, Unit.INSTANCE, poseStack, patternGlintType,
                         FULL_BRIGHT, overlayCoords, -1, this.sprites.get(sprite), 0
                 );
             }
         }
+
+        RuneEquipmentVfxRenderer.submitShield(components, poseStack, submitNodeCollector, true);
     }
 
     @Override
