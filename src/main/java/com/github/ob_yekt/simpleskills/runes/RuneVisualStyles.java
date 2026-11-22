@@ -3,12 +3,16 @@ package com.github.ob_yekt.simpleskills.runes;
 import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.Identifier;
 import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
+import org.jspecify.annotations.Nullable;
 
 /** Persistent, synchronized cosmetic enchantment-glint style stored on each equipment stack. */
 public final class RuneVisualStyles {
@@ -43,6 +47,15 @@ public final class RuneVisualStyles {
         // The style is kept on the stack, but it only applies while the item still has enchantments.
         if (EnchantmentHelper.getEnchantmentsForCrafting(stack).isEmpty()) return VANILLA;
         int style = stack.getOrDefault(ENCHANTMENT_STYLE, VANILLA);
+        return style < VANILLA || style > MAX_STYLE ? VANILLA : style;
+    }
+
+    /** Overload used by SpecialModelRenderers (such as shields) that receive an immutable DataComponentMap. */
+    public static int getStyle(@Nullable DataComponentMap components) {
+        if (components == null || ENCHANTMENT_STYLE == null) return VANILLA;
+        ItemEnchantments enchantments = components.getOrDefault(DataComponents.ENCHANTMENTS, ItemEnchantments.EMPTY);
+        if (enchantments.isEmpty()) return VANILLA;
+        int style = components.getOrDefault(ENCHANTMENT_STYLE, VANILLA);
         return style < VANILLA || style > MAX_STYLE ? VANILLA : style;
     }
 

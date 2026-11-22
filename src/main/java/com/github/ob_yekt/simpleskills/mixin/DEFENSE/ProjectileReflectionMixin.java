@@ -7,6 +7,7 @@ import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import com.github.ob_yekt.simpleskills.DefenseCombat;
+import com.github.ob_yekt.simpleskills.shields.GlowstoneShields;
 import net.minecraft.world.entity.projectile.ProjectileDeflection;
 import net.minecraft.world.entity.projectile.ShulkerBullet;
 import net.minecraft.world.entity.projectile.arrow.AbstractArrow;
@@ -25,7 +26,7 @@ public abstract class ProjectileReflectionMixin {
         Entity self = (Entity) (Object) this;
         if (!(self instanceof Player player) || player.level().isClientSide()
                 || Defense.getSkillLevelFromCache(player.getUUID()) < 30
-                || !player.isBlocking() || !player.getUseItem().is(Items.SHIELD)
+                || !player.isBlocking() || !player.getUseItem().is(GlowstoneShields.SHIELDS)
                 || !simpleskills$isSupportedVanillaProjectile(projectile)) {
             return;
         }

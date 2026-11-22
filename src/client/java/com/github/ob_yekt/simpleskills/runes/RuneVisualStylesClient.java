@@ -11,7 +11,7 @@ import net.minecraft.resources.Identifier;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-/** Builds native custom glint render types for item sprites and worn armor. */
+/** Builds native custom glint render types for item sprites, worn armor, and shields. */
 public final class RuneVisualStylesClient {
     private static final String[] TEXTURES = {
             "", "rune_glint_arcane", "rune_glint_inferno", "rune_glint_frost",
@@ -19,11 +19,13 @@ public final class RuneVisualStylesClient {
     };
 
     private record ItemCacheKey(Identifier atlas, int style, boolean translucent, boolean special) {}
-    private record ArmorLayerCacheKey(Identifier armorTexture, int style) {}
+    private record EntityLayerCacheKey(Identifier texture, int style) {}
 
     private static final Map<ItemCacheKey, RenderType> ITEM_CACHE = new ConcurrentHashMap<>();
-    private static final Map<ArmorLayerCacheKey, RenderType> ARMOR_LAYER_CACHE = new ConcurrentHashMap<>();
+    private static final Map<EntityLayerCacheKey, RenderType> ARMOR_LAYER_CACHE = new ConcurrentHashMap<>();
     private static final Map<Integer, RenderType> TRIMMED_ARMOR_CACHE = new ConcurrentHashMap<>();
+    private static final Map<EntityLayerCacheKey, RenderType> SHIELD_ENTITY_CACHE = new ConcurrentHashMap<>();
+    private static final Map<Integer, RenderType> PATTERNED_SHIELD_CACHE = new ConcurrentHashMap<>();
 
     private RuneVisualStylesClient() {}
 
@@ -38,7 +40,7 @@ public final class RuneVisualStylesClient {
     /** Custom glint pass used by ordinary humanoid armor layers. */
     public static RenderType armorLayer(int style, Identifier armorTexture) {
         if (!isCustomStyle(style) || armorTexture == null) return null;
-        ArmorLayerCacheKey key = new ArmorLayerCacheKey(armorTexture, style);
+        EntityLayerCacheKey key = new EntityLayerCacheKey(armorTexture, style);
         return ARMOR_LAYER_CACHE.computeIfAbsent(key, ignored -> createArmorLayer(style, armorTexture));
     }
 
@@ -46,6 +48,19 @@ public final class RuneVisualStylesClient {
     public static RenderType trimmedArmor(int style) {
         if (!isCustomStyle(style)) return null;
         return TRIMMED_ARMOR_CACHE.computeIfAbsent(style, RuneVisualStylesClient::createTrimmedArmor);
+    }
+
+    /** Custom glint pass used by unpatterned shields (vanilla and Glowstone). */
+    public static RenderType shieldEntity(int style, Identifier shieldAtlas) {
+        if (!isCustomStyle(style) || shieldAtlas == null) return null;
+        EntityLayerCacheKey key = new EntityLayerCacheKey(shieldAtlas, style);
+        return SHIELD_ENTITY_CACHE.computeIfAbsent(key, ignored -> createShieldEntity(style, shieldAtlas));
+    }
+
+    /** Separate glint overlay pass used by shields carrying banner patterns. */
+    public static RenderType patternedShield(int style) {
+        if (!isCustomStyle(style)) return null;
+        return PATTERNED_SHIELD_CACHE.computeIfAbsent(style, RuneVisualStylesClient::createPatternedShield);
     }
 
     private static RenderType getItem(int style, boolean translucent, boolean special, Identifier itemAtlas) {
@@ -101,6 +116,29 @@ public final class RuneVisualStylesClient {
                 .withForcedSolidModelPhase()
                 .createRenderSetup();
         return RenderType.create("simpleskills_rune_trimmed_armor_glint_" + style, setup);
+    }
+
+    private static RenderType createShieldEntity(int style, Identifier shieldAtlas) {
+        RenderSetup setup = RenderSetup.builder(RenderPipelines.ARMOR_CUTOUT_NO_CULL_GLINT)
+                .withTexture("Sampler0", shieldAtlas)
+                .withTexture("GlintSampler", glintTexture(style))
+                .setTextureTransform(TextureTransform.ARMOR_ENTITY_GLINT_TEXTURING)
+                .useLightmap()
+                .useOverlay()
+                .affectsCrumbling()
+                .setOutline(RenderSetup.OutlineProperty.AFFECTS_OUTLINE)
+                .createRenderSetup();
+        return RenderType.create("simpleskills_rune_shield_glint_" + style + "_" + safeName(shieldAtlas), setup);
+    }
+
+    private static RenderType createPatternedShield(int style) {
+        RenderSetup setup = RenderSetup.builder(RenderPipelines.GLINT)
+                .withTexture("Sampler0", glintTexture(style))
+                .setTextureTransform(TextureTransform.ARMOR_ENTITY_GLINT_TEXTURING)
+                .setLayeringTransform(LayeringTransform.VIEW_OFFSET_Z_LAYERING)
+                .withForcedSolidModelPhase()
+                .createRenderSetup();
+        return RenderType.create("simpleskills_rune_patterned_shield_glint_" + style, setup);
     }
 
     private static boolean isCustomStyle(int style) {

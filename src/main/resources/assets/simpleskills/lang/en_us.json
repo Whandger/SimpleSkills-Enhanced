@@ -1,7 +1,12 @@
 {
+  "itemGroup.simpleskills.items": "SimpleSkills",
+  "gui.simpleskills.tab.glowstone_shield": "Glowstone Shield",
+  "item.simpleskills.glowstone_shield": "Glowstone Shield",
+  "item.simpleskills.diamond_glowstone_shield": "Diamond Glowstone Shield",
+  "item.simpleskills.netherite_glowstone_shield": "Netherite Glowstone Shield",
   "key.simpleskills.toggle_hud": "Toggle HUD",
   "key.simpleskills.cycle_hud_position": "Cycle HUD Position",
-  "key.category.minecraft.simpleskills": "simpleskills",
+  "key.category.simpleskills.controls": "SimpleSkills",
   "message.simpleskills.vein_mining.unlocked": "Vein Mining unlocked! Hold Shift while mining to break up to %s additional connected ores.",
   "message.simpleskills.vein_mining.improved": "Vein Mining improved! Hold Shift while mining to break up to %s additional connected ores.",
   "message.simpleskills.tree_feller.unlocked": "Tree Feller unlocked! Hold Shift and break a tree trunk with an axe to make the entire tree fall.",
@@ -468,5 +473,6 @@
   "gui.simpleskills.rune_infusion.style_cosmetic": "Cosmetic only — no stat changes.",
   "gui.simpleskills.rune_infusion.invalid_selection": "That enchantment selection is no longer valid.",
   "message.simpleskills.rune_infusion.style_too_far": "You need to be closer to the Enchanting Table.",
-  "key.simpleskills.skill_overview": "Skill Overview"
+  "key.simpleskills.skill_overview": "Skill Overview",
+  "message.simpleskills.glowstone_shield.unlocked": "Glowstone Shield unlocked! Craft it using 6 Iron Ingots, 2 Glowstone Dust, and 1 Glowstone. The Diamond variant requires 6 Diamonds, 2 Glowstone Dust, and 1 Glowstone. Upgrade this variant in a Smithing Table using a Netherite Upgrade Template and a Netherite Ingot."
 }

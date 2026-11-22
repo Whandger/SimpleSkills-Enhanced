@@ -617,7 +617,7 @@ public class EventHandlers {
                                     || (originalAmount > actualAmount
                                             && defender.isBlocking()
                                             && defender.getUseItem()
-                                                    .getItem() == net.minecraft.world.item.Items.SHIELD);
+                                                    .is(com.github.ob_yekt.simpleskills.shields.GlowstoneShields.SHIELDS));
 
                             if (wasBlocked) {
                                 int xp = (int) (originalAmount

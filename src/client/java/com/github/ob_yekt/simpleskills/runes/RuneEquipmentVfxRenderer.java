@@ -12,6 +12,7 @@ import com.github.ob_yekt.simpleskills.runes.armor.FrostArmorVfx;
 import com.github.ob_yekt.simpleskills.runes.armor.InfernoArmorVfx;
 import com.github.ob_yekt.simpleskills.runes.armor.ShadowArmorVfx;
 import com.github.ob_yekt.simpleskills.runes.armor.StormArmorVfx;
+import com.github.ob_yekt.simpleskills.runes.shields.ShieldRuneVfx;
 import com.github.ob_yekt.simpleskills.runes.tools.ArcaneToolVfx;
 import com.github.ob_yekt.simpleskills.runes.tools.DivineToolVfx;
 import com.github.ob_yekt.simpleskills.runes.tools.FrostToolVfx;
@@ -26,15 +27,18 @@ import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.resources.model.geometry.BakedQuad;
 import net.minecraft.client.resources.model.geometry.ItemQuads;
+import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ShieldItem;
 import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.phys.Vec3;
 import org.joml.Vector3fc;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -52,8 +56,8 @@ import static com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.RIGHT_ARM;
 import static com.github.ob_yekt.simpleskills.runes.RuneVfxPrimitives.lerp;
 
 /**
- * Entry point and geometry sampler for Rune visual styles on held tools/weapons and armor.
- * Delegates rendering per style to {@code runes.tools.*} and {@code runes.armor.*}.
+ * Entry point and geometry sampler for Rune visual styles on held tools/weapons, shields, and armor.
+ * Delegates rendering per style to {@code runes.tools.*}, {@code runes.shields.*}, and {@code runes.armor.*}.
  */
 public final class RuneEquipmentVfxRenderer {
     private static final int STORM = RuneVisualStyles.STORM;
@@ -63,10 +67,33 @@ public final class RuneEquipmentVfxRenderer {
     private static final int FROST = RuneVisualStyles.FROST;
     private static final int DIVINE = RuneVisualStyles.DIVINE;
 
+    // ShieldModel local coordinates (1 model unit = 1/16 block):
+    // plate: X [-6..6] (-0.375..0.375), Y [-11..11] (-0.6875..0.6875), Z [-2..-1] (-0.125..-0.0625)
+    private static final Bounds VANILLA_SHIELD_BOUNDS =
+            new Bounds(-0.385, 0.385, -0.70, 0.70, -0.14, 0.08);
+    // Glowstone shields add a royal crown (-13/16 = -0.8125), keel (+12/16 = 0.75), and central crystal apex (-3.85/16 = -0.2406)
+    private static final Bounds GLOWSTONE_SHIELD_BOUNDS =
+            new Bounds(-0.39, 0.39, -0.82, 0.76, -0.25, 0.08);
+
     private static final Map<ItemStackRenderState, PendingVfx> PENDING_ITEM_STYLES =
             Collections.synchronizedMap(new WeakHashMap<>());
 
+    private static final ThreadLocal<ItemDisplayContext> ACTIVE_DISPLAY_CONTEXT =
+            ThreadLocal.withInitial(() -> ItemDisplayContext.NONE);
+
     private RuneEquipmentVfxRenderer() {}
+
+    /** Pushes the active ItemDisplayContext during LayerRenderState.submit so SpecialModelRenderers can inspect it. */
+    public static ItemDisplayContext pushDisplayContext(@Nullable ItemDisplayContext context) {
+        ItemDisplayContext previous = ACTIVE_DISPLAY_CONTEXT.get();
+        ACTIVE_DISPLAY_CONTEXT.set(context != null ? context : ItemDisplayContext.NONE);
+        return previous;
+    }
+
+    /** Restores the previous ItemDisplayContext at the end of LayerRenderState.submit. */
+    public static void popDisplayContext(@Nullable ItemDisplayContext previous) {
+        ACTIVE_DISPLAY_CONTEXT.set(previous != null ? previous : ItemDisplayContext.NONE);
+    }
 
     /** Associates the stack's cosmetic style with the render state built by ItemModelResolver. */
     public static void clearItemStyle(ItemStackRenderState renderState) {
@@ -75,6 +102,8 @@ public final class RuneEquipmentVfxRenderer {
 
     public static void captureItemStyle(ItemStackRenderState renderState, ItemStack stack, int style) {
         if (renderState == null || stack == null || stack.isEmpty() || !supportsCustomVfx(style)) return;
+        // Shields are rendered through SpecialModelRenderer (submitShield), not baked quads.
+        if (stack.getItem() instanceof ShieldItem) return;
         int seed = stack.getItem().hashCode() ^ stack.getDamageValue() * 73 ^ stack.getCount() * 19 ^ style * 31;
         ItemCategory category = classifyItem(stack);
         PENDING_ITEM_STYLES.put(renderState, new PendingVfx(style, seed, category));
@@ -94,6 +123,13 @@ public final class RuneEquipmentVfxRenderer {
         return ItemCategory.TOOL;
     }
 
+    private static boolean isHeldContext(ItemDisplayContext context) {
+        return context == ItemDisplayContext.FIRST_PERSON_LEFT_HAND
+                || context == ItemDisplayContext.FIRST_PERSON_RIGHT_HAND
+                || context == ItemDisplayContext.THIRD_PERSON_LEFT_HAND
+                || context == ItemDisplayContext.THIRD_PERSON_RIGHT_HAND;
+    }
+
     /**
      * Called after a layer has submitted the item model, while the exact ItemDisplayContext
      * transform is active again.
@@ -106,12 +142,7 @@ public final class RuneEquipmentVfxRenderer {
 
         ItemStackRenderStateAccessor state = (ItemStackRenderStateAccessor) (Object) renderState;
         ItemDisplayContext context = state.simpleskills$getDisplayContext();
-        if (context != ItemDisplayContext.FIRST_PERSON_LEFT_HAND
-                && context != ItemDisplayContext.FIRST_PERSON_RIGHT_HAND
-                && context != ItemDisplayContext.THIRD_PERSON_LEFT_HAND
-                && context != ItemDisplayContext.THIRD_PERSON_RIGHT_HAND) {
-            return;
-        }
+        if (!isHeldContext(context)) return;
 
         ItemGeometryInfo itemInfo = extractItemGeometry(state, pending.category());
         if (itemInfo == null) return;
@@ -132,6 +163,41 @@ public final class RuneEquipmentVfxRenderer {
             FrostToolVfx.submit(collector, poseStack, itemInfo, time, seed);
         } else if (style == DIVINE) {
             DivineToolVfx.submit(collector, poseStack, itemInfo, time, seed);
+        }
+    }
+
+    /**
+     * Called by ShieldSpecialRenderer and GlowstoneShieldSpecialRenderer while the shield model's
+     * local transform (including blocking pose and special model scale) is active.
+     */
+    public static void submitShield(@Nullable DataComponentMap components,
+                                    PoseStack poseStack,
+                                    SubmitNodeCollector collector,
+                                    boolean isGlowstoneShield) {
+        if (components == null) return;
+        int style = RuneVisualStyles.getStyle(components);
+        if (!supportsCustomVfx(style)) return;
+
+        ItemDisplayContext context = ACTIVE_DISPLAY_CONTEXT.get();
+        if (!isHeldContext(context)) return;
+
+        Bounds bounds = isGlowstoneShield ? GLOWSTONE_SHIELD_BOUNDS : VANILLA_SHIELD_BOUNDS;
+        double frontZ = isGlowstoneShield ? -0.258 : -0.148;
+        double time = Util.getMillis() / 50.0;
+        int seed = (isGlowstoneShield ? 0x51A7 : 0x2B93) ^ (style * 31) ^ context.hashCode();
+
+        if (style == STORM) {
+            StormArmorVfx.submit(collector, poseStack, bounds, time, seed);
+        } else if (style == INFERNO) {
+            InfernoArmorVfx.submit(collector, poseStack, bounds, time, seed);
+        } else if (style == SHADOW) {
+            ShadowArmorVfx.submit(collector, poseStack, bounds, time, seed);
+        } else if (style == FROST) {
+            FrostArmorVfx.submit(collector, poseStack, EquipmentPart.CHEST_TORSO, bounds, time, seed);
+        } else if (style == ARCANE) {
+            ShieldRuneVfx.submitArcane(collector, poseStack, bounds, frontZ, time, seed);
+        } else if (style == DIVINE) {
+            ShieldRuneVfx.submitDivine(collector, poseStack, bounds, frontZ, time, seed);
         }
     }
 

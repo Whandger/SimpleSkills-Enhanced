@@ -1,6 +1,7 @@
 package com.github.ob_yekt.simpleskills.mixin.DEFENSE;
 
 import com.github.ob_yekt.simpleskills.Skills;
+import com.github.ob_yekt.simpleskills.shields.GlowstoneShields;
 import com.github.ob_yekt.simpleskills.managers.ConfigManager;
 import com.github.ob_yekt.simpleskills.managers.DatabaseManager;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
@@ -40,7 +41,7 @@ public abstract class LivingEntityShieldMixin {
         if (!(entity instanceof Player) || !entity.isUsingItem()) return;
 
         ItemStack activeStack = this.getUseItem();
-        if (!activeStack.is(Items.SHIELD)) return;
+        if (!activeStack.is(GlowstoneShields.SHIELDS)) return;
 
         if (entity instanceof ServerPlayer serverPlayer && !simpleskills$meetsShieldRequirement(serverPlayer)) {
             cir.setReturnValue(null);
@@ -57,7 +58,7 @@ public abstract class LivingEntityShieldMixin {
     private double simpleskills$widenShieldCoverage(double angle) {
         LivingEntity entity = (LivingEntity) (Object) this;
         ItemStack blockingStack = this.getItemBlockingWith();
-        if (entity instanceof Player && blockingStack != null && blockingStack.is(Items.SHIELD)) {
+        if (entity instanceof Player && blockingStack != null && blockingStack.is(GlowstoneShields.SHIELDS)) {
             return angle * 0.75; // 120° incoming arc against the component's 90° threshold
         }
         return angle;
@@ -82,7 +83,7 @@ public abstract class LivingEntityShieldMixin {
         }
 
         ItemStack activeStack = this.getUseItem();
-        if (activeStack.isEmpty() || !activeStack.is(Items.SHIELD)) {
+        if (activeStack.isEmpty() || !activeStack.is(GlowstoneShields.SHIELDS)) {
             return;
         }
 

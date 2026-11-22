@@ -6,6 +6,7 @@ import com.github.ob_yekt.simpleskills.DefenseCombat;
 import com.github.ob_yekt.simpleskills.VeinMining;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingManager;
 import com.github.ob_yekt.simpleskills.farming.FarmingPerks;
+import com.github.ob_yekt.simpleskills.shields.CraftingLevelLock;
 import com.github.ob_yekt.simpleskills.TreeFeller;
 import com.github.ob_yekt.simpleskills.Skills;
 import com.google.gson.JsonObject;
@@ -181,6 +182,11 @@ public class XPManager {
         // Farming 5: teach Bone Meal Mastery and Auto Plant (only these two perks have unlock messages).
         if (skill == Skills.FARMING && newLevel > currentLevel) {
             FarmingPerks.notifyUnlocked(player, currentLevel, newLevel);
+        }
+
+        // Crafting 15: teach how to craft the Glowstone Shield and its upgrades.
+        if (skill == Skills.CRAFTING && newLevel > currentLevel) {
+            CraftingLevelLock.notifyUnlocked(player, currentLevel, newLevel);
         }
 
         // Tell the player when an Excavating level-up reaches a new rank.

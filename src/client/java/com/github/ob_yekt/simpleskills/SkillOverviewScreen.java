@@ -10,6 +10,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.github.ob_yekt.simpleskills.prayer.PrayerAbility;
 import com.github.ob_yekt.simpleskills.prayer.PrayerScaling;
+import com.github.ob_yekt.simpleskills.shields.CraftingLevelLock;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -562,6 +563,12 @@ public final class SkillOverviewScreen extends Screen {
                 } else {
                     out.append(String.format("   §8↳ §7%s: %s\n",
                             SkillOverviewText.get("gui.simpleskills.tab.material_recovery"), lockedAt(25)));
+                }
+                out.append("   §8↳ §7").append(SkillOverviewText.get("gui.simpleskills.tab.glowstone_shield")).append(": ");
+                if (safe >= CraftingLevelLock.GLOWSTONE_SHIELD_LEVEL) {
+                    out.append("§a").append(SkillOverviewText.get("gui.simpleskills.tab.unlocked")).append("\n");
+                } else {
+                    out.append(lockedAt(CraftingLevelLock.GLOWSTONE_SHIELD_LEVEL)).append("\n");
                 }
             }
             default -> {

@@ -1,0 +1,48 @@
+{
+  "model": {
+    "type": "minecraft:condition",
+    "on_false": {
+      "type": "minecraft:special",
+      "base": "minecraft:item/shield",
+      "model": {
+        "type": "simpleskills:glowstone_shield",
+        "texture": "simpleskills:diamond_glowstone_shield_base",
+        "no_pattern_texture": "simpleskills:diamond_glowstone_shield_base_nopattern"
+      }
+    },
+    "on_true": {
+      "type": "minecraft:special",
+      "base": "minecraft:item/shield_blocking",
+      "model": {
+        "type": "simpleskills:glowstone_shield",
+        "texture": "simpleskills:diamond_glowstone_shield_base",
+        "no_pattern_texture": "simpleskills:diamond_glowstone_shield_base_nopattern"
+      }
+    },
+    "property": "minecraft:using_item",
+    "transformation": {
+      "left_rotation": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "right_rotation": [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      "scale": [
+        1.0,
+        -1.0,
+        -1.0
+      ],
+      "translation": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  }
+}

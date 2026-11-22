@@ -4,6 +4,7 @@ import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.github.ob_yekt.simpleskills.Skills;
 import com.github.ob_yekt.simpleskills.managers.ConfigManager;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
+import com.github.ob_yekt.simpleskills.shields.CraftingLevelLock;
 import com.github.ob_yekt.simpleskills.utils.CraftingCommon;
 
 import com.llamalad7.mixinextras.sugar.Local;
@@ -41,6 +42,16 @@ public abstract class CraftingScreenHandlerMixin extends AbstractCraftingMenu {
     @Unique
     private CraftingContainer getCraftingInventory() {
         return ((AbstractCraftingScreenHandlerAccessor) this).getCraftingInventory();
+    }
+
+    /** Bloqueia o shift-clique do escudo de glowstone enquanto o Crafting estiver abaixo do nível 15. */
+    @Inject(method = "quickMoveStack", at = @At("HEAD"), cancellable = true)
+    private void simpleskills$blockLockedQuickMove(Player player, int slotIndex, CallbackInfoReturnable<ItemStack> cir) {
+        if (slotIndex != 0 || !(player instanceof ServerPlayer serverPlayer)) return;
+        if (CraftingLevelLock.isLocked(serverPlayer, this.getSlot(0).getItem())) {
+            CraftingLevelLock.deny(serverPlayer);
+            cir.setReturnValue(ItemStack.EMPTY);
+        }
     }
 
     @Inject(

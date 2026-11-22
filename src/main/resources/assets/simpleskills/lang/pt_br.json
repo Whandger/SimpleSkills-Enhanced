@@ -1,4 +1,9 @@
 {
+  "itemGroup.simpleskills.items": "SimpleSkills",
+  "gui.simpleskills.tab.glowstone_shield": "Escudo de Glowstone",
+  "item.simpleskills.glowstone_shield": "Escudo de Glowstone",
+  "item.simpleskills.diamond_glowstone_shield": "Escudo de Glowstone de Diamante",
+  "item.simpleskills.netherite_glowstone_shield": "Escudo de Glowstone de Netherite",
   "block.simpleskills.investigated_sand": "Areia Investigada",
   "message.simpleskills.bone_meal_mastery.unlocked": "Bone Meal Mastery desbloqueada! Segure qualquer enxada e clique com o botão direito em uma plantação compatível para fazê-la crescer como se fosse farinha de osso - não é preciso ter farinha de osso no inventário. O uso gasta fome conforme seu nível de Farming e fica gratuito a partir do nível 20.",
   "message.simpleskills.auto_plant.unlocked": "Auto Plant desbloqueada! Segure qualquer enxada e clique com o botão esquerdo em uma plantação madura sobre terra arada: ela será colhida e replantada automaticamente usando uma semente dos próprios drops - não é preciso ter sementes no inventário.",
@@ -460,7 +465,7 @@
   "message.simpleskills.rune_infusion.style_invalid": "Este item não pode receber um estilo de brilho.",
   "gui.simpleskills.rune_infusion.style_unchanged": "Este estilo já está aplicado.",
   "gui.simpleskills.rune_infusion.style_cosmetic": "Apenas visual — sem alterar atributos.",
-  "key.category.minecraft.simpleskills": "simpleskills",
+  "key.category.simpleskills.controls": "SimpleSkills",
   "key.simpleskills.cycle_hud_position": "Alternar posição do HUD",
   "key.simpleskills.toggle_hud": "Ativar/desativar HUD",
   "message.simpleskills.tree_feller.unlocked": "Derrubada de Árvores desbloqueada! Segure Shift e quebre o tronco de uma árvore com um machado para derrubar a árvore inteira.",
@@ -468,5 +473,6 @@
   "message.simpleskills.vein_mining.unlocked": "Minerador de Veios desbloqueado! Segure Shift enquanto minera para quebrar até %s minérios conectados adicionais.",
   "gui.simpleskills.rune_infusion.invalid_selection": "A seleção de encantamentos não é mais válida.",
   "message.simpleskills.rune_infusion.style_too_far": "Você precisa estar mais perto da Mesa de Encantamentos.",
-  "key.simpleskills.skill_overview": "Visão Geral das Perícias"
+  "key.simpleskills.skill_overview": "Visão Geral das Perícias",
+  "message.simpleskills.glowstone_shield.unlocked": "Escudo de Glowstone desbloqueado! Crie-o usando 6 lingotes de ferro, 2 pós de glowstone e 1 bloco de glowstone. A versão de diamante exige 6 diamantes, 2 pós de glowstone e 1 bloco de glowstone. Melhore esta versão na mesa de ferraria usando um molde de melhoria de netherita e uma barra de netherita."
 }

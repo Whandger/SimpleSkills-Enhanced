@@ -2,6 +2,7 @@ package com.github.ob_yekt.simpleskills.mixin.DEFENSE;
 
 import com.github.ob_yekt.simpleskills.DefenseParryAccess;
 import com.github.ob_yekt.simpleskills.DefenseCombat;
+import com.github.ob_yekt.simpleskills.shields.GlowstoneShields;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
@@ -19,7 +20,7 @@ public abstract class DefenseParryMixin implements DefenseParryAccess {
     @Inject(method = "startUsingItem", at = @At("HEAD"))
     private void simpleskills$recordShieldStart(InteractionHand hand, CallbackInfo ci) {
         LivingEntity self = (LivingEntity) (Object) this;
-        if (self instanceof ServerPlayer player && !self.isUsingItem() && self.getItemInHand(hand).is(Items.SHIELD)) {
+        if (self instanceof ServerPlayer player && !self.isUsingItem() && self.getItemInHand(hand).is(GlowstoneShields.SHIELDS)) {
             simpleskills$shieldRaisedTick = player.tickCount;
         }
     }
