@@ -542,5 +542,7 @@
     "gui.simpleskills.crafting_reveal.close_hint": "Pressione ESC ou clique em X para fechar",
     "gui.simpleskills.crafting_reveal.no_extra_stats": "Sem atributos adicionais",
     "item.simpleskills.crafting_stat.attack_speed": "Velocidade de ataque: +%s%%",
+    "item.simpleskills.crafting_stat.armor": "Armadura: +%s%%",
+    "item.simpleskills.crafting_stat.armor_toughness": "Resistência da armadura: +%s%%",
     "message.simpleskills.crafting.high_rarity_announcement": "⚒ %1$s fabricou %2$s!"
 }

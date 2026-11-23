@@ -48,6 +48,7 @@ import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.ItemLore;
 
@@ -64,6 +65,8 @@ public final class CraftingEquipmentManager {
     private static final String DATA_DURABILITY = "simpleskills_crafting_durability_bonus";
     private static final String DATA_CRITICAL_CHANCE = "simpleskills_crafting_critical_chance";
     private static final String DATA_ATTACK_SPEED = "simpleskills_crafting_attack_speed_bonus";
+    private static final String DATA_ARMOR = "simpleskills_crafting_armor_bonus";
+    private static final String DATA_TOUGHNESS = "simpleskills_crafting_toughness_bonus";
     private static final String DATA_PERKS = "simpleskills_crafting_perks";
     private static final int EFFECT_DURATION_TICKS = 40;
     private static final int EFFECT_REFRESH_INTERVAL = 10;
@@ -72,6 +75,10 @@ public final class CraftingEquipmentManager {
             Simpleskills.MOD_ID, "crafting_damage_bonus");
     private static final Identifier CRAFTING_ATTACK_SPEED_MODIFIER_ID = Identifier.fromNamespaceAndPath(
             Simpleskills.MOD_ID, "crafting_attack_speed_bonus");
+    private static final Identifier CRAFTING_ARMOR_MODIFIER_ID = Identifier.fromNamespaceAndPath(
+            Simpleskills.MOD_ID, "crafting_armor_bonus");
+    private static final Identifier CRAFTING_TOUGHNESS_MODIFIER_ID = Identifier.fromNamespaceAndPath(
+            Simpleskills.MOD_ID, "crafting_armor_toughness_bonus");
     private static final Identifier VITALITY_MODIFIER_ID = Identifier.fromNamespaceAndPath(
             Simpleskills.MOD_ID, "crafting_vitality");
     private static final Identifier RESILIENCE_MODIFIER_ID = Identifier.fromNamespaceAndPath(
@@ -178,31 +185,52 @@ public final class CraftingEquipmentManager {
 
         boolean weapon = isWeapon(stack);
         boolean sword = stack.is(ItemTags.SWORDS);
-        // Every newly forged item rolls its own values inside its rarity's stat ranges.
-        // Fractions are rounded to 0.1 percentage-point steps to keep the results varied but readable.
-        double damageBonus = weapon
+        boolean damageEligible = weapon || kind == EquipmentKind.TOOL;
+        boolean attackSpeedEligible = sword || kind == EquipmentKind.TOOL;
+        boolean defenseEligible = kind == EquipmentKind.ARMOR || kind == EquipmentKind.SHIELD;
+
+        // Each attribute has its own rarity-weighted chance to exist. Common gear often
+        // has no extra combat/defense stat; Epic and higher always roll applicable stats.
+        double damageBonus = damageEligible && rollStatPresence(player, rarity.damageStatChance())
                 ? rollStat(player, rarity.minDamageBonus(), rarity.maxDamageBonus(), 0.001) : 0.0;
         double durabilityBonus = rollStat(player, rarity.minDurabilityBonus(), rarity.maxDurabilityBonus(), 0.01);
-        double criticalChance = weapon
+        double criticalChance = weapon && damageBonus > 0.0
                 ? rollStat(player, rarity.minCriticalChance(), rarity.maxCriticalChance(), 0.001) : 0.0;
-        double attackSpeedBonus = sword
+        double attackSpeedBonus = attackSpeedEligible && rollStatPresence(player, rarity.attackSpeedStatChance())
                 ? rollStat(player, rarity.minAttackSpeedBonus(), rarity.maxAttackSpeedBonus(), 0.005) : 0.0;
+        double armorBonus = defenseEligible && rollStatPresence(player, rarity.armorStatChance())
+                ? rollStat(player, rarity.minArmorBonus(), rarity.maxArmorBonus(), 0.001) : 0.0;
+        double toughnessBonus = defenseEligible && rollStatPresence(player, rarity.toughnessStatChance())
+                ? rollStat(player, rarity.minToughnessBonus(), rarity.maxToughnessBonus(), 0.001) : 0.0;
         String encodedPerks = encodePerks(perks, level, rarity, player);
 
         // Runic Edge is included in the same final percentage shown in the lore and native attribute tooltip.
         boolean hasRunicEdge = perks.stream().anyMatch(perk -> perk.id().equals("runic_edge"));
-        double totalDamageBonus = (1.0 + damageBonus) * (hasRunicEdge ? 1.08 : 1.0) - 1.0;
-        boolean damageAppliedAsAttribute = applyAttackDamageAttributeBonus(stack, totalDamageBonus);
-        boolean attackSpeedAppliedAsAttribute = sword && applyAttackSpeedAttributeBonus(stack, attackSpeedBonus);
+        double requestedDamageBonus = damageBonus > 0.0
+                ? (1.0 + damageBonus) * (hasRunicEdge ? 1.08 : 1.0) - 1.0 : 0.0;
+        boolean damageAppliedAsAttribute = applyAttackDamageAttributeBonus(stack, requestedDamageBonus);
+        boolean attackSpeedAppliedAsAttribute = attackSpeedBonus > 0.0
+                && applyAttackSpeedAttributeBonus(stack, attackSpeedBonus);
+        if (!damageAppliedAsAttribute && !isRangedWeapon(stack)) damageBonus = 0.0;
         if (!attackSpeedAppliedAsAttribute) attackSpeedBonus = 0.0;
+        double totalDamageBonus = damageBonus > 0.0
+                ? (1.0 + damageBonus) * (hasRunicEdge ? 1.08 : 1.0) - 1.0 : 0.0;
+        boolean[] defenseApplied = applyDefenseAttributeBonuses(stack, kind, armorBonus, toughnessBonus);
+        if (!defenseApplied[0]) armorBonus = 0.0;
+        if (!defenseApplied[1]) toughnessBonus = 0.0;
+        final double finalDamageBonus = damageBonus;
         final double finalAttackSpeedBonus = attackSpeedBonus;
+        final double finalArmorBonus = armorBonus;
+        final double finalToughnessBonus = toughnessBonus;
 
         CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
             tag.putString(DATA_RARITY, rarity.id());
-            tag.putDouble(DATA_DAMAGE, damageBonus);
+            tag.putDouble(DATA_DAMAGE, finalDamageBonus);
             tag.putDouble(DATA_DURABILITY, durabilityBonus);
             tag.putDouble(DATA_CRITICAL_CHANCE, criticalChance);
             tag.putDouble(DATA_ATTACK_SPEED, finalAttackSpeedBonus);
+            tag.putDouble(DATA_ARMOR, finalArmorBonus);
+            tag.putDouble(DATA_TOUGHNESS, finalToughnessBonus);
             tag.putString(DATA_PERKS, encodedPerks);
             tag.putBoolean(DATA_DAMAGE_AS_ATTRIBUTE, damageAppliedAsAttribute);
             tag.putBoolean(DATA_DAMAGE_ATTRIBUTE_INCLUDES_AFFIXES, damageAppliedAsAttribute);
@@ -221,12 +249,13 @@ public final class CraftingEquipmentManager {
                 .withStyle(style -> style.withColor(rarity.color()).withItalic(false)));
         double displayedCriticalChance = getEffectiveCriticalChance(stack);
         // Display the combined rarity + Runic Edge percentage so it matches the real main-hand attribute modifier.
-        appendTooltip(stack, rarity, totalDamageBonus, durabilityBonus, displayedCriticalChance, attackSpeedBonus);
+        appendTooltip(stack, rarity, totalDamageBonus, durabilityBonus, displayedCriticalChance,
+                attackSpeedBonus, armorBonus, toughnessBonus);
 
         if (weapon) unlockWeaponTitle(player, rarity);
         announceHighRarityCraft(player, stack, rarity);
         sendReveal(player, stack, originalName.getString(), rarity, totalDamageBonus, durabilityBonus,
-                displayedCriticalChance, attackSpeedBonus, encodedPerks);
+                displayedCriticalChance, attackSpeedBonus, armorBonus, toughnessBonus, encodedPerks);
     }
 
     /** Announces Legendary, Mythic and Transcendent equipment to the entire server. */
@@ -260,7 +289,8 @@ public final class CraftingEquipmentManager {
      */
     private static void sendReveal(ServerPlayer player, ItemStack stack, String itemName, CraftingRarity rarity,
                                    double damageBonus, double durabilityBonus, double criticalChance,
-                                   double attackSpeedBonus, String encodedPerks) {
+                                   double attackSpeedBonus, double armorBonus, double toughnessBonus,
+                                   String encodedPerks) {
         // Common and Rare are intentionally silent; the reveal screen is reserved for Unique+.
         if (rarity.ordinal() < CraftingRarity.UNIQUE.ordinal()) return;
         if (!ServerPlayNetworking.canSend(player, CraftingRevealPayload.TYPE)) return;
@@ -270,6 +300,8 @@ public final class CraftingEquipmentManager {
         details.addProperty("durability", (int) Math.round(durabilityBonus * 100.0));
         details.addProperty("critical", criticalChance * 100.0);
         details.addProperty("attackSpeed", attackSpeedBonus * 100.0);
+        details.addProperty("armor", armorBonus * 100.0);
+        details.addProperty("toughness", toughnessBonus * 100.0);
         JsonArray perks = new JsonArray();
         for (String encoded : encodedPerks.isBlank() ? List.<String>of() : List.of(encodedPerks.split(","))) {
             String[] parts = encoded.split(":", 2);
@@ -500,7 +532,7 @@ public final class CraftingEquipmentManager {
 
     /** Adds a percentage of the sword's current main-hand attack speed as a real item attribute. */
     private static boolean applyAttackSpeedAttributeBonus(ItemStack stack, double speedBonus) {
-        if (stack == null || stack.isEmpty() || !stack.is(ItemTags.SWORDS) || speedBonus <= 0.0) return false;
+        if (stack == null || stack.isEmpty() || speedBonus <= 0.0) return false;
         ItemAttributeModifiers modifiers = stack.getOrDefault(
                 DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
         boolean hasMainHandAttackSpeed = modifiers.modifiers().stream().anyMatch(entry ->
@@ -523,6 +555,95 @@ public final class CraftingEquipmentManager {
         return true;
     }
 
+    /**
+     * Adds randomized Armor and Armor Toughness bonuses to armor pieces or shields.
+     * Armor pieces reuse their native equipment slot group. Shields receive the bonus
+     * while held in the offhand. Toughness uses a small 0.5 baseline on materials whose
+     * vanilla toughness is zero, so leather/iron/gold armor can still gain this stat.
+     */
+    private static boolean[] applyDefenseAttributeBonuses(ItemStack stack, EquipmentKind kind,
+                                                           double armorBonus, double toughnessBonus) {
+        if (stack == null || stack.isEmpty() || (kind != EquipmentKind.ARMOR && kind != EquipmentKind.SHIELD)) {
+            return new boolean[]{false, false};
+        }
+
+        ItemAttributeModifiers modifiers = stack.getOrDefault(
+                DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+        EquipmentSlotGroup slotGroup = null;
+        EquipmentSlot equipmentSlot = null;
+
+        if (kind == EquipmentKind.SHIELD) {
+            slotGroup = EquipmentSlotGroup.OFFHAND;
+            equipmentSlot = EquipmentSlot.OFFHAND;
+        } else {
+            for (var entry : modifiers.modifiers()) {
+                if (!entry.attribute().equals(Attributes.ARMOR)) continue;
+                slotGroup = entry.slot();
+                for (EquipmentSlot candidate : List.of(
+                        EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET)) {
+                    if (slotGroup.test(candidate)) {
+                        equipmentSlot = candidate;
+                        break;
+                    }
+                }
+                if (equipmentSlot != null) break;
+            }
+        }
+
+        if (slotGroup == null || equipmentSlot == null) return new boolean[]{false, false};
+
+        boolean armorApplied = false;
+        boolean toughnessApplied = false;
+        double baseArmor = modifiers.compute(Attributes.ARMOR, 0.0, equipmentSlot);
+        double baseToughness = modifiers.compute(Attributes.ARMOR_TOUGHNESS, 0.0, equipmentSlot);
+        // A vanilla shield has no armor attribute; use a modest 2-point reference
+        // so a rolled shield affix grants a small, readable offhand defense bonus.
+        if (kind == EquipmentKind.SHIELD) baseArmor = Math.max(baseArmor, 2.0);
+        // Materials without native Armor Toughness still receive a small reference value.
+        double toughnessReference = baseToughness > 0.0
+                ? baseToughness : Math.max(0.5, baseArmor * 0.10);
+
+        if (armorBonus > 0.0 && !hasModifier(modifiers, CRAFTING_ARMOR_MODIFIER_ID)) {
+            double amount = baseArmor * armorBonus;
+            if (Double.isFinite(amount) && amount > 0.0) {
+                AttributeModifier modifier = new AttributeModifier(
+                        CRAFTING_ARMOR_MODIFIER_ID, amount, AttributeModifier.Operation.ADD_VALUE);
+                modifiers = modifiers.withModifierAdded(Attributes.ARMOR, modifier, slotGroup);
+                armorApplied = true;
+            }
+        } else if (hasModifier(modifiers, CRAFTING_ARMOR_MODIFIER_ID)) {
+            armorApplied = true;
+        }
+
+        if (toughnessBonus > 0.0 && !hasModifier(modifiers, CRAFTING_TOUGHNESS_MODIFIER_ID)) {
+            double amount = toughnessReference * toughnessBonus;
+            if (Double.isFinite(amount) && amount > 0.0) {
+                AttributeModifier modifier = new AttributeModifier(
+                        CRAFTING_TOUGHNESS_MODIFIER_ID, amount, AttributeModifier.Operation.ADD_VALUE);
+                modifiers = modifiers.withModifierAdded(Attributes.ARMOR_TOUGHNESS, modifier, slotGroup);
+                toughnessApplied = true;
+            }
+        } else if (hasModifier(modifiers, CRAFTING_TOUGHNESS_MODIFIER_ID)) {
+            toughnessApplied = true;
+        }
+
+        stack.set(DataComponents.ATTRIBUTE_MODIFIERS, modifiers);
+        return new boolean[]{armorApplied, toughnessApplied};
+    }
+
+    private static boolean hasModifier(ItemAttributeModifiers modifiers, Identifier modifierId) {
+        return modifiers.modifiers().stream().anyMatch(entry -> entry.modifier().id().equals(modifierId));
+    }
+
+    private static boolean isRangedWeapon(ItemStack stack) {
+        return stack != null && !stack.isEmpty() && (stack.is(Items.BOW) || stack.is(Items.CROSSBOW)
+                || stack.is(Items.TRIDENT));
+    }
+
+    private static boolean rollStatPresence(ServerPlayer player, double chance) {
+        return chance >= 1.0 || (chance > 0.0 && player.getRandom().nextDouble() < chance);
+    }
+
     private static String formatPercent(double percentage) {
         double nearestWhole = Math.rint(percentage);
         return Math.abs(percentage - nearestWhole) < 0.05
@@ -531,7 +652,8 @@ public final class CraftingEquipmentManager {
     }
 
     private static void appendTooltip(ItemStack stack, CraftingRarity rarity, double damageBonus,
-                                      double durabilityBonus, double criticalChance, double attackSpeedBonus) {
+                                      double durabilityBonus, double criticalChance, double attackSpeedBonus,
+                                      double armorBonus, double toughnessBonus) {
         ItemLore current = stack.getOrDefault(DataComponents.LORE, new ItemLore(List.of()));
         List<Component> lines = new ArrayList<>(current.lines());
         lines.add(Component.translatable("item.simpleskills.crafting_rarity_label",
@@ -552,6 +674,14 @@ public final class CraftingEquipmentManager {
         if (attackSpeedBonus > 0.0) {
             lines.add(Component.translatable("item.simpleskills.crafting_stat.attack_speed",
                     formatPercent(attackSpeedBonus * 100.0)).withStyle(ChatFormatting.GREEN));
+        }
+        if (armorBonus > 0.0) {
+            lines.add(Component.translatable("item.simpleskills.crafting_stat.armor",
+                    formatPercent(armorBonus * 100.0)).withStyle(ChatFormatting.GREEN));
+        }
+        if (toughnessBonus > 0.0) {
+            lines.add(Component.translatable("item.simpleskills.crafting_stat.armor_toughness",
+                    formatPercent(toughnessBonus * 100.0)).withStyle(ChatFormatting.GREEN));
         }
         for (String encoded : encodePerksWithAmplifiers(stack)) {
             String[] parts = encoded.split(":", 2);

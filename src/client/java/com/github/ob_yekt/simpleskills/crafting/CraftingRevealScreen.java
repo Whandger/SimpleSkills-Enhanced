@@ -747,6 +747,8 @@ public final class CraftingRevealScreen extends Screen {
         int dur = intStat(entry.details(), "durability");
         double crit = doubleStat(entry.details(), "critical");
         double attackSpeed = doubleStat(entry.details(), "attackSpeed");
+        double armor = doubleStat(entry.details(), "armor");
+        double toughness = doubleStat(entry.details(), "toughness");
         if (dmg > 0.0) {
             chips.add(new StatChip("+" + formatPercent(dmg) + "% ATK", 0x66163826, STAT_GREEN, 0xFFC8F7D8));
         }
@@ -755,6 +757,12 @@ public final class CraftingRevealScreen extends Screen {
         }
         if (crit > 0.0) {
             chips.add(new StatChip("+" + formatPercent(crit) + "% CRIT", 0x663D2B10, GOLD, GOLD_BRIGHT));
+        }
+        if (armor > 0.0) {
+            chips.add(new StatChip("+" + formatPercent(armor) + "% ARMOR", 0x662A3218, 0xFFC5D98A, 0xFFEAF5C9));
+        }
+        if (toughness > 0.0) {
+            chips.add(new StatChip("+" + formatPercent(toughness) + "% TOUGH", 0x66312B20, 0xFFD9B78A, 0xFFF3E2C8));
         }
         if (dur > 0) {
             chips.add(new StatChip("+" + dur + "% DUR", 0x66142B3D, PERK_CYAN, 0xFFC9F2FF));
@@ -774,6 +782,8 @@ public final class CraftingRevealScreen extends Screen {
         addStat(lines, entry.details(), "durability", "item.simpleskills.crafting_stat.durability");
         addStat(lines, entry.details(), "critical", "item.simpleskills.crafting_stat.critical_chance");
         addStat(lines, entry.details(), "attackSpeed", "item.simpleskills.crafting_stat.attack_speed");
+        addStat(lines, entry.details(), "armor", "item.simpleskills.crafting_stat.armor");
+        addStat(lines, entry.details(), "toughness", "item.simpleskills.crafting_stat.armor_toughness");
         JsonArray perks = entry.details().has("perks") && entry.details().get("perks").isJsonArray()
                 ? entry.details().getAsJsonArray("perks") : new JsonArray();
         for (int i = 0; i < Math.min(5, perks.size()); i++) {
@@ -801,7 +811,8 @@ public final class CraftingRevealScreen extends Screen {
     }
 
     private static void addStat(List<Component> lines, JsonObject details, String field, String key) {
-        if (field.equals("damage") || field.equals("attackSpeed") || field.equals("critical")) {
+        if (field.equals("damage") || field.equals("attackSpeed") || field.equals("critical")
+                || field.equals("armor") || field.equals("toughness")) {
             double value = doubleStat(details, field);
             if (value > 0.0) lines.add(Component.translatable(key, formatPercent(value)));
             return;
@@ -838,6 +849,8 @@ public final class CraftingRevealScreen extends Screen {
         if (doubleStat(entry.details(), "damage") > 0.0) count++;
         if (doubleStat(entry.details(), "attackSpeed") > 0.0) count++;
         if (doubleStat(entry.details(), "critical") > 0.0) count++;
+        if (doubleStat(entry.details(), "armor") > 0.0) count++;
+        if (doubleStat(entry.details(), "toughness") > 0.0) count++;
         if (intStat(entry.details(), "durability") > 0) count++;
         return count;
     }

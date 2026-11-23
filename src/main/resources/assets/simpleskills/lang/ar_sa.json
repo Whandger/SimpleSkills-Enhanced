@@ -537,5 +537,7 @@
     "gui.simpleskills.crafting_reveal.close_hint": "اضغط ESC أو انقر X للإغلاق",
     "gui.simpleskills.crafting_reveal.no_extra_stats": "لا توجد سمات إضافية",
     "item.simpleskills.crafting_stat.attack_speed": "سرعة الهجوم: +%s%%",
+    "item.simpleskills.crafting_stat.armor": "درع: +%s%%",
+    "item.simpleskills.crafting_stat.armor_toughness": "متانة الدرع: +%s%%",
     "message.simpleskills.crafting.high_rarity_announcement": "⚒ صنع %1$s العنصر %2$s!"
 }

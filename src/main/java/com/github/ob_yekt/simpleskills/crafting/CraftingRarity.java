@@ -5,27 +5,35 @@ import net.minecraft.ChatFormatting;
 
 /** Rarity tiers and the randomized stat/perk ranges available when crafting equipment. */
 public enum CraftingRarity {
-    // Stat values are fractions: 0.05 = +5%. Common damage intentionally starts at +0.1%.
+    // Percentages are stored as fractions: 0.05 = +5%. Stat chances control whether
+    // an individual item receives that attribute at all; Epic+ always rolls applicable stats.
     COMMON("common", "Common", 85.0, 40.0, 5.0,
             0.001, 0.050, 0.000, 0.050, 0.000, 0.010, 0.005, 0.020,
+            0.12, 0.08, 0.12, 0.08, 0.001, 0.050, 0.001, 0.030,
             0, 1, 1, ChatFormatting.GRAY),
     RARE("rare", "Rare", 12.0, 32.0, 30.0,
             0.030, 0.080, 0.040, 0.110, 0.005, 0.018, 0.010, 0.030,
+            0.35, 0.30, 0.35, 0.25, 0.020, 0.070, 0.010, 0.050,
             1, 1, 1, ChatFormatting.BLUE),
     UNIQUE("unique", "Unique", 2.0, 17.0, 30.0,
             0.050, 0.120, 0.080, 0.180, 0.010, 0.025, 0.020, 0.045,
+            0.70, 0.65, 0.70, 0.60, 0.050, 0.120, 0.030, 0.080,
             1, 1, 1, ChatFormatting.AQUA),
     EPIC("epic", "Epic", 0.8, 7.5, 20.0,
             0.080, 0.160, 0.150, 0.280, 0.020, 0.040, 0.030, 0.055,
+            1.00, 1.00, 1.00, 1.00, 0.080, 0.160, 0.060, 0.120,
             2, 2, 2, ChatFormatting.DARK_PURPLE),
     LEGENDARY("legendary", "Legendary", 0.15, 2.7, 10.0,
             0.120, 0.230, 0.250, 0.380, 0.035, 0.060, 0.050, 0.080,
+            1.00, 1.00, 1.00, 1.00, 0.120, 0.220, 0.100, 0.180,
             2, 3, 3, ChatFormatting.GOLD),
     MYTHIC("mythic", "Mythic", 0.04, 0.65, 4.0,
             0.160, 0.320, 0.350, 0.500, 0.055, 0.090, 0.075, 0.120,
+            1.00, 1.00, 1.00, 1.00, 0.180, 0.300, 0.140, 0.240,
             3, 4, 3, ChatFormatting.RED),
     TRANSCENDENT("transcendent", "Transcendent", 0.01, 0.15, 1.0,
             0.220, 0.420, 0.450, 0.650, 0.080, 0.120, 0.100, 0.180,
+            1.00, 1.00, 1.00, 1.00, 0.250, 0.420, 0.200, 0.350,
             4, 5, 4, ChatFormatting.YELLOW);
 
     private final String id;
@@ -41,6 +49,14 @@ public enum CraftingRarity {
     private final double maxCriticalChance;
     private final double minAttackSpeedBonus;
     private final double maxAttackSpeedBonus;
+    private final double damageStatChance;
+    private final double attackSpeedStatChance;
+    private final double armorStatChance;
+    private final double toughnessStatChance;
+    private final double minArmorBonus;
+    private final double maxArmorBonus;
+    private final double minToughnessBonus;
+    private final double maxToughnessBonus;
     private final int minimumPerks;
     private final int maximumPerks;
     private final int minimumPerkEffectLevel;
@@ -51,6 +67,10 @@ public enum CraftingRarity {
                    double minDurabilityBonus, double maxDurabilityBonus,
                    double minCriticalChance, double maxCriticalChance,
                    double minAttackSpeedBonus, double maxAttackSpeedBonus,
+                   double damageStatChance, double attackSpeedStatChance,
+                   double armorStatChance, double toughnessStatChance,
+                   double minArmorBonus, double maxArmorBonus,
+                   double minToughnessBonus, double maxToughnessBonus,
                    int minimumPerks, int maximumPerks, int minimumPerkEffectLevel,
                    ChatFormatting color) {
         this.id = id;
@@ -66,6 +86,14 @@ public enum CraftingRarity {
         this.maxCriticalChance = maxCriticalChance;
         this.minAttackSpeedBonus = minAttackSpeedBonus;
         this.maxAttackSpeedBonus = maxAttackSpeedBonus;
+        this.damageStatChance = damageStatChance;
+        this.attackSpeedStatChance = attackSpeedStatChance;
+        this.armorStatChance = armorStatChance;
+        this.toughnessStatChance = toughnessStatChance;
+        this.minArmorBonus = minArmorBonus;
+        this.maxArmorBonus = maxArmorBonus;
+        this.minToughnessBonus = minToughnessBonus;
+        this.maxToughnessBonus = maxToughnessBonus;
         this.minimumPerks = minimumPerks;
         this.maximumPerks = maximumPerks;
         this.minimumPerkEffectLevel = minimumPerkEffectLevel;
@@ -82,6 +110,14 @@ public enum CraftingRarity {
     public double maxCriticalChance() { return maxCriticalChance; }
     public double minAttackSpeedBonus() { return minAttackSpeedBonus; }
     public double maxAttackSpeedBonus() { return maxAttackSpeedBonus; }
+    public double damageStatChance() { return damageStatChance; }
+    public double attackSpeedStatChance() { return attackSpeedStatChance; }
+    public double armorStatChance() { return armorStatChance; }
+    public double toughnessStatChance() { return toughnessStatChance; }
+    public double minArmorBonus() { return minArmorBonus; }
+    public double maxArmorBonus() { return maxArmorBonus; }
+    public double minToughnessBonus() { return minToughnessBonus; }
+    public double maxToughnessBonus() { return maxToughnessBonus; }
     public int minimumPerks() { return minimumPerks; }
     public int maximumPerks() { return maximumPerks; }
     public int minimumPerkEffectLevel() { return minimumPerkEffectLevel; }
@@ -164,7 +200,13 @@ public enum CraftingRarity {
                 if (rarity.minDamageBonus < 0.0 || rarity.maxDamageBonus < rarity.minDamageBonus
                         || rarity.minDurabilityBonus < 0.0 || rarity.maxDurabilityBonus < rarity.minDurabilityBonus
                         || rarity.minCriticalChance < 0.0 || rarity.maxCriticalChance < rarity.minCriticalChance
-                        || rarity.minAttackSpeedBonus < 0.0 || rarity.maxAttackSpeedBonus < rarity.minAttackSpeedBonus) {
+                        || rarity.minAttackSpeedBonus < 0.0 || rarity.maxAttackSpeedBonus < rarity.minAttackSpeedBonus
+                        || rarity.damageStatChance < 0.0 || rarity.damageStatChance > 1.0
+                        || rarity.attackSpeedStatChance < 0.0 || rarity.attackSpeedStatChance > 1.0
+                        || rarity.armorStatChance < 0.0 || rarity.armorStatChance > 1.0
+                        || rarity.toughnessStatChance < 0.0 || rarity.toughnessStatChance > 1.0
+                        || rarity.minArmorBonus < 0.0 || rarity.maxArmorBonus < rarity.minArmorBonus
+                        || rarity.minToughnessBonus < 0.0 || rarity.maxToughnessBonus < rarity.minToughnessBonus) {
                     return "Invalid stat range for rarity " + rarity.id;
                 }
             }
