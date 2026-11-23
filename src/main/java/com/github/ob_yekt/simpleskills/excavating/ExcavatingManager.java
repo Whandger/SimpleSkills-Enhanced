@@ -15,9 +15,7 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.Direction;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.core.Holder;
@@ -499,19 +497,6 @@ public final class ExcavatingManager {
 
         ExcavatingRarity rarity = reward.getRarity();
         ServerPlayer player = level.getServer().getPlayerList().getPlayer(session.playerId);
-        if (reward == Reward.CELESTIAL_RELIC) {
-            level.playSound(null, session.pos, SoundEvents.UI_TOAST_CHALLENGE_COMPLETE,
-                    SoundSource.PLAYERS, 1.4F, 0.72F);
-            level.sendParticles(ParticleTypes.TOTEM_OF_UNDYING,
-                    session.pos.getX() + 0.5, session.pos.getY() + 0.8, session.pos.getZ() + 0.5,
-                    45, 0.55, 0.65, 0.55, 0.12);
-            if (player != null) {
-                player.sendSystemMessage(Component.translatable(
-                        "message.simpleskills.excavating.celestial_relic_found", found.getHoverName())
-                        .withStyle(ChatFormatting.GOLD), false);
-            }
-        }
-
         // Very Rare and above are announced to the finder.
         if (player != null && rarity.ordinal() >= ExcavatingRarity.VERY_RARE.ordinal()) {
             player.sendSystemMessage(Component.literal(
@@ -563,16 +548,7 @@ public final class ExcavatingManager {
             case NETHERITE_INGOT -> new ItemStack(Items.NETHERITE_INGOT);
             case TOTEM_OF_UNDYING -> new ItemStack(Items.TOTEM_OF_UNDYING);
             case ENCHANTED_GOLDEN_APPLE -> new ItemStack(Items.ENCHANTED_GOLDEN_APPLE);
-            case CELESTIAL_RELIC -> createCelestialRelic();
         };
-    }
-
-    private static ItemStack createCelestialRelic() {
-        ItemStack relic = new ItemStack(Items.NETHER_STAR);
-        relic.set(DataComponents.CUSTOM_NAME,
-                Component.translatable("item.simpleskills.celestial_relic")
-                        .withStyle(ChatFormatting.GOLD).withStyle(style -> style.withItalic(false)));
-        return relic;
     }
 
     /** A random decorated-pot sherd from the vanilla tag. */

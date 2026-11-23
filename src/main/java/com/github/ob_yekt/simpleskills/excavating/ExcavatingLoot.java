@@ -117,11 +117,7 @@ public final class ExcavatingLoot {
                 new double[][]{{91, 0.00005}, {99, 0.0005}}),
 
         ENCHANTED_GOLDEN_APPLE("Enchanted Golden Apple", ExcavatingRarity.MYTHIC,
-                new double[][]{{91, 0.00001}, {99, 0.0001}}),
-
-        // Special Transcendent reward: rolled separately and never consumes a normal rarity budget.
-        CELESTIAL_RELIC("Celestial Relic", ExcavatingRarity.MYTHIC,
-                new double[][]{{99, 0.0}});
+                new double[][]{{91, 0.00001}, {99, 0.0001}});
 
         private final String displayName;
         private final ExcavatingRarity rarity;
@@ -192,9 +188,7 @@ public final class ExcavatingLoot {
         }
     }
 
-    private static final Reward[] REWARDS = java.util.Arrays.stream(Reward.values())
-            .filter(reward -> reward != Reward.CELESTIAL_RELIC)
-            .toArray(Reward[]::new);
+    private static final Reward[] REWARDS = Reward.values();
 
     /**
      * Interpolates between level/value key points.
@@ -471,14 +465,10 @@ public final class ExcavatingLoot {
         }
 
         int safeLevel = ExcavatingRank.clampLevel(level);
-        // Celestial Relic is a special independent chance, rising from 0.025% to 0.25%.
-        double relicChance = 0.025 + (safeLevel - 1) * (0.225 / 98.0);
         double target = roll * 100.0;
-        if (target < relicChance) return Reward.CELESTIAL_RELIC;
-        target -= relicChance;
 
-        // Keep the exact Nothing probability; Buried Truth redistributes only the reward budget.
-        double rewardBudget = Math.max(0.0, totalChance(safeLevel) - relicChance);
+        // Keep the exact Nothing probability; Buried Truth only redistributes normal reward weights.
+        double rewardBudget = totalChance(safeLevel);
         if (target >= rewardBudget) return null;
 
         double weightedTotal = 0.0;

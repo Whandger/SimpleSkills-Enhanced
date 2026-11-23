@@ -5,6 +5,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.Containers;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -44,6 +45,16 @@ public final class CelestialAltarBlockEntity extends BlockEntity implements Cont
     protected void saveAdditional(ValueOutput output) {
         super.saveAdditional(output);
         ContainerHelper.saveAllItems(output, items);
+    }
+
+    /** Drops stored items when the altar block is actually removed, never on chunk unload. */
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        super.preRemoveSideEffects(pos, state);
+        if (level == null || level.isClientSide() || isEmpty()) return;
+
+        Containers.dropContents(level, pos, this);
+        clearContent();
     }
 
     @Override public int getContainerSize() { return SLOT_COUNT; }
