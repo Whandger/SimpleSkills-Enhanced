@@ -87,6 +87,23 @@ public enum CraftingRarity {
     public int minimumPerkEffectLevel() { return minimumPerkEffectLevel; }
     public ChatFormatting color() { return color; }
 
+    /**
+     * Crafting XP reward multiplier for the rolled equipment quality.
+     * Higher tiers reward a better result without making a lucky craft worth
+     * an excessive amount of progression XP.
+     */
+    public double craftingXpMultiplier() {
+        return switch (this) {
+            case COMMON -> 1.00;
+            case RARE -> 1.10;
+            case UNIQUE -> 1.20;
+            case EPIC -> 1.40;
+            case LEGENDARY -> 1.70;
+            case MYTHIC -> 2.10;
+            case TRANSCENDENT -> 2.60;
+        };
+    }
+
     /** Interpolates continuously between the three published progression milestones. */
     public double chanceAt(int level) {
         int safeLevel = Math.max(1, Math.min(99, level));

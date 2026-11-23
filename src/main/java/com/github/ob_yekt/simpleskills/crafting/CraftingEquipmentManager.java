@@ -224,8 +224,34 @@ public final class CraftingEquipmentManager {
         appendTooltip(stack, rarity, totalDamageBonus, durabilityBonus, displayedCriticalChance, attackSpeedBonus);
 
         if (weapon) unlockWeaponTitle(player, rarity);
+        announceHighRarityCraft(player, stack, rarity);
         sendReveal(player, stack, originalName.getString(), rarity, totalDamageBonus, durabilityBonus,
                 displayedCriticalChance, attackSpeedBonus, encodedPerks);
+    }
+
+    /** Announces Legendary, Mythic and Transcendent equipment to the entire server. */
+    private static void announceHighRarityCraft(ServerPlayer player, ItemStack stack, CraftingRarity rarity) {
+        if (rarity.ordinal() < CraftingRarity.LEGENDARY.ordinal()) return;
+        MinecraftServer server = player.level().getServer();
+        if (server == null) return;
+
+        Component announcement = Component.translatable(
+                "message.simpleskills.crafting.high_rarity_announcement",
+                player.getDisplayName(), stack.getHoverName());
+        MutableComponent styledAnnouncement = Component.empty()
+                .append(announcement)
+                .withStyle(ChatFormatting.GRAY);
+        Component message = Component.literal("[SimpleSkills] ")
+                .withStyle(ChatFormatting.DARK_GRAY)
+                .append(styledAnnouncement);
+        server.getPlayerList().broadcastSystemMessage(message, false);
+    }
+
+    /** Returns the XP multiplier carried by a newly crafted equipment item. */
+    public static double getCraftingXpMultiplier(ItemStack stack) {
+        if (!hasRarity(stack)) return 1.0;
+        CraftingRarity rarity = CraftingRarity.byId(getRarityId(stack));
+        return rarity == null ? 1.0 : rarity.craftingXpMultiplier();
     }
 
     /**

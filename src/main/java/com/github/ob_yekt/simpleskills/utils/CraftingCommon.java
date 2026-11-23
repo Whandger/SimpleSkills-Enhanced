@@ -38,7 +38,7 @@ public final class CraftingCommon {
     public static void grantCraftingXP(ServerPlayer player, ItemStack stack) {
         if (!isValidStack(stack) || !isCraftableItem(stack)) return;
 
-        // Prevent durability bonus on "cosmetic re-crafting" (dyeing armor, applying banner to shield, etc.)
+        // Cosmetic recipes must not grant Crafting XP or amplify XP from an existing rare item.
         if (stack.has(DataComponents.DYED_COLOR) || stack.has(DataComponents.BANNER_PATTERNS)) {
             return;
         }
@@ -47,8 +47,14 @@ public final class CraftingCommon {
         int xpPerItem = ConfigManager.getCraftingXP(itemId.toString(), Skills.CRAFTING);
         if (xpPerItem <= 0) return;
 
-        int totalXP = xpPerItem * stack.getCount();
-        XPManager.addXPWithNotification(player, Skills.CRAFTING, totalXP);
+        // Base XP remains recipe/material-value driven by crafting_xp.json.
+        // The equipment's rolled rarity then adds a measured reward on top.
+        double rarityMultiplier = com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
+                .getCraftingXpMultiplier(stack);
+        int totalXP = (int) Math.round((double) xpPerItem * stack.getCount() * rarityMultiplier);
+        if (totalXP > 0) {
+            XPManager.addXPWithNotification(player, Skills.CRAFTING, totalXP);
+        }
     }
 
     public static void grantCookingXP(ServerPlayer player, ItemStack stack) {
