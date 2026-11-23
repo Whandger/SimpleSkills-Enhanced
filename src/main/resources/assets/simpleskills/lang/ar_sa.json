@@ -539,5 +539,8 @@
     "item.simpleskills.crafting_stat.attack_speed": "سرعة الهجوم: +%s%%",
     "item.simpleskills.crafting_stat.armor": "درع: +%s%%",
     "item.simpleskills.crafting_stat.armor_toughness": "متانة الدرع: +%s%%",
-    "message.simpleskills.crafting.high_rarity_announcement": "⚒ صنع %1$s العنصر %2$s!"
+    "message.simpleskills.crafting.high_rarity_announcement": "⚒ صنع %1$s العنصر %2$s!",
+    "item.simpleskills.crafting_perk.celestial_wings": "الأجنحة السماوية: تتيح الطيران أثناء ارتداء هذه الأحذية",
+    "item.simpleskills.crafting_perk.celestial_range": "المدى السماوي: +6 كتل إلى مدى الهجوم",
+    "message.simpleskills.crafting.inventory_full": "مخزونك ممتلئ. أفرغ مساحة قبل صنع المعدات."
 }

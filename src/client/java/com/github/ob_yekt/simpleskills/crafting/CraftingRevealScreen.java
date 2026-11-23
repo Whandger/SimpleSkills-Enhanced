@@ -64,7 +64,8 @@ public final class CraftingRevealScreen extends Screen {
     private static final List<String> NO_LEVEL_TEXT = List.of(
             "runic_edge", "anvil_ward",
             "guardian_oath", "arcane_mastery", "godslayer", "eternal_guardian",
-            "divine_blessing", "aegis_of_ages", "fire_resistance", "featherweight");
+            "divine_blessing", "aegis_of_ages", "fire_resistance", "featherweight",
+            "celestial_wings", "celestial_range");
 
     private static CraftingRevealScreen activeScreen;
 
@@ -416,7 +417,8 @@ public final class CraftingRevealScreen extends Screen {
         int lineY = y + 66;
         for (int i = 0; i < maxInline; i++) {
             String lineText = fitText("◆ " + lines.get(i).getString(), infoW);
-            int lineColor = (i < statCount) ? STAT_GREEN : PERK_CYAN;
+            int lineColor = i < statCount ? STAT_GREEN
+                    : (isGoldenPerkLine(entry, i) ? GOLD_BRIGHT : PERK_CYAN);
             graphics.text(this.font, Component.literal(lineText), infoX, lineY, lineColor, false);
             lineY += 13;
         }
@@ -728,8 +730,9 @@ public final class CraftingRevealScreen extends Screen {
         for (int i = 0; i < lines.size(); i++) {
             Component line = lines.get(i);
             boolean isStat = i < statCount;
-            int bulletColor = isStat ? STAT_GREEN : theme.bright();
-            int textColor = isStat ? 0xFFE5F7EC : 0xFFE3ECF8;
+            boolean goldenPerk = !isStat && isGoldenPerkLine(entry, i);
+            int bulletColor = isStat ? STAT_GREEN : (goldenPerk ? GOLD_BRIGHT : theme.bright());
+            int textColor = isStat ? 0xFFE5F7EC : (goldenPerk ? GOLD_BRIGHT : 0xFFE3ECF8);
             String bullet = isStat ? "◆" : "✦";
 
             graphics.text(this.font, Component.literal(bullet), x + 8, lineY, bulletColor, false);
@@ -774,6 +777,25 @@ public final class CraftingRevealScreen extends Screen {
             }
         }
         return chips;
+    }
+
+    /** Identifies the two exclusive Transcendent affixes so they receive a gold accent. */
+    private static boolean isGoldenPerkLine(Entry entry, int detailLineIndex) {
+        int perkIndex = detailLineIndex - countPrimaryStats(entry);
+        if (perkIndex < 0 || !entry.details().has("perks")
+                || !entry.details().get("perks").isJsonArray()) return false;
+
+        JsonArray perks = entry.details().getAsJsonArray("perks");
+        int visiblePerkIndex = 0;
+        for (int i = 0; i < Math.min(5, perks.size()); i++) {
+            if (!perks.get(i).isJsonObject()) continue;
+            String id = stringValue(perks.get(i).getAsJsonObject(), "id", "");
+            if (id.isBlank()) continue;
+            if (visiblePerkIndex++ == perkIndex) {
+                return id.equals("celestial_wings") || id.equals("celestial_range");
+            }
+        }
+        return false;
     }
 
     private List<Component> buildDetailLines(Entry entry) {

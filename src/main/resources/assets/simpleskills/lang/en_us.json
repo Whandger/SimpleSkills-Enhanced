@@ -544,5 +544,8 @@
     "item.simpleskills.crafting_stat.attack_speed": "Attack Speed: +%s%%",
     "item.simpleskills.crafting_stat.armor": "Armor: +%s%%",
     "item.simpleskills.crafting_stat.armor_toughness": "Armor Toughness: +%s%%",
-    "message.simpleskills.crafting.high_rarity_announcement": "⚒ %1$s crafted %2$s!"
+    "message.simpleskills.crafting.high_rarity_announcement": "⚒ %1$s crafted %2$s!",
+    "item.simpleskills.crafting_perk.celestial_wings": "Celestial Wings: allows flight while these boots are equipped",
+    "item.simpleskills.crafting_perk.celestial_range": "Celestial Range: +6 blocks of attack reach",
+    "message.simpleskills.crafting.inventory_full": "Your inventory is full. Make room before crafting equipment."
 }

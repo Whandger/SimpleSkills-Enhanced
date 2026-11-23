@@ -539,5 +539,8 @@
     "item.simpleskills.crafting_stat.attack_speed": "Vitesse d’attaque : +%s%%",
     "item.simpleskills.crafting_stat.armor": "Armure : +%s%%",
     "item.simpleskills.crafting_stat.armor_toughness": "Solidité de l’armure : +%s%%",
-    "message.simpleskills.crafting.high_rarity_announcement": "⚒ %1$s a fabriqué %2$s !"
+    "message.simpleskills.crafting.high_rarity_announcement": "⚒ %1$s a fabriqué %2$s !",
+    "item.simpleskills.crafting_perk.celestial_wings": "Ailes célestes : permet de voler lorsque ces bottes sont équipées",
+    "item.simpleskills.crafting_perk.celestial_range": "Portée céleste : +6 blocs de portée d’attaque",
+    "message.simpleskills.crafting.inventory_full": "Votre inventaire est plein. Faites de la place avant de fabriquer un équipement."
 }

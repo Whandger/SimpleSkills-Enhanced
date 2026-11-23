@@ -44,6 +44,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.component.AttackRange;
+import net.minecraft.world.item.equipment.Equippable;
 import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -88,6 +90,7 @@ public final class CraftingEquipmentManager {
     private static final Map<UUID, Long> ETERNAL_GUARDIAN_READY_AT = new ConcurrentHashMap<>();
     private static final Map<UUID, Double> APPLIED_VITALITY = new ConcurrentHashMap<>();
     private static final Map<UUID, Double> APPLIED_RESILIENCE = new ConcurrentHashMap<>();
+    private static final Map<UUID, Boolean> CELESTIAL_FLIGHT_PREVIOUS_MAYFLY = new ConcurrentHashMap<>();
     private static final Set<UUID> BONUS_DAMAGE_GUARD = ConcurrentHashMap.newKeySet();
     private static final Map<UUID, PendingRevealBatch> PENDING_REVEALS = new ConcurrentHashMap<>();
     private static final int REVEAL_BATCH_IDLE_TICKS = 2;
@@ -99,7 +102,7 @@ public final class CraftingEquipmentManager {
     }
 
     private record ProjectileDamageData(double multiplier, String encodedPerks, long expiresAt) {}
-    private enum EquipmentKind { WEAPON, ARMOR, SHIELD, TOOL, OTHER }
+    private enum EquipmentKind { WEAPON, SWORD, ARMOR, BOOTS, SHIELD, TOOL, OTHER }
     private record Perk(String id, String effectId, int maximumEffectLevel, int extraJumps) {}
 
     private static Perk effect(String id, String effectId, int maxLevel) {
@@ -145,11 +148,14 @@ public final class CraftingEquipmentManager {
     private static final Perk CELESTIAL_MOVEMENT = jump("celestial_movement", 2, 4);
     private static final Perk AEGIS_OF_AGES = passive("aegis_of_ages", 1);
     private static final Perk WORLD_SHAPER = effect("worldshaper", "minecraft:haste", 4);
+    private static final Perk CELESTIAL_WINGS = passive("celestial_wings", 1);
+    private static final Perk CELESTIAL_RANGE = passive("celestial_range", 1);
 
     private static final Set<String> NO_LEVEL_PERKS = Set.of(
             "runic_edge", "anvil_ward",
             "guardian_oath", "arcane_mastery", "godslayer", "eternal_guardian",
-            "divine_blessing", "aegis_of_ages", "fire_resistance", "featherweight");
+            "divine_blessing", "aegis_of_ages", "fire_resistance", "featherweight",
+            "celestial_wings", "celestial_range");
 
     private CraftingEquipmentManager() {}
 
@@ -163,6 +169,7 @@ public final class CraftingEquipmentManager {
             UUID id = handler.player.getUUID();
             APPLIED_VITALITY.remove(id);
             APPLIED_RESILIENCE.remove(id);
+            restoreCelestialFlight(handler.player);
             PENDING_REVEALS.remove(id);
         });
         ServerLivingEntityEvents.AFTER_DAMAGE.register(CraftingEquipmentManager::afterDamage);
@@ -187,7 +194,8 @@ public final class CraftingEquipmentManager {
         boolean sword = stack.is(ItemTags.SWORDS);
         boolean damageEligible = weapon || kind == EquipmentKind.TOOL;
         boolean attackSpeedEligible = sword || kind == EquipmentKind.TOOL;
-        boolean defenseEligible = kind == EquipmentKind.ARMOR || kind == EquipmentKind.SHIELD;
+        boolean defenseEligible = kind == EquipmentKind.ARMOR || kind == EquipmentKind.BOOTS
+                || kind == EquipmentKind.SHIELD;
 
         // Each attribute has its own rarity-weighted chance to exist. Common gear often
         // has no extra combat/defense stat; Epic and higher always roll applicable stats.
@@ -203,6 +211,8 @@ public final class CraftingEquipmentManager {
         double toughnessBonus = defenseEligible && rollStatPresence(player, rarity.toughnessStatChance())
                 ? rollStat(player, rarity.minToughnessBonus(), rarity.maxToughnessBonus(), 0.001) : 0.0;
         String encodedPerks = encodePerks(perks, level, rarity, player);
+        boolean celestialRangeApplied = perks.stream().anyMatch(perk -> perk.id().equals("celestial_range"));
+        if (celestialRangeApplied) applyCelestialRange(stack, player);
 
         // Runic Edge is included in the same final percentage shown in the lore and native attribute tooltip.
         boolean hasRunicEdge = perks.stream().anyMatch(perk -> perk.id().equals("runic_edge"));
@@ -369,7 +379,11 @@ public final class CraftingEquipmentManager {
                 || stack.is(ItemTags.SHOVELS) || stack.is(ItemTags.HOES)) return EquipmentKind.TOOL;
         String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().toLowerCase(java.util.Locale.ROOT);
         if (path.contains("shield")) return EquipmentKind.SHIELD;
-        if (stack.has(DataComponents.EQUIPPABLE)) return EquipmentKind.ARMOR;
+        Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
+        if (equippable != null) {
+            return equippable.slot() == EquipmentSlot.FEET ? EquipmentKind.BOOTS : EquipmentKind.ARMOR;
+        }
+        if (stack.is(ItemTags.SWORDS)) return EquipmentKind.SWORD;
         if (isWeapon(stack)) return EquipmentKind.WEAPON;
         return EquipmentKind.OTHER;
     }
@@ -386,9 +400,9 @@ public final class CraftingEquipmentManager {
 
     private static List<Perk> commonPool(EquipmentKind kind) {
         return switch (kind) {
-            case WEAPON -> new ArrayList<>(List.of(STRENGTH, SPEED, REGENERATION, VAMPIRIC,
+            case WEAPON, SWORD -> new ArrayList<>(List.of(STRENGTH, SPEED, REGENERATION, VAMPIRIC,
                     CRITICAL_MASTERY, THUNDEROUS, FROSTBITE, PHOENIX, DOUBLE_LEAP, WINDWALKER));
-            case ARMOR -> new ArrayList<>(List.of(PROTECTION, RESILIENT, SPEED, REGENERATION,
+            case ARMOR, BOOTS -> new ArrayList<>(List.of(PROTECTION, RESILIENT, SPEED, REGENERATION,
                     FEATHERWEIGHT, VITALITY, FIRE_RESISTANCE, JUMP_BOOST, DOUBLE_LEAP));
             case SHIELD -> new ArrayList<>(List.of(PROTECTION, RESILIENT, REGENERATION, VITALITY,
                     FIRE_RESISTANCE, DOUBLE_LEAP));
@@ -401,8 +415,8 @@ public final class CraftingEquipmentManager {
 
     private static List<Perk> uniquePool(EquipmentKind kind) {
         return switch (kind) {
-            case WEAPON -> List.of(RUNIC_EDGE);
-            case ARMOR -> List.of(ANVIL_WARD);
+            case WEAPON, SWORD -> List.of(RUNIC_EDGE);
+            case ARMOR, BOOTS -> List.of(ANVIL_WARD);
             case SHIELD -> List.of(GUARDIAN_OATH);
             case TOOL -> List.of(PROSPECTOR);
             default -> List.of(ANVIL_WARD);
@@ -412,7 +426,9 @@ public final class CraftingEquipmentManager {
     private static List<Perk> transcendentPool(EquipmentKind kind) {
         return switch (kind) {
             case WEAPON -> List.of(TITAN_STRENGTH, GODSLAYER, ARCANE_MASTERY);
+            case SWORD -> List.of(CELESTIAL_RANGE);
             case ARMOR -> List.of(DIVINE_BLESSING, CELESTIAL_MOVEMENT, ETERNAL_GUARDIAN);
+            case BOOTS -> List.of(CELESTIAL_WINGS);
             case SHIELD -> List.of(DIVINE_BLESSING, ETERNAL_GUARDIAN, AEGIS_OF_AGES);
             case TOOL -> List.of(WORLD_SHAPER);
             default -> List.of(DIVINE_BLESSING);
@@ -555,6 +571,17 @@ public final class CraftingEquipmentManager {
         return true;
     }
 
+    /** Adds six blocks of melee reach through Minecraft 26.3's native attack_range component. */
+    private static void applyCelestialRange(ItemStack stack, ServerPlayer player) {
+        AttackRange current = stack.getOrDefault(DataComponents.ATTACK_RANGE, AttackRange.defaultFor(player));
+        float maxReach = Math.min(64.0F, current.maxReach() + 6.0F);
+        float maxCreativeReach = Math.min(64.0F, current.maxCreativeReach() + 6.0F);
+        stack.set(DataComponents.ATTACK_RANGE, new AttackRange(
+                current.minReach(), maxReach,
+                current.minCreativeReach(), maxCreativeReach,
+                current.hitboxMargin(), current.mobFactor()));
+    }
+
     /**
      * Adds randomized Armor and Armor Toughness bonuses to armor pieces or shields.
      * Armor pieces reuse their native equipment slot group. Shields receive the bonus
@@ -563,7 +590,8 @@ public final class CraftingEquipmentManager {
      */
     private static boolean[] applyDefenseAttributeBonuses(ItemStack stack, EquipmentKind kind,
                                                            double armorBonus, double toughnessBonus) {
-        if (stack == null || stack.isEmpty() || (kind != EquipmentKind.ARMOR && kind != EquipmentKind.SHIELD)) {
+        if (stack == null || stack.isEmpty() || (kind != EquipmentKind.ARMOR
+                && kind != EquipmentKind.BOOTS && kind != EquipmentKind.SHIELD)) {
             return new boolean[]{false, false};
         }
 
@@ -700,7 +728,9 @@ public final class CraftingEquipmentManager {
             } else {
                 perkLine = Component.translatable(key, roman(amplifier + 1));
             }
-            lines.add(perkLine.withStyle(ChatFormatting.AQUA));
+            ChatFormatting perkColor = id.equals("celestial_wings") || id.equals("celestial_range")
+                    ? ChatFormatting.GOLD : ChatFormatting.AQUA;
+            lines.add(perkLine.withStyle(perkColor));
         }
         stack.set(DataComponents.LORE, new ItemLore(lines));
     }
@@ -728,6 +758,7 @@ public final class CraftingEquipmentManager {
         ETERNAL_GUARDIAN_READY_AT.entrySet().removeIf(entry -> entry.getValue() <= now);
 
         for (ServerPlayer player : server.getPlayerList().getPlayers()) {
+            updateCelestialFlight(player);
             if (player.tickCount % EFFECT_REFRESH_INTERVAL != 0) continue;
             Map<String, Integer> wanted = collectActiveEffects(player);
             for (Map.Entry<String, Integer> effect : wanted.entrySet()) {
@@ -735,6 +766,40 @@ public final class CraftingEquipmentManager {
             }
             updateVitality(player);
             updateResilience(player);
+        }
+    }
+
+    /** Grants vanilla flight only while the Celestial Wings boots are equipped in the FEET slot. */
+    private static void updateCelestialFlight(ServerPlayer player) {
+        if (player.isCreative() || player.isSpectator()) return;
+
+        UUID playerId = player.getUUID();
+        ItemStack boots = player.getItemBySlot(EquipmentSlot.FEET);
+        boolean hasCelestialWings = getPerkAmplifier(boots, "celestial_wings") >= 0;
+        var abilities = player.getAbilities();
+
+        if (hasCelestialWings) {
+            CELESTIAL_FLIGHT_PREVIOUS_MAYFLY.putIfAbsent(playerId, abilities.mayfly);
+            if (!abilities.mayfly) {
+                abilities.mayfly = true;
+                player.onUpdateAbilities();
+            }
+            return;
+        }
+
+        restoreCelestialFlight(player);
+    }
+
+    /** Restores the player's previous mayfly permission when Celestial Wings is removed. */
+    private static void restoreCelestialFlight(ServerPlayer player) {
+        Boolean previouslyAllowed = CELESTIAL_FLIGHT_PREVIOUS_MAYFLY.remove(player.getUUID());
+        if (previouslyAllowed == null || player.isCreative() || player.isSpectator()) return;
+
+        var abilities = player.getAbilities();
+        if (!previouslyAllowed) {
+            abilities.flying = false;
+            abilities.mayfly = false;
+            player.onUpdateAbilities();
         }
     }
 
@@ -816,13 +881,26 @@ public final class CraftingEquipmentManager {
 
     private static List<ItemStack> getActiveEquipment(Player player) {
         List<ItemStack> stacks = new ArrayList<>(6);
-        stacks.add(player.getMainHandItem());
-        stacks.add(player.getOffhandItem());
+
+        // Equippable armor must only activate its perks while it occupies an armor slot.
+        // Do not treat a helmet/chestplate/leggings/boots held in either hand as equipped.
+        ItemStack mainHand = player.getMainHandItem();
+        if (!isArmorItem(mainHand)) stacks.add(mainHand);
+
+        ItemStack offHand = player.getOffhandItem();
+        if (!isArmorItem(offHand)) stacks.add(offHand);
+
+        // These are the only slots from which armor perks are considered active.
         stacks.add(player.getItemBySlot(EquipmentSlot.HEAD));
         stacks.add(player.getItemBySlot(EquipmentSlot.CHEST));
         stacks.add(player.getItemBySlot(EquipmentSlot.LEGS));
         stacks.add(player.getItemBySlot(EquipmentSlot.FEET));
         return stacks;
+    }
+
+    /** True for items that use Minecraft's equippable equipment-slot component. */
+    private static boolean isArmorItem(ItemStack stack) {
+        return stack != null && !stack.isEmpty() && stack.has(DataComponents.EQUIPPABLE);
     }
 
     private static List<String> getEncodedPerks(ItemStack stack) {
@@ -866,6 +944,8 @@ public final class CraftingEquipmentManager {
             case "celestial_movement" -> CELESTIAL_MOVEMENT;
             case "aegis_of_ages" -> AEGIS_OF_AGES;
             case "worldshaper" -> WORLD_SHAPER;
+            case "celestial_wings" -> CELESTIAL_WINGS;
+            case "celestial_range" -> CELESTIAL_RANGE;
             default -> null;
         };
     }
