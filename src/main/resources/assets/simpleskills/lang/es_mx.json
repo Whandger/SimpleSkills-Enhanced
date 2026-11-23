@@ -596,5 +596,20 @@
   "message.simpleskills.celestial_altar.salvage_confirm": "Vuelve a pulsar Desmantelar en 1,5 segundos para confirmar el sacrificio de este objeto.",
   "message.simpleskills.celestial_altar.salvaged": "Se desmanteló un objeto Transcendent para obtener una Esencia de Trascendencia.",
   "gui.simpleskills.celestial_altar.one_item": "1 objeto Transcendent",
-  "message.simpleskills.celestial_altar.need_one_transcendent": "Coloca un objeto Transcendent válido en el espacio de desmantelamiento."
+  "message.simpleskills.celestial_altar.need_one_transcendent": "Coloca un objeto Transcendent válido en el espacio de desmantelamiento.",
+  "gui.simpleskills.celestial_altar.tab.enhance": "Mejorar",
+  "gui.simpleskills.celestial_altar.enhance_equipment": "Equipo",
+  "gui.simpleskills.celestial_altar.enhance_runes": "Runas",
+  "gui.simpleskills.celestial_altar.enhance_no_stats": "No hay atributos mejorables ni ventajas que se puedan volver a sortear",
+  "gui.simpleskills.celestial_altar.enhance_equipment_hint": "Coloca equipo fabricado válido",
+  "gui.simpleskills.celestial_altar.enhance_rune_hint": "Agrega Runas de SimpleSkills",
+  "gui.simpleskills.celestial_altar.enhance_apply": "Usar runa (+1% del rango)",
+  "gui.simpleskills.celestial_altar.enhance_hint": "Pulsa + para mejorar un atributo o la ruleta para sortear una ventaja. 1 runa por clic.",
+  "message.simpleskills.celestial_altar.enhancement_invalid": "Coloca equipo válido y al menos una runa en el altar.",
+  "message.simpleskills.celestial_altar.enhanced": "Runa aplicada a %s.",
+  "gui.simpleskills.celestial_altar.selected_perk": "Ventaja seleccionada",
+  "gui.simpleskills.celestial_altar.perk_reroll_hint": "Una runa vuelve a sortear solo esta ventaja. Las demás no cambian.",
+  "gui.simpleskills.celestial_altar.reroll_perk_action": "Volver a sortear ventaja (1 runa)",
+  "message.simpleskills.celestial_altar.perk_rerolled": "La ventaja seleccionada se volvió a sortear.",
+  "gui.simpleskills.celestial_altar.enhance_options": "Atributos y ventajas"
 }

@@ -46,7 +46,7 @@ public enum CraftingRarity {
         COPPER("Copper", 0.20),             // 0.20% at level 99
         GOLD("Gold", 0.50),                 // 0.50% at level 99
         IRON("Iron", 0.60),                 // 0.60% at level 99
-        OTHER("Other / Modded", 0.10),      // Conservative 0.10% fallback
+        OTHER("Other / Modded", 0.60),      // Same 0.60% at level 99 as Iron
         DIAMOND("Diamond", 1.00),           // 1.00% at level 99
         NETHERITE("Netherite", 1.00);       // 1.00% at level 99
 

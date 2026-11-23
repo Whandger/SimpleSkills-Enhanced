@@ -596,5 +596,20 @@
   "message.simpleskills.celestial_altar.salvage_confirm": "انقر على التفكيك مرة أخرى خلال 1.5 ثانية لتأكيد التضحية بهذه المعدّة.",
   "message.simpleskills.celestial_altar.salvaged": "تم تفكيك معدّة Transcendent واحدة للحصول على جوهر تسامي واحد.",
   "gui.simpleskills.celestial_altar.one_item": "معدّة Transcendent واحدة",
-  "message.simpleskills.celestial_altar.need_one_transcendent": "ضع معدّة Transcendent مؤهلة واحدة في خانة التفكيك."
+  "message.simpleskills.celestial_altar.need_one_transcendent": "ضع معدّة Transcendent مؤهلة واحدة في خانة التفكيك.",
+  "gui.simpleskills.celestial_altar.tab.enhance": "تحسين",
+  "gui.simpleskills.celestial_altar.enhance_equipment": "المعدّة",
+  "gui.simpleskills.celestial_altar.enhance_runes": "الرونيات",
+  "gui.simpleskills.celestial_altar.enhance_no_stats": "لا توجد سمات قابلة للتحسين أو مزايا قابلة لإعادة السحب",
+  "gui.simpleskills.celestial_altar.enhance_equipment_hint": "ضع معدّة مصنوعة مؤهلة",
+  "gui.simpleskills.celestial_altar.enhance_rune_hint": "أضف رونيات SimpleSkills",
+  "gui.simpleskills.celestial_altar.enhance_apply": "استخدم روناً (+1% من النطاق)",
+  "gui.simpleskills.celestial_altar.enhance_hint": "اضغط + لتحسين سمة أو عجلة الحظ لإعادة سحب ميزة. رون واحد لكل نقرة.",
+  "message.simpleskills.celestial_altar.enhancement_invalid": "ضع معدّة مؤهلة وروناً واحداً على الأقل في المذبح.",
+  "message.simpleskills.celestial_altar.enhanced": "تم تطبيق رون على %s.",
+  "gui.simpleskills.celestial_altar.selected_perk": "الميزة المحددة",
+  "gui.simpleskills.celestial_altar.perk_reroll_hint": "تعيد رونية واحدة سحب هذه الميزة فقط، وتبقى بقية المزايا كما هي.",
+  "gui.simpleskills.celestial_altar.reroll_perk_action": "إعادة سحب الميزة (رونية واحدة)",
+  "message.simpleskills.celestial_altar.perk_rerolled": "تمت إعادة سحب الميزة المحددة.",
+  "gui.simpleskills.celestial_altar.enhance_options": "السمات والمزايا"
 }

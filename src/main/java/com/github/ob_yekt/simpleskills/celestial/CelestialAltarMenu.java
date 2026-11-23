@@ -1,6 +1,10 @@
 package com.github.ob_yekt.simpleskills.celestial;
 
 import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager;
+import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager.PerkRerollInfo;
+import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager.StatUpgradeInfo;
+import com.github.ob_yekt.simpleskills.runes.RuneContent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Container;
@@ -11,16 +15,14 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.network.chat.Component;
 
-/** Server-authoritative two-tab menu for the Celestial Altar. */
+import java.util.List;
+
+/** Server-authoritative three-tab menu for the Celestial Altar. */
 public final class CelestialAltarMenu extends AbstractContainerMenu {
     public static final int MODE_INFUSION = 0;
     public static final int MODE_SALVAGE = 1;
-    public static final int BUTTON_INFUSION_TAB = 0;
-    public static final int BUTTON_SALVAGE_TAB = 1;
-    public static final int BUTTON_ASCEND = 2;
-    public static final int BUTTON_SALVAGE_CONFIRM = 3;
+    public static final int MODE_ENHANCE = 2;
 
     private final Container container;
     private final CelestialAltarBlockEntity altar;
@@ -46,23 +48,37 @@ public final class CelestialAltarMenu extends AbstractContainerMenu {
         this.altar = altar;
         container.startOpen(inventory.player);
 
-        addSlot(new Slot(container, CelestialAltarBlockEntity.INFUSION_EQUIPMENT, 111, 73) {
+        addSlot(new Slot(container, CelestialAltarBlockEntity.INFUSION_EQUIPMENT, 148, 74) {
             @Override public boolean mayPlace(ItemStack stack) {
                 return CraftingEquipmentManager.isEligibleForCelestialAltar(stack);
             }
             @Override public int getMaxStackSize() { return 1; }
             @Override public boolean isActive() { return getMode() == MODE_INFUSION; }
         });
-        addEssenceSlot(CelestialAltarBlockEntity.ESSENCE_TOP, 111, 51);
-        addEssenceSlot(CelestialAltarBlockEntity.ESSENCE_LEFT, 71, 73);
-        addEssenceSlot(CelestialAltarBlockEntity.ESSENCE_RIGHT, 151, 73);
-        addSalvageSlot(CelestialAltarBlockEntity.SALVAGE_EQUIPMENT, 84, 72);
-        addSlot(new Slot(container, CelestialAltarBlockEntity.SALVAGE_OUTPUT, 148, 72) {
+        addEssenceSlot(CelestialAltarBlockEntity.ESSENCE_TOP, 148, 50);
+        addEssenceSlot(CelestialAltarBlockEntity.ESSENCE_LEFT, 112, 74);
+        addEssenceSlot(CelestialAltarBlockEntity.ESSENCE_RIGHT, 184, 74);
+        addSalvageSlot(CelestialAltarBlockEntity.SALVAGE_EQUIPMENT, 104, 72);
+        addSlot(new Slot(container, CelestialAltarBlockEntity.SALVAGE_OUTPUT, 192, 72) {
             @Override public boolean mayPlace(ItemStack stack) { return false; }
             @Override public boolean isActive() { return getMode() == MODE_SALVAGE; }
         });
 
-        addStandardInventorySlots(inventory, 8, 137);
+        // Enhance tab: equipment on the left, enhancement options in the center, runes on the right.
+        addSlot(new Slot(container, CelestialAltarBlockEntity.ENHANCE_EQUIPMENT, 24, 72) {
+            @Override public boolean mayPlace(ItemStack stack) {
+                return CraftingEquipmentManager.isEligibleForCelestialAltar(stack);
+            }
+            @Override public int getMaxStackSize() { return 1; }
+            @Override public boolean isActive() { return getMode() == MODE_ENHANCE; }
+        });
+        addSlot(new Slot(container, CelestialAltarBlockEntity.ENHANCE_RUNES, 272, 72) {
+            @Override public boolean mayPlace(ItemStack stack) { return stack.is(RuneContent.RUNE); }
+            @Override public int getMaxStackSize() { return 64; }
+            @Override public boolean isActive() { return getMode() == MODE_ENHANCE; }
+        });
+
+        addStandardInventorySlots(inventory, 75, 142);
         addDataSlot(mode);
     }
 
@@ -89,6 +105,16 @@ public final class CelestialAltarMenu extends AbstractContainerMenu {
 
     public int getMode() { return mode.get(); }
 
+    public List<StatUpgradeInfo> getEnhancementStats() {
+        return CraftingEquipmentManager.getEnhanceableStats(
+                container.getItem(CelestialAltarBlockEntity.ENHANCE_EQUIPMENT));
+    }
+
+    public List<PerkRerollInfo> getEnhancementPerks() {
+        return CraftingEquipmentManager.getEnhanceablePerks(
+                container.getItem(CelestialAltarBlockEntity.ENHANCE_EQUIPMENT));
+    }
+
     public boolean canInfuse() {
         ItemStack equipment = container.getItem(CelestialAltarBlockEntity.INFUSION_EQUIPMENT);
         if (!CraftingEquipmentManager.isEligibleForCelestialAltar(equipment) || equipment.getCount() != 1) return false;
@@ -107,38 +133,51 @@ public final class CelestialAltarMenu extends AbstractContainerMenu {
                 && stack.getCount() == 1;
     }
 
-    @Override
-    public boolean clickMenuButton(Player player, int buttonId) {
-        if (buttonId == BUTTON_INFUSION_TAB) {
-            mode.set(MODE_INFUSION);
-            return true;
-        }
-        if (buttonId == BUTTON_SALVAGE_TAB) {
-            mode.set(MODE_SALVAGE);
-            return true;
-        }
-        if (!(player instanceof ServerPlayer serverPlayer) || altar == null) return false;
-        if (buttonId == BUTTON_ASCEND && getMode() == MODE_INFUSION) return executeAscension(serverPlayer);
-        if (buttonId == BUTTON_SALVAGE_CONFIRM && getMode() == MODE_SALVAGE) return executeSalvage(serverPlayer);
-        return false;
+    public boolean hasEnhancementRunes() {
+        ItemStack runes = container.getItem(CelestialAltarBlockEntity.ENHANCE_RUNES);
+        return !runes.isEmpty() && runes.is(RuneContent.RUNE);
     }
 
-    private boolean executeAscension(ServerPlayer player) {
+    /** Called only by the server-side receiver after confirming this menu is still open. */
+    public void handleUiAction(ServerPlayer player, int action, String targetId) {
+        if (player == null || player.containerMenu != this || !stillValid(player)) return;
+        if (targetId == null || targetId.length() > 128) return;
+
+        switch (action) {
+            case CelestialAltarActionPayload.TAB_INFUSION -> mode.set(MODE_INFUSION);
+            case CelestialAltarActionPayload.TAB_SALVAGE -> mode.set(MODE_SALVAGE);
+            case CelestialAltarActionPayload.TAB_ENHANCE -> mode.set(MODE_ENHANCE);
+            case CelestialAltarActionPayload.ASCEND -> {
+                if (getMode() == MODE_INFUSION) executeAscension(player);
+            }
+            case CelestialAltarActionPayload.SALVAGE -> {
+                if (getMode() == MODE_SALVAGE) executeSalvage(player);
+            }
+            case CelestialAltarActionPayload.ENHANCE_STAT -> {
+                if (getMode() == MODE_ENHANCE) executeEnhancement(player, targetId, false);
+            }
+            case CelestialAltarActionPayload.REROLL_PERK -> {
+                if (getMode() == MODE_ENHANCE) executeEnhancement(player, targetId, true);
+            }
+            default -> { return; }
+        }
+        broadcastChanges();
+    }
+
+    private void executeAscension(ServerPlayer player) {
         ItemStack equipment = container.getItem(CelestialAltarBlockEntity.INFUSION_EQUIPMENT);
         if (!CraftingEquipmentManager.isEligibleForCelestialAltar(equipment) || equipment.getCount() != 1) {
             player.sendSystemMessage(Component.translatable("message.simpleskills.celestial_altar.invalid_equipment"), true);
-            return false;
+            return;
         }
         for (int slot = CelestialAltarBlockEntity.ESSENCE_TOP; slot <= CelestialAltarBlockEntity.ESSENCE_RIGHT; slot++) {
             if (!container.getItem(slot).is(CelestialAltarContent.TRANSCENDENCY_ESSENCE)) {
                 player.sendSystemMessage(Component.translatable("message.simpleskills.celestial_altar.missing_essence"), true);
-                return false;
+                return;
             }
         }
 
-        if (!CraftingEquipmentManager.applyCelestialAltarReroll(equipment, player)) return false;
-        // The ItemStack is mutated in place; mark the block entity dirty even if the player's
-        // inventory is full and the upgraded equipment has to remain in the altar input slot.
+        if (!CraftingEquipmentManager.applyCelestialAltarReroll(equipment, player)) return;
         container.setChanged();
         for (int slot = CelestialAltarBlockEntity.ESSENCE_TOP; slot <= CelestialAltarBlockEntity.ESSENCE_RIGHT; slot++) {
             ItemStack essence = container.getItem(slot);
@@ -153,29 +192,28 @@ public final class CelestialAltarMenu extends AbstractContainerMenu {
         player.playSound(SoundEvents.PLAYER_LEVELUP, 0.9F, 1.0F);
         player.sendSystemMessage(Component.translatable("message.simpleskills.celestial_altar.ascended"), true);
         player.closeContainer();
-        return true;
     }
 
-    private boolean executeSalvage(ServerPlayer player) {
+    private void executeSalvage(ServerPlayer player) {
         ItemStack output = container.getItem(CelestialAltarBlockEntity.SALVAGE_OUTPUT);
         if (!output.isEmpty()) {
             player.sendSystemMessage(Component.translatable("message.simpleskills.celestial_altar.take_output_first"), true);
-            return false;
+            return;
         }
         ItemStack sacrifice = container.getItem(CelestialAltarBlockEntity.SALVAGE_EQUIPMENT);
         if (!CraftingEquipmentManager.isTranscendent(sacrifice)
                 || !CraftingEquipmentManager.isEligibleForCelestialAltar(sacrifice)
                 || sacrifice.getCount() != 1) {
             player.sendSystemMessage(Component.translatable("message.simpleskills.celestial_altar.need_one_transcendent"), true);
-            return false;
+            return;
         }
 
         long now = player.level().getGameTime();
         if (now - lastSalvageConfirmTick > 30L || !matchesPendingSalvageItems()) {
-            rememberPendingSalvageItems();
+            pendingSalvageConfirmation = sacrifice.copy();
             lastSalvageConfirmTick = now;
             player.sendSystemMessage(Component.translatable("message.simpleskills.celestial_altar.salvage_confirm"), true);
-            return true;
+            return;
         }
 
         container.setItem(CelestialAltarBlockEntity.SALVAGE_EQUIPMENT, ItemStack.EMPTY);
@@ -185,16 +223,47 @@ public final class CelestialAltarMenu extends AbstractContainerMenu {
         pendingSalvageConfirmation = ItemStack.EMPTY;
         player.playSound(SoundEvents.ANVIL_USE, 0.8F, 1.3F);
         player.sendSystemMessage(Component.translatable("message.simpleskills.celestial_altar.salvaged"), true);
-        return true;
-    }
-
-    private void rememberPendingSalvageItems() {
-        pendingSalvageConfirmation = container.getItem(CelestialAltarBlockEntity.SALVAGE_EQUIPMENT).copy();
     }
 
     private boolean matchesPendingSalvageItems() {
         ItemStack current = container.getItem(CelestialAltarBlockEntity.SALVAGE_EQUIPMENT);
         return !pendingSalvageConfirmation.isEmpty() && ItemStack.matches(pendingSalvageConfirmation, current);
+    }
+
+    private void executeEnhancement(ServerPlayer player, String targetId, boolean rerollPerk) {
+        ItemStack equipment = container.getItem(CelestialAltarBlockEntity.ENHANCE_EQUIPMENT);
+        ItemStack runes = container.getItem(CelestialAltarBlockEntity.ENHANCE_RUNES);
+        if (targetId.isBlank() || equipment.getCount() != 1 || runes.isEmpty() || !runes.is(RuneContent.RUNE)) {
+            player.sendSystemMessage(Component.translatable("message.simpleskills.celestial_altar.enhancement_invalid"), true);
+            return;
+        }
+
+        boolean applied;
+        if (rerollPerk) {
+            // Verify the requested ID is still present and rerollable on the current equipment.
+            if (!CraftingEquipmentManager.canRerollPerk(equipment, targetId)) return;
+            applied = CraftingEquipmentManager.rerollEquipmentPerk(equipment, targetId, player);
+        } else {
+            // Verify the requested stat exists on this item and is not already at its cap.
+            if (!CraftingEquipmentManager.canEnhanceStat(equipment, targetId)) return;
+            applied = CraftingEquipmentManager.enhanceEquipmentStat(equipment, targetId);
+        }
+        if (!applied) return;
+
+        runes.shrink(1);
+        if (runes.isEmpty()) container.setItem(CelestialAltarBlockEntity.ENHANCE_RUNES, ItemStack.EMPTY);
+        container.setChanged();
+        player.playSound(SoundEvents.ANVIL_USE, 0.65F, rerollPerk ? 1.25F : 1.55F);
+        if (rerollPerk) {
+            player.sendSystemMessage(Component.translatable("message.simpleskills.celestial_altar.perk_rerolled"), true);
+        } else {
+            String translationKey = getEnhancementStats().stream()
+                    .filter(info -> info.id().equals(targetId))
+                    .map(StatUpgradeInfo::translationKey)
+                    .findFirst().orElse("item.simpleskills.crafting_stat." + targetId);
+            player.sendSystemMessage(Component.translatable("message.simpleskills.celestial_altar.enhanced",
+                    Component.translatable(translationKey)), true);
+        }
     }
 
     @Override

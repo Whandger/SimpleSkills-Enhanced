@@ -596,5 +596,20 @@
   "message.simpleskills.celestial_altar.salvage_confirm": "Cliquez de nouveau sur Démanteler sous 1,5 seconde pour confirmer le sacrifice de cet objet.",
   "message.simpleskills.celestial_altar.salvaged": "Un objet Transcendent a été démantelé pour obtenir une essence de transcendance.",
   "gui.simpleskills.celestial_altar.one_item": "1 objet Transcendent",
-  "message.simpleskills.celestial_altar.need_one_transcendent": "Placez un objet Transcendent admissible dans l’emplacement de démantèlement."
+  "message.simpleskills.celestial_altar.need_one_transcendent": "Placez un objet Transcendent admissible dans l’emplacement de démantèlement.",
+  "gui.simpleskills.celestial_altar.tab.enhance": "Améliorer",
+  "gui.simpleskills.celestial_altar.enhance_equipment": "Équipement",
+  "gui.simpleskills.celestial_altar.enhance_runes": "Runes",
+  "gui.simpleskills.celestial_altar.enhance_no_stats": "Aucun attribut améliorable ni avantage pouvant être relancé",
+  "gui.simpleskills.celestial_altar.enhance_equipment_hint": "Placez un équipement fabriqué admissible",
+  "gui.simpleskills.celestial_altar.enhance_rune_hint": "Ajoutez des runes SimpleSkills",
+  "gui.simpleskills.celestial_altar.enhance_apply": "Utiliser une rune (+1% de plage)",
+  "gui.simpleskills.celestial_altar.enhance_hint": "Cliquez sur + pour améliorer un attribut ou sur la roulette pour relancer un avantage. 1 rune par clic.",
+  "message.simpleskills.celestial_altar.enhancement_invalid": "Placez un équipement admissible et au moins une rune dans l’autel.",
+  "message.simpleskills.celestial_altar.enhanced": "Rune appliquée à %s.",
+  "gui.simpleskills.celestial_altar.selected_perk": "Avantage sélectionné",
+  "gui.simpleskills.celestial_altar.perk_reroll_hint": "Une rune relance uniquement cet avantage. Les autres restent inchangés.",
+  "gui.simpleskills.celestial_altar.reroll_perk_action": "Relancer l’avantage (1 rune)",
+  "message.simpleskills.celestial_altar.perk_rerolled": "L’avantage sélectionné a été relancé.",
+  "gui.simpleskills.celestial_altar.enhance_options": "Attributs et avantages"
 }

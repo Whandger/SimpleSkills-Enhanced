@@ -231,7 +231,13 @@ public final class CraftingEquipmentManager {
         if (stack == null || stack.isEmpty() || player == null || stack.get(DataComponents.MAX_DAMAGE) == null
                 || hasRarity(stack)) return;
         int level = getCraftingLevel(player);
-        CraftingRarity.MaterialTier materialTier = getRecipeMaterialTier(ingredients);
+        Identifier craftedItemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        boolean externalModEquipment = !craftedItemId.getNamespace().equals("minecraft")
+                && !craftedItemId.getNamespace().equals(Simpleskills.MOD_ID);
+        // Equipment supplied by another mod uses the same conservative 0.60% level-99
+        // Transcendent rate as Iron, even if the modded item's ID contains a material name.
+        CraftingRarity.MaterialTier materialTier = externalModEquipment
+                ? CraftingRarity.MaterialTier.OTHER : getRecipeMaterialTier(ingredients);
         CraftingRarity rarity = CraftingRarity.roll(
                 level, player.getRandom().nextDouble() * 100.0, materialTier);
         applyEquipmentRarity(stack, player, rarity, level);
@@ -263,7 +269,7 @@ public final class CraftingEquipmentManager {
             case COPPER -> 3;
             case GOLD -> 4;
             case IRON -> 5;
-            case OTHER -> 2;
+            case OTHER -> 5; // Unknown/modded materials use the Iron probability tier.
             case DIAMOND -> 6;
             case NETHERITE -> 7;
         };
@@ -272,6 +278,10 @@ public final class CraftingEquipmentManager {
     /** Returns the material tier represented by a recipe ingredient. */
     private static CraftingRarity.MaterialTier getIngredientMaterialTier(ItemStack stack) {
         Identifier itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        if (!itemId.getNamespace().equals("minecraft")
+                && !itemId.getNamespace().equals(Simpleskills.MOD_ID)) {
+            return CraftingRarity.MaterialTier.OTHER;
+        }
         String path = itemId.getPath().toLowerCase(java.util.Locale.ROOT);
 
         if (path.contains("netherite") || path.contains("ancient_debris")) {
@@ -331,6 +341,366 @@ public final class CraftingEquipmentManager {
         prepareEquipmentForReroll(stack, player);
         applyEquipmentRarity(stack, player, CraftingRarity.TRANSCENDENT, getCraftingLevel(player));
         return true;
+    }
+
+    /** Snapshot of one rolled attribute available for rune enhancement. Values are percentages. */
+    public record StatUpgradeInfo(String id, String translationKey, double currentPercent,
+                                  double minimumPercent, double maximumPercent) {
+        public double progressPercent() {
+            double width = maximumPercent - minimumPercent;
+            return width <= 0.0 ? 100.0
+                    : Math.max(0.0, Math.min(100.0, (currentPercent - minimumPercent) / width * 100.0));
+        }
+
+        public boolean isMaxed() {
+            return currentPercent >= maximumPercent - 0.0001;
+        }
+    }
+
+    /** A currently rolled perk, with whether it has a legal replacement in its own perk pool. */
+    public record PerkRerollInfo(String id, int amplifier, boolean signatureAbility, boolean rerollable) {
+        public String translationKey() { return "item.simpleskills.crafting_perk." + id; }
+    }
+
+    /** Returns every currently rolled perk and marks whether it has a legal replacement. */
+    public static List<PerkRerollInfo> getEnhanceablePerks(ItemStack stack) {
+        if (!isEligibleForCelestialAltar(stack)) return List.of();
+        CraftingRarity rarity = CraftingRarity.byId(getRarityId(stack));
+        if (rarity == null) return List.of();
+
+        EquipmentKind kind = classify(stack);
+        List<String> encodedPerks = getEncodedPerks(stack);
+        List<PerkRerollInfo> result = new ArrayList<>();
+        for (String encoded : encodedPerks) {
+            String[] parts = encoded.split(":", 2);
+            if (parts.length != 2) continue;
+            String perkId = parts[0];
+            Perk currentPerk = perkById(perkId);
+            if (currentPerk == null) continue;
+
+            boolean signature = rarity == CraftingRarity.TRANSCENDENT
+                    && transcendentPool(kind).stream().anyMatch(perk -> perk.id().equals(perkId));
+            List<Perk> pool = signature ? transcendentPool(kind)
+                    : (rarity == CraftingRarity.UNIQUE ? uniquePool(kind) : commonPool(kind));
+            boolean rerollable = hasAlternativePerk(pool, encodedPerks, currentPerk);
+            result.add(new PerkRerollInfo(perkId, Math.max(0, parseInt(parts[1], 0)), signature, rerollable));
+        }
+        return List.copyOf(result);
+    }
+
+    /** Returns only perks that can be replaced without changing any of the item's other perks. */
+    public static List<PerkRerollInfo> getRerollablePerks(ItemStack stack) {
+        return getEnhanceablePerks(stack).stream().filter(PerkRerollInfo::rerollable).toList();
+    }
+
+    public static boolean canRerollPerk(ItemStack stack, String perkId) {
+        if (perkId == null || perkId.isBlank()) return false;
+        return getRerollablePerks(stack).stream().anyMatch(info -> info.id().equals(perkId));
+    }
+
+    /** Formats a selected perk exactly like its equipment tooltip, including its rolled rank. */
+    public static Component getPerkDisplayComponent(PerkRerollInfo info) {
+        if (info == null) return Component.empty();
+        String id = info.id();
+        int amplifier = info.amplifier();
+        String key = info.translationKey();
+        if (isJumpPerk(id)) {
+            return Component.translatable(key, getAdditionalJumpsForPerk(id, amplifier + 1));
+        }
+        if (id.equals("vitality")) {
+            return Component.translatable(key, roman(amplifier + 1), (amplifier + 1) * 4);
+        }
+        if (id.equals("resilient")) {
+            return Component.translatable(key, roman(amplifier + 1), (amplifier + 1) * 2);
+        }
+        if (NO_LEVEL_PERKS.contains(id)) return Component.translatable(key);
+        return Component.translatable(key, roman(amplifier + 1));
+    }
+
+    private static boolean hasAlternativePerk(List<Perk> pool, List<String> encodedPerks, Perk currentPerk) {
+        Set<String> occupiedIds = new HashSet<>();
+        Set<String> occupiedEffects = new HashSet<>();
+        for (String encoded : encodedPerks) {
+            String[] parts = encoded.split(":", 2);
+            if (parts.length != 2 || parts[0].equals(currentPerk.id())) continue;
+            occupiedIds.add(parts[0]);
+            Perk existing = perkById(parts[0]);
+            if (existing != null && !existing.effectId().isBlank()) occupiedEffects.add(existing.effectId());
+        }
+
+        for (Perk candidate : pool) {
+            if (candidate == null || candidate.id().equals(currentPerk.id())
+                    || occupiedIds.contains(candidate.id())) continue;
+            if (!candidate.effectId().isBlank()
+                    && (candidate.effectId().equals(currentPerk.effectId())
+                    || occupiedEffects.contains(candidate.effectId()))) continue;
+            return true;
+        }
+        return false;
+    }
+
+    /** Replaces exactly one selected perk with another valid perk from the same rarity/category pool. */
+    public static boolean rerollEquipmentPerk(ItemStack stack, String perkId, ServerPlayer player) {
+        if (!isEligibleForCelestialAltar(stack) || player == null || perkId == null || perkId.isBlank()) return false;
+        CraftingRarity rarity = CraftingRarity.byId(getRarityId(stack));
+        if (rarity == null) return false;
+
+        List<String> encodedPerks = new ArrayList<>(getEncodedPerks(stack));
+        int targetIndex = -1;
+        for (int i = 0; i < encodedPerks.size(); i++) {
+            String[] parts = encodedPerks.get(i).split(":", 2);
+            if (parts.length == 2 && parts[0].equals(perkId)) {
+                targetIndex = i;
+                break;
+            }
+        }
+        if (targetIndex < 0) return false;
+
+        Perk currentPerk = perkById(perkId);
+        if (currentPerk == null) return false;
+        EquipmentKind kind = classify(stack);
+        boolean signature = rarity == CraftingRarity.TRANSCENDENT
+                && transcendentPool(kind).stream().anyMatch(perk -> perk.id().equals(perkId));
+        List<Perk> pool = signature ? transcendentPool(kind)
+                : (rarity == CraftingRarity.UNIQUE ? uniquePool(kind) : commonPool(kind));
+        if (!hasAlternativePerk(pool, encodedPerks, currentPerk)) return false;
+
+        Set<String> occupiedIds = new HashSet<>();
+        Set<String> occupiedEffects = new HashSet<>();
+        for (int i = 0; i < encodedPerks.size(); i++) {
+            if (i == targetIndex) continue;
+            String[] parts = encodedPerks.get(i).split(":", 2);
+            if (parts.length != 2) continue;
+            occupiedIds.add(parts[0]);
+            Perk existing = perkById(parts[0]);
+            if (existing != null && !existing.effectId().isBlank()) occupiedEffects.add(existing.effectId());
+        }
+
+        List<Perk> candidates = new ArrayList<>();
+        for (Perk candidate : pool) {
+            if (candidate.id().equals(perkId) || occupiedIds.contains(candidate.id())) continue;
+            if (!candidate.effectId().isBlank()
+                    && (candidate.effectId().equals(currentPerk.effectId())
+                    || occupiedEffects.contains(candidate.effectId()))) continue;
+            candidates.add(candidate);
+        }
+        if (candidates.isEmpty()) return false;
+
+        Perk replacement = candidates.get(player.getRandom().nextInt(candidates.size()));
+        String replacementEncoding = encodePerks(List.of(replacement), getCraftingLevel(player), rarity, player);
+        if (replacementEncoding.isBlank()) return false;
+        encodedPerks.set(targetIndex, replacementEncoding);
+        String persistedPerks = String.join(",", encodedPerks);
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, data -> data.putString(DATA_PERKS, persistedPerks));
+        refreshCraftingAttributes(stack);
+        refreshCraftingTooltip(stack);
+        return true;
+    }
+
+    /**
+     * Returns the attributes already rolled on an item. Attributes which were not generated
+     * for the equipment category are not offered by the altar.
+     */
+    public static List<StatUpgradeInfo> getEnhanceableStats(ItemStack stack) {
+        if (!isEligibleForCelestialAltar(stack)) return List.of();
+        CraftingRarity rarity = CraftingRarity.byId(getRarityId(stack));
+        if (rarity == null) return List.of();
+
+        CompoundTag tag = getTag(stack);
+        List<StatUpgradeInfo> result = new ArrayList<>();
+        boolean runicEdge = getPerkAmplifier(stack, "runic_edge") >= 0;
+        int criticalMastery = getPerkAmplifier(stack, "critical_mastery");
+        double criticalMasteryBonus = criticalMastery >= 0 ? 5.0 + criticalMastery * 5.0 : 0.0;
+
+        addUpgradeInfo(result, tag, "damage", "item.simpleskills.crafting_stat.damage",
+                rarity.minDamageBonus(), rarity.maxDamageBonus(), runicEdge);
+        addUpgradeInfo(result, tag, "durability", "item.simpleskills.crafting_stat.durability",
+                rarity.minDurabilityBonus(), rarity.maxDurabilityBonus(), false);
+        addUpgradeInfo(result, tag, "breakSpeed", "item.simpleskills.crafting_stat.break_speed",
+                rarity.minBreakSpeedBonus(), rarity.maxBreakSpeedBonus(), false);
+        addUpgradeInfo(result, tag, "critical", "item.simpleskills.crafting_stat.critical_chance",
+                rarity.minCriticalChance(), rarity.maxCriticalChance(), criticalMasteryBonus);
+        addUpgradeInfo(result, tag, "attackSpeed", "item.simpleskills.crafting_stat.attack_speed",
+                rarity.minAttackSpeedBonus(), rarity.maxAttackSpeedBonus(), false);
+        addUpgradeInfo(result, tag, "armor", "item.simpleskills.crafting_stat.armor",
+                rarity.minArmorBonus(), rarity.maxArmorBonus(), false);
+        addUpgradeInfo(result, tag, "toughness", "item.simpleskills.crafting_stat.armor_toughness",
+                rarity.minToughnessBonus(), rarity.maxToughnessBonus(), false);
+        return List.copyOf(result);
+    }
+
+    private static void addUpgradeInfo(List<StatUpgradeInfo> result, CompoundTag tag, String field,
+                                       String translationKey, double minimum, double maximum,
+                                       boolean runicEdge) {
+        addUpgradeInfo(result, tag, field, translationKey, minimum, maximum,
+                runicEdge ? 1.08 : 1.0, 0.0);
+    }
+
+    private static void addUpgradeInfo(List<StatUpgradeInfo> result, CompoundTag tag, String field,
+                                       String translationKey, double minimum, double maximum,
+                                       double additiveBonus) {
+        addUpgradeInfo(result, tag, field, translationKey, minimum, maximum, 1.0, additiveBonus);
+    }
+
+    private static void addUpgradeInfo(List<StatUpgradeInfo> result, CompoundTag tag, String field,
+                                       String translationKey, double minimum, double maximum,
+                                       double multiplier, double additiveBonus) {
+        double current = tag.getDoubleOr(statDataKey(field), 0.0);
+        if (current <= 0.0 || maximum <= minimum) return;
+        double shownCurrent = current;
+        double shownMin = minimum;
+        double shownMax = maximum;
+        if (multiplier != 1.0) {
+            shownCurrent = (1.0 + current) * multiplier - 1.0;
+            shownMin = (1.0 + minimum) * multiplier - 1.0;
+            shownMax = (1.0 + maximum) * multiplier - 1.0;
+        }
+        if (additiveBonus != 0.0) {
+            shownCurrent = Math.min(0.60, shownCurrent + additiveBonus);
+            shownMin = Math.min(0.60, shownMin + additiveBonus);
+            shownMax = Math.min(0.60, shownMax + additiveBonus);
+        }
+        result.add(new StatUpgradeInfo(field, translationKey,
+                shownCurrent * 100.0, shownMin * 100.0, shownMax * 100.0));
+    }
+
+    private static String statDataKey(String field) {
+        return switch (field) {
+            case "damage" -> DATA_DAMAGE;
+            case "durability" -> DATA_DURABILITY;
+            case "breakSpeed" -> DATA_BREAK_SPEED;
+            case "critical" -> DATA_CRITICAL_CHANCE;
+            case "attackSpeed" -> DATA_ATTACK_SPEED;
+            case "armor" -> DATA_ARMOR;
+            case "toughness" -> DATA_TOUGHNESS;
+            default -> "";
+        };
+    }
+
+    /** True when the selected stat still has room below its rarity's maximum roll. */
+    public static boolean canEnhanceStat(ItemStack stack, String field) {
+        double[] bounds = statBounds(stack, field);
+        if (bounds == null) return false;
+        double current = getTag(stack).getDoubleOr(statDataKey(field), 0.0);
+        return current > 0.0 && current < bounds[1] - 0.0000001;
+    }
+
+    /**
+     * Consumes one Rune to increase the selected attribute by exactly 1.00 percentage point.
+     * The increase is capped at the attribute's maximum roll for the equipment rarity.
+     */
+    public static boolean enhanceEquipmentStat(ItemStack stack, String field) {
+        if (!isEligibleForCelestialAltar(stack) || !canEnhanceStat(stack, field)) return false;
+        double[] bounds = statBounds(stack, field);
+        if (bounds == null) return false;
+
+        double current = getTag(stack).getDoubleOr(statDataKey(field), 0.0);
+        // Stored values are fractions (0.25 = +25%). Damage with Runic Edge is displayed
+        // with an additional 1.08 multiplier, so compensate to keep the visible increase
+        // at exactly +1.00 percentage point per Rune as well.
+        double displayMultiplier = "damage".equals(field)
+                && getPerkAmplifier(stack, "runic_edge") >= 0 ? 1.08 : 1.0;
+        double oneRuneProgress = 0.01 / displayMultiplier;
+        if (oneRuneProgress <= 0.0) return false;
+        double upgraded = Math.min(bounds[1], current + oneRuneProgress);
+        if (upgraded <= current) return false;
+
+        String dataKey = statDataKey(field);
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, data -> data.putDouble(dataKey, upgraded));
+        refreshCraftingAttributes(stack);
+        refreshCraftingTooltip(stack);
+        return true;
+    }
+
+    /** Returns the raw stored range as fractions (e.g. 0.23 = +23%). */
+    private static double[] statBounds(ItemStack stack, String field) {
+        if (!isEligibleForCelestialAltar(stack)) return null;
+        CraftingRarity rarity = CraftingRarity.byId(getRarityId(stack));
+        if (rarity == null) return null;
+        return switch (field) {
+            case "damage" -> new double[]{rarity.minDamageBonus(), rarity.maxDamageBonus()};
+            case "durability" -> new double[]{rarity.minDurabilityBonus(), rarity.maxDurabilityBonus()};
+            case "breakSpeed" -> new double[]{rarity.minBreakSpeedBonus(), rarity.maxBreakSpeedBonus()};
+            case "critical" -> {
+                int mastery = getPerkAmplifier(stack, "critical_mastery");
+                double masteryBonus = mastery >= 0 ? 0.05 + mastery * 0.05 : 0.0;
+                double cappedMaximum = Math.min(rarity.maxCriticalChance(), 0.60 - masteryBonus);
+                yield cappedMaximum > rarity.minCriticalChance()
+                        ? new double[]{rarity.minCriticalChance(), cappedMaximum} : null;
+            }
+            case "attackSpeed" -> new double[]{rarity.minAttackSpeedBonus(), rarity.maxAttackSpeedBonus()};
+            case "armor" -> new double[]{rarity.minArmorBonus(), rarity.maxArmorBonus()};
+            case "toughness" -> new double[]{rarity.minToughnessBonus(), rarity.maxToughnessBonus()};
+            default -> null;
+        };
+    }
+
+    private static void refreshCraftingAttributes(ItemStack stack) {
+        CompoundTag tag = getTag(stack);
+        double damage = tag.getDoubleOr(DATA_DAMAGE, 0.0);
+        double speed = tag.getDoubleOr(DATA_ATTACK_SPEED, 0.0);
+        double armor = tag.getDoubleOr(DATA_ARMOR, 0.0);
+        double toughness = tag.getDoubleOr(DATA_TOUGHNESS, 0.0);
+        double durability = tag.getDoubleOr(DATA_DURABILITY, 0.0);
+        boolean hasRunicEdge = getPerkAmplifier(stack, "runic_edge") >= 0;
+        double totalDamage = damage > 0.0
+                ? (1.0 + damage) * (hasRunicEdge ? 1.08 : 1.0) - 1.0 : 0.0;
+
+        removeCraftingAttributeModifiers(stack);
+        boolean damageApplied = applyAttackDamageAttributeBonus(stack, totalDamage);
+        boolean speedApplied = applyAttackSpeedAttributeBonus(stack, speed);
+        boolean[] defenseApplied = applyDefenseAttributeBonuses(stack, classify(stack), armor, toughness);
+        Integer currentMax = stack.get(DataComponents.MAX_DAMAGE);
+        int baseMaximum = tag.getIntOr(DATA_BASE_MAX_DAMAGE, -1);
+        if (baseMaximum < 1 && currentMax != null) {
+            baseMaximum = Math.max(1, (int) Math.round(currentMax / (1.0 + Math.max(0.0, durability))));
+        }
+        if (baseMaximum > 0) {
+            stack.set(DataComponents.MAX_DAMAGE, Math.max(1, (int) Math.round(baseMaximum * (1.0 + durability))));
+            final int savedBaseMaximum = baseMaximum;
+            CustomData.update(DataComponents.CUSTOM_DATA, stack,
+                    data -> data.putInt(DATA_BASE_MAX_DAMAGE, savedBaseMaximum));
+        }
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, data -> {
+            data.putBoolean(DATA_DAMAGE_AS_ATTRIBUTE, damageApplied);
+            data.putBoolean(DATA_DAMAGE_ATTRIBUTE_INCLUDES_AFFIXES, damageApplied);
+            if (!speedApplied) data.putDouble(DATA_ATTACK_SPEED, 0.0);
+            if (!defenseApplied[0]) data.putDouble(DATA_ARMOR, 0.0);
+            if (!defenseApplied[1]) data.putDouble(DATA_TOUGHNESS, 0.0);
+        });
+    }
+
+    private static void refreshCraftingTooltip(ItemStack stack) {
+        CompoundTag tag = getTag(stack);
+        ItemLore currentLore = stack.getOrDefault(DataComponents.LORE, new ItemLore(List.of()));
+        int generated = tag.getIntOr(DATA_LORE_LINE_COUNT, -1);
+        if (generated < 0) {
+            generated = 1;
+            generated += tag.getDoubleOr(DATA_DAMAGE, 0.0) > 0.0 ? 1 : 0;
+            generated += tag.getDoubleOr(DATA_DURABILITY, 0.0) > 0.0 ? 1 : 0;
+            generated += tag.getDoubleOr(DATA_BREAK_SPEED, 0.0) > 0.0 ? 1 : 0;
+            generated += tag.getDoubleOr(DATA_CRITICAL_CHANCE, 0.0) > 0.0 ? 1 : 0;
+            generated += tag.getDoubleOr(DATA_ATTACK_SPEED, 0.0) > 0.0 ? 1 : 0;
+            generated += tag.getDoubleOr(DATA_ARMOR, 0.0) > 0.0 ? 1 : 0;
+            generated += tag.getDoubleOr(DATA_TOUGHNESS, 0.0) > 0.0 ? 1 : 0;
+            String encoded = tag.getStringOr(DATA_PERKS, "");
+            if (!encoded.isBlank()) generated += encoded.split(",").length;
+        }
+        int keep = Math.max(0, currentLore.lines().size() - generated);
+        stack.set(DataComponents.LORE, new ItemLore(new ArrayList<>(currentLore.lines().subList(0, keep))));
+
+        CraftingRarity rarity = CraftingRarity.byId(tag.getStringOr(DATA_RARITY, ""));
+        if (rarity == null) return;
+        double damage = tag.getDoubleOr(DATA_DAMAGE, 0.0);
+        double totalDamage = damage > 0.0
+                ? (1.0 + damage) * (getPerkAmplifier(stack, "runic_edge") >= 0 ? 1.08 : 1.0) - 1.0 : 0.0;
+        appendTooltip(stack, rarity, totalDamage,
+                tag.getDoubleOr(DATA_DURABILITY, 0.0),
+                tag.getDoubleOr(DATA_BREAK_SPEED, 0.0),
+                getEffectiveCriticalChance(stack),
+                tag.getDoubleOr(DATA_ATTACK_SPEED, 0.0),
+                tag.getDoubleOr(DATA_ARMOR, 0.0),
+                tag.getDoubleOr(DATA_TOUGHNESS, 0.0));
     }
 
     private static String getUnprefixedItemName(ItemStack stack) {
@@ -1046,9 +1416,16 @@ public final class CraftingEquipmentManager {
 
     private static String formatPercent(double percentage) {
         double nearestWhole = Math.rint(percentage);
-        return Math.abs(percentage - nearestWhole) < 0.05
-                ? String.format(java.util.Locale.ROOT, "%.0f", nearestWhole)
-                : String.format(java.util.Locale.ROOT, "%.1f", percentage);
+        if (Math.abs(percentage - nearestWhole) < 0.005) {
+            return String.format(java.util.Locale.ROOT, "%.0f", nearestWhole);
+        }
+        double nearestTenth = Math.rint(percentage * 10.0) / 10.0;
+        if (Math.abs(percentage - nearestTenth) < 0.005) {
+            return String.format(java.util.Locale.ROOT, "%.1f", nearestTenth);
+        }
+        // Rune upgrades can move a stat by only 1% of its range per use; retain enough
+        // precision to make each consumed Rune visibly change the displayed attribute.
+        return String.format(java.util.Locale.ROOT, "%.2f", percentage);
     }
 
     private static void appendTooltip(ItemStack stack, CraftingRarity rarity, double damageBonus,
@@ -1071,17 +1448,17 @@ public final class CraftingEquipmentManager {
         }
         if (damageBonus > 0.0) {
             lines.add(rangeStatLine("item.simpleskills.crafting_stat.damage", damageBonus * 100.0,
-                    damageMin, damageMax, 0.001 * 100.0));
+                    damageMin, damageMax));
             generatedLines++;
         }
         if (durabilityBonus > 0.0) {
             lines.add(rangeStatLine("item.simpleskills.crafting_stat.durability", durabilityBonus * 100.0,
-                    rarity.minDurabilityBonus() * 100.0, rarity.maxDurabilityBonus() * 100.0, 1.0));
+                    rarity.minDurabilityBonus() * 100.0, rarity.maxDurabilityBonus() * 100.0));
             generatedLines++;
         }
         if (breakSpeedBonus > 0.0) {
             lines.add(rangeStatLine("item.simpleskills.crafting_stat.break_speed", breakSpeedBonus * 100.0,
-                    rarity.minBreakSpeedBonus() * 100.0, rarity.maxBreakSpeedBonus() * 100.0, 1.0));
+                    rarity.minBreakSpeedBonus() * 100.0, rarity.maxBreakSpeedBonus() * 100.0));
             generatedLines++;
         }
         if (criticalChance > 0.0) {
@@ -1089,22 +1466,22 @@ public final class CraftingEquipmentManager {
             double masteryBonus = mastery >= 0 ? 5.0 + mastery * 5.0 : 0.0;
             lines.add(rangeStatLine("item.simpleskills.crafting_stat.critical_chance", criticalChance * 100.0,
                     Math.min(60.0, rarity.minCriticalChance() * 100.0 + masteryBonus),
-                    Math.min(60.0, rarity.maxCriticalChance() * 100.0 + masteryBonus), 0.1));
+                    Math.min(60.0, rarity.maxCriticalChance() * 100.0 + masteryBonus)));
             generatedLines++;
         }
         if (attackSpeedBonus > 0.0) {
             lines.add(rangeStatLine("item.simpleskills.crafting_stat.attack_speed", attackSpeedBonus * 100.0,
-                    rarity.minAttackSpeedBonus() * 100.0, rarity.maxAttackSpeedBonus() * 100.0, 0.5));
+                    rarity.minAttackSpeedBonus() * 100.0, rarity.maxAttackSpeedBonus() * 100.0));
             generatedLines++;
         }
         if (armorBonus > 0.0) {
             lines.add(rangeStatLine("item.simpleskills.crafting_stat.armor", armorBonus * 100.0,
-                    rarity.minArmorBonus() * 100.0, rarity.maxArmorBonus() * 100.0, 0.1));
+                    rarity.minArmorBonus() * 100.0, rarity.maxArmorBonus() * 100.0));
             generatedLines++;
         }
         if (toughnessBonus > 0.0) {
             lines.add(rangeStatLine("item.simpleskills.crafting_stat.armor_toughness", toughnessBonus * 100.0,
-                    rarity.minToughnessBonus() * 100.0, rarity.maxToughnessBonus() * 100.0, 0.1));
+                    rarity.minToughnessBonus() * 100.0, rarity.maxToughnessBonus() * 100.0));
             generatedLines++;
         }
         for (String encoded : encodePerksWithAmplifiers(stack)) {
@@ -1139,8 +1516,9 @@ public final class CraftingEquipmentManager {
     }
 
     private static Component rangeStatLine(String translationKey, double value, double minimum,
-                                           double maximum, double step) {
-        boolean maxRoll = Math.abs(value - maximum) <= Math.max(0.0001, step * 0.51);
+                                           double maximum) {
+        // Only the actual maximum is gold; a Rune still remaining must not look like Max Roll.
+        boolean maxRoll = Math.abs(value - maximum) <= 0.0001;
         ChatFormatting valueColor = maxRoll ? ChatFormatting.GOLD : ChatFormatting.GREEN;
         MutableComponent line = Component.translatable(translationKey).withStyle(valueColor);
         line.append(Component.literal(": +" + formatPercent(value) + "%").withStyle(valueColor));

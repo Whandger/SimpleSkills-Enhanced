@@ -2,6 +2,8 @@ package com.github.ob_yekt.simpleskills.celestial;
 
 import net.fabricmc.fabric.api.entity.event.v1.ServerLivingEntityEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -25,7 +27,21 @@ public final class CelestialAltarManager {
 
     private CelestialAltarManager() {}
 
+    public static void registerPayloads() {
+        PayloadTypeRegistry.serverboundPlay().register(CelestialAltarActionPayload.TYPE,
+                CelestialAltarActionPayload.CODEC);
+    }
+
     public static void register() {
+        ServerPlayNetworking.registerGlobalReceiver(CelestialAltarActionPayload.TYPE,
+                (payload, context) -> context.server().execute(() -> {
+                    ServerPlayer player = context.player();
+                    if (player == null || payload == null || payload.targetId() == null
+                            || payload.targetId().length() > 128) return;
+                    if (player.containerMenu instanceof CelestialAltarMenu menu) {
+                        menu.handleUiAction(player, payload.action(), payload.targetId());
+                    }
+                }));
         ServerLivingEntityEvents.AFTER_DAMAGE.register(CelestialAltarManager::recordPlayerDamage);
         ServerLivingEntityEvents.AFTER_DEATH.register(CelestialAltarManager::onLivingDeath);
         ServerTickEvents.END_SERVER_TICK.register(CelestialAltarManager::cleanupRecentHits);

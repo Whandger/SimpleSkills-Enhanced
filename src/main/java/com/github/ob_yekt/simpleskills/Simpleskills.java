@@ -71,6 +71,7 @@ public class Simpleskills implements ModInitializer {
 		GatheringSpeed.registerPayloads();
 		ExcavatingManager.registerPayloads();
 		FishingManager.registerPayloads();
+		CelestialAltarManager.registerPayloads();
 		AgilityManager.registerPayloads();
 		RankTitleManager.registerPayloads();
 		CraftingEquipmentManager.registerPayloads();

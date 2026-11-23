@@ -601,5 +601,20 @@
   "message.simpleskills.celestial_altar.salvage_confirm": "Click dismantle again within 1.5 seconds to confirm sacrificing this item.",
   "message.simpleskills.celestial_altar.salvaged": "One Transcendent item was dismantled into one Transcendency Essence.",
   "gui.simpleskills.celestial_altar.one_item": "1 Transcendent item",
-  "message.simpleskills.celestial_altar.need_one_transcendent": "Place one eligible Transcendent item in the salvage slot."
+  "message.simpleskills.celestial_altar.need_one_transcendent": "Place one eligible Transcendent item in the salvage slot.",
+  "gui.simpleskills.celestial_altar.tab.enhance": "Enhance",
+  "gui.simpleskills.celestial_altar.enhance_equipment": "Equipment",
+  "gui.simpleskills.celestial_altar.enhance_runes": "Runes",
+  "gui.simpleskills.celestial_altar.enhance_no_stats": "No upgradeable attributes or rerollable perks",
+  "gui.simpleskills.celestial_altar.enhance_equipment_hint": "Place eligible crafted equipment",
+  "gui.simpleskills.celestial_altar.enhance_rune_hint": "Add SimpleSkills Runes",
+  "gui.simpleskills.celestial_altar.enhance_apply": "Use Rune (+1% range)",
+  "gui.simpleskills.celestial_altar.enhance_hint": "Click + to upgrade a stat or the wheel to reroll a perk. 1 Rune per click.",
+  "message.simpleskills.celestial_altar.enhancement_invalid": "Place eligible equipment and at least one Rune in the altar.",
+  "message.simpleskills.celestial_altar.enhanced": "Rune applied to %s.",
+  "gui.simpleskills.celestial_altar.selected_perk": "Selected perk",
+  "gui.simpleskills.celestial_altar.perk_reroll_hint": "One Rune rerolls only this perk. All other perks stay unchanged.",
+  "gui.simpleskills.celestial_altar.reroll_perk_action": "Reroll Perk (1 Rune)",
+  "message.simpleskills.celestial_altar.perk_rerolled": "The selected perk has been rerolled.",
+  "gui.simpleskills.celestial_altar.enhance_options": "Attributes & Perks"
 }

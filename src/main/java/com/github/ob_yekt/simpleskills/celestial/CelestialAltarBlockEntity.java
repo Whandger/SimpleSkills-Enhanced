@@ -13,17 +13,20 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import com.github.ob_yekt.simpleskills.runes.RuneContent;
 import org.jetbrains.annotations.Nullable;
 
-/** Persistent six-slot inventory for infusion ingredients and single-item salvage/output. */
+/** Persistent altar inventory for infusion, salvage and rune-based attribute enhancement. */
 public final class CelestialAltarBlockEntity extends BlockEntity implements Container, net.minecraft.world.MenuProvider {
-    public static final int SLOT_COUNT = 6;
+    public static final int SLOT_COUNT = 8;
     public static final int INFUSION_EQUIPMENT = 0;
     public static final int ESSENCE_TOP = 1;
     public static final int ESSENCE_LEFT = 2;
     public static final int ESSENCE_RIGHT = 3;
     public static final int SALVAGE_EQUIPMENT = 4;
     public static final int SALVAGE_OUTPUT = 5;
+    public static final int ENHANCE_EQUIPMENT = 6;
+    public static final int ENHANCE_RUNES = 7;
 
     private final NonNullList<ItemStack> items = NonNullList.withSize(SLOT_COUNT, ItemStack.EMPTY);
 
@@ -110,6 +113,10 @@ public final class CelestialAltarBlockEntity extends BlockEntity implements Cont
             return com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager.isTranscendent(stack)
                     && com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager.isEligibleForCelestialAltar(stack);
         }
+        if (slot == ENHANCE_EQUIPMENT) {
+            return com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager.isEligibleForCelestialAltar(stack);
+        }
+        if (slot == ENHANCE_RUNES) return stack.is(RuneContent.RUNE);
         return false;
     }
 

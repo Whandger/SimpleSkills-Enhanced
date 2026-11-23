@@ -601,5 +601,20 @@
   "message.simpleskills.celestial_altar.salvage_confirm": "Clique em Desmontar novamente em até 1,5 segundo para confirmar o sacrifício deste equipamento.",
   "message.simpleskills.celestial_altar.salvaged": "Um equipamento Transcendent foi desmontado e gerou uma Essência de Transcendência.",
   "gui.simpleskills.celestial_altar.one_item": "1 equipamento Transcendent",
-  "message.simpleskills.celestial_altar.need_one_transcendent": "Coloque um equipamento Transcendent elegível no slot de desmonte."
+  "message.simpleskills.celestial_altar.need_one_transcendent": "Coloque um equipamento Transcendent elegível no slot de desmonte.",
+  "gui.simpleskills.celestial_altar.tab.enhance": "Aprimorar",
+  "gui.simpleskills.celestial_altar.enhance_equipment": "Equipamento",
+  "gui.simpleskills.celestial_altar.enhance_runes": "Runas",
+  "gui.simpleskills.celestial_altar.enhance_no_stats": "Nenhum atributo aprimorável ou perk que possa ser rerrolado",
+  "gui.simpleskills.celestial_altar.enhance_equipment_hint": "Coloque um equipamento criado elegível",
+  "gui.simpleskills.celestial_altar.enhance_rune_hint": "Adicione Runas do SimpleSkills",
+  "gui.simpleskills.celestial_altar.enhance_apply": "Usar Runa (+1% da margem)",
+  "gui.simpleskills.celestial_altar.enhance_hint": "Clique em + para upar atributos ou na roleta para rerrolar perks. 1 Runa por clique.",
+  "message.simpleskills.celestial_altar.enhancement_invalid": "Coloque um equipamento elegível e ao menos uma Runa no altar.",
+  "message.simpleskills.celestial_altar.enhanced": "Runa aplicada em %s.",
+  "gui.simpleskills.celestial_altar.selected_perk": "Perk selecionado",
+  "gui.simpleskills.celestial_altar.perk_reroll_hint": "Uma Runa rerrola somente este perk. Os demais permanecem iguais.",
+  "gui.simpleskills.celestial_altar.reroll_perk_action": "Rerrolar Perk (1 Runa)",
+  "message.simpleskills.celestial_altar.perk_rerolled": "O perk selecionado foi rerrolado.",
+  "gui.simpleskills.celestial_altar.enhance_options": "Atributos e Perks"
 }
