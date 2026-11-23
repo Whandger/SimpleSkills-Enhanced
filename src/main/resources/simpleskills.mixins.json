@@ -16,6 +16,8 @@
     "BlockDropMixin",
     "GatheringSpeedMixin",
     "GatheringDurabilityMixin",
+    "CraftingIndestructibleMixin",
+    "LivingEntityDamageCooldownAccessor",
     "TreeFellerFallingBlockMixin",
     "EnchantingScreenHandlerMixin",
     "ServerPlayerEntityMixin",

@@ -5,6 +5,7 @@ import com.github.ob_yekt.simpleskills.Skills;
 import com.github.ob_yekt.simpleskills.agility.AgilityManager;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingLoot;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingRank;
+import com.github.ob_yekt.simpleskills.crafting.CraftingRarity;
 import com.github.ob_yekt.simpleskills.fishing.FishingDebug;
 import com.github.ob_yekt.simpleskills.managers.ConfigManager;
 import com.github.ob_yekt.simpleskills.managers.DatabaseManager;
@@ -88,6 +89,17 @@ public class SimpleskillsCommands {
                                                                     "§6[simpleskills]§f " + ExcavatingLoot.describe(level)), false);
                                                             return 1;
                                                         }))))
+                                // Shows the exact equipment-rarity chances for any Crafting level.
+                                .then(Commands.literal("crafting")
+                                        .requires(source -> source.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.MODERATORS)))
+                                        .then(Commands.literal("odds")
+                                                .then(Commands.argument("level", IntegerArgumentType.integer(1, 99))
+                                                        .executes(context -> {
+                                                            int level = IntegerArgumentType.getInteger(context, "level");
+                                                            context.getSource().sendSuccess(() -> Component.literal(
+                                                                    "§6[simpleskills]§f " + CraftingRarity.describe(level)), false);
+                                                            return 1;
+                                                        }))))
                                 .then(Commands.literal("reload")
                                         .requires(source -> source.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.MODERATORS)))
                                         .executes(context -> {
@@ -161,8 +173,12 @@ public class SimpleskillsCommands {
             return 0;
         }
         if (!RankTitleManager.isUnlocked(player, option)) {
-            context.getSource().sendFailure(Component.translatable("message.simpleskills.titles.locked",
-                    option.requiredLevel()));
+            if (option.craftedWeaponRank()) {
+                context.getSource().sendFailure(Component.translatable("message.simpleskills.titles.crafting_weapon_locked"));
+            } else {
+                context.getSource().sendFailure(Component.translatable("message.simpleskills.titles.locked",
+                        option.requiredLevel()));
+            }
             return 0;
         }
 

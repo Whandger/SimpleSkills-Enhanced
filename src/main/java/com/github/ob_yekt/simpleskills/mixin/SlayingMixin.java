@@ -24,11 +24,19 @@ public abstract class SlayingMixin {
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;hurtOrSimulate(Lnet/minecraft/world/damagesource/DamageSource;F)Z"),
         index = 1
     )
-    private float simpleskills$applyCounterMastery(float damage) {
+    private float simpleskills$applyCounterMastery(float damage,
+            @Local(argsOnly = true) Entity target) {
         Player player = (Player) (Object) this;
-        return player instanceof net.minecraft.server.level.ServerPlayer serverPlayer
-                && com.github.ob_yekt.simpleskills.DefenseCombat.hasCounterMastery(serverPlayer)
-                ? (float) (damage * com.github.ob_yekt.simpleskills.DefenseCombat.COUNTER_DAMAGE_MULTIPLIER) : damage;
+        float result = damage;
+        if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer
+                && com.github.ob_yekt.simpleskills.DefenseCombat.hasCounterMastery(serverPlayer)) {
+            result *= (float) com.github.ob_yekt.simpleskills.DefenseCombat.COUNTER_DAMAGE_MULTIPLIER;
+        }
+        result *= (float) com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
+                .getDamageMultiplier(player.getMainHandItem(), target);
+        result *= com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
+                .getCriticalMultiplier(player.getMainHandItem(), player.getRandom());
+        return result;
     }
 
     @ModifyExpressionValue(

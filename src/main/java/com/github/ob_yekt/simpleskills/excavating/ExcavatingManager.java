@@ -435,7 +435,9 @@ public final class ExcavatingManager {
         // Durability: exactly 1 point per completed investigation, through the EXISTING
         // Excavating durability-protection perk (no second chance, no new formula).
         ItemStack tool = player.getMainHandItem();
-        if (!GatheringSpeed.shouldPreventDurabilityLoss(player, sandState, tool)) {
+        if (!GatheringSpeed.shouldPreventDurabilityLoss(player, sandState, tool)
+                && !com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
+                        .shouldPreventDurabilityLoss(tool, player)) {
             tool.hurtAndBreak(1, player, EquipmentSlot.MAINHAND);
         }
 
@@ -450,6 +452,15 @@ public final class ExcavatingManager {
 
             if (!found.isEmpty()) {
                 Block.popResourceFromFace(level, session.pos, session.face, found);
+
+                // Treasure Hunter can discover a second copy of a successful find.
+                double extraChance = com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
+                        .getTreasureHunterChance(tool);
+                if (extraChance > 0.0 && level.getRandom().nextDouble() < extraChance) {
+                    Block.popResourceFromFace(level, session.pos, session.face, found.copy());
+                    player.sendSystemMessage(Component.translatable(
+                            "message.simpleskills.crafting.treasure_hunter").withStyle(net.minecraft.ChatFormatting.GOLD), true);
+                }
             }
         }
 

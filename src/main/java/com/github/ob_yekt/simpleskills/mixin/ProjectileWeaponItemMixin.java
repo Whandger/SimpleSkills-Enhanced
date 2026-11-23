@@ -61,6 +61,8 @@ public abstract class ProjectileWeaponItemMixin {
                 projectileStack,
                 shootFunction
         );
+        com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
+                .registerProjectileDamageBonus(spawnedProjectile, weapon);
 
         // Only server players can receive the Ranged duplication perk.
         if (!(shooter instanceof ServerPlayer player)) {
@@ -145,6 +147,8 @@ public abstract class ProjectileWeaponItemMixin {
                 projectileStack,
                 isCrit
         );
+        com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
+                .registerProjectileDamageBonus(duplicate, weapon);
 
         Vec3 originalMovement = originalProjectile.getDeltaMovement();
 

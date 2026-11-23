@@ -18,7 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 
 /** Builds the unlocked, selectable profession-title list and its clickable chat menu. */
 public final class RankTitleManager {
-    public record TitleOption(String id, Skills skill, int requiredLevel, String translationKey) {}
+    public record TitleOption(String id, Skills skill, int requiredLevel, String translationKey, boolean craftedWeaponRank) {}
 
     private static final List<Skills> TEN_RANK_SKILLS = List.of(
             Skills.MINING, Skills.WOODCUTTING, Skills.FARMING, Skills.SLAYING, Skills.RANGED,
@@ -82,6 +82,8 @@ public final class RankTitleManager {
             row.addProperty("skill_name", SkillTabTranslations.get(player, "skill.simpleskills.name." + skill));
             row.addProperty("name", getLocalizedTitle(player, option));
             row.addProperty("level", option.requiredLevel());
+            row.addProperty("requirement", option.craftedWeaponRank()
+                    ? SkillTabTranslations.get(player, "gui.simpleskills.rank_titles.crafted_weapon") : "");
             rows.add(row);
         }
         JsonObject labels = new JsonObject();
@@ -108,6 +110,7 @@ public final class RankTitleManager {
             String profession = skill.name().toLowerCase(Locale.ROOT);
             if (TEN_RANK_SKILLS.contains(skill)) {
                 addTenRanks(options, skill, profession);
+                if (skill == Skills.CRAFTING) addCraftingWeaponTitles(options);
             } else if (skill == Skills.AGILITY) {
                 AgilityRank[] ranks = AgilityRank.values();
                 for (int i = 0; i < ranks.length; i++) {
@@ -149,7 +152,15 @@ public final class RankTitleManager {
 
     private static void add(List<TitleOption> options, Skills skill, int rank, int requiredLevel, String translationKey) {
         options.add(new TitleOption(skill.name().toLowerCase(Locale.ROOT) + "_rank_" + rank,
-                skill, requiredLevel, translationKey));
+                skill, requiredLevel, translationKey, false));
+    }
+
+    private static void addCraftingWeaponTitles(List<TitleOption> options) {
+        for (com.github.ob_yekt.simpleskills.crafting.CraftingRarity rarity
+                : com.github.ob_yekt.simpleskills.crafting.CraftingRarity.values()) {
+            options.add(new TitleOption("crafting_rarity_" + rarity.id(), Skills.CRAFTING, 100,
+                    "skill.simpleskills.rank.crafting.weapon_" + rarity.id(), true));
+        }
     }
 
     public static TitleOption find(String id) {
@@ -158,7 +169,12 @@ public final class RankTitleManager {
     }
 
     public static boolean isUnlocked(ServerPlayer player, TitleOption option) {
-        return option != null && XPManager.getSkillLevel(player.getStringUUID(), option.skill()) >= option.requiredLevel();
+        if (player == null || option == null) return false;
+        if (option.craftedWeaponRank()) {
+            String rarityId = option.id().substring("crafting_rarity_".length());
+            return DatabaseManager.getInstance().getCraftedWeaponRanks(player.getStringUUID()).contains(rarityId);
+        }
+        return XPManager.getSkillLevel(player.getStringUUID(), option.skill()) >= option.requiredLevel();
     }
 
     public static void showMenu(ServerPlayer player) {

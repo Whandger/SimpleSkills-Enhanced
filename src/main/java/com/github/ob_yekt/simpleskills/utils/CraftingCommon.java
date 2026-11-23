@@ -123,6 +123,9 @@ public final class CraftingCommon {
 
         int newDurability = Math.max(1, Math.round(originalDurability * multiplier));
         stack.set(DataComponents.MAX_DAMAGE, newDurability);
+
+        // Rarity and random affixes are rolled once and stored on the crafted item.
+        com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager.applyCraftedEquipment(stack, player);
     }
 
     public static void applyCookingScaling(ItemStack stack, ServerPlayer player) {

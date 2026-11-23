@@ -19,7 +19,7 @@ import net.minecraft.network.chat.Component;
 /** Profession rank selector, styled to match the Rune Infusion and Fishing screens. */
 public final class RankTitleMenuScreen extends Screen {
     private static RankTitleMenuScreen activeScreen;
-    private record Title(String id, String name, int requiredLevel) {}
+    private record Title(String id, String name, int requiredLevel, String requirement) {}
 
     private static final int WIDTH = 520;
     private static final int HEIGHT = 330;
@@ -96,12 +96,14 @@ public final class RankTitleMenuScreen extends Screen {
                 String titleName = row.get("name").getAsString();
                 if (id.length() > 64 || skill.length() > 24 || titleName.length() > 160) continue;
                 int requiredLevel = row.get("level").getAsInt();
-                if (requiredLevel < 1 || requiredLevel > 99) continue;
+                if (requiredLevel < 1 || requiredLevel > 100) continue;
+                String requirement = row.has("requirement") && row.get("requirement").isJsonPrimitive()
+                        ? row.get("requirement").getAsString() : "";
                 if (!titlesBySkill.containsKey(skill)) {
                     titlesBySkill.put(skill, new ArrayList<>());
                     skills.add(skill);
                 }
-                titlesBySkill.get(skill).add(new Title(id, titleName, requiredLevel));
+                titlesBySkill.get(skill).add(new Title(id, titleName, requiredLevel, requirement));
                 skillNames.put(skill, skillName);
             }
         } catch (RuntimeException ignored) { }
@@ -226,7 +228,9 @@ public final class RankTitleMenuScreen extends Screen {
                     x0 + 27, y + 3, MUTED, false);
             g.text(font, Component.literal(option.name()),
                     x0 + 27, y + 13, selected ? GOLD : TEXT, false);
-            String level = String.format(java.util.Locale.ROOT, label("level"), option.requiredLevel());
+            String level = option.requirement().isBlank()
+                    ? String.format(java.util.Locale.ROOT, label("level"), option.requiredLevel())
+                    : option.requirement();
             g.text(font, Component.literal(level), x1 - font.width(level) - 9, y + 8,
                     selected ? GREEN : MUTED, false);
         }

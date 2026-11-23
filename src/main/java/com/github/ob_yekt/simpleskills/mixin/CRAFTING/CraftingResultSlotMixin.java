@@ -41,9 +41,9 @@ public abstract class CraftingResultSlotMixin {
 
         // Apply bonuses based on item type
         if (CraftingCommon.isCraftableItem(stack)) {
-            CraftingCommon.grantCraftingXP(serverPlayer, stack);
             CraftingCommon.applyCraftingLore(stack, serverPlayer);
             CraftingCommon.applyCraftingScaling(stack, serverPlayer);
+            CraftingCommon.grantCraftingXP(serverPlayer, stack);
         } else if (CraftingCommon.isCookableFoodItem(stack)) {
             CraftingCommon.grantCookingXP(serverPlayer, stack);
             CraftingCommon.applyCookingLore(stack, serverPlayer);

@@ -43,7 +43,10 @@ public abstract class GatheringDurabilityMixin {
             return;
         }
 
-        if (GatheringSpeed.shouldPreventDurabilityLoss(player, state, stack)) {
+        if (GatheringSpeed.shouldPreventDurabilityLoss(player, state, stack)
+                || (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer
+                        && com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
+                                .shouldPreventDurabilityLoss(stack, serverPlayer))) {
             ci.cancel();
         }
     }

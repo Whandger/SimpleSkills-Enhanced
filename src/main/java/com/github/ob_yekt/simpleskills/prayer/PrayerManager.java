@@ -290,6 +290,9 @@ public final class PrayerManager {
         // 3. Apply cooldown & grant XP (a cada cast válido; a recarga já limita a
         // frequência)
         int cooldown = PrayerScaling.cooldownTicks(ability, level);
+        if (com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager.hasActivePerk(player, "arcane_mastery")) {
+            cooldown = Math.max(20, Math.round(cooldown * 0.85F));
+        }
         COOLDOWNS.get(player.getUUID()).put(ability.id(), now + cooldown);
         if (ServerPlayNetworking.canSend(player, PrayerCooldownPayload.TYPE))
             ServerPlayNetworking.send(player, new PrayerCooldownPayload(ability.id(), cooldown));

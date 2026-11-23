@@ -26,6 +26,7 @@ import com.github.ob_yekt.simpleskills.prayer.PrayerVisualEffects;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVfxEntity;
 import com.github.ob_yekt.simpleskills.shields.GlowstoneShieldLight;
 import com.github.ob_yekt.simpleskills.shields.GlowstoneShields;
+import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 
 import net.fabricmc.api.ModInitializer;
@@ -68,6 +69,7 @@ public class Simpleskills implements ModInitializer {
 		FishingManager.registerPayloads();
 		AgilityManager.registerPayloads();
 		RankTitleManager.registerPayloads();
+		CraftingEquipmentManager.registerPayloads();
 		SkillOverviewManager.registerPayloads();
 		PrayerManager.registerPayloads();
 		PrayerVfxEntity.register();
@@ -80,6 +82,7 @@ public class Simpleskills implements ModInitializer {
 		EventHandlers.registerAll();
 		DefenseCombat.register();
 		AgilityManager.register();
+		CraftingEquipmentManager.register();
 		RankTitleManager.registerReceivers();
 		SkillOverviewManager.registerReceivers();
 		PrayerManager.registerReceivers();

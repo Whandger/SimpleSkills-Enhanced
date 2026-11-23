@@ -46,11 +46,20 @@ public class NamePrefixManager {
         }
 
         team.setPlayerPrefix(Component.literal(prefix));
-        Component suffix = selectedTitle == null ? Component.empty()
-                : Component.literal(" (").withStyle(ChatFormatting.GRAY)
-                        .append(Component.literal(RankTitleManager.getLocalizedTitle(player, selectedTitle))
-                                .withStyle(ChatFormatting.GOLD))
-                        .append(Component.literal(")").withStyle(ChatFormatting.GRAY));
+        Component suffix;
+        if (selectedTitle == null) {
+            suffix = Component.empty();
+        } else if (selectedTitle.id().startsWith("crafting_rarity_")) {
+            // Weapon-rarity crafting titles use the requested comma-style name suffix.
+            suffix = Component.literal(", ").withStyle(ChatFormatting.GRAY)
+                    .append(Component.literal(RankTitleManager.getLocalizedTitle(player, selectedTitle))
+                            .withStyle(ChatFormatting.GOLD));
+        } else {
+            suffix = Component.literal(" (").withStyle(ChatFormatting.GRAY)
+                    .append(Component.literal(RankTitleManager.getLocalizedTitle(player, selectedTitle))
+                            .withStyle(ChatFormatting.GOLD))
+                    .append(Component.literal(")").withStyle(ChatFormatting.GRAY));
+        }
         team.setPlayerSuffix(suffix);
         team.setColor(Optional.of(TeamColor.WHITE));
 

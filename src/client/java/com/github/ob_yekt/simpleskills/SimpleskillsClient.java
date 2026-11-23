@@ -1,6 +1,8 @@
 package com.github.ob_yekt.simpleskills;
 
 import com.github.ob_yekt.simpleskills.excavating.InvestigationHud;
+import com.github.ob_yekt.simpleskills.crafting.CraftingRevealPayload;
+import com.github.ob_yekt.simpleskills.crafting.CraftingRevealScreen;
 import com.github.ob_yekt.simpleskills.excavating.InvestigationPayload;
 import com.github.ob_yekt.simpleskills.fishing.FishingCatchPayload;
 import com.github.ob_yekt.simpleskills.fishing.FishingCatchScreen;
@@ -62,6 +64,9 @@ public class SimpleskillsClient implements ClientModInitializer {
         AgilityDashHud.register();
         PrayerCooldownHud.register();
         PrayerImpactFeedback.registerClientHooks();
+
+        ClientPlayNetworking.registerGlobalReceiver(CraftingRevealPayload.TYPE, (payload, context) ->
+                context.client().execute(() -> CraftingRevealScreen.accept(payload)));
 
         ClientPlayNetworking.registerGlobalReceiver(AgilityLevelPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> AgilityClientState.set(payload)));
