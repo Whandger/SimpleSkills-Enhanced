@@ -25,7 +25,8 @@ public abstract class SlayingMixin {
         index = 1
     )
     private float simpleskills$applyCounterMastery(float damage,
-            @Local(argsOnly = true) Entity target) {
+            @Local(argsOnly = true) Entity target,
+            @Local(name = "attackStrengthScale") float attackStrengthScale) {
         Player player = (Player) (Object) this;
         float result = damage;
         if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer
@@ -35,7 +36,8 @@ public abstract class SlayingMixin {
         result *= (float) com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
                 .getDamageMultiplier(player.getMainHandItem(), target);
         result *= com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
-                .getCriticalMultiplier(player.getMainHandItem(), player.getRandom());
+                .getCriticalMultiplier(player.getMainHandItem(), player, player.getRandom(),
+                        attackStrengthScale > 0.9F);
         return result;
     }
 
@@ -69,11 +71,8 @@ public abstract class SlayingMixin {
         // Regular damage bonus.
         float multiplier = Slaying.getDamageMultiplier(player.getUUID());
 
-        // One custom critical roll per attack.
-        if (player.getRandom().nextFloat()
-                < Slaying.getCriticalChance(player.getUUID())) {
-            multiplier *= 1.5f;
-        }
+        // Critical chance is rolled once in simpleskills$applyCounterMastery, where
+        // equipment and Slaying chances are combined additively.
 
         // Apply bonuses to base damage and original weapon bonus.
         return originalBonus

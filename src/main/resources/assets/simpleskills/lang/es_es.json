@@ -544,7 +544,7 @@
   "item.simpleskills.crafting_perk.celestial_range": "Alcance Celestial: +6 bloques de alcance de ataque",
   "message.simpleskills.crafting.inventory_full": "Tu inventario está lleno. Haz espacio antes de fabricar equipo.",
   "item.simpleskills.crafting_perk.oracle_vision": "Visión del Oráculo: revela criaturas hostiles y minerales raros a través de paredes",
-  "item.simpleskills.crafting_perk.aegis_of_purity": "Égida de Pureza: inmunidad a efectos de estado negativos mientras está equipada",
+  "item.simpleskills.crafting_perk.aegis_of_purity": "Égida de Pureza: inmunidad a efectos de estado negativos y evita la pérdida de hambre mientras está equipada",
   "item.simpleskills.crafting_perk.phantom_stride": "Paso Fantasma: sube bloques de un nivel e ignora la ralentización de ciertos terrenos",
   "item.simpleskills.crafting_perk.divine_reflection": "Reflejo Divino: un Perfect Parry libera una onda de choque divina",
   "item.simpleskills.crafting_perk.astral_pursuit": "Persecución Astral: las flechas persiguen directamente al objetivo hostil seleccionado",
@@ -573,5 +573,8 @@
   "message.simpleskills.transcendent_area.worldbreaker_enabled": "Efecto 3×3 de Worldbreaker activado.",
   "message.simpleskills.transcendent_area.worldbreaker_disabled": "Efecto 3×3 de Worldbreaker desactivado.",
   "message.simpleskills.transcendent_area.eden_enabled": "Efecto 3×3 de Eden’s Dominion activado.",
-  "message.simpleskills.transcendent_area.eden_disabled": "Efecto 3×3 de Eden’s Dominion desactivado."
+  "message.simpleskills.transcendent_area.eden_disabled": "Efecto 3×3 de Eden’s Dominion desactivado.",
+  "item.simpleskills.crafting_stat.break_speed": "Velocidad de rotura: +%s%% de velocidad al romper bloques",
+  "item.simpleskills.crafting_perk.midas_touch": "Toque de Midas: con Shift, los troncos se vuelven bloques de oro y las hojas, pepitas. Otorga una manzana dorada y un 20% de probabilidad de una encantada.",
+  "item.simpleskills.crafting_perk.abyssal_sovereign": "Soberano Abisal: captura cualquier pez al instante, sin desafío de tensión, y entrega 5–10 peces con botín oceánico adicional."
 }

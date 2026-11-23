@@ -122,6 +122,13 @@ public class EventHandlers {
                 return true;
             }
 
+            // Midas' Touch must intercept the first log before vanilla drops wood;
+            // the Tree Feller job then transmutes the entire connected tree consistently.
+            if (world instanceof ServerLevel serverLevel
+                    && TreeFeller.tryActivateMidasBeforeBreak(serverPlayer, serverLevel, pos, state)) {
+                return false;
+            }
+
             return true;
         });
 

@@ -1,6 +1,7 @@
 
 package com.github.ob_yekt.simpleskills;
 
+import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager;
 import com.github.ob_yekt.simpleskills.managers.ConfigManager;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
 import com.github.ob_yekt.simpleskills.utils.BlockSkillClassifier;
@@ -8,15 +9,21 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
@@ -74,6 +81,51 @@ public final class TreeFeller {
     }
 
     /**
+     * Midas' Touch must own the starting log before vanilla drops it, otherwise
+     * the first trunk block would remain ordinary wood while the rest becomes gold.
+     * Returning true tells the BEFORE break hook to cancel vanilla's break; this job
+     * then processes the origin together with the rest of the connected tree.
+     */
+    public static boolean tryActivateMidasBeforeBreak(
+            ServerPlayer player,
+            ServerLevel level,
+            BlockPos origin,
+            BlockState originState
+    ) {
+        if (player == null || level == null || origin == null || originState == null
+                || !originState.is(BlockTags.LOGS)) {
+            return false;
+        }
+
+        TreeJob activeJob = ACTIVE_JOBS.get(player.getUUID());
+        if (activeJob != null && activeJob.midasTouch
+                && activeJob.level == level && activeJob.origin.equals(origin)) {
+            // A repeated break packet for the same starting log must not fall through
+            // to vanilla, even if the player released Shift after starting the tree job.
+            return true;
+        }
+
+        if (!player.isShiftKeyDown() || player.preventsBlockDrops()
+                || !player.getMainHandItem().is(ItemTags.AXES)
+                || !CraftingEquipmentManager.stackHasPerk(player.getMainHandItem(), "midas_touch")
+                || !level.mayInteract(player, origin)
+                || level.getServer().isUnderSpawnProtection(level, origin, player)) {
+            return false;
+        }
+
+        int woodcuttingLevel = GatheringSpeed.getSkillLevelFromCache(player.getUUID(), Skills.WOODCUTTING);
+        if (!isUnlocked(woodcuttingLevel) || activeJob != null) return false;
+
+        ItemStack tool = player.getMainHandItem();
+        TreeJob job = new TreeJob(player, level, origin.immutable(), tool, tool.copy(), true);
+        job.blocks.add(new TreeBlock(origin.immutable(), originState, true));
+        job.visitedLogs.add(origin.immutable());
+        seedNeighbors(job);
+        ACTIVE_JOBS.put(player.getUUID(), job);
+        return true;
+    }
+
+    /**
      * Called after the manually broken starting log has already been processed
      * by Minecraft and SimpleSkills' normal block-break handlers.
      */
@@ -110,12 +162,14 @@ public final class TreeFeller {
 
         ItemStack tool = player.getMainHandItem();
 
+        boolean midasTouch = CraftingEquipmentManager.stackHasPerk(tool, "midas_touch");
         TreeJob job = new TreeJob(
                 player,
                 level,
                 origin.immutable(),
                 tool,
-                tool.copy()
+                tool.copy(),
+                midasTouch
         );
 
         seedNeighbors(job);
@@ -304,6 +358,10 @@ public final class TreeFeller {
             if (job.scanComplete
                     && job.spawningComplete
                     && job.pendingFallingBlocks == 0) {
+                if (job.midasTouch && job.midasOriginProcessed && !job.midasRewardsDropped) {
+                    dropMidasTreeRewards(job);
+                    job.midasRewardsDropped = true;
+                }
                 ACTIVE_JOBS.remove(job.player.getUUID(), job);
             }
         }
@@ -446,13 +504,24 @@ public final class TreeFeller {
                     job.player
             );
 
+            // Midas' Touch turns logs into falling gold blocks and leaves into
+            // falling raw gold blocks. Leaves only become gold nuggets after landing.
+            BlockState fallingState = adjustedState;
+            if (job.midasTouch) {
+                fallingState = treeBlock.isLog()
+                        ? Blocks.GOLD_BLOCK.defaultBlockState()
+                        : Blocks.RAW_GOLD_BLOCK.defaultBlockState();
+            }
             FallingBlockEntity fallingBlock = FallingBlockEntity.fall(
                     job.level,
                     pos,
-                    adjustedState
+                    fallingState
             );
 
             block.destroy(job.level, pos, adjustedState);
+            if (job.midasTouch && treeBlock.isLog() && pos.equals(job.origin)) {
+                job.midasOriginProcessed = true;
+            }
 
             // The entity is visual only. TreeFeller handles loot, XP and
             // durability exactly once when the entity reaches the ground.
@@ -534,7 +603,14 @@ public final class TreeFeller {
         ServerPlayer player = job.player;
 
         if (player.isRemoved() || !player.isAlive()) {
-            Block.dropResources(state, level, landingPos, null);
+            if (job.midasTouch) {
+                ItemStack reward = task.isLog()
+                        ? new ItemStack(Items.GOLD_BLOCK)
+                        : new ItemStack(Items.GOLD_NUGGET);
+                Block.popResource(level, landingPos, reward);
+            } else {
+                Block.dropResources(state, level, landingPos, null);
+            }
             return;
         }
 
@@ -571,6 +647,19 @@ public final class TreeFeller {
             }
         }
 
+        if (job.midasTouch) {
+            if (task.isLog()) {
+                BlockState goldState = Blocks.GOLD_BLOCK.defaultBlockState();
+                goldState.getBlock().spawnDestroyByEntityParticles(level, player, landingPos, goldState);
+                Block.popResource(level, landingPos, new ItemStack(Items.GOLD_BLOCK));
+                player.awardStat(Stats.BLOCK_MINED.get(state.getBlock()));
+            } else {
+                Block.popResource(level, landingPos, new ItemStack(Items.GOLD_NUGGET));
+                playMidasLeafTransmutation(job, landingPos);
+            }
+            return;
+        }
+
         // Show the block breaking effect where the falling block lands.
         state.getBlock().spawnDestroyByEntityParticles(
                 level,
@@ -589,6 +678,36 @@ public final class TreeFeller {
                 null,
                 destroyedWith
         );
+    }
+
+    private static void playMidasLeafTransmutation(TreeJob job, BlockPos pos) {
+        ServerLevel level = job.level;
+        double x = pos.getX() + 0.5;
+        double y = pos.getY() + 0.5;
+        double z = pos.getZ() + 0.5;
+        level.sendParticles(ParticleTypes.WAX_ON, x, y, z, 5, 0.25, 0.25, 0.25, 0.04);
+        level.sendParticles(ParticleTypes.HAPPY_VILLAGER, x, y, z, 3, 0.18, 0.18, 0.18, 0.02);
+
+        long now = level.getGameTime();
+        // A canopy can contain hundreds of leaves; throttle the metallic cue so it remains
+        // audible without flooding the sound channel during one tree-felling action.
+        if (now - job.lastMidasSoundTick >= 8) {
+            level.playSound(null, pos, SoundEvents.ANVIL_USE,
+                    SoundSource.BLOCKS, 0.38F, 1.65F);
+            job.lastMidasSoundTick = now;
+        }
+    }
+
+    private static void dropMidasTreeRewards(TreeJob job) {
+        Block.popResource(job.level, job.origin, new ItemStack(Items.GOLDEN_APPLE));
+        if (job.level.getRandom().nextFloat() < 0.20F) {
+            Block.popResource(job.level, job.origin, new ItemStack(Items.ENCHANTED_GOLDEN_APPLE));
+        }
+        job.level.sendParticles(ParticleTypes.WAX_ON,
+                job.origin.getX() + 0.5, job.origin.getY() + 0.8, job.origin.getZ() + 0.5,
+                12, 0.45, 0.35, 0.45, 0.05);
+        job.level.playSound(null, job.origin, SoundEvents.ANVIL_USE,
+                SoundSource.BLOCKS, 0.55F, 1.2F);
     }
 
     private static void damageAxeForLog(
@@ -634,7 +753,41 @@ public final class TreeFeller {
         );
     }
 
+    private static void restoreMidasOriginAsNormalLog(TreeJob job) {
+        TreeBlock original = job.blocks.stream()
+                .filter(block -> block.isLog() && block.pos().equals(job.origin))
+                .findFirst().orElse(null);
+        if (original == null || !job.level.hasChunkAt(job.origin)
+                || !job.level.mayInteract(job.player, job.origin)
+                || job.level.getServer().isUnderSpawnProtection(job.level, job.origin, job.player)) {
+            return;
+        }
+
+        BlockState state = job.level.getBlockState(job.origin);
+        if (state.getBlock() != original.state().getBlock() || state.hasBlockEntity()) return;
+        Block block = state.getBlock();
+        BlockState adjusted = block.playerWillDestroy(job.level, job.origin, state, job.player);
+        block.destroy(job.level, job.origin, adjusted);
+        block.spawnDestroyByEntityParticles(job.level, job.player, job.origin, state);
+        damageAxeForLog(job, job.level, state, job.origin);
+        block.playerDestroy(job.level, job.player, job.origin, state, null, job.toolSnapshot.copy());
+
+        Integer configuredXp = ConfigManager.getBlockXPOverride(state.getBlock().getDescriptionId());
+        int xp = configuredXp != null ? configuredXp : Math.max(0, Math.round(
+                state.getDestroySpeed(job.level, job.origin) * (100.0f / 1.5f)));
+        if (BlockSkillClassifier.classify(state) == Skills.WOODCUTTING && xp > 0) {
+            XPManager.addXPWithNotification(job.player, Skills.WOODCUTTING, xp);
+        }
+    }
+
     private static void cancelJob(TreeJob job, String message) {
+        // If a Midas scan determines that the broken block is not a valid tree (for example,
+        // a lone log with no natural leaves), restore vanilla single-block behavior instead
+        // of leaving the starting log unbreakable after the BEFORE hook cancelled it.
+        if (job.midasTouch && !job.midasOriginProcessed
+                && !job.player.isRemoved() && job.player.isAlive()) {
+            restoreMidasOriginAsNormalLog(job);
+        }
         job.cancelled = true;
 
         ACTIVE_JOBS.remove(
@@ -670,6 +823,7 @@ public final class TreeFeller {
         private final BlockPos origin;
         private final ItemStack toolStack;
         private final ItemStack toolSnapshot;
+        private final boolean midasTouch;
 
         private final ArrayDeque<BlockPos> logQueue = new ArrayDeque<>();
         private final ArrayDeque<BlockPos> leafQueue = new ArrayDeque<>();
@@ -689,19 +843,24 @@ public final class TreeFeller {
         private int nextBlockIndex;
         private int pendingFallingBlocks;
         private int pendingXp;
+        private boolean midasRewardsDropped;
+        private boolean midasOriginProcessed;
+        private long lastMidasSoundTick = Long.MIN_VALUE / 2;
 
         private TreeJob(
                 ServerPlayer player,
                 ServerLevel level,
                 BlockPos origin,
                 ItemStack toolStack,
-                ItemStack toolSnapshot
+                ItemStack toolSnapshot,
+                boolean midasTouch
         ) {
             this.player = player;
             this.level = level;
             this.origin = origin;
             this.toolStack = toolStack;
             this.toolSnapshot = toolSnapshot;
+            this.midasTouch = midasTouch;
         }
     }
 }

@@ -8,32 +8,32 @@ public enum CraftingRarity {
     // Percentages are stored as fractions: 0.05 = +5%. Stat chances control whether
     // an individual item receives that attribute at all; Epic+ always rolls applicable stats.
     COMMON("common", "Common", 85.0, 40.0, 5.0,
-            0.001, 0.050, 0.000, 0.050, 0.000, 0.010, 0.005, 0.020,
-            0.12, 0.08, 0.12, 0.08, 0.001, 0.050, 0.001, 0.030,
+            0.001, 0.050, 0.000, 0.050, 0.020, 0.050, 0.000, 0.010, 0.005, 0.020,
+            0.12, 0.12, 0.08, 0.12, 0.08, 0.001, 0.050, 0.001, 0.030,
             0, 1, 1, ChatFormatting.GRAY),
     RARE("rare", "Rare", 12.0, 32.0, 30.0,
-            0.030, 0.080, 0.040, 0.110, 0.005, 0.018, 0.010, 0.030,
-            0.35, 0.30, 0.35, 0.25, 0.020, 0.070, 0.010, 0.050,
+            0.030, 0.080, 0.040, 0.110, 0.040, 0.080, 0.005, 0.018, 0.010, 0.030,
+            0.35, 0.35, 0.30, 0.35, 0.25, 0.020, 0.070, 0.010, 0.050,
             1, 1, 1, ChatFormatting.BLUE),
     UNIQUE("unique", "Unique", 2.0, 17.0, 30.0,
-            0.050, 0.120, 0.080, 0.180, 0.010, 0.025, 0.020, 0.045,
-            0.70, 0.65, 0.70, 0.60, 0.050, 0.120, 0.030, 0.080,
+            0.050, 0.120, 0.080, 0.180, 0.060, 0.100, 0.010, 0.025, 0.020, 0.045,
+            0.70, 0.70, 0.65, 0.70, 0.60, 0.050, 0.120, 0.030, 0.080,
             1, 1, 1, ChatFormatting.AQUA),
     EPIC("epic", "Epic", 0.8, 7.5, 20.0,
-            0.080, 0.160, 0.150, 0.280, 0.020, 0.040, 0.030, 0.055,
-            1.00, 1.00, 1.00, 1.00, 0.080, 0.160, 0.060, 0.120,
+            0.080, 0.160, 0.150, 0.280, 0.080, 0.120, 0.020, 0.040, 0.030, 0.055,
+            1.00, 1.00, 1.00, 1.00, 1.00, 0.080, 0.160, 0.060, 0.120,
             2, 2, 2, ChatFormatting.DARK_PURPLE),
     LEGENDARY("legendary", "Legendary", 0.15, 2.7, 10.0,
-            0.120, 0.230, 0.250, 0.380, 0.035, 0.060, 0.050, 0.080,
-            1.00, 1.00, 1.00, 1.00, 0.120, 0.220, 0.100, 0.180,
+            0.120, 0.230, 0.250, 0.380, 0.120, 0.170, 0.035, 0.060, 0.050, 0.080,
+            1.00, 1.00, 1.00, 1.00, 1.00, 0.120, 0.220, 0.100, 0.180,
             2, 3, 3, ChatFormatting.GOLD),
     MYTHIC("mythic", "Mythic", 0.04, 0.65, 4.0,
-            0.160, 0.320, 0.350, 0.500, 0.055, 0.090, 0.075, 0.120,
-            1.00, 1.00, 1.00, 1.00, 0.180, 0.300, 0.140, 0.240,
+            0.160, 0.320, 0.350, 0.500, 0.170, 0.230, 0.055, 0.090, 0.075, 0.120,
+            1.00, 1.00, 1.00, 1.00, 1.00, 0.180, 0.300, 0.140, 0.240,
             3, 4, 3, ChatFormatting.RED),
     TRANSCENDENT("transcendent", "Transcendent", 0.01, 0.15, 1.0,
-            0.220, 0.420, 0.450, 0.650, 0.080, 0.120, 0.100, 0.180,
-            1.00, 1.00, 1.00, 1.00, 0.250, 0.420, 0.200, 0.350,
+            0.220, 0.420, 0.450, 0.650, 0.230, 0.300, 0.080, 0.120, 0.100, 0.180,
+            1.00, 1.00, 1.00, 1.00, 1.00, 0.250, 0.420, 0.200, 0.350,
             4, 5, 4, ChatFormatting.YELLOW);
 
     private final String id;
@@ -45,11 +45,14 @@ public enum CraftingRarity {
     private final double maxDamageBonus;
     private final double minDurabilityBonus;
     private final double maxDurabilityBonus;
+    private final double minBreakSpeedBonus;
+    private final double maxBreakSpeedBonus;
     private final double minCriticalChance;
     private final double maxCriticalChance;
     private final double minAttackSpeedBonus;
     private final double maxAttackSpeedBonus;
     private final double damageStatChance;
+    private final double breakSpeedStatChance;
     private final double attackSpeedStatChance;
     private final double armorStatChance;
     private final double toughnessStatChance;
@@ -65,9 +68,10 @@ public enum CraftingRarity {
     CraftingRarity(String id, String displayName, double level1Chance, double level50Chance,
                    double level99Chance, double minDamageBonus, double maxDamageBonus,
                    double minDurabilityBonus, double maxDurabilityBonus,
+                   double minBreakSpeedBonus, double maxBreakSpeedBonus,
                    double minCriticalChance, double maxCriticalChance,
                    double minAttackSpeedBonus, double maxAttackSpeedBonus,
-                   double damageStatChance, double attackSpeedStatChance,
+                   double damageStatChance, double breakSpeedStatChance, double attackSpeedStatChance,
                    double armorStatChance, double toughnessStatChance,
                    double minArmorBonus, double maxArmorBonus,
                    double minToughnessBonus, double maxToughnessBonus,
@@ -82,11 +86,14 @@ public enum CraftingRarity {
         this.maxDamageBonus = maxDamageBonus;
         this.minDurabilityBonus = minDurabilityBonus;
         this.maxDurabilityBonus = maxDurabilityBonus;
+        this.minBreakSpeedBonus = minBreakSpeedBonus;
+        this.maxBreakSpeedBonus = maxBreakSpeedBonus;
         this.minCriticalChance = minCriticalChance;
         this.maxCriticalChance = maxCriticalChance;
         this.minAttackSpeedBonus = minAttackSpeedBonus;
         this.maxAttackSpeedBonus = maxAttackSpeedBonus;
         this.damageStatChance = damageStatChance;
+        this.breakSpeedStatChance = breakSpeedStatChance;
         this.attackSpeedStatChance = attackSpeedStatChance;
         this.armorStatChance = armorStatChance;
         this.toughnessStatChance = toughnessStatChance;
@@ -106,6 +113,9 @@ public enum CraftingRarity {
     public double maxDamageBonus() { return maxDamageBonus; }
     public double minDurabilityBonus() { return minDurabilityBonus; }
     public double maxDurabilityBonus() { return maxDurabilityBonus; }
+    public double minBreakSpeedBonus() { return minBreakSpeedBonus; }
+    public double maxBreakSpeedBonus() { return maxBreakSpeedBonus; }
+    public double breakSpeedStatChance() { return breakSpeedStatChance; }
     public double minCriticalChance() { return minCriticalChance; }
     public double maxCriticalChance() { return maxCriticalChance; }
     public double minAttackSpeedBonus() { return minAttackSpeedBonus; }
@@ -204,6 +214,8 @@ public enum CraftingRarity {
                 }
                 if (rarity.minDamageBonus < 0.0 || rarity.maxDamageBonus < rarity.minDamageBonus
                         || rarity.minDurabilityBonus < 0.0 || rarity.maxDurabilityBonus < rarity.minDurabilityBonus
+                        || rarity.minBreakSpeedBonus < 0.0 || rarity.maxBreakSpeedBonus < rarity.minBreakSpeedBonus
+                        || rarity.breakSpeedStatChance < 0.0 || rarity.breakSpeedStatChance > 1.0
                         || rarity.minCriticalChance < 0.0 || rarity.maxCriticalChance < rarity.minCriticalChance
                         || rarity.minAttackSpeedBonus < 0.0 || rarity.maxAttackSpeedBonus < rarity.minAttackSpeedBonus
                         || rarity.damageStatChance < 0.0 || rarity.damageStatChance > 1.0

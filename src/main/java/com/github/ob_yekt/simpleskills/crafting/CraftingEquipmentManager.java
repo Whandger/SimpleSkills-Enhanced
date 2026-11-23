@@ -7,6 +7,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -65,6 +66,7 @@ public final class CraftingEquipmentManager {
     private static final String DATA_DAMAGE_ATTRIBUTE_INCLUDES_AFFIXES =
             "simpleskills_crafting_damage_attribute_includes_affixes";
     private static final String DATA_DURABILITY = "simpleskills_crafting_durability_bonus";
+    private static final String DATA_BREAK_SPEED = "simpleskills_crafting_break_speed_bonus";
     private static final String DATA_CRITICAL_CHANCE = "simpleskills_crafting_critical_chance";
     private static final String DATA_ATTACK_SPEED = "simpleskills_crafting_attack_speed_bonus";
     private static final String DATA_ARMOR = "simpleskills_crafting_armor_bonus";
@@ -104,7 +106,7 @@ public final class CraftingEquipmentManager {
     private record ProjectileDamageData(double multiplier, String encodedPerks, long expiresAt) {}
     private enum EquipmentKind {
         WEAPON, SWORD, ARMOR, HELMET, CHESTPLATE, LEGGINGS, BOOTS, SHIELD,
-        BOW, CROSSBOW, TRIDENT, PICKAXE, SHOVEL, HOE, AXE, MACE, TOOL, OTHER
+        BOW, CROSSBOW, TRIDENT, FISHING_ROD, PICKAXE, SHOVEL, HOE, AXE, MACE, TOOL, OTHER
     }
     private record Perk(String id, String effectId, int maximumEffectLevel, int extraJumps) {}
 
@@ -164,6 +166,8 @@ public final class CraftingEquipmentManager {
     private static final Perk WORLDBREAKER = passive("worldbreaker", 1);
     private static final Perk BURIED_TRUTH = passive("buried_truth", 1);
     private static final Perk EDENS_DOMINION = passive("edens_dominion", 1);
+    private static final Perk MIDAS_TOUCH = passive("midas_touch", 1);
+    private static final Perk ABYSSAL_SOVEREIGN = passive("abyssal_sovereign", 1);
 
     private static final Set<String> NO_LEVEL_PERKS = Set.of(
             "runic_edge", "anvil_ward",
@@ -171,7 +175,8 @@ public final class CraftingEquipmentManager {
             "divine_blessing", "aegis_of_ages", "fire_resistance", "featherweight",
             "celestial_wings", "celestial_range", "oracle_vision", "aegis_of_purity",
             "phantom_stride", "divine_reflection", "astral_pursuit", "singularity_bolt",
-            "poseidons_wrath", "worldbreaker", "buried_truth", "edens_dominion");
+            "poseidons_wrath", "worldbreaker", "buried_truth", "edens_dominion",
+            "midas_touch", "abyssal_sovereign");
 
     private CraftingEquipmentManager() {}
 
@@ -241,6 +246,8 @@ public final class CraftingEquipmentManager {
         boolean sword = stack.is(ItemTags.SWORDS);
         boolean damageEligible = weapon || kind == EquipmentKind.TOOL;
         boolean attackSpeedEligible = sword || kind == EquipmentKind.TOOL;
+        boolean breakSpeedEligible = kind == EquipmentKind.PICKAXE
+                || kind == EquipmentKind.AXE || kind == EquipmentKind.SHOVEL;
         boolean defenseEligible = kind == EquipmentKind.ARMOR || kind == EquipmentKind.HELMET
                 || kind == EquipmentKind.CHESTPLATE || kind == EquipmentKind.LEGGINGS
                 || kind == EquipmentKind.BOOTS || kind == EquipmentKind.SHIELD;
@@ -250,6 +257,9 @@ public final class CraftingEquipmentManager {
         double damageBonus = damageEligible && rollStatPresence(player, rarity.damageStatChance())
                 ? rollStat(player, rarity.minDamageBonus(), rarity.maxDamageBonus(), 0.001) : 0.0;
         double durabilityBonus = rollStat(player, rarity.minDurabilityBonus(), rarity.maxDurabilityBonus(), 0.01);
+        // Break Speed is a basic equipment stat (not a blue perk) and has its own rarity-based appearance roll.
+        double breakSpeedBonus = breakSpeedEligible && rollStatPresence(player, rarity.breakSpeedStatChance())
+                ? rollStat(player, rarity.minBreakSpeedBonus(), rarity.maxBreakSpeedBonus(), 0.01) : 0.0;
         double criticalChance = weapon && damageBonus > 0.0
                 ? rollStat(player, rarity.minCriticalChance(), rarity.maxCriticalChance(), 0.001) : 0.0;
         double attackSpeedBonus = attackSpeedEligible && rollStatPresence(player, rarity.attackSpeedStatChance())
@@ -285,6 +295,7 @@ public final class CraftingEquipmentManager {
             tag.putString(DATA_RARITY, rarity.id());
             tag.putDouble(DATA_DAMAGE, finalDamageBonus);
             tag.putDouble(DATA_DURABILITY, durabilityBonus);
+            tag.putDouble(DATA_BREAK_SPEED, breakSpeedBonus);
             tag.putDouble(DATA_CRITICAL_CHANCE, criticalChance);
             tag.putDouble(DATA_ATTACK_SPEED, finalAttackSpeedBonus);
             tag.putDouble(DATA_ARMOR, finalArmorBonus);
@@ -307,13 +318,13 @@ public final class CraftingEquipmentManager {
                 .withStyle(style -> style.withColor(rarity.color()).withItalic(false)));
         double displayedCriticalChance = getEffectiveCriticalChance(stack);
         // Display the combined rarity + Runic Edge percentage so it matches the real main-hand attribute modifier.
-        appendTooltip(stack, rarity, totalDamageBonus, durabilityBonus, displayedCriticalChance,
+        appendTooltip(stack, rarity, totalDamageBonus, durabilityBonus, breakSpeedBonus, displayedCriticalChance,
                 attackSpeedBonus, armorBonus, toughnessBonus);
 
         if (weapon) unlockWeaponTitle(player, rarity);
         announceHighRarityCraft(player, stack, rarity);
         sendReveal(player, stack, originalName.getString(), rarity, totalDamageBonus, durabilityBonus,
-                displayedCriticalChance, attackSpeedBonus, armorBonus, toughnessBonus, encodedPerks);
+                breakSpeedBonus, displayedCriticalChance, attackSpeedBonus, armorBonus, toughnessBonus, encodedPerks);
     }
 
     /** Announces Legendary, Mythic and Transcendent equipment to the entire server. */
@@ -346,7 +357,8 @@ public final class CraftingEquipmentManager {
      * so closing the reveal screen cannot cause later packets from the same shift-click to reopen it.
      */
     private static void sendReveal(ServerPlayer player, ItemStack stack, String itemName, CraftingRarity rarity,
-                                   double damageBonus, double durabilityBonus, double criticalChance,
+                                   double damageBonus, double durabilityBonus, double breakSpeedBonus,
+                                   double criticalChance,
                                    double attackSpeedBonus, double armorBonus, double toughnessBonus,
                                    String encodedPerks) {
         // Common and Rare are intentionally silent; the reveal screen is reserved for Unique+.
@@ -356,6 +368,7 @@ public final class CraftingEquipmentManager {
         JsonObject details = new JsonObject();
         details.addProperty("damage", damageBonus * 100.0);
         details.addProperty("durability", (int) Math.round(durabilityBonus * 100.0));
+        details.addProperty("breakSpeed", breakSpeedBonus * 100.0);
         details.addProperty("critical", criticalChance * 100.0);
         details.addProperty("attackSpeed", attackSpeedBonus * 100.0);
         details.addProperty("armor", armorBonus * 100.0);
@@ -445,6 +458,7 @@ public final class CraftingEquipmentManager {
         if (stack.is(Items.BOW) || path.endsWith("_bow")) return EquipmentKind.BOW;
         if (stack.is(Items.CROSSBOW) || path.endsWith("_crossbow")) return EquipmentKind.CROSSBOW;
         if (stack.is(Items.TRIDENT) || path.endsWith("_trident")) return EquipmentKind.TRIDENT;
+        if (stack.is(Items.FISHING_ROD) || path.equals("fishing_rod")) return EquipmentKind.FISHING_ROD;
         if (stack.is(Items.MACE) || path.endsWith("_mace")) return EquipmentKind.MACE;
         if (isWeapon(stack)) return EquipmentKind.WEAPON;
         return EquipmentKind.OTHER;
@@ -471,20 +485,24 @@ public final class CraftingEquipmentManager {
             case SHIELD -> new ArrayList<>(List.of(PROTECTION, RESILIENT, REGENERATION, VITALITY,
                     FIRE_RESISTANCE, DOUBLE_LEAP));
             case SHOVEL -> new ArrayList<>(List.of(HASTE, EFFICIENT, SPEED,
-                    FORTUNE_MASTERY, INDESTRUCTIBLE, TREASURE_HUNTER));
-            case TOOL, PICKAXE, HOE, AXE -> new ArrayList<>(List.of(HASTE, EFFICIENT, SPEED,
+                    INDESTRUCTIBLE, TREASURE_HUNTER));
+            case PICKAXE -> new ArrayList<>(List.of(HASTE, EFFICIENT, SPEED,
                     FORTUNE_MASTERY, INDESTRUCTIBLE));
+            case AXE, TOOL, HOE -> new ArrayList<>(List.of(HASTE, EFFICIENT, SPEED,
+                    INDESTRUCTIBLE));
             default -> new ArrayList<>(List.of(SPEED, REGENERATION, VITALITY,
-                    HASTE, EFFICIENT, INDESTRUCTIBLE, FORTUNE_MASTERY));
+                    HASTE, EFFICIENT, INDESTRUCTIBLE));
         };
     }
 
     private static List<Perk> uniquePool(EquipmentKind kind) {
         return switch (kind) {
-            case WEAPON, SWORD, BOW, CROSSBOW, TRIDENT, MACE, AXE -> List.of(RUNIC_EDGE);
+            case WEAPON, SWORD, BOW, CROSSBOW, TRIDENT, MACE -> List.of(RUNIC_EDGE);
+            case AXE -> List.of(RUNIC_EDGE);
             case ARMOR, HELMET, CHESTPLATE, LEGGINGS, BOOTS -> List.of(ANVIL_WARD);
             case SHIELD -> List.of(GUARDIAN_OATH);
-            case TOOL, PICKAXE, SHOVEL, HOE -> List.of(PROSPECTOR);
+            case TOOL, PICKAXE, SHOVEL -> List.of(PROSPECTOR);
+            case HOE -> List.of(PROSPECTOR);
             default -> List.of(ANVIL_WARD);
         };
     }
@@ -500,10 +518,12 @@ public final class CraftingEquipmentManager {
             case BOW -> List.of(ASTRAL_PURSUIT);
             case CROSSBOW -> List.of(SINGULARITY_BOLT);
             case TRIDENT -> List.of(POSEIDONS_WRATH);
+            case FISHING_ROD -> List.of(ABYSSAL_SOVEREIGN);
+            case AXE -> List.of(MIDAS_TOUCH);
             case PICKAXE -> List.of(WORLDBREAKER);
             case SHOVEL -> List.of(BURIED_TRUTH);
             case HOE -> List.of(EDENS_DOMINION);
-            case WEAPON, MACE, AXE -> List.of(TITAN_STRENGTH, GODSLAYER, ARCANE_MASTERY);
+            case WEAPON, MACE -> List.of(TITAN_STRENGTH, GODSLAYER, ARCANE_MASTERY);
             case TOOL -> List.of(WORLD_SHAPER);
             default -> List.of(DIVINE_BLESSING);
         };
@@ -526,6 +546,11 @@ public final class CraftingEquipmentManager {
             generalPool.remove(guaranteedExclusive);
         }
 
+        // A single item must never roll two perks that grant the same potion effect.
+        // This also handles aliases such as Haste and Efficient, which both grant minecraft:haste,
+        // and prevents a Transcendent signature effect from being repeated by a regular affix.
+        removeDuplicatePotionEffects(generalPool, selected);
+
         int exclusiveCount = selected.size();
         int guaranteedGeneral = rarity == CraftingRarity.TRANSCENDENT
                 ? rarity.minimumPerks() : Math.max(0, rarity.minimumPerks() - exclusiveCount);
@@ -544,6 +569,13 @@ public final class CraftingEquipmentManager {
             selected.add(generalPool.remove(player.getRandom().nextInt(generalPool.size())));
         }
         return List.copyOf(selected);
+    }
+
+    /** Removes duplicate potion-effect IDs from both already selected perks and remaining candidates. */
+    private static void removeDuplicatePotionEffects(List<Perk> candidates, List<Perk> selected) {
+        Set<String> usedEffectIds = new HashSet<>();
+        selected.removeIf(perk -> !perk.effectId().isBlank() && !usedEffectIds.add(perk.effectId()));
+        candidates.removeIf(perk -> !perk.effectId().isBlank() && !usedEffectIds.add(perk.effectId()));
     }
 
     private static String encodePerks(List<Perk> perks, int level, CraftingRarity rarity, ServerPlayer player) {
@@ -761,8 +793,8 @@ public final class CraftingEquipmentManager {
     }
 
     private static void appendTooltip(ItemStack stack, CraftingRarity rarity, double damageBonus,
-                                      double durabilityBonus, double criticalChance, double attackSpeedBonus,
-                                      double armorBonus, double toughnessBonus) {
+                                      double durabilityBonus, double breakSpeedBonus, double criticalChance,
+                                      double attackSpeedBonus, double armorBonus, double toughnessBonus) {
         ItemLore current = stack.getOrDefault(DataComponents.LORE, new ItemLore(List.of()));
         List<Component> lines = new ArrayList<>(current.lines());
         lines.add(Component.translatable("item.simpleskills.crafting_rarity_label",
@@ -775,6 +807,10 @@ public final class CraftingEquipmentManager {
         if (durabilityBonus > 0.0) {
             lines.add(Component.translatable("item.simpleskills.crafting_stat.durability",
                     String.format(java.util.Locale.ROOT, "%.0f", durabilityBonus * 100.0)).withStyle(ChatFormatting.GREEN));
+        }
+        if (breakSpeedBonus > 0.0) {
+            lines.add(Component.translatable("item.simpleskills.crafting_stat.break_speed",
+                    formatPercent(breakSpeedBonus * 100.0)).withStyle(ChatFormatting.GREEN));
         }
         if (criticalChance > 0.0) {
             lines.add(Component.translatable("item.simpleskills.crafting_stat.critical_chance",
@@ -812,7 +848,8 @@ public final class CraftingEquipmentManager {
             ChatFormatting perkColor = Set.of("celestial_wings", "celestial_range", "oracle_vision",
                     "aegis_of_purity", "phantom_stride", "divine_reflection", "astral_pursuit",
                     "singularity_bolt", "poseidons_wrath", "worldbreaker", "buried_truth",
-                    "edens_dominion").contains(id) ? ChatFormatting.GOLD : ChatFormatting.AQUA;
+                    "edens_dominion", "midas_touch", "abyssal_sovereign").contains(id)
+                    ? ChatFormatting.GOLD : ChatFormatting.AQUA;
             lines.add(perkLine.withStyle(perkColor));
         }
         stack.set(DataComponents.LORE, new ItemLore(lines));
@@ -1049,6 +1086,8 @@ public final class CraftingEquipmentManager {
             case "worldbreaker" -> WORLDBREAKER;
             case "buried_truth" -> BURIED_TRUTH;
             case "edens_dominion" -> EDENS_DOMINION;
+            case "midas_touch" -> MIDAS_TOUCH;
+            case "abyssal_sovereign" -> ABYSSAL_SOVEREIGN;
             default -> null;
         };
     }
@@ -1134,10 +1173,56 @@ public final class CraftingEquipmentManager {
         return Math.min(0.60, Math.max(0.0, chance));
     }
 
-    public static float getCriticalMultiplier(ItemStack weapon, RandomSource random) {
-        if (weapon == null || weapon.isEmpty() || random == null || !hasRarity(weapon)) return 1.0F;
-        double chance = getEffectiveCriticalChance(weapon);
-        if (chance <= 0.0 || random.nextDouble() >= chance) return 1.0F;
+    /**
+     * Returns the additive Break Speed equipment stat. It stacks with the player's
+     * Mining, Woodcutting or Excavating profession bonus and is not a perk slot.
+     * The legacy encoded-perk fallback keeps equipment created by the earlier 1.2.2
+     * development build functional after this stat migration.
+     */
+    public static float getBreakSpeedBonus(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) return 0.0F;
+        CompoundTag tag = getTag(stack);
+        double storedBonus = tag.getDoubleOr(DATA_BREAK_SPEED, 0.0);
+        if (storedBonus > 0.0) return (float) storedBonus;
+
+        String encodedPerks = tag.getStringOr(DATA_PERKS, "");
+        int perkStart = encodedPerks.indexOf("gathering_speed:");
+        if (perkStart < 0) return 0.0F;
+
+        CraftingRarity rarity = CraftingRarity.byId(tag.getStringOr(DATA_RARITY, ""));
+        if (rarity == null) return 0.0F;
+        int rankStart = perkStart + "gathering_speed:".length();
+        int rankEnd = encodedPerks.indexOf(',', rankStart);
+        String encodedRank = rankEnd < 0
+                ? encodedPerks.substring(rankStart) : encodedPerks.substring(rankStart, rankEnd);
+        int amplifier = parseInt(encodedRank, -1);
+        if (amplifier < 0) return 0.0F;
+
+        double minimum;
+        double maximum;
+        switch (rarity) {
+            case COMMON -> { minimum = 0.02; maximum = 0.05; }
+            case RARE -> { minimum = 0.04; maximum = 0.08; }
+            case UNIQUE -> { minimum = 0.06; maximum = 0.10; }
+            case EPIC -> { minimum = 0.08; maximum = 0.12; }
+            case LEGENDARY -> { minimum = 0.12; maximum = 0.17; }
+            case MYTHIC -> { minimum = 0.17; maximum = 0.23; }
+            case TRANSCENDENT -> { minimum = 0.23; maximum = 0.30; }
+            default -> { return 0.0F; }
+        }
+        double rankProgress = Math.min(1.0, Math.max(0.0, amplifier / 3.0));
+        return (float) (minimum + (maximum - minimum) * rankProgress);
+    }
+
+    /** Returns one critical roll using the sum of equipment and Slaying chances. */
+    public static float getCriticalMultiplier(ItemStack weapon, Player attacker, RandomSource random,
+                                              boolean includeSlayingChance) {
+        if (weapon == null || weapon.isEmpty() || random == null) return 1.0F;
+        double equipmentChance = getEffectiveCriticalChance(weapon);
+        double slayingChance = includeSlayingChance && attacker != null && weapon.is(ItemTags.SWORDS)
+                ? com.github.ob_yekt.simpleskills.Slaying.getCriticalChance(attacker.getUUID()) : 0.0;
+        double combinedChance = Math.min(1.0, Math.max(0.0, equipmentChance + slayingChance));
+        if (combinedChance <= 0.0 || random.nextDouble() >= combinedChance) return 1.0F;
         return 1.5F;
     }
 
@@ -1149,7 +1234,7 @@ public final class CraftingEquipmentManager {
                 : projectile.level().getServer().overworld().getGameTime();
         double multiplier = getDamageMultiplier(weapon);
         if (projectile.getOwner() instanceof ServerPlayer shooter) {
-            multiplier *= getCriticalMultiplier(weapon, shooter.getRandom());
+            multiplier *= getCriticalMultiplier(weapon, shooter, shooter.getRandom(), false);
         }
         String encodedPerks = getTag(weapon).getStringOr(DATA_PERKS, "");
         PROJECTILE_DATA.put(projectile.getUUID(), new ProjectileDamageData(
@@ -1226,6 +1311,9 @@ public final class CraftingEquipmentManager {
     }
 
     public static double getBonusDropChance(ItemStack stack, String perkId) {
+        // Fortune Mastery is a pickaxe-only affix. This guard also disables the bonus
+        // on older equipment that may already have rolled the perk before this restriction.
+        if ("fortune_mastery".equals(perkId) && classify(stack) != EquipmentKind.PICKAXE) return 0.0;
         int level = getPerkAmplifier(stack, perkId);
         if (level < 0) return 0.0;
         double chance = Math.min(0.30, 0.06 + level * 0.06);

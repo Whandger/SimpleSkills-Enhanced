@@ -2,6 +2,7 @@ package com.github.ob_yekt.simpleskills.fishing;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.github.ob_yekt.simpleskills.Skills;
+import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager;
 import com.github.ob_yekt.simpleskills.managers.ConfigManager;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -84,6 +85,8 @@ public final class FishingManager {
         @Nullable FishSpecies species;
         /** Stored size of the hooked fish (read once when the fish is picked, never rolled again). */
         @Nullable FishAttributes attributes;
+        boolean abyssalCatchPrepared;
+        List<ItemStack> preparedBonusLoot = List.of();
 
         // approach
         double speed;
@@ -363,6 +366,31 @@ public final class FishingManager {
                 SoundSource.NEUTRAL, 0.5F, 1.0F + (level.getRandom().nextFloat() - level.getRandom().nextFloat()) * 0.4F);
         level.sendParticles(ParticleTypes.FISHING, s.hook.getX(), s.hook.getY() + 0.1, s.hook.getZ(), 8, 0.25, 0.0, 0.25, 0.1);
         send(s, FishingStatePayload.STATE_BITE, 0f, 0f, 0f, 0);
+
+        if (hasAbyssalSovereign(s.player)) {
+            // Roll all rewards once at bite time. This lets Abyssal Sovereign decide whether
+            // a common fish is a simple catch or a valuable treasure that deserves the fight.
+            InteractionHand hand = rodHand(s.player);
+            ItemStack rod = hand == null ? ItemStack.EMPTY : s.player.getItemInHand(hand);
+            int luck = ((FishingBobberEntityAccessor) s.hook).getLuckBonus();
+            s.preparedBonusLoot = new ArrayList<>(FishingLoot.rollBonus(
+                    level, s.player, s.hook, rod, s.fishingLevel, luck));
+            s.preparedBonusLoot.addAll(FishingLoot.rollAbyssalBonus(level));
+            s.abyssalCatchPrepared = true;
+
+            // Abyssal Sovereign skips the tension minigame for every catch, including
+            // high-difficulty fish and valuable treasure. Its rarity already comes from
+            // the Transcendent crafting roll, so the bonus rewards are delivered directly.
+            FishingDebug.info(s.player, "Abyssal Sovereign: fish caught instantly (minigame skipped)");
+            setBiting(s.hook, false);
+            completeCatch(s, level);
+        }
+    }
+
+    private static boolean hasAbyssalSovereign(ServerPlayer player) {
+        InteractionHand hand = rodHand(player);
+        return hand != null
+                && CraftingEquipmentManager.stackHasPerk(player.getItemInHand(hand), "abyssal_sovereign");
     }
 
     private static void tickBiting(Session s, ServerLevel level, long now) {
@@ -489,8 +517,11 @@ public final class FishingManager {
         int luck = ((FishingBobberEntityAccessor) s.hook).getLuckBonus();
 
         // Rewards go straight to the inventory, wherever the fish was when the bar filled up.
-        ItemStack main = new ItemStack(species.item());
-        List<ItemStack> bonus = FishingLoot.rollBonus(level, player, s.hook, rod, s.fishingLevel, luck);
+        int fishCount = s.abyssalCatchPrepared ? 5 + level.getRandom().nextInt(6) : 1;
+        ItemStack main = new ItemStack(species.item(), fishCount);
+        List<ItemStack> bonus = s.abyssalCatchPrepared
+                ? new ArrayList<>(s.preparedBonusLoot)
+                : FishingLoot.rollBonus(level, player, s.hook, rod, s.fishingLevel, luck);
         FishingLoot.deliver(level, player, s.hook, rod, main, bonus, level.getRandom().nextInt(6) + 1);
 
         if (hand != null && !rod.isEmpty()) {

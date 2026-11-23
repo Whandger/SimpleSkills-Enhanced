@@ -549,7 +549,7 @@
   "item.simpleskills.crafting_perk.celestial_range": "Alcance Celestial: +6 blocos de alcance de ataque",
   "message.simpleskills.crafting.inventory_full": "Seu inventário está cheio. Libere espaço antes de fabricar equipamentos.",
   "item.simpleskills.crafting_perk.oracle_vision": "Visão do Oráculo: revela criaturas hostis e minérios raros através das paredes",
-  "item.simpleskills.crafting_perk.aegis_of_purity": "Égide da Pureza: imunidade a efeitos de status negativos enquanto equipada",
+  "item.simpleskills.crafting_perk.aegis_of_purity": "Égide da Pureza: imunidade a efeitos de status negativos e impede a perda de fome enquanto equipada",
   "item.simpleskills.crafting_perk.phantom_stride": "Passo Fantasma: sobe blocos de um nível e ignora lentidão de certos terrenos",
   "item.simpleskills.crafting_perk.divine_reflection": "Reflexo Divino: um Perfect Parry libera uma onda de choque divina",
   "item.simpleskills.crafting_perk.astral_pursuit": "Perseguição Astral: flechas perseguem diretamente o alvo hostil selecionado",
@@ -578,5 +578,8 @@
   "message.simpleskills.transcendent_area.worldbreaker_enabled": "Efeito 3×3 do Worldbreaker ativado.",
   "message.simpleskills.transcendent_area.worldbreaker_disabled": "Efeito 3×3 do Worldbreaker desativado.",
   "message.simpleskills.transcendent_area.eden_enabled": "Efeito 3×3 do Eden’s Dominion ativado.",
-  "message.simpleskills.transcendent_area.eden_disabled": "Efeito 3×3 do Eden’s Dominion desativado."
+  "message.simpleskills.transcendent_area.eden_disabled": "Efeito 3×3 do Eden’s Dominion desativado.",
+  "item.simpleskills.crafting_stat.break_speed": "Velocidade de Quebra: +%s%% na velocidade ao quebrar blocos",
+  "item.simpleskills.crafting_perk.midas_touch": "Toque de Midas: com Shift, troncos viram blocos de ouro e folhas viram pepitas. Concede uma Maçã Dourada e 20% de chance de uma Encantada.",
+  "item.simpleskills.crafting_perk.abyssal_sovereign": "Soberano Abissal: captura qualquer peixe instantaneamente, sem minigame de tensão, e rende 5–10 peixes com saques oceânicos extras."
 }

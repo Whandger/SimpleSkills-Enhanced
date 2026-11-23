@@ -544,7 +544,7 @@
   "item.simpleskills.crafting_perk.celestial_range": "المدى السماوي: +6 كتل إلى مدى الهجوم",
   "message.simpleskills.crafting.inventory_full": "مخزونك ممتلئ. أفرغ مساحة قبل صنع المعدات.",
   "item.simpleskills.crafting_perk.oracle_vision": "رؤية العرّاف: تكشف المخلوقات المعادية والخامات النادرة عبر الجدران",
-  "item.simpleskills.crafting_perk.aegis_of_purity": "درع النقاء: مناعة ضد تأثيرات الحالة السلبية أثناء ارتدائه",
+  "item.simpleskills.crafting_perk.aegis_of_purity": "درع النقاء: مناعة ضد تأثيرات الحالة السلبية ويمنع فقدان الجوع أثناء ارتدائه",
   "item.simpleskills.crafting_perk.phantom_stride": "خطوة الشبح: يصعد كتلة كاملة ويتجاهل إبطاء بعض التضاريس",
   "item.simpleskills.crafting_perk.divine_reflection": "الانعكاس الإلهي: يطلق الصد المثالي موجة صدمة إلهية",
   "item.simpleskills.crafting_perk.astral_pursuit": "المطاردة النجمية: تتبع الأسهم الهدف المعادي المحدد مباشرة",
@@ -573,5 +573,8 @@
   "message.simpleskills.transcendent_area.worldbreaker_enabled": "تم تفعيل تأثير Worldbreaker ‏3×3.",
   "message.simpleskills.transcendent_area.worldbreaker_disabled": "تم تعطيل تأثير Worldbreaker ‏3×3.",
   "message.simpleskills.transcendent_area.eden_enabled": "تم تفعيل تأثير Eden’s Dominion ‏3×3.",
-  "message.simpleskills.transcendent_area.eden_disabled": "تم تعطيل تأثير Eden’s Dominion ‏3×3."
+  "message.simpleskills.transcendent_area.eden_disabled": "تم تعطيل تأثير Eden’s Dominion ‏3×3.",
+  "item.simpleskills.crafting_stat.break_speed": "سرعة تكسير الكتل: +%1$s%%",
+  "item.simpleskills.crafting_perk.midas_touch": "لمسة ميداس: مع Shift، تتحول الجذوع إلى كتل ذهبية والأوراق إلى شذرات. تمنح تفاحة ذهبية وفرصة 20% للحصول على تفاحة مسحورة.",
+  "item.simpleskills.crafting_perk.abyssal_sovereign": "سيد الأعماق: يصطاد جميع الأسماك فورًا دون تحدي الشد، ويمنح 5 إلى 10 أسماك مع غنائم محيطية إضافية"
 }

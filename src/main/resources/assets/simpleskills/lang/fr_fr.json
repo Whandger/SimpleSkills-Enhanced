@@ -544,7 +544,7 @@
   "item.simpleskills.crafting_perk.celestial_range": "Portée céleste : +6 blocs de portée d’attaque",
   "message.simpleskills.crafting.inventory_full": "Votre inventaire est plein. Faites de la place avant de fabriquer un équipement.",
   "item.simpleskills.crafting_perk.oracle_vision": "Vision de l'Oracle : révèle les créatures hostiles et les minerais rares à travers les murs",
-  "item.simpleskills.crafting_perk.aegis_of_purity": "Égide de Pureté : immunité aux effets de statut négatifs tant qu'elle est équipée",
+  "item.simpleskills.crafting_perk.aegis_of_purity": "Égide de Pureté : immunité aux effets de statut néfastes et empêche la perte de faim tant qu’elle est équipée",
   "item.simpleskills.crafting_perk.phantom_stride": "Pas Fantôme : franchit des blocs d'un niveau et ignore certains ralentissements du terrain",
   "item.simpleskills.crafting_perk.divine_reflection": "Réflexion Divine : une parade parfaite libère une onde de choc divine",
   "item.simpleskills.crafting_perk.astral_pursuit": "Poursuite Astrale : les flèches poursuivent directement la cible hostile sélectionnée",
@@ -573,5 +573,8 @@
   "message.simpleskills.transcendent_area.worldbreaker_enabled": "Effet 3×3 de Worldbreaker activé.",
   "message.simpleskills.transcendent_area.worldbreaker_disabled": "Effet 3×3 de Worldbreaker désactivé.",
   "message.simpleskills.transcendent_area.eden_enabled": "Effet 3×3 d’Eden’s Dominion activé.",
-  "message.simpleskills.transcendent_area.eden_disabled": "Effet 3×3 d’Eden’s Dominion désactivé."
+  "message.simpleskills.transcendent_area.eden_disabled": "Effet 3×3 d’Eden’s Dominion désactivé.",
+  "item.simpleskills.crafting_stat.break_speed": "Vitesse de minage : +%s%% de vitesse de destruction des blocs",
+  "item.simpleskills.crafting_perk.midas_touch": "Toucher de Midas : avec Maj, les troncs deviennent des blocs d’or et les feuilles, des pépites. Donne une pomme dorée et 20 % de chances d’en obtenir une enchantée.",
+  "item.simpleskills.crafting_perk.abyssal_sovereign": "Souverain des abysses : capture tous les poissons instantanément, sans défi de tension, et en donne 5 à 10 avec du butin océanique supplémentaire."
 }

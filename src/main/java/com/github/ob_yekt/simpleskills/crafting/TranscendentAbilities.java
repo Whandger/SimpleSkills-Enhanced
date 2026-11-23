@@ -106,9 +106,16 @@ public final class TranscendentAbilities {
         tickSingularities();
     }
 
-    /** Removes all currently active harmful potion effects while Aegis of Purity is worn. */
+    /** Removes harmful potion effects and prevents hunger loss while Aegis of Purity is worn. */
     public static void enforceAegisOfPurity(ServerPlayer player) {
         if (!CraftingEquipmentManager.hasEquippedPerkInSlot(player, EquipmentSlot.CHEST, "aegis_of_purity")) return;
+
+        // Aegis of Purity also prevents hunger loss: restore both food and saturation
+        // after the player's normal food tick so exhaustion cannot drain the food bar.
+        var foodData = player.getFoodData();
+        if (foodData.getFoodLevel() < 20) foodData.setFoodLevel(20);
+        if (foodData.getSaturationLevel() < 20.0F) foodData.setSaturation(20.0F);
+
         for (MobEffectInstance effect : new ArrayList<>(player.getActiveEffects())) {
             if (effect.getEffect().value().getCategory() == MobEffectCategory.HARMFUL) {
                 player.removeEffect(effect.getEffect());

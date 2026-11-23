@@ -549,7 +549,7 @@
   "item.simpleskills.crafting_perk.celestial_range": "Celestial Range: +6 blocks of attack reach",
   "message.simpleskills.crafting.inventory_full": "Your inventory is full. Make room before crafting equipment.",
   "item.simpleskills.crafting_perk.oracle_vision": "Oracle's Vision: reveals hostile creatures and rare ores through walls",
-  "item.simpleskills.crafting_perk.aegis_of_purity": "Aegis of Purity: immunity to harmful status effects while equipped",
+  "item.simpleskills.crafting_perk.aegis_of_purity": "Aegis of Purity: immunity to harmful status effects and prevents hunger loss while equipped",
   "item.simpleskills.crafting_perk.phantom_stride": "Phantom Stride: step up one block and ignore selected terrain slowdowns",
   "item.simpleskills.crafting_perk.divine_reflection": "Divine Reflection: Perfect Parry releases a divine shockwave",
   "item.simpleskills.crafting_perk.astral_pursuit": "Astral Pursuit: arrows home directly toward the selected hostile target",
@@ -578,5 +578,8 @@
   "message.simpleskills.transcendent_area.worldbreaker_enabled": "Worldbreaker 3x3 effect enabled.",
   "message.simpleskills.transcendent_area.worldbreaker_disabled": "Worldbreaker 3x3 effect disabled.",
   "message.simpleskills.transcendent_area.eden_enabled": "Eden’s Dominion 3x3 effect enabled.",
-  "message.simpleskills.transcendent_area.eden_disabled": "Eden’s Dominion 3x3 effect disabled."
+  "message.simpleskills.transcendent_area.eden_disabled": "Eden’s Dominion 3x3 effect disabled.",
+  "item.simpleskills.crafting_stat.break_speed": "Break Speed: +%s%% block breaking speed",
+  "item.simpleskills.crafting_perk.midas_touch": "Midas' Touch: Shift-felled logs become gold blocks and leaves become nuggets. Grants a Golden Apple; 20% chance for an Enchanted one.",
+  "item.simpleskills.crafting_perk.abyssal_sovereign": "Abyssal Sovereign: catches every fish instantly without the tension challenge, yielding 5–10 fish and bonus ocean loot."
 }

@@ -1,6 +1,7 @@
 
 package com.github.ob_yekt.simpleskills;
 
+import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager;
 import com.github.ob_yekt.simpleskills.managers.DatabaseManager;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
 import com.github.ob_yekt.simpleskills.utils.BlockSkillClassifier;
@@ -22,8 +23,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Gathering Speed: +1% block-breaking speed per level for Mining (pickaxe),
- * Woodcutting (axe) and Excavating (shovel), applied once on top of the vanilla speed.
+ * Profession break speed: +1% block-breaking speed per level for Mining (pickaxe),
+ * Woodcutting (axe) and Excavating (shovel), with the equipment Break Speed stat added on top.
  *
  * Levels are kept in tiny in-memory caches so the per-tick break-speed calculation never touches
  * the database (DatabaseManager.getAllSkills pings the JDBC connection on every call):
@@ -273,7 +274,9 @@ public final class GatheringSpeed {
                 Math.min(getLevel(player, skill), XPManager.getMaxLevel())
         );
 
-        return 1.0f + (level * BONUS_PER_LEVEL);
+        float professionBonus = level * BONUS_PER_LEVEL;
+        float equipmentBonus = CraftingEquipmentManager.getBreakSpeedBonus(player.getMainHandItem());
+        return 1.0f + professionBonus + equipmentBonus;
     }
 
     /**

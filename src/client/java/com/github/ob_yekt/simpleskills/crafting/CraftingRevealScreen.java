@@ -67,12 +67,14 @@ public final class CraftingRevealScreen extends Screen {
             "divine_blessing", "aegis_of_ages", "fire_resistance", "featherweight",
             "celestial_wings", "celestial_range", "oracle_vision", "aegis_of_purity",
             "phantom_stride", "divine_reflection", "astral_pursuit", "singularity_bolt",
-            "poseidons_wrath", "worldbreaker", "buried_truth", "edens_dominion");
+            "poseidons_wrath", "worldbreaker", "buried_truth", "edens_dominion",
+            "midas_touch", "abyssal_sovereign");
 
     private static final Set<String> GOLDEN_PERKS = Set.of(
             "celestial_wings", "celestial_range", "oracle_vision", "aegis_of_purity",
             "phantom_stride", "divine_reflection", "astral_pursuit", "singularity_bolt",
-            "poseidons_wrath", "worldbreaker", "buried_truth", "edens_dominion");
+            "poseidons_wrath", "worldbreaker", "buried_truth", "edens_dominion",
+            "midas_touch", "abyssal_sovereign");
 
     private static CraftingRevealScreen activeScreen;
 
@@ -755,12 +757,16 @@ public final class CraftingRevealScreen extends Screen {
         List<StatChip> chips = new ArrayList<>();
         double dmg = doubleStat(entry.details(), "damage");
         int dur = intStat(entry.details(), "durability");
+        double breakSpeed = doubleStat(entry.details(), "breakSpeed");
         double crit = doubleStat(entry.details(), "critical");
         double attackSpeed = doubleStat(entry.details(), "attackSpeed");
         double armor = doubleStat(entry.details(), "armor");
         double toughness = doubleStat(entry.details(), "toughness");
         if (dmg > 0.0) {
             chips.add(new StatChip("+" + formatPercent(dmg) + "% ATK", 0x66163826, STAT_GREEN, 0xFFC8F7D8));
+        }
+        if (breakSpeed > 0.0) {
+            chips.add(new StatChip("+" + formatPercent(breakSpeed) + "% BREAK SPD", 0x66142B3D, PERK_CYAN, 0xFFC9F2FF));
         }
         if (attackSpeed > 0.0) {
             chips.add(new StatChip("+" + formatPercent(attackSpeed) + "% ATK SPD", 0x662B2050, 0xFFB58CFF, 0xFFE3D8FF));
@@ -809,6 +815,7 @@ public final class CraftingRevealScreen extends Screen {
         List<Component> lines = new ArrayList<>();
         addStat(lines, entry.details(), "damage", "item.simpleskills.crafting_stat.damage");
         addStat(lines, entry.details(), "durability", "item.simpleskills.crafting_stat.durability");
+        addStat(lines, entry.details(), "breakSpeed", "item.simpleskills.crafting_stat.break_speed");
         addStat(lines, entry.details(), "critical", "item.simpleskills.crafting_stat.critical_chance");
         addStat(lines, entry.details(), "attackSpeed", "item.simpleskills.crafting_stat.attack_speed");
         addStat(lines, entry.details(), "armor", "item.simpleskills.crafting_stat.armor");
@@ -840,8 +847,8 @@ public final class CraftingRevealScreen extends Screen {
     }
 
     private static void addStat(List<Component> lines, JsonObject details, String field, String key) {
-        if (field.equals("damage") || field.equals("attackSpeed") || field.equals("critical")
-                || field.equals("armor") || field.equals("toughness")) {
+        if (field.equals("damage") || field.equals("breakSpeed") || field.equals("attackSpeed")
+                || field.equals("critical") || field.equals("armor") || field.equals("toughness")) {
             double value = doubleStat(details, field);
             if (value > 0.0) lines.add(Component.translatable(key, formatPercent(value)));
             return;
@@ -876,6 +883,7 @@ public final class CraftingRevealScreen extends Screen {
     private static int countPrimaryStats(Entry entry) {
         int count = 0;
         if (doubleStat(entry.details(), "damage") > 0.0) count++;
+        if (doubleStat(entry.details(), "breakSpeed") > 0.0) count++;
         if (doubleStat(entry.details(), "attackSpeed") > 0.0) count++;
         if (doubleStat(entry.details(), "critical") > 0.0) count++;
         if (doubleStat(entry.details(), "armor") > 0.0) count++;
