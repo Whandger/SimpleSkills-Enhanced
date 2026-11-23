@@ -36,6 +36,32 @@ public enum CraftingRarity {
             1.00, 1.00, 1.00, 1.00, 1.00, 0.250, 0.420, 0.200, 0.350,
             4, 5, 4, ChatFormatting.YELLOW);
 
+    /**
+     * Material quality scales only the Transcendent roll; the removed probability returns to Common.
+     * Multipliers are relative to Diamond's 1.00% Transcendent chance at Crafting level 99.
+     */
+    public enum MaterialTier {
+        WOOD("Wood / Leather", 0.05),       // 0.05% at level 99
+        STONE("Stone", 0.10),               // 0.10% at level 99
+        COPPER("Copper", 0.20),             // 0.20% at level 99
+        GOLD("Gold", 0.50),                 // 0.50% at level 99
+        IRON("Iron", 0.60),                 // 0.60% at level 99
+        OTHER("Other / Modded", 0.10),      // Conservative 0.10% fallback
+        DIAMOND("Diamond", 1.00),           // 1.00% at level 99
+        NETHERITE("Netherite", 1.00);       // 1.00% at level 99
+
+        private final String displayName;
+        private final double transcendentMultiplier;
+
+        MaterialTier(String displayName, double transcendentMultiplier) {
+            this.displayName = displayName;
+            this.transcendentMultiplier = transcendentMultiplier;
+        }
+
+        public String displayName() { return displayName; }
+        public double transcendentMultiplier() { return transcendentMultiplier; }
+    }
+
     private final String id;
     private final String displayName;
     private final double level1Chance;
@@ -159,31 +185,59 @@ public enum CraftingRarity {
         return level50Chance + (level99Chance - level50Chance) * ((safeLevel - 50) / 49.0);
     }
 
-    public static CraftingRarity roll(int level, double rollPercent) {
+    /** Applies the recipe material multiplier only to Transcendent, compensating Common to keep 100%. */
+    public double chanceAt(int level, MaterialTier materialTier) {
+        MaterialTier tier = materialTier == null ? MaterialTier.OTHER : materialTier;
+        if (this != COMMON && this != TRANSCENDENT) return chanceAt(level);
+
+        double baseTranscendentChance = TRANSCENDENT.chanceAt(level);
+        double adjustedTranscendentChance = baseTranscendentChance * tier.transcendentMultiplier();
+        return this == TRANSCENDENT
+                ? adjustedTranscendentChance
+                : COMMON.chanceAt(level) + baseTranscendentChance - adjustedTranscendentChance;
+    }
+
+    /** Rolls rarity using the crafted recipe's strongest recognized material. */
+    public static CraftingRarity roll(int level, double rollPercent, MaterialTier materialTier) {
         double cumulative = 0.0;
         CraftingRarity last = COMMON;
         for (CraftingRarity rarity : values()) {
             last = rarity;
-            cumulative += rarity.chanceAt(level);
+            cumulative += rarity.chanceAt(level, materialTier);
             if (rollPercent < cumulative) return rarity;
         }
         return last;
     }
 
+    /** Backward-compatible baseline roll; diamond is the reference material. */
+    public static CraftingRarity roll(int level, double rollPercent) {
+        return roll(level, rollPercent, MaterialTier.DIAMOND);
+    }
+
     public static double totalChance(int level) {
+        return totalChance(level, MaterialTier.DIAMOND);
+    }
+
+    public static double totalChance(int level, MaterialTier materialTier) {
         double total = 0.0;
-        for (CraftingRarity rarity : values()) total += rarity.chanceAt(level);
+        for (CraftingRarity rarity : values()) total += rarity.chanceAt(level, materialTier);
         return total;
     }
 
     public static String describe(int level) {
         int safeLevel = Math.max(1, Math.min(99, level));
         StringBuilder output = new StringBuilder();
-        output.append(String.format(Locale.US, "Crafting level %d equipment rarity chances:%n", safeLevel));
+        output.append(String.format(Locale.US,
+                "Crafting level %d equipment rarity chances (Diamond baseline):%n", safeLevel));
         for (CraftingRarity rarity : values()) {
             output.append(String.format(Locale.US, "  %-14s %9.4f%%%n", rarity.displayName, rarity.chanceAt(safeLevel)));
         }
         output.append(String.format(Locale.US, "  %-14s %9.4f%%%n", "TOTAL", totalChance(safeLevel)));
+        output.append(String.format(Locale.US, "%nTranscendent chance by recipe material:%n"));
+        for (MaterialTier tier : MaterialTier.values()) {
+            double chance = TRANSCENDENT.chanceAt(safeLevel, tier);
+            output.append(String.format(Locale.US, "  %-16s %9.4f%%%n", tier.displayName(), chance));
+        }
         return output.toString();
     }
 
@@ -206,6 +260,20 @@ public enum CraftingRarity {
             double total = totalChance(level);
             if (!Double.isFinite(total) || Math.abs(total - 100.0) > 1.0E-7) {
                 return "Crafting rarity distribution totals " + total + "% at level " + level;
+            }
+            for (CraftingRarity.MaterialTier tier : CraftingRarity.MaterialTier.values()) {
+                double materialTotal = totalChance(level, tier);
+                if (!Double.isFinite(materialTotal) || Math.abs(materialTotal - 100.0) > 1.0E-7) {
+                    return "Crafting rarity distribution for " + tier.displayName()
+                            + " totals " + materialTotal + "% at level " + level;
+                }
+                for (CraftingRarity rarity : values()) {
+                    double materialChance = rarity.chanceAt(level, tier);
+                    if (!Double.isFinite(materialChance) || materialChance < 0.0) {
+                        return "Invalid " + rarity.id + " chance for " + tier.displayName()
+                                + " at level " + level;
+                    }
+                }
             }
             for (CraftingRarity rarity : values()) {
                 double chance = rarity.chanceAt(level);

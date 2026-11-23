@@ -114,6 +114,10 @@ public final class CraftingCommon {
     }
 
     public static void applyCraftingScaling(ItemStack stack, ServerPlayer player) {
+        applyCraftingScaling(stack, player, null);
+    }
+
+    public static void applyCraftingScaling(ItemStack stack, ServerPlayer player, ItemStack[] ingredients) {
         if (!isValidStack(stack) || !isCraftableItem(stack)) return;
 
         // Prevent durability bonus on "cosmetic re-crafting" (dyeing armor, applying banner to shield, etc.)
@@ -131,7 +135,7 @@ public final class CraftingCommon {
         stack.set(DataComponents.MAX_DAMAGE, newDurability);
 
         // Rarity and random affixes are rolled once and stored on the crafted item.
-        com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager.applyCraftedEquipment(stack, player);
+        com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager.applyCraftedEquipment(stack, player, ingredients);
     }
 
     public static void applyCookingScaling(ItemStack stack, ServerPlayer player) {

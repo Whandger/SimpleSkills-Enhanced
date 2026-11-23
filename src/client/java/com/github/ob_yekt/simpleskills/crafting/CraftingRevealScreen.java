@@ -59,6 +59,7 @@ public final class CraftingRevealScreen extends Screen {
     private static final int MUTED = 0xFFAAB6C8;
     private static final int DIM = 0xFF5D687A;
     private static final int STAT_GREEN = 0xFF7CE89E;
+    private static final int STAT_RANGE_GRAY = 0xFF8792A3;
     private static final int PERK_CYAN = 0xFF7EE4FF;
 
     private static final List<String> NO_LEVEL_TEXT = List.of(
@@ -739,14 +740,37 @@ public final class CraftingRevealScreen extends Screen {
         for (int i = 0; i < lines.size(); i++) {
             Component line = lines.get(i);
             boolean isStat = i < statCount;
+            boolean maxRollStat = isStat && isMaxRollStatLine(entry, i);
             boolean goldenPerk = !isStat && isGoldenPerkLine(entry, i);
-            int bulletColor = isStat ? STAT_GREEN : (goldenPerk ? GOLD_BRIGHT : theme.bright());
-            int textColor = isStat ? 0xFFE5F7EC : (goldenPerk ? GOLD_BRIGHT : 0xFFE3ECF8);
+            int bulletColor = maxRollStat || goldenPerk ? GOLD_BRIGHT : (isStat ? STAT_GREEN : theme.bright());
+            int textColor = maxRollStat || goldenPerk ? GOLD_BRIGHT : (isStat ? 0xFFE5F7EC : 0xFFE3ECF8);
             String bullet = isStat ? "◆" : "✦";
 
             graphics.text(this.font, Component.literal(bullet), x + 8, lineY, bulletColor, false);
-            String fitted = fitText(line.getString(), width - 24);
-            graphics.text(this.font, Component.literal(fitted), x + 18, lineY, textColor, false);
+            if (isStat) {
+                // Keep the rolled value prominent, but render the possible range in a
+                // quieter gray so it reads as reference information rather than a bonus.
+                String fullText = line.getString();
+                int rangeStart = fullText.lastIndexOf(" [");
+                if (rangeStart >= 0) {
+                    String rolledText = fullText.substring(0, rangeStart);
+                    String rangeText = fullText.substring(rangeStart + 1);
+                    int availableWidth = width - 24;
+                    int rangeWidth = this.font.width(rangeText);
+                    String fittedRolled = fitText(rolledText, Math.max(1, availableWidth - rangeWidth));
+                    graphics.text(this.font, Component.literal(fittedRolled), x + 18, lineY, textColor, false);
+                    int rangeX = x + 18 + this.font.width(fittedRolled);
+                    if (rangeX + rangeWidth <= x + 18 + availableWidth) {
+                        graphics.text(this.font, Component.literal(rangeText), rangeX, lineY, STAT_RANGE_GRAY, false);
+                    }
+                } else {
+                    String fitted = fitText(fullText, width - 24);
+                    graphics.text(this.font, Component.literal(fitted), x + 18, lineY, textColor, false);
+                }
+            } else {
+                String fitted = fitText(line.getString(), width - 24);
+                graphics.text(this.font, Component.literal(fitted), x + 18, lineY, textColor, false);
+            }
             lineY += 13;
         }
     }
@@ -847,21 +871,52 @@ public final class CraftingRevealScreen extends Screen {
     }
 
     private static void addStat(List<Component> lines, JsonObject details, String field, String key) {
-        if (field.equals("damage") || field.equals("breakSpeed") || field.equals("attackSpeed")
-                || field.equals("critical") || field.equals("armor") || field.equals("toughness")) {
-            double value = doubleStat(details, field);
-            if (value > 0.0) lines.add(Component.translatable(key, formatPercent(value)));
-            return;
+        double value = doubleStat(details, field);
+        if (value <= 0.0) return;
+
+        // Older reveal packets may not contain ranges; use the rolled value as a
+        // fallback rather than allowing raw format placeholders to appear on screen.
+        double minimum = doubleStat(details, field + "Min", value);
+        double maximum = doubleStat(details, field + "Max", value);
+        // Labels are translated separately from values to avoid fragile printf-style
+        // placeholders in language files and to let the tooltip color the range on its own.
+        String label = Component.translatable(key).getString();
+        String text = label + ": +" + formatPercent(value) + "% ["
+                + formatPercent(minimum) + "% - " + formatPercent(maximum) + "%]";
+        lines.add(Component.literal(text));
+    }
+
+    private static boolean isMaxRollStatLine(Entry entry, int statLineIndex) {
+        String[] fields = {"damage", "durability", "breakSpeed", "critical", "attackSpeed", "armor", "toughness"};
+        int visibleIndex = 0;
+        for (String field : fields) {
+            if (doubleStat(entry.details(), field) <= 0.0) continue;
+            if (visibleIndex++ == statLineIndex) return isMaxRoll(entry.details(), field);
         }
-        int value = intStat(details, field);
-        if (value > 0) lines.add(Component.translatable(key, Integer.toString(value)));
+        return false;
+    }
+
+    private static boolean isMaxRoll(JsonObject details, String field) {
+        if (!details.has(field + "Max")) return false;
+        double value = doubleStat(details, field);
+        double maximum = doubleStat(details, field + "Max");
+        double step = switch (field) {
+            case "durability", "breakSpeed" -> 1.0;
+            case "attackSpeed" -> 0.5;
+            default -> 0.1;
+        };
+        return value > 0.0 && Math.abs(value - maximum) <= Math.max(0.0001, step * 0.51);
     }
 
     private static double doubleStat(JsonObject details, String field) {
+        return doubleStat(details, field, 0.0);
+    }
+
+    private static double doubleStat(JsonObject details, String field, double fallback) {
         try {
-            return details.has(field) ? details.get(field).getAsDouble() : 0.0;
+            return details.has(field) ? details.get(field).getAsDouble() : fallback;
         } catch (RuntimeException ignored) {
-            return 0.0;
+            return fallback;
         }
     }
 
@@ -883,12 +938,12 @@ public final class CraftingRevealScreen extends Screen {
     private static int countPrimaryStats(Entry entry) {
         int count = 0;
         if (doubleStat(entry.details(), "damage") > 0.0) count++;
+        if (intStat(entry.details(), "durability") > 0) count++;
         if (doubleStat(entry.details(), "breakSpeed") > 0.0) count++;
-        if (doubleStat(entry.details(), "attackSpeed") > 0.0) count++;
         if (doubleStat(entry.details(), "critical") > 0.0) count++;
+        if (doubleStat(entry.details(), "attackSpeed") > 0.0) count++;
         if (doubleStat(entry.details(), "armor") > 0.0) count++;
         if (doubleStat(entry.details(), "toughness") > 0.0) count++;
-        if (intStat(entry.details(), "durability") > 0) count++;
         return count;
     }
 

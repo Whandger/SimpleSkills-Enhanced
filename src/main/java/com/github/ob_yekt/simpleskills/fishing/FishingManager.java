@@ -368,8 +368,8 @@ public final class FishingManager {
         send(s, FishingStatePayload.STATE_BITE, 0f, 0f, 0f, 0);
 
         if (hasAbyssalSovereign(s.player)) {
-            // Roll all rewards once at bite time. This lets Abyssal Sovereign decide whether
-            // a common fish is a simple catch or a valuable treasure that deserves the fight.
+            // Roll all rewards once at bite time so the instant catch can deliver the exact
+            // same fish and treasure results without entering the tension minigame.
             InteractionHand hand = rodHand(s.player);
             ItemStack rod = hand == null ? ItemStack.EMPTY : s.player.getItemInHand(hand);
             int luck = ((FishingBobberEntityAccessor) s.hook).getLuckBonus();
@@ -522,6 +522,8 @@ public final class FishingManager {
         List<ItemStack> bonus = s.abyssalCatchPrepared
                 ? new ArrayList<>(s.preparedBonusLoot)
                 : FishingLoot.rollBonus(level, player, s.hook, rod, s.fishingLevel, luck);
+        com.github.ob_yekt.simpleskills.celestial.CelestialAltarManager
+                .rollFishingEssence(level, s.fishingLevel, bonus);
         FishingLoot.deliver(level, player, s.hook, rod, main, bonus, level.getRandom().nextInt(6) + 1);
 
         if (hand != null && !rod.isEmpty()) {

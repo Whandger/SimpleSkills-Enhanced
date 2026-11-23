@@ -474,6 +474,8 @@ public final class ExcavatingManager {
                 : ExcavatingRarity.BASE_XP;
         XPManager.addXPWithNotification(player, Skills.EXCAVATING, xp);
 
+        com.github.ob_yekt.simpleskills.celestial.CelestialAltarManager
+                .rollExcavatingEssence(level, session.pos, excavatingLevel);
         playCompletionEffects(level, session, sandState, reward, found);
     }
 

@@ -85,7 +85,7 @@ public abstract class CraftingScreenHandlerMixin extends AbstractCraftingMenu {
             // Apply bonuses using CraftingCommon (which already handles both types)
             if (CraftingCommon.isCraftableItem(itemStack2)) {
                 CraftingCommon.applyCraftingLore(itemStack2, serverPlayer);
-                CraftingCommon.applyCraftingScaling(itemStack2, serverPlayer);
+                CraftingCommon.applyCraftingScaling(itemStack2, serverPlayer, originalInputs);
             } else if (CraftingCommon.isCookableFoodItem(itemStack2)) {
                 CraftingCommon.applyCookingLore(itemStack2, serverPlayer);
                 CraftingCommon.applyCookingScaling(itemStack2, serverPlayer);

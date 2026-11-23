@@ -24,6 +24,7 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
@@ -72,6 +73,16 @@ public final class CraftingEquipmentManager {
     private static final String DATA_ARMOR = "simpleskills_crafting_armor_bonus";
     private static final String DATA_TOUGHNESS = "simpleskills_crafting_toughness_bonus";
     private static final String DATA_PERKS = "simpleskills_crafting_perks";
+    private static final String DATA_BASE_NAME = "simpleskills_crafting_base_name";
+    private static final String DATA_BASE_MAX_DAMAGE = "simpleskills_crafting_base_max_damage";
+    private static final String DATA_LORE_LINE_COUNT = "simpleskills_crafting_lore_line_count";
+    private static final String DATA_BASE_RANGE_PRESENT = "simpleskills_crafting_base_range_present";
+    private static final String DATA_BASE_RANGE_MIN = "simpleskills_crafting_base_range_min";
+    private static final String DATA_BASE_RANGE_MAX = "simpleskills_crafting_base_range_max";
+    private static final String DATA_BASE_RANGE_MIN_CREATIVE = "simpleskills_crafting_base_range_min_creative";
+    private static final String DATA_BASE_RANGE_MAX_CREATIVE = "simpleskills_crafting_base_range_max_creative";
+    private static final String DATA_BASE_RANGE_HITBOX = "simpleskills_crafting_base_range_hitbox";
+    private static final String DATA_BASE_RANGE_MOB_FACTOR = "simpleskills_crafting_base_range_mob_factor";
     private static final int EFFECT_DURATION_TICKS = 40;
     private static final int EFFECT_REFRESH_INTERVAL = 10;
     private static final long PROJECTILE_BONUS_LIFETIME_TICKS = 1200L;
@@ -212,11 +223,215 @@ public final class CraftingEquipmentManager {
 
     /** Applies rarity exactly once to a new durable crafting result. */
     public static void applyCraftedEquipment(ItemStack stack, ServerPlayer player) {
+        applyCraftedEquipment(stack, player, null);
+    }
+
+    /** Applies a material-scaled Transcendent chance using the actual recipe ingredients. */
+    public static void applyCraftedEquipment(ItemStack stack, ServerPlayer player, ItemStack[] ingredients) {
         if (stack == null || stack.isEmpty() || player == null || stack.get(DataComponents.MAX_DAMAGE) == null
                 || hasRarity(stack)) return;
         int level = getCraftingLevel(player);
-        CraftingRarity rarity = CraftingRarity.roll(level, player.getRandom().nextDouble() * 100.0);
+        CraftingRarity.MaterialTier materialTier = getRecipeMaterialTier(ingredients);
+        CraftingRarity rarity = CraftingRarity.roll(
+                level, player.getRandom().nextDouble() * 100.0, materialTier);
         applyEquipmentRarity(stack, player, rarity, level);
+    }
+
+    /**
+     * Uses the strongest material present in the recipe. Neutral ingredients such as
+     * string, sticks, leather and planks map to the basic tier; unknown modded ingredients
+     * are treated conservatively as Other / Modded instead of receiving the diamond rate.
+     */
+    private static CraftingRarity.MaterialTier getRecipeMaterialTier(ItemStack[] ingredients) {
+        CraftingRarity.MaterialTier strongest = null;
+        if (ingredients != null) {
+            for (ItemStack ingredient : ingredients) {
+                if (ingredient == null || ingredient.isEmpty()) continue;
+                CraftingRarity.MaterialTier tier = getIngredientMaterialTier(ingredient);
+                if (tier != null && (strongest == null || materialPriority(tier) > materialPriority(strongest))) {
+                    strongest = tier;
+                }
+            }
+        }
+        return strongest == null ? CraftingRarity.MaterialTier.OTHER : strongest;
+    }
+
+    private static int materialPriority(CraftingRarity.MaterialTier tier) {
+        return switch (tier) {
+            case WOOD -> 1;
+            case STONE -> 2;
+            case COPPER -> 3;
+            case GOLD -> 4;
+            case IRON -> 5;
+            case OTHER -> 2;
+            case DIAMOND -> 6;
+            case NETHERITE -> 7;
+        };
+    }
+
+    /** Returns the material tier represented by a recipe ingredient. */
+    private static CraftingRarity.MaterialTier getIngredientMaterialTier(ItemStack stack) {
+        Identifier itemId = BuiltInRegistries.ITEM.getKey(stack.getItem());
+        String path = itemId.getPath().toLowerCase(java.util.Locale.ROOT);
+
+        if (path.contains("netherite") || path.contains("ancient_debris")) {
+            return CraftingRarity.MaterialTier.NETHERITE;
+        }
+        if (path.contains("diamond")) return CraftingRarity.MaterialTier.DIAMOND;
+        if (path.startsWith("iron_") || path.contains("_iron_") || path.endsWith("_iron_ingot")) {
+            return CraftingRarity.MaterialTier.IRON;
+        }
+        if (path.startsWith("gold_") || path.startsWith("golden_")
+                || path.contains("_gold_") || path.endsWith("_gold_ingot")) {
+            return CraftingRarity.MaterialTier.GOLD;
+        }
+        if (path.startsWith("copper_") || path.contains("_copper_") || path.endsWith("_copper_ingot")) {
+            return CraftingRarity.MaterialTier.COPPER;
+        }
+
+        if (path.equals("stone") || path.contains("cobblestone") || path.contains("deepslate")
+                || path.contains("blackstone") || path.contains("tuff") || path.contains("andesite")
+                || path.contains("diorite") || path.contains("granite") || path.equals("end_stone")) {
+            return CraftingRarity.MaterialTier.STONE;
+        }
+
+        if (path.startsWith("wooden_") || path.startsWith("leather_")
+                || stack.is(ItemTags.PLANKS) || stack.is(ItemTags.LOGS)
+                || stack.is(Items.STICK) || stack.is(Items.BAMBOO)
+                || stack.is(Items.LEATHER) || stack.is(Items.RABBIT_HIDE)
+                || stack.is(Items.STRING)) {
+            return CraftingRarity.MaterialTier.WOOD;
+        }
+
+        // Modded ingredients without a recognized tier use the conservative fallback.
+        return itemId.getNamespace().equals("minecraft") ? null : CraftingRarity.MaterialTier.OTHER;
+    }
+
+    /** Returns whether the item belongs to a supported category and can be ascended by the altar. */
+    public static boolean isEligibleForCelestialAltar(ItemStack stack) {
+        return stack != null && !stack.isEmpty() && hasRarity(stack)
+                && CraftingRarity.byId(getRarityId(stack)) != null
+                && stack.get(DataComponents.MAX_DAMAGE) != null
+                && classify(stack) != EquipmentKind.OTHER;
+    }
+
+    public static boolean isTranscendent(ItemStack stack) {
+        return hasRarity(stack) && CraftingRarity.byId(getRarityId(stack)) == CraftingRarity.TRANSCENDENT;
+    }
+
+    /** Applies a fresh Transcendent roll while retaining vanilla enchantments, custom name and damage. */
+    public static boolean applyCelestialAltarReroll(ItemStack stack, ServerPlayer player) {
+        if (!isEligibleForCelestialAltar(stack) || player == null) return false;
+        CraftingRarity current = CraftingRarity.byId(getRarityId(stack));
+        if (current == null) {
+            // The altar can only ascend equipment which has already entered the SimpleSkills rarity system.
+            return false;
+        }
+        // Both lower rarities and existing Transcendent equipment receive a fresh Transcendent roll.
+        prepareEquipmentForReroll(stack, player);
+        applyEquipmentRarity(stack, player, CraftingRarity.TRANSCENDENT, getCraftingLevel(player));
+        return true;
+    }
+
+    private static String getUnprefixedItemName(ItemStack stack) {
+        Component customName = stack.get(DataComponents.CUSTOM_NAME);
+        if (customName != null && customName.getContents() instanceof TranslatableContents translated
+                && translated.getKey().equals("item.simpleskills.crafted_quality_name")) {
+            Object[] arguments = translated.getArgs();
+            if (arguments.length > 1 && arguments[1] instanceof Component originalName) {
+                return originalName.getString();
+            }
+        }
+        return stack.getHoverName().getString();
+    }
+
+    private static void prepareEquipmentForReroll(ItemStack stack, ServerPlayer player) {
+        CompoundTag tag = getTag(stack);
+        Integer currentMax = stack.get(DataComponents.MAX_DAMAGE);
+        int baseMaximum = tag.getIntOr(DATA_BASE_MAX_DAMAGE, -1);
+        if (baseMaximum < 1) {
+            double oldBonus = tag.getDoubleOr(DATA_DURABILITY, 0.0);
+            baseMaximum = currentMax == null ? 1 : Math.max(1,
+                    (int) Math.round(currentMax / (1.0 + Math.max(0.0, oldBonus))));
+        }
+        final int savedBaseMaximum = baseMaximum;
+        String baseName = tag.getStringOr(DATA_BASE_NAME, "");
+        if (baseName.isBlank()) baseName = getUnprefixedItemName(stack);
+        final String savedBaseName = baseName;
+
+        // Remove only the lore lines previously generated by this system; unrelated/custom lore stays intact.
+        ItemLore lore = stack.get(DataComponents.LORE);
+        if (lore != null && !lore.lines().isEmpty()) {
+            int generated = tag.getIntOr(DATA_LORE_LINE_COUNT, -1);
+            if (generated < 0) {
+                generated = 1;
+                generated += tag.getDoubleOr(DATA_DAMAGE, 0.0) > 0.0 ? 1 : 0;
+                generated += tag.getDoubleOr(DATA_DURABILITY, 0.0) > 0.0 ? 1 : 0;
+                generated += tag.getDoubleOr(DATA_BREAK_SPEED, 0.0) > 0.0 ? 1 : 0;
+                generated += tag.getDoubleOr(DATA_CRITICAL_CHANCE, 0.0) > 0.0 ? 1 : 0;
+                generated += tag.getDoubleOr(DATA_ATTACK_SPEED, 0.0) > 0.0 ? 1 : 0;
+                generated += tag.getDoubleOr(DATA_ARMOR, 0.0) > 0.0 ? 1 : 0;
+                generated += tag.getDoubleOr(DATA_TOUGHNESS, 0.0) > 0.0 ? 1 : 0;
+                String oldPerks = tag.getStringOr(DATA_PERKS, "");
+                if (!oldPerks.isBlank()) generated += oldPerks.split(",").length;
+            }
+            int keep = Math.max(0, lore.lines().size() - Math.max(0, generated));
+            stack.set(DataComponents.LORE, new ItemLore(new ArrayList<>(lore.lines().subList(0, keep))));
+        }
+
+        removeCraftingAttributeModifiers(stack);
+        restoreBaseAttackRange(stack, player, tag);
+        stack.set(DataComponents.MAX_DAMAGE, savedBaseMaximum);
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, data -> {
+            data.putInt(DATA_BASE_MAX_DAMAGE, savedBaseMaximum);
+            data.putString(DATA_BASE_NAME, savedBaseName);
+            data.remove(DATA_LORE_LINE_COUNT);
+        });
+    }
+
+    private static void removeCraftingAttributeModifiers(ItemStack stack) {
+        ItemAttributeModifiers modifiers = stack.getOrDefault(
+                DataComponents.ATTRIBUTE_MODIFIERS, ItemAttributeModifiers.EMPTY);
+        List<ItemAttributeModifiers.Entry> retained = modifiers.modifiers().stream()
+                .filter(entry -> !Set.of(CRAFTING_DAMAGE_MODIFIER_ID, CRAFTING_ATTACK_SPEED_MODIFIER_ID,
+                        CRAFTING_ARMOR_MODIFIER_ID, CRAFTING_TOUGHNESS_MODIFIER_ID)
+                        .contains(entry.modifier().id()))
+                .toList();
+        stack.set(DataComponents.ATTRIBUTE_MODIFIERS, new ItemAttributeModifiers(retained));
+    }
+
+    private static void storeBaseAttackRangeIfMissing(ItemStack stack, ServerPlayer player) {
+        CompoundTag tag = getTag(stack);
+        if (tag.getBooleanOr(DATA_BASE_RANGE_PRESENT, false)) return;
+        AttackRange range = stack.getOrDefault(DataComponents.ATTACK_RANGE, AttackRange.defaultFor(player));
+        CustomData.update(DataComponents.CUSTOM_DATA, stack, data -> {
+            data.putBoolean(DATA_BASE_RANGE_PRESENT, true);
+            data.putFloat(DATA_BASE_RANGE_MIN, range.minReach());
+            data.putFloat(DATA_BASE_RANGE_MAX, range.maxReach());
+            data.putFloat(DATA_BASE_RANGE_MIN_CREATIVE, range.minCreativeReach());
+            data.putFloat(DATA_BASE_RANGE_MAX_CREATIVE, range.maxCreativeReach());
+            data.putFloat(DATA_BASE_RANGE_HITBOX, range.hitboxMargin());
+            data.putFloat(DATA_BASE_RANGE_MOB_FACTOR, range.mobFactor());
+        });
+    }
+
+    private static void restoreBaseAttackRange(ItemStack stack, ServerPlayer player, CompoundTag tag) {
+        if (getPerkAmplifier(stack, "celestial_range") < 0) return;
+        if (tag.getBooleanOr(DATA_BASE_RANGE_PRESENT, false)) {
+            stack.set(DataComponents.ATTACK_RANGE, new AttackRange(
+                    tag.getFloatOr(DATA_BASE_RANGE_MIN, 0.0F),
+                    tag.getFloatOr(DATA_BASE_RANGE_MAX, 3.0F),
+                    tag.getFloatOr(DATA_BASE_RANGE_MIN_CREATIVE, 0.0F),
+                    tag.getFloatOr(DATA_BASE_RANGE_MAX_CREATIVE, 5.0F),
+                    tag.getFloatOr(DATA_BASE_RANGE_HITBOX, 0.3F),
+                    tag.getFloatOr(DATA_BASE_RANGE_MOB_FACTOR, 1.0F)));
+        } else {
+            AttackRange current = stack.getOrDefault(DataComponents.ATTACK_RANGE, AttackRange.defaultFor(player));
+            stack.set(DataComponents.ATTACK_RANGE, new AttackRange(current.minReach(),
+                    Math.max(current.minReach(), current.maxReach() - 6.0F),
+                    current.minCreativeReach(), Math.max(current.minCreativeReach(), current.maxCreativeReach() - 6.0F),
+                    current.hitboxMargin(), current.mobFactor()));
+        }
     }
 
     /** Applies a requested rarity to a test item held in the main hand. */
@@ -239,6 +454,17 @@ public final class CraftingEquipmentManager {
     }
 
     private static void applyEquipmentRarity(ItemStack stack, ServerPlayer player, CraftingRarity rarity, int level) {
+        CompoundTag previousTag = getTag(stack);
+        String baseName = previousTag.getStringOr(DATA_BASE_NAME, "");
+        if (baseName.isBlank()) baseName = getUnprefixedItemName(stack);
+        final String persistedBaseName = baseName;
+        Integer baseMaximum = previousTag.getIntOr(DATA_BASE_MAX_DAMAGE, -1);
+        if (baseMaximum == null || baseMaximum < 1) {
+            baseMaximum = stack.get(DataComponents.MAX_DAMAGE);
+        }
+        if (baseMaximum == null || baseMaximum < 1) baseMaximum = 1;
+        final int persistedBaseMaximum = baseMaximum;
+
         EquipmentKind kind = classify(stack);
         List<Perk> perks = rollPerks(kind, rarity, level, player);
 
@@ -270,7 +496,10 @@ public final class CraftingEquipmentManager {
                 ? rollStat(player, rarity.minToughnessBonus(), rarity.maxToughnessBonus(), 0.001) : 0.0;
         String encodedPerks = encodePerks(perks, level, rarity, player);
         boolean celestialRangeApplied = perks.stream().anyMatch(perk -> perk.id().equals("celestial_range"));
-        if (celestialRangeApplied) applyCelestialRange(stack, player);
+        if (celestialRangeApplied) {
+            storeBaseAttackRangeIfMissing(stack, player);
+            applyCelestialRange(stack, player);
+        }
 
         // Runic Edge is included in the same final percentage shown in the lore and native attribute tooltip.
         boolean hasRunicEdge = perks.stream().anyMatch(perk -> perk.id().equals("runic_edge"));
@@ -293,6 +522,8 @@ public final class CraftingEquipmentManager {
 
         CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
             tag.putString(DATA_RARITY, rarity.id());
+            tag.putString(DATA_BASE_NAME, persistedBaseName);
+            tag.putInt(DATA_BASE_MAX_DAMAGE, persistedBaseMaximum);
             tag.putDouble(DATA_DAMAGE, finalDamageBonus);
             tag.putDouble(DATA_DURABILITY, durabilityBonus);
             tag.putDouble(DATA_BREAK_SPEED, breakSpeedBonus);
@@ -305,13 +536,10 @@ public final class CraftingEquipmentManager {
             tag.putBoolean(DATA_DAMAGE_ATTRIBUTE_INCLUDES_AFFIXES, damageAppliedAsAttribute);
         });
 
-        Integer currentMaximum = stack.get(DataComponents.MAX_DAMAGE);
-        if (currentMaximum != null && durabilityBonus > 0.0) {
-            stack.set(DataComponents.MAX_DAMAGE, Math.max(1,
-                    (int) Math.round(currentMaximum * (1.0 + durabilityBonus))));
-        }
+        stack.set(DataComponents.MAX_DAMAGE, Math.max(1,
+                (int) Math.round(baseMaximum * (1.0 + durabilityBonus))));
 
-        Component originalName = stack.getHoverName();
+        Component originalName = Component.literal(baseName);
         Component rarityName = Component.translatable("item.simpleskills.crafting_rarity." + rarity.id());
         stack.set(DataComponents.CUSTOM_NAME, Component.translatable(
                 "item.simpleskills.crafted_quality_name", rarityName, originalName)
@@ -373,6 +601,32 @@ public final class CraftingEquipmentManager {
         details.addProperty("attackSpeed", attackSpeedBonus * 100.0);
         details.addProperty("armor", armorBonus * 100.0);
         details.addProperty("toughness", toughnessBonus * 100.0);
+
+        // Send the same rarity ranges used by the item's tooltip so the reveal screen
+        // can display the rolled value and identify a true maximum roll.
+        boolean hasRunicEdge = getPerkAmplifier(stack, "runic_edge") >= 0;
+        double damageMin = rarity.minDamageBonus() * 100.0;
+        double damageMax = rarity.maxDamageBonus() * 100.0;
+        if (hasRunicEdge) {
+            damageMin = ((1.0 + rarity.minDamageBonus()) * 1.08 - 1.0) * 100.0;
+            damageMax = ((1.0 + rarity.maxDamageBonus()) * 1.08 - 1.0) * 100.0;
+        }
+        addRevealStatRange(details, "damage", damageMin, damageMax);
+        addRevealStatRange(details, "durability",
+                rarity.minDurabilityBonus() * 100.0, rarity.maxDurabilityBonus() * 100.0);
+        addRevealStatRange(details, "breakSpeed",
+                rarity.minBreakSpeedBonus() * 100.0, rarity.maxBreakSpeedBonus() * 100.0);
+        int criticalMastery = getPerkAmplifier(stack, "critical_mastery");
+        double criticalMasteryBonus = criticalMastery >= 0 ? 5.0 + criticalMastery * 5.0 : 0.0;
+        addRevealStatRange(details, "critical",
+                Math.min(60.0, rarity.minCriticalChance() * 100.0 + criticalMasteryBonus),
+                Math.min(60.0, rarity.maxCriticalChance() * 100.0 + criticalMasteryBonus));
+        addRevealStatRange(details, "attackSpeed",
+                rarity.minAttackSpeedBonus() * 100.0, rarity.maxAttackSpeedBonus() * 100.0);
+        addRevealStatRange(details, "armor",
+                rarity.minArmorBonus() * 100.0, rarity.maxArmorBonus() * 100.0);
+        addRevealStatRange(details, "toughness",
+                rarity.minToughnessBonus() * 100.0, rarity.maxToughnessBonus() * 100.0);
         JsonArray perks = new JsonArray();
         for (String encoded : encodedPerks.isBlank() ? List.<String>of() : List.of(encodedPerks.split(","))) {
             String[] parts = encoded.split(":", 2);
@@ -392,6 +646,11 @@ public final class CraftingEquipmentManager {
         PendingRevealBatch pending = PENDING_REVEALS.computeIfAbsent(player.getUUID(), ignored -> new PendingRevealBatch());
         pending.entries.add(entry);
         pending.lastQueuedAt = player.level().getGameTime();
+    }
+
+    private static void addRevealStatRange(JsonObject details, String field, double minimum, double maximum) {
+        details.addProperty(field + "Min", minimum);
+        details.addProperty(field + "Max", maximum);
     }
 
     private static void flushPendingReveals(MinecraftServer server, long now) {
@@ -797,36 +1056,56 @@ public final class CraftingEquipmentManager {
                                       double attackSpeedBonus, double armorBonus, double toughnessBonus) {
         ItemLore current = stack.getOrDefault(DataComponents.LORE, new ItemLore(List.of()));
         List<Component> lines = new ArrayList<>(current.lines());
+        int generatedLines = 0;
         lines.add(Component.translatable("item.simpleskills.crafting_rarity_label",
                 Component.translatable("item.simpleskills.crafting_rarity." + rarity.id()))
                 .withStyle(rarity.color()).withStyle(style -> style.withItalic(false)));
+        generatedLines++;
+
+        boolean runicEdge = getPerkAmplifier(stack, "runic_edge") >= 0;
+        double damageMin = rarity.minDamageBonus() * 100.0;
+        double damageMax = rarity.maxDamageBonus() * 100.0;
+        if (runicEdge) {
+            damageMin = ((1.0 + rarity.minDamageBonus()) * 1.08 - 1.0) * 100.0;
+            damageMax = ((1.0 + rarity.maxDamageBonus()) * 1.08 - 1.0) * 100.0;
+        }
         if (damageBonus > 0.0) {
-            lines.add(Component.translatable("item.simpleskills.crafting_stat.damage",
-                    formatPercent(damageBonus * 100.0)).withStyle(ChatFormatting.GREEN));
+            lines.add(rangeStatLine("item.simpleskills.crafting_stat.damage", damageBonus * 100.0,
+                    damageMin, damageMax, 0.001 * 100.0));
+            generatedLines++;
         }
         if (durabilityBonus > 0.0) {
-            lines.add(Component.translatable("item.simpleskills.crafting_stat.durability",
-                    String.format(java.util.Locale.ROOT, "%.0f", durabilityBonus * 100.0)).withStyle(ChatFormatting.GREEN));
+            lines.add(rangeStatLine("item.simpleskills.crafting_stat.durability", durabilityBonus * 100.0,
+                    rarity.minDurabilityBonus() * 100.0, rarity.maxDurabilityBonus() * 100.0, 1.0));
+            generatedLines++;
         }
         if (breakSpeedBonus > 0.0) {
-            lines.add(Component.translatable("item.simpleskills.crafting_stat.break_speed",
-                    formatPercent(breakSpeedBonus * 100.0)).withStyle(ChatFormatting.GREEN));
+            lines.add(rangeStatLine("item.simpleskills.crafting_stat.break_speed", breakSpeedBonus * 100.0,
+                    rarity.minBreakSpeedBonus() * 100.0, rarity.maxBreakSpeedBonus() * 100.0, 1.0));
+            generatedLines++;
         }
         if (criticalChance > 0.0) {
-            lines.add(Component.translatable("item.simpleskills.crafting_stat.critical_chance",
-                    formatPercent(criticalChance * 100.0)).withStyle(ChatFormatting.GREEN));
+            int mastery = getPerkAmplifier(stack, "critical_mastery");
+            double masteryBonus = mastery >= 0 ? 5.0 + mastery * 5.0 : 0.0;
+            lines.add(rangeStatLine("item.simpleskills.crafting_stat.critical_chance", criticalChance * 100.0,
+                    Math.min(60.0, rarity.minCriticalChance() * 100.0 + masteryBonus),
+                    Math.min(60.0, rarity.maxCriticalChance() * 100.0 + masteryBonus), 0.1));
+            generatedLines++;
         }
         if (attackSpeedBonus > 0.0) {
-            lines.add(Component.translatable("item.simpleskills.crafting_stat.attack_speed",
-                    formatPercent(attackSpeedBonus * 100.0)).withStyle(ChatFormatting.GREEN));
+            lines.add(rangeStatLine("item.simpleskills.crafting_stat.attack_speed", attackSpeedBonus * 100.0,
+                    rarity.minAttackSpeedBonus() * 100.0, rarity.maxAttackSpeedBonus() * 100.0, 0.5));
+            generatedLines++;
         }
         if (armorBonus > 0.0) {
-            lines.add(Component.translatable("item.simpleskills.crafting_stat.armor",
-                    formatPercent(armorBonus * 100.0)).withStyle(ChatFormatting.GREEN));
+            lines.add(rangeStatLine("item.simpleskills.crafting_stat.armor", armorBonus * 100.0,
+                    rarity.minArmorBonus() * 100.0, rarity.maxArmorBonus() * 100.0, 0.1));
+            generatedLines++;
         }
         if (toughnessBonus > 0.0) {
-            lines.add(Component.translatable("item.simpleskills.crafting_stat.armor_toughness",
-                    formatPercent(toughnessBonus * 100.0)).withStyle(ChatFormatting.GREEN));
+            lines.add(rangeStatLine("item.simpleskills.crafting_stat.armor_toughness", toughnessBonus * 100.0,
+                    rarity.minToughnessBonus() * 100.0, rarity.maxToughnessBonus() * 100.0, 0.1));
+            generatedLines++;
         }
         for (String encoded : encodePerksWithAmplifiers(stack)) {
             String[] parts = encoded.split(":", 2);
@@ -851,8 +1130,25 @@ public final class CraftingEquipmentManager {
                     "edens_dominion", "midas_touch", "abyssal_sovereign").contains(id)
                     ? ChatFormatting.GOLD : ChatFormatting.AQUA;
             lines.add(perkLine.withStyle(perkColor));
+            generatedLines++;
         }
         stack.set(DataComponents.LORE, new ItemLore(lines));
+        final int persistedGeneratedLines = generatedLines;
+        CustomData.update(DataComponents.CUSTOM_DATA, stack,
+                tag -> tag.putInt(DATA_LORE_LINE_COUNT, persistedGeneratedLines));
+    }
+
+    private static Component rangeStatLine(String translationKey, double value, double minimum,
+                                           double maximum, double step) {
+        boolean maxRoll = Math.abs(value - maximum) <= Math.max(0.0001, step * 0.51);
+        ChatFormatting valueColor = maxRoll ? ChatFormatting.GOLD : ChatFormatting.GREEN;
+        MutableComponent line = Component.translatable(translationKey).withStyle(valueColor);
+        line.append(Component.literal(": +" + formatPercent(value) + "%").withStyle(valueColor));
+        // The range is reference information, so keep it gray even when the rolled
+        // attribute itself reached its maximum and is highlighted in gold.
+        line.append(Component.literal(" [" + formatPercent(minimum) + "% - "
+                + formatPercent(maximum) + "%]").withStyle(ChatFormatting.GRAY));
+        return line;
     }
 
     private static List<String> encodePerksWithAmplifiers(ItemStack stack) {

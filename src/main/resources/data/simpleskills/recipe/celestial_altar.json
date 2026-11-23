@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ORO",
+    "GNG",
+    "ORO"
+  ],
+  "key": {
+    "O": "minecraft:obsidian",
+    "R": "simpleskills:rune",
+    "G": "minecraft:gold_ingot",
+    "N": "minecraft:nether_star"
+  },
+  "result": {
+    "id": "simpleskills:celestial_altar",
+    "count": 1
+  }
+}

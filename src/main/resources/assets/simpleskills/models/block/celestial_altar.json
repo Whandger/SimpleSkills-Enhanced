@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "simpleskills:block/celestial_altar_top",
+    "bottom": "simpleskills:block/celestial_altar_bottom",
+    "side": "simpleskills:block/celestial_altar_side"
+  }
+}
