@@ -117,7 +117,11 @@ public final class ExcavatingLoot {
                 new double[][]{{91, 0.00005}, {99, 0.0005}}),
 
         ENCHANTED_GOLDEN_APPLE("Enchanted Golden Apple", ExcavatingRarity.MYTHIC,
-                new double[][]{{91, 0.00001}, {99, 0.0001}});
+                new double[][]{{91, 0.00001}, {99, 0.0001}}),
+
+        // Special Transcendent reward: rolled separately and never consumes a normal rarity budget.
+        CELESTIAL_RELIC("Celestial Relic", ExcavatingRarity.MYTHIC,
+                new double[][]{{99, 0.0}});
 
         private final String displayName;
         private final ExcavatingRarity rarity;
@@ -188,7 +192,9 @@ public final class ExcavatingLoot {
         }
     }
 
-    private static final Reward[] REWARDS = Reward.values();
+    private static final Reward[] REWARDS = java.util.Arrays.stream(Reward.values())
+            .filter(reward -> reward != Reward.CELESTIAL_RELIC)
+            .toArray(Reward[]::new);
 
     /**
      * Interpolates between level/value key points.
@@ -458,6 +464,52 @@ public final class ExcavatingLoot {
      * @param level Excavating level when the investigation completes.
      * @param roll uniform random value in [0, 1).
      */
+    public static Reward roll(int level, double roll, boolean buriedTruth) {
+        if (!buriedTruth) return roll(level, roll);
+        if (Double.isNaN(roll) || roll < 0.0 || roll >= 1.0) {
+            throw new IllegalArgumentException("Roll must be in the range [0, 1)");
+        }
+
+        int safeLevel = ExcavatingRank.clampLevel(level);
+        // Celestial Relic is a special independent chance, rising from 0.025% to 0.25%.
+        double relicChance = 0.025 + (safeLevel - 1) * (0.225 / 98.0);
+        double target = roll * 100.0;
+        if (target < relicChance) return Reward.CELESTIAL_RELIC;
+        target -= relicChance;
+
+        // Keep the exact Nothing probability; Buried Truth redistributes only the reward budget.
+        double rewardBudget = Math.max(0.0, totalChance(safeLevel) - relicChance);
+        if (target >= rewardBudget) return null;
+
+        double weightedTotal = 0.0;
+        for (Reward reward : REWARDS) {
+            double chance = reward.chanceAt(safeLevel);
+            if (chance > 0.0) weightedTotal += chance * buriedTruthWeight(reward.getRarity());
+        }
+        if (weightedTotal <= 0.0) return roll(safeLevel, Math.min(0.999999, roll));
+
+        double cumulative = 0.0;
+        for (Reward reward : REWARDS) {
+            double chance = reward.chanceAt(safeLevel);
+            if (chance <= 0.0) continue;
+            cumulative += rewardBudget * (chance * buriedTruthWeight(reward.getRarity())) / weightedTotal;
+            if (target < cumulative) return reward;
+        }
+        return REWARDS.length == 0 ? null : REWARDS[REWARDS.length - 1];
+    }
+
+    private static double buriedTruthWeight(ExcavatingRarity rarity) {
+        return switch (rarity) {
+            case COMMON -> 0.65;
+            case UNCOMMON -> 1.0;
+            case RARE -> 1.35;
+            case VERY_RARE -> 1.75;
+            case EPIC -> 2.2;
+            case LEGENDARY -> 2.8;
+            case MYTHIC -> 3.5;
+        };
+    }
+
     public static Reward roll(int level, double roll) {
         if (Double.isNaN(roll) || roll < 0.0 || roll >= 1.0) {
             throw new IllegalArgumentException(

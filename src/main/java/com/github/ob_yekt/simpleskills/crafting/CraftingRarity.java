@@ -179,8 +179,13 @@ public enum CraftingRarity {
 
     public static CraftingRarity byId(String id) {
         if (id == null) return null;
+        String normalized = id.toLowerCase(Locale.ROOT);
+        // Accept the common Portuguese spelling as a convenience for in-game testing.
+        if (normalized.equals("transdente") || normalized.equals("transcendente")) {
+            return TRANSCENDENT;
+        }
         for (CraftingRarity rarity : values()) {
-            if (rarity.id.equals(id.toLowerCase(Locale.ROOT))) return rarity;
+            if (rarity.id.equals(normalized)) return rarity;
         }
         return null;
     }

@@ -13,6 +13,7 @@ import com.github.ob_yekt.simpleskills.ui.SkillOverviewRequestPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerActionPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerClientState;
 import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager;
+import com.github.ob_yekt.simpleskills.crafting.TranscendentToolTogglePayload;
 import net.minecraft.world.phys.Vec3;
 import java.util.UUID;
 
@@ -61,6 +62,13 @@ public class Keybinds {
     public static final KeyMapping OPEN_SKILL_OVERVIEW_KEY = new KeyMapping(
             "key.simpleskills.skill_overview", InputConstants.Type.KEYBOARD, InputConstants.KEY_K, CATEGORY);
 
+    public static final KeyMapping TOGGLE_TRANSCENDENT_AREA_KEY = new KeyMapping(
+            "key.simpleskills.toggle_transcendent_area",
+            InputConstants.Type.KEYBOARD,
+            InputConstants.KEY_L,
+            CATEGORY
+    );
+
     private static boolean wasJumpDown;
     private static int doubleJumpsUsed;
     private static boolean wasOnGround;
@@ -75,6 +83,7 @@ public class Keybinds {
         KeyMappingHelper.registerKeyMapping(CAST_PRAYER_KEY);
         KeyMappingHelper.registerKeyMapping(OPEN_PRAYER_WHEEL_KEY);
         KeyMappingHelper.registerKeyMapping(OPEN_SKILL_OVERVIEW_KEY);
+        KeyMappingHelper.registerKeyMapping(TOGGLE_TRANSCENDENT_AREA_KEY);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null) {
@@ -103,6 +112,16 @@ public class Keybinds {
                 } else if (client.gui.screen() == null
                         && ClientPlayNetworking.canSend(SkillOverviewRequestPayload.TYPE)) {
                     ClientPlayNetworking.send(new SkillOverviewRequestPayload(SkillOverviewRequestPayload.OPEN));
+                }
+            }
+            if (TOGGLE_TRANSCENDENT_AREA_KEY.consumeClick() && client.gui.screen() == null
+                    && ClientPlayNetworking.canSend(TranscendentToolTogglePayload.TYPE)) {
+                var held = client.player.getMainHandItem();
+                if (CraftingEquipmentManager.stackHasPerk(held, "worldbreaker")
+                        || CraftingEquipmentManager.stackHasPerk(held, "buried_truth")
+                        || CraftingEquipmentManager.stackHasPerk(held, "edens_dominion")) {
+                    ClientPlayNetworking.send(new TranscendentToolTogglePayload(
+                            TranscendentToolTogglePayload.TOGGLE_AREA_EFFECT));
                 }
             }
             if (OPEN_PRAYER_BOOK_KEY.consumeClick() && client.gui.screen() == null && ClientPlayNetworking.canSend(PrayerActionPayload.TYPE)) {

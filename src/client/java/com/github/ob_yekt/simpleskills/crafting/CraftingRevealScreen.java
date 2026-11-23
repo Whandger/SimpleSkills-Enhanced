@@ -65,7 +65,14 @@ public final class CraftingRevealScreen extends Screen {
             "runic_edge", "anvil_ward",
             "guardian_oath", "arcane_mastery", "godslayer", "eternal_guardian",
             "divine_blessing", "aegis_of_ages", "fire_resistance", "featherweight",
-            "celestial_wings", "celestial_range");
+            "celestial_wings", "celestial_range", "oracle_vision", "aegis_of_purity",
+            "phantom_stride", "divine_reflection", "astral_pursuit", "singularity_bolt",
+            "poseidons_wrath", "worldbreaker", "buried_truth", "edens_dominion");
+
+    private static final Set<String> GOLDEN_PERKS = Set.of(
+            "celestial_wings", "celestial_range", "oracle_vision", "aegis_of_purity",
+            "phantom_stride", "divine_reflection", "astral_pursuit", "singularity_bolt",
+            "poseidons_wrath", "worldbreaker", "buried_truth", "edens_dominion");
 
     private static CraftingRevealScreen activeScreen;
 
@@ -779,7 +786,7 @@ public final class CraftingRevealScreen extends Screen {
         return chips;
     }
 
-    /** Identifies the two exclusive Transcendent affixes so they receive a gold accent. */
+    /** Identifies all signature Transcendent affixes so they receive a gold accent. */
     private static boolean isGoldenPerkLine(Entry entry, int detailLineIndex) {
         int perkIndex = detailLineIndex - countPrimaryStats(entry);
         if (perkIndex < 0 || !entry.details().has("perks")
@@ -787,12 +794,12 @@ public final class CraftingRevealScreen extends Screen {
 
         JsonArray perks = entry.details().getAsJsonArray("perks");
         int visiblePerkIndex = 0;
-        for (int i = 0; i < Math.min(5, perks.size()); i++) {
+        for (int i = 0; i < perks.size(); i++) {
             if (!perks.get(i).isJsonObject()) continue;
             String id = stringValue(perks.get(i).getAsJsonObject(), "id", "");
             if (id.isBlank()) continue;
             if (visiblePerkIndex++ == perkIndex) {
-                return id.equals("celestial_wings") || id.equals("celestial_range");
+                return GOLDEN_PERKS.contains(id);
             }
         }
         return false;
@@ -808,7 +815,7 @@ public final class CraftingRevealScreen extends Screen {
         addStat(lines, entry.details(), "toughness", "item.simpleskills.crafting_stat.armor_toughness");
         JsonArray perks = entry.details().has("perks") && entry.details().get("perks").isJsonArray()
                 ? entry.details().getAsJsonArray("perks") : new JsonArray();
-        for (int i = 0; i < Math.min(5, perks.size()); i++) {
+        for (int i = 0; i < perks.size(); i++) {
             if (!perks.get(i).isJsonObject()) continue;
             JsonObject perk = perks.get(i).getAsJsonObject();
             String id = stringValue(perk, "id", "");

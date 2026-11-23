@@ -18,6 +18,10 @@
     "GatheringDurabilityMixin",
     "CraftingIndestructibleMixin",
     "LivingEntityDamageCooldownAccessor",
+    "TranscendentProjectileMixin",
+    "PhantomStrideMixin",
+    "PhantomStrideStuckMixin",
+    "AegisOfPurityMixin",
     "TreeFellerFallingBlockMixin",
     "EnchantingScreenHandlerMixin",
     "ServerPlayerEntityMixin",
@@ -77,6 +81,7 @@
     "ItemStackRenderStateAccessor",
     "ItemStackLayerRenderStateAccessor",
     "RuneEquipmentLayerRendererMixin",
-    "RuneItemStackLayerVfxMixin"
+    "RuneItemStackLayerVfxMixin",
+    "TranscendentVisionOutlineMixin"
   ]
 }

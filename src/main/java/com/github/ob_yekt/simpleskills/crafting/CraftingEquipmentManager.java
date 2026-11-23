@@ -102,7 +102,10 @@ public final class CraftingEquipmentManager {
     }
 
     private record ProjectileDamageData(double multiplier, String encodedPerks, long expiresAt) {}
-    private enum EquipmentKind { WEAPON, SWORD, ARMOR, BOOTS, SHIELD, TOOL, OTHER }
+    private enum EquipmentKind {
+        WEAPON, SWORD, ARMOR, HELMET, CHESTPLATE, LEGGINGS, BOOTS, SHIELD,
+        BOW, CROSSBOW, TRIDENT, PICKAXE, SHOVEL, HOE, AXE, MACE, TOOL, OTHER
+    }
     private record Perk(String id, String effectId, int maximumEffectLevel, int extraJumps) {}
 
     private static Perk effect(String id, String effectId, int maxLevel) {
@@ -150,26 +153,50 @@ public final class CraftingEquipmentManager {
     private static final Perk WORLD_SHAPER = effect("worldshaper", "minecraft:haste", 4);
     private static final Perk CELESTIAL_WINGS = passive("celestial_wings", 1);
     private static final Perk CELESTIAL_RANGE = passive("celestial_range", 1);
+    // Exclusive Transcendent abilities by equipment category.
+    private static final Perk ORACLE_VISION = passive("oracle_vision", 1);
+    private static final Perk AEGIS_OF_PURITY = passive("aegis_of_purity", 1);
+    private static final Perk PHANTOM_STRIDE = passive("phantom_stride", 1);
+    private static final Perk DIVINE_REFLECTION = passive("divine_reflection", 1);
+    private static final Perk ASTRAL_PURSUIT = passive("astral_pursuit", 1);
+    private static final Perk SINGULARITY_BOLT = passive("singularity_bolt", 1);
+    private static final Perk POSEIDONS_WRATH = passive("poseidons_wrath", 1);
+    private static final Perk WORLDBREAKER = passive("worldbreaker", 1);
+    private static final Perk BURIED_TRUTH = passive("buried_truth", 1);
+    private static final Perk EDENS_DOMINION = passive("edens_dominion", 1);
 
     private static final Set<String> NO_LEVEL_PERKS = Set.of(
             "runic_edge", "anvil_ward",
             "guardian_oath", "arcane_mastery", "godslayer", "eternal_guardian",
             "divine_blessing", "aegis_of_ages", "fire_resistance", "featherweight",
-            "celestial_wings", "celestial_range");
+            "celestial_wings", "celestial_range", "oracle_vision", "aegis_of_purity",
+            "phantom_stride", "divine_reflection", "astral_pursuit", "singularity_bolt",
+            "poseidons_wrath", "worldbreaker", "buried_truth", "edens_dominion");
 
     private CraftingEquipmentManager() {}
 
     public static void registerPayloads() {
         PayloadTypeRegistry.clientboundPlay().register(CraftingRevealPayload.TYPE, CraftingRevealPayload.CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(TranscendentToolTogglePayload.TYPE,
+                TranscendentToolTogglePayload.CODEC);
+        TranscendentVisionPayload.registerPayload();
+        WorldbreakerPreviewPayload.registerPayload();
     }
 
     public static void register() {
+        ServerPlayNetworking.registerGlobalReceiver(TranscendentToolTogglePayload.TYPE, (payload, context) ->
+                context.server().execute(() -> {
+                    if (payload.action() == TranscendentToolTogglePayload.TOGGLE_AREA_EFFECT) {
+                        TranscendentAbilities.toggleToolAreaEffect(context.player());
+                    }
+                }));
         ServerTickEvents.END_SERVER_TICK.register(CraftingEquipmentManager::tick);
         ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> {
             UUID id = handler.player.getUUID();
             APPLIED_VITALITY.remove(id);
             APPLIED_RESILIENCE.remove(id);
             restoreCelestialFlight(handler.player);
+            TranscendentAbilities.clearPlayer(id);
             PENDING_REVEALS.remove(id);
         });
         ServerLivingEntityEvents.AFTER_DAMAGE.register(CraftingEquipmentManager::afterDamage);
@@ -180,13 +207,33 @@ public final class CraftingEquipmentManager {
 
     /** Applies rarity exactly once to a new durable crafting result. */
     public static void applyCraftedEquipment(ItemStack stack, ServerPlayer player) {
-        if (stack == null || stack.isEmpty() || player == null || stack.get(DataComponents.MAX_DAMAGE) == null) return;
-        if (hasRarity(stack)) return;
+        if (stack == null || stack.isEmpty() || player == null || stack.get(DataComponents.MAX_DAMAGE) == null
+                || hasRarity(stack)) return;
+        int level = getCraftingLevel(player);
+        CraftingRarity rarity = CraftingRarity.roll(level, player.getRandom().nextDouble() * 100.0);
+        applyEquipmentRarity(stack, player, rarity, level);
+    }
 
-        int level = Math.max(1, Math.min(99,
+    /** Applies a requested rarity to a test item held in the main hand. */
+    public static boolean applyCommandRarity(ServerPlayer player, CraftingRarity rarity) {
+        if (player == null || rarity == null) return false;
+        ItemStack stack = player.getMainHandItem();
+        if (stack == null || stack.isEmpty() || stack.get(DataComponents.MAX_DAMAGE) == null || hasRarity(stack)) {
+            return false;
+        }
+        // A rarity command simulates the item being crafted: same affixes, attributes, lore,
+        // title unlock, announcement and reveal packet. It intentionally grants no crafting XP.
+        applyEquipmentRarity(stack, player, rarity, getCraftingLevel(player));
+        return true;
+    }
+
+    private static int getCraftingLevel(ServerPlayer player) {
+        return Math.max(1, Math.min(99,
                 com.github.ob_yekt.simpleskills.managers.XPManager.getSkillLevel(
                         player.getStringUUID(), com.github.ob_yekt.simpleskills.Skills.CRAFTING)));
-        CraftingRarity rarity = CraftingRarity.roll(level, player.getRandom().nextDouble() * 100.0);
+    }
+
+    private static void applyEquipmentRarity(ItemStack stack, ServerPlayer player, CraftingRarity rarity, int level) {
         EquipmentKind kind = classify(stack);
         List<Perk> perks = rollPerks(kind, rarity, level, player);
 
@@ -194,8 +241,9 @@ public final class CraftingEquipmentManager {
         boolean sword = stack.is(ItemTags.SWORDS);
         boolean damageEligible = weapon || kind == EquipmentKind.TOOL;
         boolean attackSpeedEligible = sword || kind == EquipmentKind.TOOL;
-        boolean defenseEligible = kind == EquipmentKind.ARMOR || kind == EquipmentKind.BOOTS
-                || kind == EquipmentKind.SHIELD;
+        boolean defenseEligible = kind == EquipmentKind.ARMOR || kind == EquipmentKind.HELMET
+                || kind == EquipmentKind.CHESTPLATE || kind == EquipmentKind.LEGGINGS
+                || kind == EquipmentKind.BOOTS || kind == EquipmentKind.SHIELD;
 
         // Each attribute has its own rarity-weighted chance to exist. Common gear often
         // has no extra combat/defense stat; Epic and higher always roll applicable stats.
@@ -373,17 +421,31 @@ public final class CraftingEquipmentManager {
         }
     }
 
-    /** Gathering axes are tools for affix selection, while still counting as weapons for damage/title stats. */
+    /** Resolve the exact equipment class so Transcendent items receive their own signature ability. */
     private static EquipmentKind classify(ItemStack stack) {
-        if (stack.is(ItemTags.AXES) || stack.is(ItemTags.PICKAXES)
-                || stack.is(ItemTags.SHOVELS) || stack.is(ItemTags.HOES)) return EquipmentKind.TOOL;
+        if (stack == null || stack.isEmpty()) return EquipmentKind.OTHER;
         String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().toLowerCase(java.util.Locale.ROOT);
         if (path.contains("shield")) return EquipmentKind.SHIELD;
+
         Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
         if (equippable != null) {
-            return equippable.slot() == EquipmentSlot.FEET ? EquipmentKind.BOOTS : EquipmentKind.ARMOR;
+            return switch (equippable.slot()) {
+                case HEAD -> EquipmentKind.HELMET;
+                case CHEST -> EquipmentKind.CHESTPLATE;
+                case LEGS -> EquipmentKind.LEGGINGS;
+                case FEET -> EquipmentKind.BOOTS;
+                default -> EquipmentKind.ARMOR;
+            };
         }
         if (stack.is(ItemTags.SWORDS)) return EquipmentKind.SWORD;
+        if (stack.is(ItemTags.PICKAXES)) return EquipmentKind.PICKAXE;
+        if (stack.is(ItemTags.SHOVELS)) return EquipmentKind.SHOVEL;
+        if (stack.is(ItemTags.HOES)) return EquipmentKind.HOE;
+        if (stack.is(ItemTags.AXES)) return EquipmentKind.AXE;
+        if (stack.is(Items.BOW) || path.endsWith("_bow")) return EquipmentKind.BOW;
+        if (stack.is(Items.CROSSBOW) || path.endsWith("_crossbow")) return EquipmentKind.CROSSBOW;
+        if (stack.is(Items.TRIDENT) || path.endsWith("_trident")) return EquipmentKind.TRIDENT;
+        if (stack.is(Items.MACE) || path.endsWith("_mace")) return EquipmentKind.MACE;
         if (isWeapon(stack)) return EquipmentKind.WEAPON;
         return EquipmentKind.OTHER;
     }
@@ -400,36 +462,48 @@ public final class CraftingEquipmentManager {
 
     private static List<Perk> commonPool(EquipmentKind kind) {
         return switch (kind) {
-            case WEAPON, SWORD -> new ArrayList<>(List.of(STRENGTH, SPEED, REGENERATION, VAMPIRIC,
-                    CRITICAL_MASTERY, THUNDEROUS, FROSTBITE, PHOENIX, DOUBLE_LEAP, WINDWALKER));
-            case ARMOR, BOOTS -> new ArrayList<>(List.of(PROTECTION, RESILIENT, SPEED, REGENERATION,
-                    FEATHERWEIGHT, VITALITY, FIRE_RESISTANCE, JUMP_BOOST, DOUBLE_LEAP));
+            case WEAPON, SWORD, BOW, CROSSBOW, TRIDENT, MACE ->
+                    new ArrayList<>(List.of(STRENGTH, SPEED, REGENERATION, VAMPIRIC,
+                            CRITICAL_MASTERY, THUNDEROUS, FROSTBITE, PHOENIX, DOUBLE_LEAP, WINDWALKER));
+            case ARMOR, HELMET, CHESTPLATE, LEGGINGS, BOOTS ->
+                    new ArrayList<>(List.of(PROTECTION, RESILIENT, SPEED, REGENERATION,
+                            FEATHERWEIGHT, VITALITY, FIRE_RESISTANCE, JUMP_BOOST, DOUBLE_LEAP));
             case SHIELD -> new ArrayList<>(List.of(PROTECTION, RESILIENT, REGENERATION, VITALITY,
                     FIRE_RESISTANCE, DOUBLE_LEAP));
-            case TOOL -> new ArrayList<>(List.of(HASTE, EFFICIENT, SPEED, FORTUNE_MASTERY,
-                    INDESTRUCTIBLE, TREASURE_HUNTER));
+            case SHOVEL -> new ArrayList<>(List.of(HASTE, EFFICIENT, SPEED,
+                    FORTUNE_MASTERY, INDESTRUCTIBLE, TREASURE_HUNTER));
+            case TOOL, PICKAXE, HOE, AXE -> new ArrayList<>(List.of(HASTE, EFFICIENT, SPEED,
+                    FORTUNE_MASTERY, INDESTRUCTIBLE));
             default -> new ArrayList<>(List.of(SPEED, REGENERATION, VITALITY,
-                    HASTE, EFFICIENT, INDESTRUCTIBLE, FORTUNE_MASTERY, TREASURE_HUNTER));
+                    HASTE, EFFICIENT, INDESTRUCTIBLE, FORTUNE_MASTERY));
         };
     }
 
     private static List<Perk> uniquePool(EquipmentKind kind) {
         return switch (kind) {
-            case WEAPON, SWORD -> List.of(RUNIC_EDGE);
-            case ARMOR, BOOTS -> List.of(ANVIL_WARD);
+            case WEAPON, SWORD, BOW, CROSSBOW, TRIDENT, MACE, AXE -> List.of(RUNIC_EDGE);
+            case ARMOR, HELMET, CHESTPLATE, LEGGINGS, BOOTS -> List.of(ANVIL_WARD);
             case SHIELD -> List.of(GUARDIAN_OATH);
-            case TOOL -> List.of(PROSPECTOR);
+            case TOOL, PICKAXE, SHOVEL, HOE -> List.of(PROSPECTOR);
             default -> List.of(ANVIL_WARD);
         };
     }
 
     private static List<Perk> transcendentPool(EquipmentKind kind) {
         return switch (kind) {
-            case WEAPON -> List.of(TITAN_STRENGTH, GODSLAYER, ARCANE_MASTERY);
-            case SWORD -> List.of(CELESTIAL_RANGE);
-            case ARMOR -> List.of(DIVINE_BLESSING, CELESTIAL_MOVEMENT, ETERNAL_GUARDIAN);
+            case HELMET -> List.of(ORACLE_VISION);
+            case CHESTPLATE -> List.of(AEGIS_OF_PURITY);
+            case LEGGINGS -> List.of(PHANTOM_STRIDE);
             case BOOTS -> List.of(CELESTIAL_WINGS);
-            case SHIELD -> List.of(DIVINE_BLESSING, ETERNAL_GUARDIAN, AEGIS_OF_AGES);
+            case SWORD -> List.of(CELESTIAL_RANGE);
+            case SHIELD -> List.of(DIVINE_REFLECTION);
+            case BOW -> List.of(ASTRAL_PURSUIT);
+            case CROSSBOW -> List.of(SINGULARITY_BOLT);
+            case TRIDENT -> List.of(POSEIDONS_WRATH);
+            case PICKAXE -> List.of(WORLDBREAKER);
+            case SHOVEL -> List.of(BURIED_TRUTH);
+            case HOE -> List.of(EDENS_DOMINION);
+            case WEAPON, MACE, AXE -> List.of(TITAN_STRENGTH, GODSLAYER, ARCANE_MASTERY);
             case TOOL -> List.of(WORLD_SHAPER);
             default -> List.of(DIVINE_BLESSING);
         };
@@ -452,15 +526,20 @@ public final class CraftingEquipmentManager {
             generalPool.remove(guaranteedExclusive);
         }
 
-        int guaranteedGeneral = Math.max(0, rarity.minimumPerks() - selected.size());
-        int maximum = Math.min(rarity.maximumPerks(), generalPool.size() + selected.size());
+        int exclusiveCount = selected.size();
+        int guaranteedGeneral = rarity == CraftingRarity.TRANSCENDENT
+                ? rarity.minimumPerks() : Math.max(0, rarity.minimumPerks() - exclusiveCount);
+        int maximumGeneral = rarity == CraftingRarity.TRANSCENDENT
+                ? rarity.maximumPerks()
+                : Math.min(rarity.maximumPerks(), generalPool.size() + exclusiveCount);
         for (int i = 0; i < guaranteedGeneral && !generalPool.isEmpty(); i++) {
             selected.add(generalPool.remove(player.getRandom().nextInt(generalPool.size())));
         }
 
         // Extra affixes become more likely with every Crafting level, without exceeding the tier cap.
+        // A Transcendent signature ability is an extra slot: it does not replace its 4-5 regular perks.
         double extraPerkChance = Math.min(0.99, 0.05 + level * 0.0095);
-        while (selected.size() < maximum && !generalPool.isEmpty()
+        while (selected.size() - exclusiveCount < maximumGeneral && !generalPool.isEmpty()
                 && player.getRandom().nextDouble() < extraPerkChance) {
             selected.add(generalPool.remove(player.getRandom().nextInt(generalPool.size())));
         }
@@ -590,8 +669,10 @@ public final class CraftingEquipmentManager {
      */
     private static boolean[] applyDefenseAttributeBonuses(ItemStack stack, EquipmentKind kind,
                                                            double armorBonus, double toughnessBonus) {
-        if (stack == null || stack.isEmpty() || (kind != EquipmentKind.ARMOR
-                && kind != EquipmentKind.BOOTS && kind != EquipmentKind.SHIELD)) {
+        boolean armorPiece = kind == EquipmentKind.ARMOR || kind == EquipmentKind.HELMET
+                || kind == EquipmentKind.CHESTPLATE || kind == EquipmentKind.LEGGINGS
+                || kind == EquipmentKind.BOOTS;
+        if (stack == null || stack.isEmpty() || (!armorPiece && kind != EquipmentKind.SHIELD)) {
             return new boolean[]{false, false};
         }
 
@@ -728,8 +809,10 @@ public final class CraftingEquipmentManager {
             } else {
                 perkLine = Component.translatable(key, roman(amplifier + 1));
             }
-            ChatFormatting perkColor = id.equals("celestial_wings") || id.equals("celestial_range")
-                    ? ChatFormatting.GOLD : ChatFormatting.AQUA;
+            ChatFormatting perkColor = Set.of("celestial_wings", "celestial_range", "oracle_vision",
+                    "aegis_of_purity", "phantom_stride", "divine_reflection", "astral_pursuit",
+                    "singularity_bolt", "poseidons_wrath", "worldbreaker", "buried_truth",
+                    "edens_dominion").contains(id) ? ChatFormatting.GOLD : ChatFormatting.AQUA;
             lines.add(perkLine.withStyle(perkColor));
         }
         stack.set(DataComponents.LORE, new ItemLore(lines));
@@ -753,6 +836,7 @@ public final class CraftingEquipmentManager {
     private static void tick(MinecraftServer server) {
         long now = server.overworld().getGameTime();
         flushPendingReveals(server, now);
+        TranscendentAbilities.tick(server);
         PROJECTILE_DATA.entrySet().removeIf(entry -> entry.getValue().expiresAt() <= now);
         // Keep Guardian's cooldown across reconnects, but discard expired UUID entries.
         ETERNAL_GUARDIAN_READY_AT.entrySet().removeIf(entry -> entry.getValue() <= now);
@@ -900,7 +984,16 @@ public final class CraftingEquipmentManager {
 
     /** True for items that use Minecraft's equippable equipment-slot component. */
     private static boolean isArmorItem(ItemStack stack) {
-        return stack != null && !stack.isEmpty() && stack.has(DataComponents.EQUIPPABLE);
+        if (stack == null || stack.isEmpty()) return false;
+        Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
+        if (equippable == null) return false;
+        // Only the four armor slots are excluded from the hand-held list. Offhand
+        // equippable items (for example shields or modded offhand gear) must keep
+        // their held-item perks active while actually held in the offhand.
+        return switch (equippable.slot()) {
+            case HEAD, CHEST, LEGS, FEET -> true;
+            default -> false;
+        };
     }
 
     private static List<String> getEncodedPerks(ItemStack stack) {
@@ -946,6 +1039,16 @@ public final class CraftingEquipmentManager {
             case "worldshaper" -> WORLD_SHAPER;
             case "celestial_wings" -> CELESTIAL_WINGS;
             case "celestial_range" -> CELESTIAL_RANGE;
+            case "oracle_vision" -> ORACLE_VISION;
+            case "aegis_of_purity" -> AEGIS_OF_PURITY;
+            case "phantom_stride" -> PHANTOM_STRIDE;
+            case "divine_reflection" -> DIVINE_REFLECTION;
+            case "astral_pursuit" -> ASTRAL_PURSUIT;
+            case "singularity_bolt" -> SINGULARITY_BOLT;
+            case "poseidons_wrath" -> POSEIDONS_WRATH;
+            case "worldbreaker" -> WORLDBREAKER;
+            case "buried_truth" -> BURIED_TRUTH;
+            case "edens_dominion" -> EDENS_DOMINION;
             default -> null;
         };
     }
@@ -1048,9 +1151,10 @@ public final class CraftingEquipmentManager {
         if (projectile.getOwner() instanceof ServerPlayer shooter) {
             multiplier *= getCriticalMultiplier(weapon, shooter.getRandom());
         }
+        String encodedPerks = getTag(weapon).getStringOr(DATA_PERKS, "");
         PROJECTILE_DATA.put(projectile.getUUID(), new ProjectileDamageData(
-                multiplier, getTag(weapon).getStringOr(DATA_PERKS, ""),
-                now + PROJECTILE_BONUS_LIFETIME_TICKS));
+                multiplier, encodedPerks, now + PROJECTILE_BONUS_LIFETIME_TICKS));
+        TranscendentAbilities.onProjectileFired(projectile, weapon, encodedPerks);
     }
 
     public static double getProjectileDamageMultiplier(Projectile projectile) {
@@ -1071,6 +1175,37 @@ public final class CraftingEquipmentManager {
     private static long currentServerTime(Projectile projectile) {
         return projectile.level().getServer() == null ? projectile.level().getGameTime()
                 : projectile.level().getServer().overworld().getGameTime();
+    }
+
+    /** Checks a perk on a specific equipped slot; held items never qualify for armor perks. */
+    public static boolean hasEquippedPerkInSlot(Player player, EquipmentSlot slot, String perkId) {
+        if (player == null || slot == null || perkId == null) return false;
+        return getPerkAmplifier(player.getItemBySlot(slot), perkId) >= 0;
+    }
+
+    public static int getPerkAmplifierFromStack(ItemStack stack, String perkId) {
+        return getPerkAmplifier(stack, perkId);
+    }
+
+    public static boolean stackHasPerk(ItemStack stack, String perkId) {
+        return getPerkAmplifier(stack, perkId) >= 0;
+    }
+
+    public static boolean hasActivePerk(Player player, String perkId) {
+        if (player == null || perkId == null) return false;
+        for (ItemStack stack : getActiveEquipment(player)) {
+            if (getPerkAmplifier(stack, perkId) >= 0) return true;
+        }
+        return false;
+    }
+
+    /** Server-authoritative cleanup for temporary abilities owned by a disconnecting player. */
+    public static void onPlayerDisconnect(ServerPlayer player) {
+        if (player == null) return;
+        restoreCelestialFlight(player);
+        APPLIED_VITALITY.remove(player.getUUID());
+        APPLIED_RESILIENCE.remove(player.getUUID());
+        TranscendentAbilities.clearPlayer(player.getUUID());
     }
 
     public static boolean hasRarity(ItemStack stack) {
@@ -1099,6 +1234,9 @@ public final class CraftingEquipmentManager {
     }
 
     public static double getTreasureHunterChance(ItemStack stack) {
+        // Treasure Hunter belongs exclusively to shovel equipment. This also prevents
+        // legacy or manually edited non-shovel items from activating the excavation perk.
+        if (classify(stack) != EquipmentKind.SHOVEL) return 0.0;
         return getBonusDropChance(stack, "treasure_hunter");
     }
 
@@ -1127,13 +1265,19 @@ public final class CraftingEquipmentManager {
         if (source.getDirectEntity() instanceof Projectile projectile) {
             if (source.getEntity() instanceof ServerPlayer player) attacker = player;
             ProjectileDamageData data = PROJECTILE_DATA.get(projectile.getUUID());
-            if (data != null && data.expiresAt() > currentServerTime(projectile)) encodedPerks = data.encodedPerks();
+            if (data != null && data.expiresAt() > currentServerTime(projectile)) {
+                encodedPerks = data.encodedPerks();
+            } else if (projectile instanceof net.minecraft.world.entity.projectile.arrow.ThrownTrident trident) {
+                if (attacker == null && trident.getOwner() instanceof ServerPlayer owner) attacker = owner;
+                encodedPerks = getTag(trident.getWeaponItem()).getStringOr(DATA_PERKS, "");
+            }
         } else if (source.getEntity() instanceof ServerPlayer player) {
             attacker = player;
             encodedPerks = getTag(player.getMainHandItem()).getStringOr(DATA_PERKS, "");
         }
         if (attacker == null || encodedPerks.isBlank()) return;
 
+        TranscendentAbilities.onWeaponHit(attacker, victim, encodedPerks, source.getDirectEntity());
         int vampiric = perkAmplifier(encodedPerks, "vampiric");
         if (vampiric >= 0) {
             float heal = Math.min(3.0F, actualAmount * (0.08F + vampiric * 0.04F));

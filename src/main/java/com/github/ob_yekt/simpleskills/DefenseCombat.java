@@ -98,6 +98,8 @@ public final class DefenseCombat {
         if (raisedAt < 0 || elapsed < 0 || elapsed > window) return;
 
         PARRY_AWARDS.put(defender.getUUID(), new ParryAward(defender, defender.level().getGameTime(), attacker.getUUID(), incomingDamage));
+        com.github.ob_yekt.simpleskills.crafting.TranscendentAbilities
+                .onPerfectParry(defender, attacker, incomingDamage);
         long now = defender.level().getGameTime();
         int stunDuration = attacker instanceof EnderDragon || attacker instanceof WitherBoss
                 ? BOSS_STUN_TICKS : NORMAL_STUN_TICKS;

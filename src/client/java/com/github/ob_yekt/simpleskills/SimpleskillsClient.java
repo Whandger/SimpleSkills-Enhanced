@@ -3,6 +3,9 @@ package com.github.ob_yekt.simpleskills;
 import com.github.ob_yekt.simpleskills.excavating.InvestigationHud;
 import com.github.ob_yekt.simpleskills.crafting.CraftingRevealPayload;
 import com.github.ob_yekt.simpleskills.crafting.CraftingRevealScreen;
+import com.github.ob_yekt.simpleskills.crafting.TranscendentVisionPayload;
+import com.github.ob_yekt.simpleskills.crafting.TranscendentVisionHud;
+import com.github.ob_yekt.simpleskills.crafting.WorldbreakerPreviewPayload;
 import com.github.ob_yekt.simpleskills.excavating.InvestigationPayload;
 import com.github.ob_yekt.simpleskills.fishing.FishingCatchPayload;
 import com.github.ob_yekt.simpleskills.fishing.FishingCatchScreen;
@@ -60,6 +63,7 @@ public class SimpleskillsClient implements ClientModInitializer {
         SkillHudRenderer.register();
         ClientConfig.load();
         InvestigationHud.register();
+        TranscendentVisionHud.register();
         FishingHud.register();
         AgilityDashHud.register();
         PrayerCooldownHud.register();
@@ -67,6 +71,12 @@ public class SimpleskillsClient implements ClientModInitializer {
 
         ClientPlayNetworking.registerGlobalReceiver(CraftingRevealPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> CraftingRevealScreen.accept(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(TranscendentVisionPayload.TYPE, (payload, context) ->
+                context.client().execute(() -> TranscendentVisionHud.accept(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(WorldbreakerPreviewPayload.TYPE, (payload, context) ->
+                context.client().execute(() -> TranscendentVisionHud.acceptWorldbreakerPreview(payload)));
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) ->
+                client.execute(TranscendentVisionHud::clear));
 
         ClientPlayNetworking.registerGlobalReceiver(AgilityLevelPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> AgilityClientState.set(payload)));

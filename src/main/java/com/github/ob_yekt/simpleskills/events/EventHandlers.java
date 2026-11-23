@@ -133,6 +133,10 @@ public class EventHandlers {
 
             String blockTranslationKey = state.getBlock().getDescriptionId();
 
+            // Transcendent Worldbreaker: automatic 3x3 on non-ore blocks while enabled.
+            com.github.ob_yekt.simpleskills.crafting.TranscendentAbilities
+                    .tryWorldbreaker(serverPlayer, (ServerLevel) world, pos, state);
+
             // Check for Silk Touch on ores, melons (before doing anything else)
             if ((blockTranslationKey.contains("_ore")
                     || blockTranslationKey.contains("melon"))
@@ -190,7 +194,7 @@ public class EventHandlers {
         });
     }
 
-    private static void grantFarmingXP(
+    public static void grantFarmingXP(
             ServerLevel world,
             ServerPlayer serverPlayer,
             BlockPos pos,
