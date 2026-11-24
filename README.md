@@ -819,6 +819,8 @@ Added the **Ore Grinder**, a fuel-powered workstation that recycles unwanted cra
 - Includes a dedicated interface with processing progress, fuel status, and an animated grinding chamber.
 - The equipment is also rendered physically on top of the block while it is being processed, with a synchronized grinding animation and visual effects.
 
+![Ore Grinder Working](docs/images/ore-grinder-working.png)
+
 #### Recoverable Equipment & Materials
 
 The Ore Grinder accepts eligible crafted equipment with supported mineral recipe data, including:
@@ -844,7 +846,13 @@ The Ore Grinder supports sided inventory automation:
 - Hoppers on the sides can supply fuel.
 - Hoppers below the block extract recovered materials.
 
-The shaped crafting recipe uses **6 Iron Ingots, 2 Grindstones, and 1 Furnace**. The block requires a pickaxe to mine. When broken, the Ore Grinder drops its own block and all stored equipment, remaining fuel, and recovered materials exactly once. Normal chunk unloading does not drop or clear its inventory.
+#### Ore Grinder Crafting Recipe
+
+The shaped crafting recipe uses **6 Iron Ingots, 2 Grindstones, and 1 Furnace**.
+
+![Ore Grinder Crafting Recipe](docs/images/ore-grinder-craft.png)
+
+The block requires a pickaxe to mine. When broken, the Ore Grinder drops its own block and all stored equipment, remaining fuel, and recovered materials exactly once. Normal chunk unloading does not drop or clear its inventory.
 
 ### 🖥️ HUD & Interface
 
