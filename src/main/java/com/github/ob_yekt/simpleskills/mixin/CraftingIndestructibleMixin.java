@@ -1,6 +1,7 @@
 package com.github.ob_yekt.simpleskills.mixin;
 
 import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager;
+import com.github.ob_yekt.simpleskills.utils.GatheringDurabilityContext;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -10,7 +11,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Gives crafted equipment with Indestructible a chance to avoid ordinary durability damage. */
+/** Applies one Indestructible/profession durability roll to each durability-damage event. */
 @Mixin(ItemStack.class)
 public abstract class CraftingIndestructibleMixin {
     @Inject(
@@ -20,8 +21,14 @@ public abstract class CraftingIndestructibleMixin {
     )
     private void simpleskills$preventCraftedDurabilityLoss(int amount, LivingEntity entity,
                                                             EquipmentSlot slot, CallbackInfo ci) {
-        if (amount > 0 && entity instanceof ServerPlayer player
-                && CraftingEquipmentManager.shouldPreventDurabilityLoss((ItemStack) (Object) this, player)) {
+        if (amount <= 0 || !(entity instanceof ServerPlayer player)) return;
+
+        ItemStack stack = (ItemStack) (Object) this;
+        double professionChance = GatheringDurabilityContext.getProfessionChance(stack, player);
+        double indestructibleChance = CraftingEquipmentManager.getIndestructibleChance(stack);
+        // Add both sources once, retaining the existing 99% gathering-protection ceiling.
+        double combinedChance = Math.min(0.99, professionChance + indestructibleChance);
+        if (combinedChance > 0.0 && player.getRandom().nextDouble() < combinedChance) {
             ci.cancel();
         }
     }

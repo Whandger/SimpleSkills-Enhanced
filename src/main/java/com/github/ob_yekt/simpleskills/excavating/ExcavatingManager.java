@@ -35,7 +35,6 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -438,14 +437,10 @@ public final class ExcavatingManager {
                 com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager.hasActivePerk(
                         player, "buried_truth"));
 
-        // Durability: exactly 1 point per completed investigation, through the EXISTING
-        // Excavating durability-protection perk (no second chance, no new formula).
+        // Use the same block-mining durability path as normal gathering so profession
+        // protection and Indestructible are combined into one additive roll.
         ItemStack tool = player.getMainHandItem();
-        if (!GatheringSpeed.shouldPreventDurabilityLoss(player, sandState, tool)
-                && !com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
-                        .shouldPreventDurabilityLoss(tool, player)) {
-            tool.hurtAndBreak(1, player, EquipmentSlot.MAINHAND);
-        }
+        tool.mineBlock(level, sandState, session.pos, player);
 
         // Reward item.
         ItemStack found = ItemStack.EMPTY;

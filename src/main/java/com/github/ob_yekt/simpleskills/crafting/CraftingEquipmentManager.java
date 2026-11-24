@@ -3153,12 +3153,21 @@ public final class CraftingEquipmentManager {
         return getTag(stack).getStringOr(DATA_RARITY, "");
     }
 
-    public static boolean shouldPreventDurabilityLoss(ItemStack stack, ServerPlayer player) {
-        if (stack == null || stack.isEmpty() || player == null) return false;
+    /** Returns the Indestructible perk chance without rolling it. */
+    public static double getIndestructibleChance(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) return 0.0;
         int level = getPerkAmplifier(stack, "indestructible");
-        if (level < 0) return false;
-        double chance = Math.min(0.45, 0.10 + level * 0.10);
-        return player.getRandom().nextDouble() < chance;
+        if (level < 0) return 0.0;
+        return Math.min(0.45, 0.10 + level * 0.10);
+    }
+
+    /**
+     * Rolls Indestructible for durability damage outside the normal gathering-block path.
+     * Gathering block damage combines this chance with profession protection in one roll.
+     */
+    public static boolean shouldPreventDurabilityLoss(ItemStack stack, ServerPlayer player) {
+        return stack != null && !stack.isEmpty() && player != null
+                && player.getRandom().nextDouble() < getIndestructibleChance(stack);
     }
 
     public static double getBonusDropChance(ItemStack stack, String perkId) {

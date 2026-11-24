@@ -18,7 +18,6 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -734,23 +733,9 @@ public final class TreeFeller {
             return;
         }
 
-        if (GatheringSpeed.shouldPreventDurabilityLoss(
-                job.player,
-                state,
-                tool
-        )) {
-            return;
-        }
-
-        tool.hurtAndBreak(
-                1,
-                level,
-                job.player,
-                brokenStack -> job.player.onEquippedItemBroken(
-                        brokenStack,
-                        EquipmentSlot.MAINHAND
-                )
-        );
+        // Use the common gathering durability path even if the captured axe is no longer
+        // in the main hand; this keeps profession protection and Indestructible additive.
+        tool.mineBlock(level, state, pos, job.player);
     }
 
     private static void restoreMidasOriginAsNormalLog(TreeJob job) {

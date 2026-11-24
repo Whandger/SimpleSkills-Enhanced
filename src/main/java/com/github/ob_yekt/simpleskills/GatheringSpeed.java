@@ -311,15 +311,22 @@ public static float getDurabilityProtectionChance(
 }
 
     /**
-     * Determines whether this block-breaking action should avoid durability loss.
+     * Convenience roll for callers that apply gathering durability directly. The normal
+     * ItemStack.mineBlock path carries the profession chance into hurtAndBreak so both
+     * protection sources are evaluated together there.
      */
     public static boolean shouldPreventDurabilityLoss(
             Player player,
             BlockState state,
             ItemStack stack
     ) {
-        float chance = getDurabilityProtectionChance(player, state, stack);
+        if (player == null || stack == null || stack.isEmpty()) return false;
 
-        return chance > 0.0f && player.getRandom().nextFloat() < chance;
+        // Indestructible adds to the matching profession's protection instead of making
+        // a second independent roll. Keep the profession system's existing 99% ceiling.
+        double professionChance = getDurabilityProtectionChance(player, state, stack);
+        double equipmentChance = CraftingEquipmentManager.getIndestructibleChance(stack);
+        double combinedChance = Math.min(0.99, professionChance + equipmentChance);
+        return combinedChance > 0.0 && player.getRandom().nextDouble() < combinedChance;
     }
 }

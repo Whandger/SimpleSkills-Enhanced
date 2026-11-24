@@ -106,11 +106,11 @@ public abstract class BlockDropMixin {
             }
         }
 
-        // Fortune Mastery, Prospector and Worldshaper add an independent duplication roll.
-        // The original drop list is used only once, preventing recursive multiplication.
-        if (heldTool.is(ItemTags.PICKAXES) || heldTool.is(ItemTags.SHOVELS)
-                || heldTool.is(ItemTags.AXES) || heldTool.is(ItemTags.HOES)
-                || heldTool.get(net.minecraft.core.component.DataComponents.TOOL) != null) {
+        // Equipment drop perks only duplicate resources belonging to their gathering action:
+        // Mining duplicates ore drops; Woodcutting duplicates log/wood drops. They never
+        // duplicate arbitrary blocks, crops, machine outputs, or unrelated modded drops.
+        // The original drop list is used once, preventing recursive multiplication.
+        if (isOre || isLog) {
             double fortuneChance = com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
                     .getBonusDropChance(heldTool, "fortune_mastery");
             double prospectorChance = com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
@@ -120,7 +120,9 @@ public abstract class BlockDropMixin {
             double bonusChance = Math.min(0.45, fortuneChance + prospectorChance + worldshaperChance);
             if (bonusChance > 0.0 && player.getRandom().nextDouble() < bonusChance) {
                 for (ItemStack stack : baseDrops) {
-                    if (!stack.isEmpty()) extraDrops.add(stack.copy());
+                    if (!stack.isEmpty() && (isOre || stack.is(ItemTags.LOGS))) {
+                        extraDrops.add(stack.copy());
+                    }
                 }
             }
         }
