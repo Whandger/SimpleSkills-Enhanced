@@ -12,6 +12,8 @@ import com.github.ob_yekt.simpleskills.ui.RankTitleMenuActionPayload;
 import com.github.ob_yekt.simpleskills.ui.SkillOverviewRequestPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerActionPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerClientState;
+import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager;
+import com.github.ob_yekt.simpleskills.crafting.TranscendentToolTogglePayload;
 import net.minecraft.world.phys.Vec3;
 import java.util.UUID;
 
@@ -60,8 +62,15 @@ public class Keybinds {
     public static final KeyMapping OPEN_SKILL_OVERVIEW_KEY = new KeyMapping(
             "key.simpleskills.skill_overview", InputConstants.Type.KEYBOARD, InputConstants.KEY_K, CATEGORY);
 
+    public static final KeyMapping TOGGLE_TRANSCENDENT_AREA_KEY = new KeyMapping(
+            "key.simpleskills.toggle_transcendent_area",
+            InputConstants.Type.KEYBOARD,
+            InputConstants.KEY_L,
+            CATEGORY
+    );
+
     private static boolean wasJumpDown;
-    private static boolean canDoubleJump = true;
+    private static int doubleJumpsUsed;
     private static boolean wasOnGround;
     private static UUID trackedPlayer;
 
@@ -74,11 +83,12 @@ public class Keybinds {
         KeyMappingHelper.registerKeyMapping(CAST_PRAYER_KEY);
         KeyMappingHelper.registerKeyMapping(OPEN_PRAYER_WHEEL_KEY);
         KeyMappingHelper.registerKeyMapping(OPEN_SKILL_OVERVIEW_KEY);
+        KeyMappingHelper.registerKeyMapping(TOGGLE_TRANSCENDENT_AREA_KEY);
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (client.player == null) {
                 wasJumpDown = false;
-                canDoubleJump = false;
+                doubleJumpsUsed = 0;
                 wasOnGround = false;
                 trackedPlayer = null;
                 return;
@@ -88,10 +98,10 @@ public class Keybinds {
             if (!client.player.getUUID().equals(trackedPlayer)) {
                 trackedPlayer = client.player.getUUID();
                 wasOnGround = onGround;
-                canDoubleJump = onGround;
+                doubleJumpsUsed = 0;
                 wasJumpDown = client.options.keyJump.isDown();
             }
-            if (onGround) canDoubleJump = true;
+            if (onGround) doubleJumpsUsed = 0;
             if (OPEN_RANK_TITLES_KEY.consumeClick()
                     && ClientPlayNetworking.canSend(RankTitleMenuActionPayload.TYPE)) {
                 ClientPlayNetworking.send(new RankTitleMenuActionPayload(RankTitleMenuActionPayload.OPEN, ""));
@@ -102,6 +112,16 @@ public class Keybinds {
                 } else if (client.gui.screen() == null
                         && ClientPlayNetworking.canSend(SkillOverviewRequestPayload.TYPE)) {
                     ClientPlayNetworking.send(new SkillOverviewRequestPayload(SkillOverviewRequestPayload.OPEN));
+                }
+            }
+            if (TOGGLE_TRANSCENDENT_AREA_KEY.consumeClick() && client.gui.screen() == null
+                    && ClientPlayNetworking.canSend(TranscendentToolTogglePayload.TYPE)) {
+                var held = client.player.getMainHandItem();
+                if (CraftingEquipmentManager.stackHasPerk(held, "worldbreaker")
+                        || CraftingEquipmentManager.stackHasPerk(held, "buried_truth")
+                        || CraftingEquipmentManager.stackHasPerk(held, "edens_dominion")) {
+                    ClientPlayNetworking.send(new TranscendentToolTogglePayload(
+                            TranscendentToolTogglePayload.TOGGLE_AREA_EFFECT));
                 }
             }
             if (OPEN_PRAYER_BOOK_KEY.consumeClick() && client.gui.screen() == null && ClientPlayNetworking.canSend(PrayerActionPayload.TYPE)) {
@@ -122,11 +142,13 @@ public class Keybinds {
             }
 
             boolean jumpDown = client.options.keyJump.isDown();
-            if (jumpDown && !wasJumpDown && !onGround && !wasOnGround && canDoubleJump
+            if (jumpDown && !wasJumpDown && !onGround && !wasOnGround
+                    && !client.player.isFallFlying() && !client.player.isPassenger()
+                    && doubleJumpsUsed < 1 + CraftingEquipmentManager.getAdditionalDoubleJumps(client.player)
                     && AgilityClientState.getLevel() >= AgilityClientState.getDoubleJumpUnlockLevel()
                     && client.player.getFoodData().getFoodLevel() > 0
                     && ClientPlayNetworking.canSend(AgilityActionPayload.TYPE)) {
-                canDoubleJump = false;
+                doubleJumpsUsed++;
                 Vec3 velocity = client.player.getDeltaMovement();
                 net.minecraft.world.phys.Vec2 movement = client.player.input.getMoveVector();
                 double yaw = Math.toRadians(client.player.getYRot());

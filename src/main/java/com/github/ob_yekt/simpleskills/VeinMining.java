@@ -228,7 +228,8 @@ public final class VeinMining {
         }
     }
 
-    private static boolean isOre(BlockState state) {
-        return state.is(BlockTags.ORES) || state.is(COMMON_ORES);
+    /** Shared ore classification used by Vein Mining and compatible area abilities. */
+    public static boolean isOre(BlockState state) {
+        return state != null && (state.is(BlockTags.ORES) || state.is(COMMON_ORES));
     }
 }

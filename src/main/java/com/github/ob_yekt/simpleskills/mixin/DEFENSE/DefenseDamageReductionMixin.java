@@ -4,6 +4,8 @@ import com.github.ob_yekt.simpleskills.Defense;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.damagesource.DamageSource;
+import com.llamalad7.mixinextras.sugar.Local;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,17 +26,15 @@ public abstract class DefenseDamageReductionMixin {
             argsOnly = true,
             ordinal = 0
     )
-    private float simpleskills$applyDefenseDamageReduction(float amount) {
+    private float simpleskills$applyDefenseDamageReduction(
+            float amount, @Local(argsOnly = true) DamageSource source) {
         if (amount <= 0.0F || !((Object) this instanceof ServerPlayer player)) {
             return amount;
         }
 
         float damageReduction = Defense.getDamageReduction(player.getUUID());
-
-        if (damageReduction <= 0.0F) {
-            return amount;
-        }
-
-        return amount * (1.0F - damageReduction);
+        double elementalReduction = com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
+                .getElementalDamageReduction(player, source);
+        return amount * (1.0F - damageReduction) * (float) (1.0 - elementalReduction);
     }
 }

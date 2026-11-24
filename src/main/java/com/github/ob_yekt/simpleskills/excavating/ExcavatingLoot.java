@@ -142,6 +142,13 @@ public final class ExcavatingLoot {
         }
 
         public int getTotalXp() {
+            // Nine nuggets craft into one ingot, so the nugget's loot bonus is
+            // one ninth of the Rare-tier bonus. The universal investigation base XP
+            // is still granted, including when a nugget is found.
+            if (this == IRON_NUGGET || this == GOLD_NUGGET) {
+                return ExcavatingRarity.BASE_XP
+                        + Math.round(ExcavatingRarity.RARE.getBonusXp() / 9.0f);
+            }
             return rarity.getTotalXp();
         }
 
@@ -458,6 +465,48 @@ public final class ExcavatingLoot {
      * @param level Excavating level when the investigation completes.
      * @param roll uniform random value in [0, 1).
      */
+    public static Reward roll(int level, double roll, boolean buriedTruth) {
+        if (!buriedTruth) return roll(level, roll);
+        if (Double.isNaN(roll) || roll < 0.0 || roll >= 1.0) {
+            throw new IllegalArgumentException("Roll must be in the range [0, 1)");
+        }
+
+        int safeLevel = ExcavatingRank.clampLevel(level);
+        double target = roll * 100.0;
+
+        // Keep the exact Nothing probability; Buried Truth only redistributes normal reward weights.
+        double rewardBudget = totalChance(safeLevel);
+        if (target >= rewardBudget) return null;
+
+        double weightedTotal = 0.0;
+        for (Reward reward : REWARDS) {
+            double chance = reward.chanceAt(safeLevel);
+            if (chance > 0.0) weightedTotal += chance * buriedTruthWeight(reward.getRarity());
+        }
+        if (weightedTotal <= 0.0) return roll(safeLevel, Math.min(0.999999, roll));
+
+        double cumulative = 0.0;
+        for (Reward reward : REWARDS) {
+            double chance = reward.chanceAt(safeLevel);
+            if (chance <= 0.0) continue;
+            cumulative += rewardBudget * (chance * buriedTruthWeight(reward.getRarity())) / weightedTotal;
+            if (target < cumulative) return reward;
+        }
+        return REWARDS.length == 0 ? null : REWARDS[REWARDS.length - 1];
+    }
+
+    private static double buriedTruthWeight(ExcavatingRarity rarity) {
+        return switch (rarity) {
+            case COMMON -> 0.65;
+            case UNCOMMON -> 1.0;
+            case RARE -> 1.35;
+            case VERY_RARE -> 1.75;
+            case EPIC -> 2.2;
+            case LEGENDARY -> 2.8;
+            case MYTHIC -> 3.5;
+        };
+    }
+
     public static Reward roll(int level, double roll) {
         if (Double.isNaN(roll) || roll < 0.0 || roll >= 1.0) {
             throw new IllegalArgumentException(

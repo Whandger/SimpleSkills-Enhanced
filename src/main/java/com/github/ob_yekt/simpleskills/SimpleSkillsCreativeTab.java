@@ -1,6 +1,8 @@
 package com.github.ob_yekt.simpleskills;
 
 import com.github.ob_yekt.simpleskills.runes.RuneContent;
+import com.github.ob_yekt.simpleskills.celestial.CelestialAltarContent;
+import com.github.ob_yekt.simpleskills.grinder.OreGrinderContent;
 import com.github.ob_yekt.simpleskills.shields.GlowstoneShields;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -33,6 +35,9 @@ public final class SimpleSkillsCreativeTab {
                     output.accept(RuneContent.RUNE_LORE_ORE);
                     output.accept(RuneContent.RUNE_ORE_ITEM);
                     output.accept(RuneContent.DEEPSLATE_RUNE_ORE_ITEM);
+                    output.accept(CelestialAltarContent.CELESTIAL_ALTAR_ITEM);
+                    output.accept(CelestialAltarContent.TRANSCENDENCY_ESSENCE);
+                    output.accept(OreGrinderContent.ITEM);
                 })
                 .build();
 

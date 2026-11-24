@@ -5,6 +5,7 @@ import com.github.ob_yekt.simpleskills.Skills;
 import com.github.ob_yekt.simpleskills.managers.ConfigManager;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
 import com.github.ob_yekt.simpleskills.shields.CraftingLevelLock;
+import com.github.ob_yekt.simpleskills.crafting.CraftingInventoryGuard;
 import com.github.ob_yekt.simpleskills.utils.CraftingCommon;
 
 import com.llamalad7.mixinextras.sugar.Local;
@@ -47,8 +48,14 @@ public abstract class CraftingScreenHandlerMixin extends AbstractCraftingMenu {
     /** Bloqueia o shift-clique do escudo de glowstone enquanto o Crafting estiver abaixo do nível 15. */
     @Inject(method = "quickMoveStack", at = @At("HEAD"), cancellable = true)
     private void simpleskills$blockLockedQuickMove(Player player, int slotIndex, CallbackInfoReturnable<ItemStack> cir) {
-        if (slotIndex != 0 || !(player instanceof ServerPlayer serverPlayer)) return;
-        if (CraftingLevelLock.isLocked(serverPlayer, this.getSlot(0).getItem())) {
+        if (slotIndex != 0) return;
+        ItemStack result = this.getSlot(0).getItem();
+        if (!CraftingInventoryGuard.canTakeResult(player, result)) {
+            CraftingInventoryGuard.notifyInventoryFull(player);
+            cir.setReturnValue(ItemStack.EMPTY);
+            return;
+        }
+        if (player instanceof ServerPlayer serverPlayer && CraftingLevelLock.isLocked(serverPlayer, result)) {
             CraftingLevelLock.deny(serverPlayer);
             cir.setReturnValue(ItemStack.EMPTY);
         }
@@ -78,7 +85,7 @@ public abstract class CraftingScreenHandlerMixin extends AbstractCraftingMenu {
             // Apply bonuses using CraftingCommon (which already handles both types)
             if (CraftingCommon.isCraftableItem(itemStack2)) {
                 CraftingCommon.applyCraftingLore(itemStack2, serverPlayer);
-                CraftingCommon.applyCraftingScaling(itemStack2, serverPlayer);
+                CraftingCommon.applyCraftingScaling(itemStack2, serverPlayer, originalInputs);
             } else if (CraftingCommon.isCookableFoodItem(itemStack2)) {
                 CraftingCommon.applyCookingLore(itemStack2, serverPlayer);
                 CraftingCommon.applyCookingScaling(itemStack2, serverPlayer);

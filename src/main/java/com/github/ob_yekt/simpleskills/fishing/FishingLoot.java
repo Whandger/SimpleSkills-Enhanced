@@ -16,6 +16,7 @@ import net.minecraft.world.entity.projectile.FishingHook;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootParams;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -60,6 +61,66 @@ public final class FishingLoot {
             Simpleskills.LOGGER.warn("Could not roll the bonus fishing loot: {}", e.getMessage());
         }
         return bonus;
+    }
+
+    /**
+     * Extra ocean rewards granted by Abyssal Sovereign. Each reward is rolled independently,
+     * so a catch can produce more than one bonus at once.
+     *
+     * Chances: Heart of the Sea 1%, Trident 0.5%, Prismarine Shards 12%,
+     * Prismarine Crystals 6%, and a rare Prismarine building item 2%.
+     */
+    public static List<ItemStack> rollAbyssalBonus(ServerLevel level) {
+        List<ItemStack> bonus = new ArrayList<>();
+        var random = level.getRandom();
+
+        if (random.nextFloat() < 0.01F) {
+            bonus.add(new ItemStack(Items.HEART_OF_THE_SEA));
+        }
+        if (random.nextFloat() < 0.005F) {
+            bonus.add(new ItemStack(Items.TRIDENT));
+        }
+        if (random.nextFloat() < 0.12F) {
+            bonus.add(new ItemStack(Items.PRISMARINE_SHARD, 3 + random.nextInt(6)));
+        }
+        if (random.nextFloat() < 0.06F) {
+            bonus.add(new ItemStack(Items.PRISMARINE_CRYSTALS, 2 + random.nextInt(4)));
+        }
+        if (random.nextFloat() < 0.02F) {
+            Item[] prismarineTreasures = {
+                    Items.PRISMARINE,
+                    Items.PRISMARINE_BRICKS,
+                    Items.DARK_PRISMARINE,
+                    Items.SEA_LANTERN
+            };
+            bonus.add(new ItemStack(prismarineTreasures[random.nextInt(prismarineTreasures.length)]));
+        }
+        return bonus;
+    }
+
+    /** Returns true when a bonus is valuable enough to retain the tension challenge. */
+    public static boolean requiresTensionChallenge(List<ItemStack> bonus) {
+        for (ItemStack stack : bonus) {
+            if (stack.isEmpty()) continue;
+            Item item = stack.getItem();
+            if (item == Items.HEART_OF_THE_SEA || item == Items.TRIDENT
+                    || item == Items.PRISMARINE_SHARD || item == Items.PRISMARINE_CRYSTALS
+                    || item == Items.PRISMARINE || item == Items.PRISMARINE_BRICKS
+                    || item == Items.DARK_PRISMARINE || item == Items.SEA_LANTERN
+                    || item == Items.NAME_TAG || item == Items.NAUTILUS_SHELL
+                    || item == Items.SADDLE || item == Items.CONDUIT || item == Items.DIAMOND
+                    || item == Items.EMERALD || item == Items.EXPERIENCE_BOTTLE
+                    || item == Items.GOLD_INGOT || item == Items.LAPIS_LAZULI) {
+                return true;
+            }
+            // Enchanted books, bows, crossbows and rods are treasure-table rewards;
+            // plain rods can also appear in the junk table, so only enchanted ones count.
+            if (stack.isEnchanted() && (item == Items.BOOK || item == Items.BOW
+                    || item == Items.CROSSBOW || item == Items.FISHING_ROD)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static LootTable resolveTable(ServerLevel level, int fishingLevel) {
@@ -108,7 +169,7 @@ public final class FishingLoot {
             }
             player.awardStat(Stats.ITEM_PICKED_UP.get(item), count);
             if (isFish) {
-                player.awardStat(Stats.FISH_CAUGHT, 1);
+                player.awardStat(Stats.FISH_CAUGHT, count);
             }
         }
         if (experience > 0) {

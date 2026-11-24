@@ -1,6 +1,18 @@
 package com.github.ob_yekt.simpleskills;
 
 import com.github.ob_yekt.simpleskills.excavating.InvestigationHud;
+import com.github.ob_yekt.simpleskills.crafting.CraftingRevealPayload;
+import com.github.ob_yekt.simpleskills.crafting.CraftingRevealScreen;
+import com.github.ob_yekt.simpleskills.celestial.CelestialAltarAnimationController;
+import com.github.ob_yekt.simpleskills.celestial.CelestialAltarContent;
+import com.github.ob_yekt.simpleskills.celestial.CelestialAltarScreen;
+import com.github.ob_yekt.simpleskills.celestial.CelestialAltarVisualPayload;
+import com.github.ob_yekt.simpleskills.grinder.OreGrinderContent;
+import com.github.ob_yekt.simpleskills.grinder.OreGrinderRenderer;
+import com.github.ob_yekt.simpleskills.grinder.OreGrinderScreen;
+import com.github.ob_yekt.simpleskills.crafting.TranscendentVisionPayload;
+import com.github.ob_yekt.simpleskills.crafting.TranscendentVisionHud;
+import com.github.ob_yekt.simpleskills.crafting.WorldbreakerPreviewPayload;
 import com.github.ob_yekt.simpleskills.excavating.InvestigationPayload;
 import com.github.ob_yekt.simpleskills.fishing.FishingCatchPayload;
 import com.github.ob_yekt.simpleskills.fishing.FishingCatchScreen;
@@ -27,6 +39,7 @@ import com.github.ob_yekt.simpleskills.prayer.PrayerVfxRenderer;
 import com.github.ob_yekt.simpleskills.shields.GlowstoneShieldLayers;
 import com.github.ob_yekt.simpleskills.shields.GlowstoneShieldSpecialRenderer;
 import net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderers;
 import net.minecraft.client.renderer.special.SpecialModelRenderers;
 import net.minecraft.resources.Identifier;
 import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
@@ -34,6 +47,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.network.chat.Component;
 
 public class SimpleskillsClient implements ClientModInitializer {
@@ -53,15 +67,30 @@ public class SimpleskillsClient implements ClientModInitializer {
         );
 
         FishingEntityClient.register();
+        MenuScreens.register(CelestialAltarContent.MENU_TYPE, CelestialAltarScreen::new);
+        MenuScreens.register(OreGrinderContent.MENU_TYPE, OreGrinderScreen::new);
+        BlockEntityRenderers.register(OreGrinderContent.BLOCK_ENTITY_TYPE, OreGrinderRenderer::new);
         EntityRendererRegistry.register(PrayerVfxEntity.TYPE, PrayerVfxRenderer::new);
         Keybinds.register();
         SkillHudRenderer.register();
         ClientConfig.load();
         InvestigationHud.register();
+        TranscendentVisionHud.register();
         FishingHud.register();
         AgilityDashHud.register();
         PrayerCooldownHud.register();
         PrayerImpactFeedback.registerClientHooks();
+
+        ClientPlayNetworking.registerGlobalReceiver(CelestialAltarVisualPayload.TYPE, (payload, context) ->
+                context.client().execute(() -> CelestialAltarAnimationController.onServerConfirmed(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(CraftingRevealPayload.TYPE, (payload, context) ->
+                context.client().execute(() -> CelestialAltarAnimationController.interceptOrForwardReveal(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(TranscendentVisionPayload.TYPE, (payload, context) ->
+                context.client().execute(() -> TranscendentVisionHud.accept(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(WorldbreakerPreviewPayload.TYPE, (payload, context) ->
+                context.client().execute(() -> TranscendentVisionHud.acceptWorldbreakerPreview(payload)));
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) ->
+                client.execute(TranscendentVisionHud::clear));
 
         ClientPlayNetworking.registerGlobalReceiver(AgilityLevelPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> AgilityClientState.set(payload)));
@@ -77,7 +106,6 @@ public class SimpleskillsClient implements ClientModInitializer {
                 context.client().execute(() -> PrayerCooldownHud.accept(payload)));
 
         // Gathering Speed: levels pushed by the server (applied in GatheringSpeedMixin)
-        // Redireciona a atualização para a thread principal do cliente para garantir thread safety
         ClientPlayNetworking.registerGlobalReceiver(GatheringSpeed.LevelsPayload.TYPE, (payload, context) ->
             context.client().execute(() ->
                 GatheringSpeed.setClientLevels(payload.mining(), payload.woodcutting(), payload.excavating())
@@ -135,8 +163,6 @@ public class SimpleskillsClient implements ClientModInitializer {
                     default -> "message.simpleskills.rune_infusion.invalid_selection";
                 };
 
-                // In this Minecraft API, LocalPlayer exposes sendSystemMessage(Component).
-                // Gui.getChat() and Gui.setOverlayMessage() are not available.
                 context.client().player.sendSystemMessage(Component.translatable(key));
             })
         );
@@ -146,7 +172,6 @@ public class SimpleskillsClient implements ClientModInitializer {
             context.client().execute(() -> {
                 RuneInfusionClientState.accept(payload);
                 if (payload.state() == RuneInfusionStatePayload.STOP) {
-                    // The screen shows the result for a moment and closes itself.
                     if (!RuneInfusionClientState.hasScreen()) RuneInfusionClientState.reset();
                     return;
                 }
@@ -169,6 +194,7 @@ public class SimpleskillsClient implements ClientModInitializer {
         );
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            CelestialAltarAnimationController.reset();
             GatheringSpeed.resetClientLevels();
             AgilityClientState.reset();
             RankTitleMenuScreen.clearActive();

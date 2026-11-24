@@ -5,6 +5,8 @@ import com.github.ob_yekt.simpleskills.Skills;
 import com.github.ob_yekt.simpleskills.agility.AgilityManager;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingLoot;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingRank;
+import com.github.ob_yekt.simpleskills.crafting.CraftingRarity;
+import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager;
 import com.github.ob_yekt.simpleskills.fishing.FishingDebug;
 import com.github.ob_yekt.simpleskills.managers.ConfigManager;
 import com.github.ob_yekt.simpleskills.managers.DatabaseManager;
@@ -41,8 +43,8 @@ import java.util.stream.Stream;
 public class SimpleskillsCommands {
 
     public static void registerCommands() {
-        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
-                dispatcher.register(
+        CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
+            dispatcher.register(
                         Commands.literal("simpleskills")
                                 .requires(source -> source.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.ALL)))
                                 .then(Commands.literal("ironman")
@@ -86,6 +88,54 @@ public class SimpleskillsCommands {
                                                             int level = IntegerArgumentType.getInteger(context, "level");
                                                             context.getSource().sendSuccess(() -> Component.literal(
                                                                     "§6[simpleskills]§f " + ExcavatingLoot.describe(level)), false);
+                                                            return 1;
+                                                        }))))
+                                // Development helper: applies a complete crafting roll to the held item.
+                                .then(Commands.literal("rarity")
+                                        .requires(source -> source.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.MODERATORS)))
+                                        .then(Commands.argument("rarity", StringArgumentType.word())
+                                                .suggests((context, builder) -> SharedSuggestionProvider.suggest(
+                                                        java.util.Arrays.stream(CraftingRarity.values())
+                                                                .map(CraftingRarity::id), builder))
+                                                .executes(context -> {
+                                                    ServerPlayer player = context.getSource().getPlayerOrException();
+                                                    String id = StringArgumentType.getString(context, "rarity");
+                                                    CraftingRarity rarity = CraftingRarity.byId(id);
+                                                    if (rarity == null) {
+                                                        context.getSource().sendFailure(Component.translatable(
+                                                                "message.simpleskills.crafting.rarity_invalid", id));
+                                                        return 0;
+                                                    }
+                                                    if (player.getMainHandItem().isEmpty()) {
+                                                        context.getSource().sendFailure(Component.translatable(
+                                                                "message.simpleskills.crafting.rarity_holding_required"));
+                                                        return 0;
+                                                    }
+                                                    if (CraftingEquipmentManager.hasRarity(player.getMainHandItem())) {
+                                                        context.getSource().sendFailure(Component.translatable(
+                                                                "message.simpleskills.crafting.rarity_already_applied"));
+                                                        return 0;
+                                                    }
+                                                    if (!CraftingEquipmentManager.applyCommandRarity(player, rarity)) {
+                                                        context.getSource().sendFailure(Component.translatable(
+                                                                "message.simpleskills.crafting.rarity_not_supported"));
+                                                        return 0;
+                                                    }
+                                                    context.getSource().sendSuccess(() -> Component.translatable(
+                                                            "message.simpleskills.crafting.rarity_forced",
+                                                            Component.translatable("item.simpleskills.crafting_rarity." + rarity.id())),
+                                                            false);
+                                                    return 1;
+                                                })))
+                                // Shows the exact equipment-rarity chances for any Crafting level.
+                                .then(Commands.literal("crafting")
+                                        .requires(source -> source.permissions().hasPermission(new Permission.HasCommandLevel(PermissionLevel.MODERATORS)))
+                                        .then(Commands.literal("odds")
+                                                .then(Commands.argument("level", IntegerArgumentType.integer(1, 99))
+                                                        .executes(context -> {
+                                                            int level = IntegerArgumentType.getInteger(context, "level");
+                                                            context.getSource().sendSuccess(() -> Component.literal(
+                                                                    "§6[simpleskills]§f " + CraftingRarity.describe(level)), false);
                                                             return 1;
                                                         }))))
                                 .then(Commands.literal("reload")
@@ -148,7 +198,11 @@ public class SimpleskillsCommands {
                                         .then(Commands.argument("skill", StringArgumentType.word())
                                                 .suggests((context, builder) -> SharedSuggestionProvider.suggest(getValidSkills(), builder))
                                                 .executes(SimpleskillsCommands::showIronmanSkillLeaderboard)))
-                ));
+                );
+            // Singular alias kept for convenience: /simpleskill <same subcommands>.
+            dispatcher.register(Commands.literal("simpleskill")
+                    .redirect(dispatcher.getRoot().getChild("simpleskills")));
+        });
     }
 
     private static int setTitle(CommandContext<CommandSourceStack> context) {
@@ -161,8 +215,12 @@ public class SimpleskillsCommands {
             return 0;
         }
         if (!RankTitleManager.isUnlocked(player, option)) {
-            context.getSource().sendFailure(Component.translatable("message.simpleskills.titles.locked",
-                    option.requiredLevel()));
+            if (option.craftedWeaponRank()) {
+                context.getSource().sendFailure(Component.translatable("message.simpleskills.titles.crafting_weapon_locked"));
+            } else {
+                context.getSource().sendFailure(Component.translatable("message.simpleskills.titles.locked",
+                        option.requiredLevel()));
+            }
             return 0;
         }
 

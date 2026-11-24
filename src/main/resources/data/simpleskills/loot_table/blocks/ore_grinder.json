@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "simpleskills:ore_grinder"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "simpleskills:blocks/ore_grinder"
+}

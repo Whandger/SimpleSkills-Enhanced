@@ -35,7 +35,6 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -250,7 +249,11 @@ public final class ExcavatingManager {
             BLOCK_OWNERS.remove(globalPos, owner); // stale entry
         }
 
-        int durationTicks = ExcavatingRank.investigationTicks(getLevel(serverPlayer));
+        int baseDurationTicks = ExcavatingRank.investigationTicks(getLevel(serverPlayer));
+        double equipmentReduction = com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
+                .getExcavationTimeReduction(serverPlayer.getMainHandItem());
+        // Keep at least a quarter-second of server-side investigation time to avoid instant completion.
+        int durationTicks = Math.max(5, (int) Math.ceil(baseDurationTicks * (1.0 - equipmentReduction)));
         Session session = new Session(
                 playerId,
                 dimension,
@@ -430,14 +433,14 @@ public final class ExcavatingManager {
 
         // Level at the moment of completion; one single roll, server side only.
         int excavatingLevel = getLevel(player);
-        Reward reward = ExcavatingLoot.roll(excavatingLevel, level.getRandom().nextDouble());
+        Reward reward = ExcavatingLoot.roll(excavatingLevel, level.getRandom().nextDouble(),
+                com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager.hasActivePerk(
+                        player, "buried_truth"));
 
-        // Durability: exactly 1 point per completed investigation, through the EXISTING
-        // Excavating durability-protection perk (no second chance, no new formula).
+        // Use the same block-mining durability path as normal gathering so profession
+        // protection and Indestructible are combined into one additive roll.
         ItemStack tool = player.getMainHandItem();
-        if (!GatheringSpeed.shouldPreventDurabilityLoss(player, sandState, tool)) {
-            tool.hurtAndBreak(1, player, EquipmentSlot.MAINHAND);
-        }
+        tool.mineBlock(level, sandState, session.pos, player);
 
         // Reward item.
         ItemStack found = ItemStack.EMPTY;
@@ -450,15 +453,26 @@ public final class ExcavatingManager {
 
             if (!found.isEmpty()) {
                 Block.popResourceFromFace(level, session.pos, session.face, found);
+
+                // Treasure Hunter can discover a second copy of a successful find.
+                double extraChance = com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
+                        .getTreasureHunterChance(tool);
+                if (extraChance > 0.0 && level.getRandom().nextDouble() < extraChance) {
+                    Block.popResourceFromFace(level, session.pos, session.face, found.copy());
+                    player.sendSystemMessage(Component.translatable(
+                            "message.simpleskills.crafting.treasure_hunter").withStyle(net.minecraft.ChatFormatting.GOLD), true);
+                }
             }
         }
 
-        // XP through the existing progression system: 40 base, plus the rarity bonus of the item.
+        // XP through the existing progression system: 100 base, plus the item's rarity bonus.
         int xp = (reward != null && !found.isEmpty())
                 ? reward.getTotalXp()
                 : ExcavatingRarity.BASE_XP;
         XPManager.addXPWithNotification(player, Skills.EXCAVATING, xp);
 
+        com.github.ob_yekt.simpleskills.celestial.CelestialAltarManager
+                .rollExcavatingEssence(level, session.pos, excavatingLevel);
         playCompletionEffects(level, session, sandState, reward, found);
     }
 
@@ -482,7 +496,6 @@ public final class ExcavatingManager {
 
         ExcavatingRarity rarity = reward.getRarity();
         ServerPlayer player = level.getServer().getPlayerList().getPlayer(session.playerId);
-
         // Very Rare and above are announced to the finder.
         if (player != null && rarity.ordinal() >= ExcavatingRarity.VERY_RARE.ordinal()) {
             player.sendSystemMessage(Component.literal(

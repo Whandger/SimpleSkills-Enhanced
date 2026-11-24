@@ -10,8 +10,10 @@ import java.sql.*;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.ArrayList;
 
 /**
@@ -98,6 +100,7 @@ public class DatabaseManager {
             is_tab_menu_visible INTEGER DEFAULT 1,
             prestige INTEGER DEFAULT 0,
             selected_title_key TEXT DEFAULT NULL,
+            crafted_weapon_ranks TEXT DEFAULT '',
             prayer_specialization TEXT DEFAULT 'divine',
             prayer_loadout TEXT DEFAULT '[]',
             prayer_active_slot INTEGER DEFAULT 0
@@ -137,6 +140,11 @@ public class DatabaseManager {
             }
             try {
                 stmt.execute("ALTER TABLE players ADD COLUMN selected_title_key TEXT DEFAULT NULL");
+            } catch (SQLException ignored) {
+                // Column likely exists; ignore
+            }
+            try {
+                stmt.execute("ALTER TABLE players ADD COLUMN crafted_weapon_ranks TEXT DEFAULT ''");
             } catch (SQLException ignored) {
                 // Column likely exists; ignore
             }
@@ -452,6 +460,49 @@ public class DatabaseManager {
         } catch (SQLException e) {
             Simpleskills.LOGGER.error("Failed to set selected title for UUID {}: {}", playerUuid, e.getMessage());
             throw new DatabaseException("Failed to set selected title", e);
+        }
+    }
+
+    /** Returns the rarity weapon-title achievements permanently earned by a player. */
+    public Set<String> getCraftedWeaponRanks(String playerUuid) {
+        checkConnection();
+        String sql = "SELECT crafted_weapon_ranks FROM players WHERE player_uuid = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, playerUuid);
+            try (ResultSet result = statement.executeQuery()) {
+                if (!result.next()) return Set.of();
+                String stored = result.getString("crafted_weapon_ranks");
+                if (stored == null || stored.isBlank()) return Set.of();
+                Set<String> ranks = new HashSet<>();
+                for (String id : stored.split(",")) {
+                    String clean = id.trim().toLowerCase(java.util.Locale.ROOT);
+                    if (!clean.isBlank()) ranks.add(clean);
+                }
+                return Set.copyOf(ranks);
+            }
+        } catch (SQLException e) {
+            Simpleskills.LOGGER.error("Failed to get crafted weapon ranks for UUID {}: {}", playerUuid, e.getMessage());
+            throw new DatabaseException("Failed to get crafted weapon ranks", e);
+        }
+    }
+
+    /**
+     * Persists a weapon-rarity achievement. Returns true only when this rarity was newly unlocked.
+     */
+    public boolean unlockCraftedWeaponRank(String playerUuid, String rarityId) {
+        checkConnection();
+        if (playerUuid == null || rarityId == null || rarityId.isBlank()) return false;
+        Set<String> ranks = new HashSet<>(getCraftedWeaponRanks(playerUuid));
+        String normalized = rarityId.trim().toLowerCase(java.util.Locale.ROOT);
+        if (!ranks.add(normalized)) return false;
+        String sql = "UPDATE players SET crafted_weapon_ranks = ? WHERE player_uuid = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, String.join(",", ranks));
+            statement.setString(2, playerUuid);
+            return statement.executeUpdate() > 0;
+        } catch (SQLException e) {
+            Simpleskills.LOGGER.error("Failed to unlock crafted weapon rank {} for UUID {}: {}", normalized, playerUuid, e.getMessage());
+            throw new DatabaseException("Failed to unlock crafted weapon rank", e);
         }
     }
 

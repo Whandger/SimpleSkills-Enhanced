@@ -26,6 +26,10 @@ import com.github.ob_yekt.simpleskills.prayer.PrayerVisualEffects;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVfxEntity;
 import com.github.ob_yekt.simpleskills.shields.GlowstoneShieldLight;
 import com.github.ob_yekt.simpleskills.shields.GlowstoneShields;
+import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager;
+import com.github.ob_yekt.simpleskills.celestial.CelestialAltarContent;
+import com.github.ob_yekt.simpleskills.grinder.OreGrinderContent;
+import com.github.ob_yekt.simpleskills.celestial.CelestialAltarManager;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 
 import net.fabricmc.api.ModInitializer;
@@ -60,14 +64,19 @@ public class Simpleskills implements ModInitializer {
 
 		// Escudos de glowstone (itens); precisam existir antes do registro congelar.
 		GlowstoneShields.register();
+		// O altar e sua essência precisam ser registrados antes da aba criativa e do freeze.
+		CelestialAltarContent.register();
+		OreGrinderContent.register();
 		// Aba própria do SimpleSkills no criativo (depois que os itens existem).
 		SimpleSkillsCreativeTab.register();
 
 		GatheringSpeed.registerPayloads();
 		ExcavatingManager.registerPayloads();
 		FishingManager.registerPayloads();
+		CelestialAltarManager.registerPayloads();
 		AgilityManager.registerPayloads();
 		RankTitleManager.registerPayloads();
+		CraftingEquipmentManager.registerPayloads();
 		SkillOverviewManager.registerPayloads();
 		PrayerManager.registerPayloads();
 		PrayerVfxEntity.register();
@@ -80,6 +89,8 @@ public class Simpleskills implements ModInitializer {
 		EventHandlers.registerAll();
 		DefenseCombat.register();
 		AgilityManager.register();
+		CraftingEquipmentManager.register();
+		CelestialAltarManager.register();
 		RankTitleManager.registerReceivers();
 		SkillOverviewManager.registerReceivers();
 		PrayerManager.registerReceivers();

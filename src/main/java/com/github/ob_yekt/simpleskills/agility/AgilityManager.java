@@ -6,7 +6,6 @@ import com.github.ob_yekt.simpleskills.managers.ConfigManager;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
 import com.google.gson.JsonObject;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
@@ -25,7 +24,7 @@ import net.minecraft.world.phys.Vec3;
 public final class AgilityManager {
     private static final Map<UUID, Long> DASH_READY_AT = new ConcurrentHashMap<>();
     private static final Map<UUID, Long> DASH_IFRAMES_UNTIL = new ConcurrentHashMap<>();
-    private static final Set<UUID> DOUBLE_JUMP_USED = ConcurrentHashMap.newKeySet();
+    private static final Map<UUID, Integer> DOUBLE_JUMPS_USED = new ConcurrentHashMap<>();
 
     private AgilityManager() {}
 
@@ -41,7 +40,7 @@ public final class AgilityManager {
 
         ServerTickEvents.END_SERVER_TICK.register(server -> {
             for (ServerPlayer player : server.getPlayerList().getPlayers()) {
-                if (player.onGround()) DOUBLE_JUMP_USED.remove(player.getUUID());
+                if (player.onGround()) DOUBLE_JUMPS_USED.remove(player.getUUID());
             }
             DASH_IFRAMES_UNTIL.entrySet().removeIf(entry -> {
                 ServerPlayer player = server.getPlayerList().getPlayer(entry.getKey());
@@ -54,7 +53,7 @@ public final class AgilityManager {
             UUID id = handler.player.getUUID();
             DASH_READY_AT.remove(id);
             DASH_IFRAMES_UNTIL.remove(id);
-            DOUBLE_JUMP_USED.remove(id);
+            DOUBLE_JUMPS_USED.remove(id);
         });
     }
 
@@ -140,10 +139,13 @@ public final class AgilityManager {
         int unlockLevel = intValue("double_jump_unlocked_at", 10);
         if (agilityLevel < unlockLevel
                 || player.onGround() || player.isFallFlying() || player.isPassenger()
-                || player.getFoodData().getFoodLevel() <= 0
-                || DOUBLE_JUMP_USED.contains(player.getUUID())) return;
+                || player.getFoodData().getFoodLevel() <= 0) return;
 
-        DOUBLE_JUMP_USED.add(player.getUUID());
+        int maximumAdditionalJumps = 1 + com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
+                .getAdditionalDoubleJumps(player);
+        int jumpsUsed = DOUBLE_JUMPS_USED.getOrDefault(player.getUUID(), 0);
+        if (jumpsUsed >= maximumAdditionalJumps) return;
+        DOUBLE_JUMPS_USED.put(player.getUUID(), jumpsUsed + 1);
         Vec3 velocity = player.getDeltaMovement();
         Vec3 direction = player.getLastClientMoveIntent();
         direction = new Vec3(direction.x, 0.0, direction.z);

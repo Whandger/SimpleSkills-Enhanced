@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
 
 public final class CraftingCommon {
     private static final String AIR_ID = "minecraft:air";
@@ -30,6 +31,16 @@ public final class CraftingCommon {
         return stack.get(DataComponents.MAX_DAMAGE) != null;
     }
 
+    /**
+     * Shields carry an empty BANNER_PATTERNS component by default. Only actual dye or
+     * non-empty banner layers indicate a cosmetic re-craft that should skip equipment rolls.
+     */
+    private static boolean isCosmeticRecraft(ItemStack stack) {
+        if (stack.has(DataComponents.DYED_COLOR)) return true;
+        BannerPatternLayers patterns = stack.get(DataComponents.BANNER_PATTERNS);
+        return patterns != null && !patterns.layers().isEmpty();
+    }
+
     public static boolean isCookableFoodItem(ItemStack stack) {
         String itemKey = stack.getItem().getDescriptionId();
         return ConfigManager.getCookingXP(itemKey, Skills.COOKING) > 0;
@@ -38,8 +49,8 @@ public final class CraftingCommon {
     public static void grantCraftingXP(ServerPlayer player, ItemStack stack) {
         if (!isValidStack(stack) || !isCraftableItem(stack)) return;
 
-        // Prevent durability bonus on "cosmetic re-crafting" (dyeing armor, applying banner to shield, etc.)
-        if (stack.has(DataComponents.DYED_COLOR) || stack.has(DataComponents.BANNER_PATTERNS)) {
+        // Cosmetic recipes must not grant Crafting XP or amplify XP from an existing rare item.
+        if (isCosmeticRecraft(stack)) {
             return;
         }
 
@@ -47,8 +58,14 @@ public final class CraftingCommon {
         int xpPerItem = ConfigManager.getCraftingXP(itemId.toString(), Skills.CRAFTING);
         if (xpPerItem <= 0) return;
 
-        int totalXP = xpPerItem * stack.getCount();
-        XPManager.addXPWithNotification(player, Skills.CRAFTING, totalXP);
+        // Base XP remains recipe/material-value driven by crafting_xp.json.
+        // The equipment's rolled rarity then adds a measured reward on top.
+        double rarityMultiplier = com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
+                .getCraftingXpMultiplier(stack);
+        int totalXP = (int) Math.round((double) xpPerItem * stack.getCount() * rarityMultiplier);
+        if (totalXP > 0) {
+            XPManager.addXPWithNotification(player, Skills.CRAFTING, totalXP);
+        }
     }
 
     public static void grantCookingXP(ServerPlayer player, ItemStack stack) {
@@ -69,7 +86,7 @@ public final class CraftingCommon {
         if (!isCraftingLoreInTooltipsEnabled()) return;
 
         // Prevent durability bonus on "cosmetic re-crafting" (dyeing armor, applying banner to shield, etc.)
-        if (stack.has(DataComponents.DYED_COLOR) || stack.has(DataComponents.BANNER_PATTERNS)) {
+        if (isCosmeticRecraft(stack)) {
             return;
         }
 
@@ -108,10 +125,14 @@ public final class CraftingCommon {
     }
 
     public static void applyCraftingScaling(ItemStack stack, ServerPlayer player) {
+        applyCraftingScaling(stack, player, null);
+    }
+
+    public static void applyCraftingScaling(ItemStack stack, ServerPlayer player, ItemStack[] ingredients) {
         if (!isValidStack(stack) || !isCraftableItem(stack)) return;
 
         // Prevent durability bonus on "cosmetic re-crafting" (dyeing armor, applying banner to shield, etc.)
-        if (stack.has(DataComponents.DYED_COLOR) || stack.has(DataComponents.BANNER_PATTERNS)) {
+        if (isCosmeticRecraft(stack)) {
             return;
         }
 
@@ -123,6 +144,9 @@ public final class CraftingCommon {
 
         int newDurability = Math.max(1, Math.round(originalDurability * multiplier));
         stack.set(DataComponents.MAX_DAMAGE, newDurability);
+
+        // Rarity and random affixes are rolled once and stored on the crafted item.
+        com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager.applyCraftedEquipment(stack, player, ingredients);
     }
 
     public static void applyCookingScaling(ItemStack stack, ServerPlayer player) {

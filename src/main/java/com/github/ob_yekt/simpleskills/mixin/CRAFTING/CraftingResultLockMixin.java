@@ -1,6 +1,7 @@
 package com.github.ob_yekt.simpleskills.mixin.CRAFTING;
 
 import com.github.ob_yekt.simpleskills.shields.CraftingLevelLock;
+import com.github.ob_yekt.simpleskills.crafting.CraftingInventoryGuard;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ResultSlot;
@@ -21,6 +22,11 @@ public abstract class CraftingResultLockMixin {
     private void simpleskills$lockCraftingResult(Player player, CallbackInfoReturnable<Boolean> cir) {
         Slot self = (Slot) (Object) this;
         if (!(self instanceof ResultSlot)) return;
+        if (!CraftingInventoryGuard.canTakeResult(player, self.getItem())) {
+            CraftingInventoryGuard.notifyInventoryFull(player);
+            cir.setReturnValue(false);
+            return;
+        }
         if (player instanceof ServerPlayer serverPlayer && CraftingLevelLock.isLocked(serverPlayer, self.getItem())) {
             CraftingLevelLock.deny(serverPlayer);
             cir.setReturnValue(false);

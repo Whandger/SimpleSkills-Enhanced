@@ -122,6 +122,13 @@ public class EventHandlers {
                 return true;
             }
 
+            // Midas' Touch must intercept the first log before vanilla drops wood;
+            // the Tree Feller job then transmutes the entire connected tree consistently.
+            if (world instanceof ServerLevel serverLevel
+                    && TreeFeller.tryActivateMidasBeforeBreak(serverPlayer, serverLevel, pos, state)) {
+                return false;
+            }
+
             return true;
         });
 
@@ -132,6 +139,10 @@ public class EventHandlers {
             }
 
             String blockTranslationKey = state.getBlock().getDescriptionId();
+
+            // Transcendent Worldbreaker: automatic 3x3 on non-ore blocks while enabled.
+            com.github.ob_yekt.simpleskills.crafting.TranscendentAbilities
+                    .tryWorldbreaker(serverPlayer, (ServerLevel) world, pos, state);
 
             // Check for Silk Touch on ores, melons (before doing anything else)
             if ((blockTranslationKey.contains("_ore")
@@ -190,7 +201,7 @@ public class EventHandlers {
         });
     }
 
-    private static void grantFarmingXP(
+    public static void grantFarmingXP(
             ServerLevel world,
             ServerPlayer serverPlayer,
             BlockPos pos,

@@ -41,6 +41,8 @@ public abstract class RangedProjectileDamageMixin {
 
         // Apply the Ranged multiplier from the server-side skill cache.
         float multiplier = Ranged.getDamageMultiplier(player.getUUID());
+        multiplier *= (float) com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
+                .getProjectileDamageMultiplier(projectile, (LivingEntity) (Object) this);
 
         if (com.github.ob_yekt.simpleskills.DefenseCombat.hasCounterMastery(player)) {
             multiplier *= com.github.ob_yekt.simpleskills.DefenseCombat.COUNTER_DAMAGE_MULTIPLIER;

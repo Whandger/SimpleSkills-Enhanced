@@ -1,6 +1,7 @@
 package com.github.ob_yekt.simpleskills.mixin.CRAFTING;
 
 import com.github.ob_yekt.simpleskills.shields.CraftingLevelLock;
+import com.github.ob_yekt.simpleskills.crafting.CraftingInventoryGuard;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
@@ -19,9 +20,15 @@ public abstract class InventoryCraftingLockMixin {
     @Inject(method = "quickMoveStack", at = @At("HEAD"), cancellable = true)
     private void simpleskills$blockLockedQuickMove(Player player, int slotIndex,
                                                    CallbackInfoReturnable<ItemStack> cir) {
-        if (slotIndex != 0 || !(player instanceof ServerPlayer serverPlayer)) return;
+        if (slotIndex != 0) return;
         InventoryMenu menu = (InventoryMenu) (Object) this;
-        if (CraftingLevelLock.isLocked(serverPlayer, menu.getSlot(0).getItem())) {
+        ItemStack result = menu.getSlot(0).getItem();
+        if (!CraftingInventoryGuard.canTakeResult(player, result)) {
+            CraftingInventoryGuard.notifyInventoryFull(player);
+            cir.setReturnValue(ItemStack.EMPTY);
+            return;
+        }
+        if (player instanceof ServerPlayer serverPlayer && CraftingLevelLock.isLocked(serverPlayer, result)) {
             CraftingLevelLock.deny(serverPlayer);
             cir.setReturnValue(ItemStack.EMPTY);
         }
