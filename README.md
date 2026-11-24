@@ -83,6 +83,18 @@ Reaching level 99 requires significant dedication, so achieving the maximum leve
 
 ![Sand Investigation](docs/images/excavation.gif)
 
+#### Excavating Block XP
+
+Updated Excavating block rewards to make gathering progression more rewarding:
+
+| Block | Excavating XP |
+|:--|--:|
+| Dirt | 100 |
+| Sand / Red Sand | 150 |
+| Gravel | 150 |
+| Clay | 250 |
+| Soul Sand | 400 |
+
 #### Ranks & Progression
 
 - **10 unique ranks**, each with its own name and color.
@@ -122,18 +134,20 @@ Reaching level 99 requires significant dedication, so achieving the maximum leve
 
 #### XP Rewards
 
-Every completed investigation grants **40 base XP**, even when Nothing is found. Additional XP depends on the rarity of the discovered reward.
+Every completed investigation grants **100 base XP**, even when Nothing is found. Additional XP depends on the rarity of the discovered reward.
 
 | Discovery | Total XP |
 |:--|--:|
-| Nothing | 40 |
-| Common | 140 |
-| Uncommon | 190 |
-| Rare | 240 |
-| Very Rare | 340 |
-| Epic | 540 |
-| Legendary | 840 |
-| Mythic | 1540 |
+| Nothing | 100 |
+| Common | 200 |
+| Uncommon | 275 |
+| Rare | 350 |
+| Very Rare | 550 |
+| Epic | 850 |
+| Legendary | 1,300 |
+| Mythic | 2,100 |
+
+Iron and Gold Nuggets also receive a proportional XP reward, based on one ninth of the corresponding Rare-tier bonus, keeping nugget rewards consistent with the 9:1 nugget-to-ingot crafting ratio.
 
 #### Special Discoveries
 
@@ -649,10 +663,23 @@ Eligible equipment can roll attributes supported by its item category:
 - Attack Speed.
 - Armor and Armor Toughness.
 - Break Speed for pickaxes, axes, and shovels.
+- **Excavation Time Reduction** for shovels, reducing the duration of Sand Investigations.
 
-Break Speed is a standalone equipment attribute, not a perk slot, and stacks additively with the corresponding Mining, Woodcutting, or Excavating profession bonus. Each rarity has its own attribute ranges and roll chances. Epic and higher rarities always receive their applicable attributes.
+Break Speed is a standalone equipment attribute, not a perk slot, and stacks additively with the corresponding Mining, Woodcutting, or Excavating profession bonus. Excavation Time Reduction is also a standalone attribute and applies only to eligible shovels. Its effect is applied server-side, with a minimum investigation duration of 5 ticks. Each rarity has its own attribute ranges and roll chances. Epic and higher rarities always receive their applicable attributes.
 
 Attribute tooltips show the rolled value and the possible range, for example `Break Speed: +29% [23% - 30%]`. Maximum rolls are highlighted in gold.
+
+The Excavation Time Reduction ranges follow the same rarity progression as Break Speed:
+
+| Rarity | Excavation Time Reduction |
+|:--|--:|
+| Common | 2% to 5% |
+| Rare | 4% to 8% |
+| Unique | 6% to 10% |
+| Epic | 8% to 12% |
+| Legendary | 12% to 17% |
+| Mythic | 17% to 23% |
+| Transcendent | 23% to 30% |
 
 Higher rarities also guarantee more perks:
 
@@ -779,6 +806,45 @@ The Celestial Altar uses the following shaped recipe:
 - Requires a Diamond-tier pickaxe or better to mine.
 - Drops the Celestial Altar block when mined with a valid tool.
 - Items stored in the altar's slots are dropped when the altar block is removed, rather than being lost.
+
+### ♻️ Ore Grinder — Equipment Recycling
+
+Added the **Ore Grinder**, a fuel-powered workstation that recycles unwanted crafted equipment and recovers part of its eligible mineral materials.
+
+#### Processing & Interface
+
+- Uses three slots: equipment input, fuel input, and recovered-material output.
+- Processes one equipment item per **200 ticks (10 seconds)**.
+- Accepts fuels supported by Minecraft's standard furnace fuel system.
+- Includes a dedicated interface with processing progress, fuel status, and an animated grinding chamber.
+- The equipment is also rendered physically on top of the block while it is being processed, with a synchronized grinding animation and visual effects.
+
+#### Recoverable Equipment & Materials
+
+The Ore Grinder accepts eligible crafted equipment with supported mineral recipe data, including:
+
+- Swords, pickaxes, axes, shovels, and hoes.
+- Helmets, chestplates, leggings, and boots.
+- SimpleSkills Glowstone Shields and their upgraded variants.
+
+Bows and crossbows are excluded. Non-mineral ingredients such as wood, sticks, and string are not recovered.
+
+| Equipment | Mineral Recovery Rate |
+|:--|--:|
+| Swords using two mineral materials | 50% |
+| Other supported equipment | 30% |
+
+Fractional recovery is handled probabilistically, rather than always rounding up. The expected recovered amount therefore follows the configured rate, including for recipes that use only one or two eligible mineral materials.
+
+#### Hopper Automation & Block Behavior
+
+The Ore Grinder supports sided inventory automation:
+
+- Hoppers above the block insert eligible equipment.
+- Hoppers on the sides can supply fuel.
+- Hoppers below the block extract recovered materials.
+
+The shaped crafting recipe uses **6 Iron Ingots, 2 Grindstones, and 1 Furnace**. The block requires a pickaxe to mine. When broken, the Ore Grinder drops its own block and all stored equipment, remaining fuel, and recovered materials exactly once. Normal chunk unloading does not drop or clear its inventory.
 
 ### 🖥️ HUD & Interface
 
@@ -1113,6 +1179,8 @@ Responsible for the additional improvements introduced in this fork, including:
 - Crafting equipment rarities, randomized attributes and perks, rarity-based Crafting XP, and the Equipment Reveal interface.
 - Transcendent equipment signature abilities and their gathering, combat, farming, and fishing integrations.
 - Celestial Altar ascension, reforging, individual attribute enhancements, perk rerolls, and Transcendency Essence salvage.
+- Ore Grinder equipment recycling, mineral recovery, hopper automation, and animated processing.
+- Excavating XP rebalance and the shovel-only Excavation Time Reduction attribute.
 - HUD and TAB interface improvements.
 - Rebalanced equipment progression based on player testing.
 - Supporting technical implementations and compatibility work.
