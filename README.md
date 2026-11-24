@@ -594,6 +594,192 @@ Progress through **10 unique ranks** as you master the art of Rune Infusion.
 | Grand Runecaster | 81–90 |
 | Archmage of Runes | 91–99 |
 
+### ⚒️ Crafting & Equipment Progression
+
+SimpleSkills Enhanced expands the Crafting profession with equipment rarities, randomized attributes, equipment-specific perks, and a new endgame progression path. Crafted equipment can receive one of seven rarity tiers, with results influenced by Crafting level and the materials used in the recipe.
+
+#### Equipment Rarities
+
+- ⚪ **Common**
+- 🔵 **Rare**
+- 🩵 **Unique**
+- 🟣 **Epic**
+- 🟡 **Legendary**
+- 🔴 **Mythic**
+- ✨ **Transcendent**
+
+Rarity chances improve as the Crafting profession levels up. The following milestones show the baseline distribution for Diamond and Netherite recipes:
+
+| Rarity | Level 1 | Level 50 | Level 99 |
+|:--|--:|--:|--:|
+| Common | 85.00% | 40.00% | 5.00% |
+| Rare | 12.00% | 32.00% | 30.00% |
+| Unique | 2.00% | 17.00% | 30.00% |
+| Epic | 0.80% | 7.50% | 20.00% |
+| Legendary | 0.15% | 2.70% | 10.00% |
+| Mythic | 0.04% | 0.65% | 4.00% |
+| Transcendent | 0.01% | 0.15% | 1.00% |
+| **Total** | **100.00%** | **100.00%** | **100.00%** |
+
+Values between these levels scale continuously with Crafting progression. Transcendent chances are also adjusted by the strongest recognized material in the recipe.
+
+##### Material-Based Transcendent Chances
+
+Maximum Transcendent chance at Crafting level 99:
+
+| Recipe Material Tier | Transcendent Chance |
+|:--|--:|
+| Wood / Leather | 0.05% |
+| Stone | 0.10% |
+| Copper | 0.20% |
+| Gold | 0.50% |
+| Iron | 0.60% |
+| Other / Modded | **0.60%** |
+| Diamond | 1.00% |
+| Netherite | 1.00% |
+
+The strongest recognized material determines the tier. Unknown modded materials use the **Other / Modded** fallback. Any chance removed from the Transcendent tier is transferred to Common, keeping the total rarity distribution at 100%.
+
+##### Randomized Attributes & Perks
+
+Eligible equipment can roll attributes supported by its item category:
+
+- Attack Damage and Critical Hit Chance.
+- Durability.
+- Attack Speed.
+- Armor and Armor Toughness.
+- Break Speed for pickaxes, axes, and shovels.
+
+Break Speed is a standalone equipment attribute, not a perk slot, and stacks additively with the corresponding Mining, Woodcutting, or Excavating profession bonus. Each rarity has its own attribute ranges and roll chances. Epic and higher rarities always receive their applicable attributes.
+
+Attribute tooltips show the rolled value and the possible range, for example `Break Speed: +29% [23% - 30%]`. Maximum rolls are highlighted in gold.
+
+Higher rarities also guarantee more perks:
+
+| Rarity | Perks |
+|:--|:--:|
+| Common | 0–1 |
+| Rare | 1 |
+| Unique | 1 exclusive perk |
+| Epic | 2 |
+| Legendary | 2–3 |
+| Mythic | 3–4 |
+| Transcendent | 5–6 total |
+
+Transcendent equipment receives one signature ability in addition to its regular perks. Perk generation uses equipment-specific pools and prevents duplicate potion-effect perks on the same item.
+
+##### Crafting XP & Reveal Interface
+
+Crafting XP is multiplied according to the rarity of the result:
+
+| Rarity | Crafting XP Multiplier |
+|:--|--:|
+| Common | 1.00× |
+| Rare | 1.10× |
+| Unique | 1.20× |
+| Epic | 1.40× |
+| Legendary | 1.70× |
+| Mythic | 2.10× |
+| Transcendent | 2.60× |
+
+Unique and higher results use a dedicated Equipment Reveal screen with rarity-specific presentation, sounds, attributes, perks, and multi-item pagination. Common and Rare results do not trigger the reveal sequence.
+
+![Crafting HUD](docs/images/crafting-hud.png)
+
+#### Transcendent Equipment Abilities
+
+Transcendent equipment can roll powerful signature abilities tied to its category, including:
+
+- **Oracle's Vision:** Reveals hostile creatures and rare ores through walls using outlines.
+- **Aegis of Purity:** Protects against harmful status effects and prevents hunger loss while the chestplate is equipped.
+- **Phantom Stride:** Allows stepping up one block and ignores selected terrain movement penalties.
+- **Celestial Wings:** Grants flight while the boots are equipped.
+- **Divine Reflection:** Perfect Parries release a divine shockwave against nearby hostile creatures.
+- **Astral Pursuit:** Arrows track selected hostile targets.
+- **Singularity Bolt:** Crossbow projectiles create a gravitational vortex on impact.
+- **Poseidon's Wrath:** Trident hits unleash a water-based area attack.
+- **Celestial Range:** Increases melee attack reach.
+- **Worldbreaker (Pickaxe):** Mines an eligible 3×3 area and previews affected blocks.
+- **Buried Truth (Shovel):** Expands Excavating to a 3×3 area and improves rare reward weights.
+- **Eden's Dominion (Hoe):** Harvests and replants a 3×3 crop area while doubling drops.
+- **Midas' Touch (Axe):** When felling a tree while sneaking, logs become falling Gold Blocks and leaves become falling Raw Gold Blocks that turn into Gold Nuggets when they land. It also grants a Golden Apple, with a 20% chance for an Enchanted Golden Apple.
+- **Abyssal Sovereign (Fishing Rod):** Catches fish and treasure without the fishing tension minigame, yielding 5–10 fish and possible bonus ocean loot.
+
+The default **L** key toggles the area effects of Transcendent gathering tools. Pickaxe, shovel, and hoe toggles are independent and enabled by default. Vein Mining retains priority for eligible ores.
+
+![Transcendent Sword](docs/images/transcendent-sword.png)
+
+#### Crafting Titles & Achievements
+
+Forging weapons of different rarities unlocks permanent rarity-based Crafting achievements and titles. These achievements are saved and integrated into the Profession Titles selection interface.
+
+### 🌌 Transcendence & Celestial Altar
+
+The Celestial Altar provides an endgame workstation for ascending equipment to Transcendent rarity, reforging existing Transcendent gear, improving individual attributes, rerolling individual perks, and salvaging equipment into Transcendency Essence.
+
+#### Transcendency Essence
+
+Transcendency Essence is the catalyst used by the Celestial Altar. It can be obtained from:
+
+| Source | Chance / Requirement |
+|:--|:--|
+| Hostile mob drops | 0.1% chance, requiring direct player damage or player damage contribution within the last 200 ticks |
+| Excavating level 1 | 0.02% chance |
+| Excavating level 99 | 0.20% chance |
+| Fishing level 1 | 0.15% chance |
+| Fishing level 99 | 0.20% chance |
+| Transcendent Salvage | 1 eligible item produces 1 Essence |
+
+Excavating and Fishing chances scale with their respective profession levels. Environmental mob deaths and fully automatic grinders without recent player interaction do not qualify for the hostile-mob drop.
+
+#### Celestial Altar Modes
+
+##### Infusion — Ascension & Reforge
+
+The Infusion mode uses one equipment slot and three Transcendency Essence slots. It requires one eligible crafted item and three Essences per operation.
+
+- **Ascension:** Converts eligible non-Transcendent equipment into Transcendent rarity, rolling Transcendent attributes, regular perks, and the category's signature ability.
+- **Reforge:** Rerolls the Transcendent attributes and perks of an existing Transcendent item. Signature abilities are rerolled only when the category has multiple available options.
+- Both operations preserve enchantments, custom item names, and current durability.
+- Successful operations reuse the Equipment Reveal interface and the existing rarity announcement and achievement/title progression.
+
+![Celestial Altar — Infusion](docs/images/infusion-altar.png)
+
+##### Enhance — Individual Attribute & Perk Upgrades
+
+The Enhance mode places the equipment on the left, the selectable attributes and perks in the center, and the Rune input on the right. Each option is an individual action:
+
+- Clicking an attribute spends **1 Rune** and increases that selected attribute by **+1 percentage point**.
+- Attribute improvements stop at the maximum value allowed by that rarity's range.
+- Clicking a rerollable perk spends **1 Rune** and rerolls only that selected perk. Other perks remain unchanged.
+- A perk can be rerolled only when its equipment-specific pool has a valid alternative.
+- Runes are consumed one at a time as each action is performed, and the updated value or perk is shown in the interface.
+
+![Celestial Altar — Enhance](docs/images/infusion-enhance.png)
+
+##### Salvage — Recover Transcendency Essence
+
+The Salvage mode accepts exactly one eligible Transcendent equipment item and produces one Transcendency Essence. A double-click confirmation within 1.5 seconds helps prevent accidental destruction. The output must be collected before another salvage operation can be performed.
+
+![Celestial Altar — Salvage](docs/images/infusion-salvage.png)
+
+#### Celestial Altar Recipe & Block Behavior
+
+The Celestial Altar uses the following shaped recipe:
+
+| Material | Quantity |
+|:--|--:|
+| Obsidian | 4 |
+| Rune | 2 |
+| Gold Ingot | 2 |
+| Nether Star | 1 |
+
+![Celestial Altar Crafting Recipe](docs/images/celestial-altar-craft.png)
+
+- Requires a Diamond-tier pickaxe or better to mine.
+- Drops the Celestial Altar block when mined with a valid tool.
+- Items stored in the altar's slots are dropped when the altar block is removed, rather than being lost.
+
 ### 🖥️ HUD & Interface
 
 #### Skills HUD
@@ -924,6 +1110,9 @@ Responsible for the additional improvements introduced in this fork, including:
 - Prayer Divine Arts rework with three disciplines, 35 spells, a skillbook, an eight-slot magic wheel, custom spell icons, animated sigils, and individual spell sound cues.
 - Farming bonuses, milking XP improvements, Bone Meal Mastery, and Auto Plant.
 - Glint Styles with procedural armor and item effects, and Rune Lore Ore.
+- Crafting equipment rarities, randomized attributes and perks, rarity-based Crafting XP, and the Equipment Reveal interface.
+- Transcendent equipment signature abilities and their gathering, combat, farming, and fishing integrations.
+- Celestial Altar ascension, reforging, individual attribute enhancements, perk rerolls, and Transcendency Essence salvage.
 - HUD and TAB interface improvements.
 - Rebalanced equipment progression based on player testing.
 - Supporting technical implementations and compatibility work.
