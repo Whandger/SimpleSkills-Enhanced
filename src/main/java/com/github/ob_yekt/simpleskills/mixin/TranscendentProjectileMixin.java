@@ -15,4 +15,14 @@ public abstract class TranscendentProjectileMixin {
     private void simpleskills$transcendentImpact(HitResult result, CallbackInfo ci) {
         TranscendentAbilities.onProjectileImpact((Projectile) (Object) this, result);
     }
+    @Inject(method = "tick()V", at = @At("HEAD"))
+    private void simpleskills$registerThrownTridentAffixes(CallbackInfo ci) {
+        Projectile projectile = (Projectile) (Object) this;
+        if (projectile instanceof net.minecraft.world.entity.projectile.arrow.ThrownTrident trident) {
+            com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
+                    .registerThrownTridentDamageBonus(trident);
+        }
+    }
+
 }
+

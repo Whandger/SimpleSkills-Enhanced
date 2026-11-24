@@ -8,7 +8,8 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.Identifier;
 
 /** Client request for a Celestial Altar UI action. All item and rune checks happen server-side. */
-public record CelestialAltarActionPayload(int action, String targetId) implements CustomPacketPayload {
+public record CelestialAltarActionPayload(int action, String targetId, int expectedRevision)
+        implements CustomPacketPayload {
     public static final int TAB_INFUSION = 0;
     public static final int TAB_SALVAGE = 1;
     public static final int TAB_ENHANCE = 2;
@@ -16,6 +17,12 @@ public record CelestialAltarActionPayload(int action, String targetId) implement
     public static final int SALVAGE = 4;
     public static final int ENHANCE_STAT = 5;
     public static final int REROLL_PERK = 6;
+    public static final int REROLL_STAT = 7;
+
+    /** Non-enhancement actions do not need a state revision. */
+    public CelestialAltarActionPayload(int action, String targetId) {
+        this(action, targetId, -1);
+    }
 
     public static final Type<CelestialAltarActionPayload> TYPE = new Type<>(
             Identifier.fromNamespaceAndPath(Simpleskills.MOD_ID, "celestial_altar_action"));
@@ -23,6 +30,7 @@ public record CelestialAltarActionPayload(int action, String targetId) implement
             StreamCodec.composite(
                     ByteBufCodecs.VAR_INT, CelestialAltarActionPayload::action,
                     ByteBufCodecs.STRING_UTF8, CelestialAltarActionPayload::targetId,
+                    ByteBufCodecs.VAR_INT, CelestialAltarActionPayload::expectedRevision,
                     CelestialAltarActionPayload::new);
 
     @Override

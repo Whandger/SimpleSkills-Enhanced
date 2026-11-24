@@ -58,34 +58,40 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
     // Interactive bounds for the hand-drawn tabs and ritual buttons.
     private static final int TAB_Y = 21;
     private static final int TAB_H = 16;
-    private static final int INFUSION_TAB_X = 10;
-    private static final int SALVAGE_TAB_X = 109;
-    private static final int ENHANCE_TAB_X = 208;
+    private static final int INFUSION_TAB_X = 30;
+    private static final int SALVAGE_TAB_X = 129;
+    private static final int ENHANCE_TAB_X = 228;
     private static final int TAB_W = 94;
 
-    private static final int ACTION_BTN_X = 81;
+    private static final int ACTION_BTN_X = 101;
     private static final int ACTION_BTN_Y = 105;
     private static final int ACTION_BTN_W = 150;
     private static final int ACTION_BTN_H = 18;
 
     // Enhancement list: each row is an individual action, so no selection arrows or shared confirm button.
-    private static final int ENHANCE_LIST_X = 52;
-    private static final int ENHANCE_LIST_Y = 47;
-    private static final int ENHANCE_LIST_W = 208;
-    private static final int ENHANCE_ROW_H = 12;
-    private static final int ENHANCE_VISIBLE_ROWS = 6;
+    private static final int ENHANCE_LIST_X = 78;
+    private static final int ENHANCE_LIST_Y = 53;
+    private static final int ENHANCE_LIST_W = 196;
+    private static final int ENHANCE_ROW_H = 9;
+    private static final int ENHANCE_VISIBLE_ROWS = 8;
 
     private int clientTicks;
     private int salvageArmedTick = -100;
     private int enhancementScroll;
     private final List<Button> enhancementRowButtons = new ArrayList<>();
+    private final List<Button> enhancementStatRerollButtons = new ArrayList<>();
+    // Bind each visible hitbox to the exact row rendered beneath it. The stat list can
+    // reorder after a reroll and server slot synchronization; resolving a click by its
+    // current visible index could otherwise apply the action to the previous row.
+    private final EnhancementRow[] renderedEnhancementRows = new EnhancementRow[ENHANCE_VISIBLE_ROWS];
+    private ItemStack renderedEnhancementEquipment = ItemStack.EMPTY;
     private Button infusionTabButton;
     private Button salvageTabButton;
     private Button enhanceTabButton;
     private Button ritualActionButton;
 
     public CelestialAltarScreen(CelestialAltarMenu menu, Inventory inventory, Component title) {
-        super(menu, inventory, title, 312, 244);
+        super(menu, inventory, title, 352, 244);
         this.titleLabelX = 8;
         this.titleLabelY = 8;
         this.inventoryLabelX = 10;
@@ -96,6 +102,9 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
     protected void init() {
         super.init();
         enhancementRowButtons.clear();
+        enhancementStatRerollButtons.clear();
+        for (int i = 0; i < renderedEnhancementRows.length; i++) renderedEnhancementRows[i] = null;
+        renderedEnhancementEquipment = ItemStack.EMPTY;
 
         // Use real Screen widgets for hit-testing. The custom drawing remains underneath,
         // but invisible hitboxes let Minecraft dispatch clicks through its normal widget path.
@@ -108,10 +117,17 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
 
         for (int row = 0; row < ENHANCE_VISIBLE_ROWS; row++) {
             final int visibleRow = row;
-            enhancementRowButtons.add(addInvisibleButton(leftPos + ENHANCE_LIST_X,
+            // Attribute controls: reroll on the left, strengthen on the right.
+            // Perk rows use the left control for their replacement roll and have no plus button.
+            enhancementRowButtons.add(addInvisibleButton(
+                    leftPos + ENHANCE_LIST_X + ENHANCE_LIST_W - 12,
                     topPos + ENHANCE_LIST_Y + row * ENHANCE_ROW_H,
-                    ENHANCE_LIST_W, ENHANCE_ROW_H,
+                    12, ENHANCE_ROW_H,
                     () -> clickEnhancementRow(visibleRow)));
+            enhancementStatRerollButtons.add(addInvisibleButton(leftPos + ENHANCE_LIST_X,
+                    topPos + ENHANCE_LIST_Y + row * ENHANCE_ROW_H,
+                    12, ENHANCE_ROW_H,
+                    () -> clickEnhancementStatReroll(visibleRow)));
         }
         ritualActionButton = addInvisibleButton(leftPos + ACTION_BTN_X, topPos + ACTION_BTN_Y,
                 ACTION_BTN_W, ACTION_BTN_H, this::clickRitualAction);
@@ -137,17 +153,36 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         sendAction(action, "");
     }
 
+    /** Right-side button: spend one Rune to strengthen only the attribute shown on this row. */
     private void clickEnhancementRow(int visibleRow) {
         if (menu.getMode() != CelestialAltarMenu.MODE_ENHANCE || !menu.hasEnhancementRunes()) return;
-        List<EnhancementRow> rows = getEnhancementRows();
-        int optionIndex = enhancementScroll + visibleRow;
-        if (optionIndex < 0 || optionIndex >= rows.size()) return;
-        EnhancementRow row = rows.get(optionIndex);
-        if (!row.actionable()) return;
+        EnhancementRow row = getRenderedEnhancementRow(visibleRow);
+        if (row == null || row.perk() || !row.actionable()) return;
         ItemStack equipment = menu.getSlot(CelestialAltarBlockEntity.ENHANCE_EQUIPMENT).getItem();
-        if (equipment.isEmpty()) return;
+        if (!matchesRenderedEquipment(equipment)) return;
+        sendAction(CelestialAltarActionPayload.ENHANCE_STAT, row.id());
+    }
+
+    /** Left-side button: replace only the exact attribute/perk represented by this rendered row. */
+    private void clickEnhancementStatReroll(int visibleRow) {
+        if (menu.getMode() != CelestialAltarMenu.MODE_ENHANCE || !menu.hasEnhancementRunes()) return;
+        EnhancementRow row = getRenderedEnhancementRow(visibleRow);
+        if (row == null || !row.rerollable()) return;
+        ItemStack equipment = menu.getSlot(CelestialAltarBlockEntity.ENHANCE_EQUIPMENT).getItem();
+        if (!matchesRenderedEquipment(equipment)) return;
         sendAction(row.perk() ? CelestialAltarActionPayload.REROLL_PERK
-                : CelestialAltarActionPayload.ENHANCE_STAT, row.id());
+                : CelestialAltarActionPayload.REROLL_STAT, row.id());
+    }
+
+    private EnhancementRow getRenderedEnhancementRow(int visibleRow) {
+        if (visibleRow < 0 || visibleRow >= renderedEnhancementRows.length) return null;
+        return renderedEnhancementRows[visibleRow];
+    }
+
+    private boolean matchesRenderedEquipment(ItemStack equipment) {
+        return equipment != null && !equipment.isEmpty()
+                && !renderedEnhancementEquipment.isEmpty()
+                && ItemStack.matches(renderedEnhancementEquipment, equipment);
     }
 
     private void clickRitualAction() {
@@ -162,16 +197,7 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
 
     private void updateWidgetStates() {
         boolean enhance = menu.getMode() == CelestialAltarMenu.MODE_ENHANCE;
-        List<EnhancementRow> rows = getEnhancementRows();
-        boolean hasRunes = menu.hasEnhancementRunes();
-        for (int i = 0; i < enhancementRowButtons.size(); i++) {
-            Button button = enhancementRowButtons.get(i);
-            int optionIndex = enhancementScroll + i;
-            boolean actionable = enhance && hasRunes && optionIndex < rows.size()
-                    && rows.get(optionIndex).actionable();
-            button.visible = enhance;
-            button.active = actionable;
-        }
+        updateEnhancementButtonStates(enhance);
         if (ritualActionButton != null) {
             boolean infusion = menu.getMode() == CelestialAltarMenu.MODE_INFUSION;
             boolean salvage = menu.getMode() == CelestialAltarMenu.MODE_SALVAGE;
@@ -181,6 +207,20 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         if (infusionTabButton != null) infusionTabButton.active = menu.getMode() != CelestialAltarMenu.MODE_INFUSION;
         if (salvageTabButton != null) salvageTabButton.active = menu.getMode() != CelestialAltarMenu.MODE_SALVAGE;
         if (enhanceTabButton != null) enhanceTabButton.active = menu.getMode() != CelestialAltarMenu.MODE_ENHANCE;
+    }
+
+    private void updateEnhancementButtonStates(boolean enhanceMode) {
+        boolean hasRunes = menu.hasEnhancementRunes();
+        for (int i = 0; i < enhancementRowButtons.size(); i++) {
+            EnhancementRow row = renderedEnhancementRows[i];
+            boolean hasRow = enhanceMode && row != null;
+            Button enhanceButton = enhancementRowButtons.get(i);
+            Button rerollButton = enhancementStatRerollButtons.get(i);
+            enhanceButton.visible = enhanceMode;
+            enhanceButton.active = hasRow && hasRunes && !row.perk() && row.actionable();
+            rerollButton.visible = enhanceMode;
+            rerollButton.active = hasRow && hasRunes && row.rerollable();
+        }
     }
 
     @Override
@@ -197,8 +237,22 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
     private void sendAction(int action, String targetId) {
         Minecraft client = Minecraft.getInstance();
         if (client.player == null || !ClientPlayNetworking.canSend(CelestialAltarActionPayload.TYPE)) return;
+
+        int expectedRevision = -1;
+        if (action == CelestialAltarActionPayload.ENHANCE_STAT
+                || action == CelestialAltarActionPayload.REROLL_STAT
+                || action == CelestialAltarActionPayload.REROLL_PERK) {
+            ItemStack currentEquipment = menu.getSlot(CelestialAltarBlockEntity.ENHANCE_EQUIPMENT).getItem();
+            // Bind the request to the exact item snapshot whose row was rendered. The server
+            // rejects it if another operation has already changed any enhancement on the item.
+            if (!matchesRenderedEquipment(currentEquipment)) return;
+            expectedRevision = CraftingEquipmentManager.getEnhancementRevision(renderedEnhancementEquipment);
+            if (expectedRevision < 0) return;
+        }
+
         client.getSoundManager().play(SimpleSoundInstance.forUI(SoundEvents.UI_BUTTON_CLICK, 1.0F));
-        ClientPlayNetworking.send(new CelestialAltarActionPayload(action, targetId == null ? "" : targetId));
+        ClientPlayNetworking.send(new CelestialAltarActionPayload(
+                action, targetId == null ? "" : targetId, expectedRevision));
     }
 
     @Override
@@ -346,14 +400,14 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
 
     private void drawInfusionLayout(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float time) {
         // Exact slot coordinates from CelestialAltarMenu:
-        // Equipment: (148, 74), Top Essence: (148, 50), Left Essence: (112, 74), Right Essence: (184, 74)
-        int equipmentX = leftPos + 148;
+        // Equipment: (168, 74), Top Essence: (168, 50), Left Essence: (132, 74), Right Essence: (204, 74)
+        int equipmentX = leftPos + 168;
         int equipmentY = topPos + 74;
-        int topEssenceX = leftPos + 148;
+        int topEssenceX = leftPos + 168;
         int topEssenceY = topPos + 50;
-        int leftEssenceX = leftPos + 112;
+        int leftEssenceX = leftPos + 132;
         int sideEssenceY = topPos + 74;
-        int rightEssenceX = leftPos + 184;
+        int rightEssenceX = leftPos + 204;
 
         ItemStack equipStack = menu.getSlot(CelestialAltarBlockEntity.INFUSION_EQUIPMENT).getItem();
         ItemStack topStack = menu.getSlot(CelestialAltarBlockEntity.ESSENCE_TOP).getItem();
@@ -400,8 +454,8 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
 
         // Wide side status plaques (96px wide each) so all labels fit cleanly inside their boxes
         int validEssences = (topValid ? 1 : 0) + (leftValid ? 1 : 0) + (rightValid ? 1 : 0);
-        drawEssenceCounterPlaque(graphics, leftPos + 11, topPos + 46, 96, 50, validEssences);
-        drawEquipmentStatusPlaque(graphics, leftPos + 205, topPos + 46, 96, 50,
+        drawEssenceCounterPlaque(graphics, leftPos + 31, topPos + 46, 96, 50, validEssences);
+        drawEquipmentStatusPlaque(graphics, leftPos + 225, topPos + 46, 96, 50,
                 equipStack, equipValid, equipAlreadyTranscendent);
 
         // Central equipment pedestal
@@ -428,8 +482,8 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
     private void drawSalvageLayout(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float time) {
         // Exact slot coordinates from CelestialAltarMenu:
         // Input: (104, 72), Output: (192, 72)
-        int inputX = leftPos + 104;
-        int outputX = leftPos + 192;
+        int inputX = leftPos + 124;
+        int outputX = leftPos + 212;
         int slotY = topPos + 72;
 
         ItemStack inputStack = menu.getSlot(CelestialAltarBlockEntity.SALVAGE_EQUIPMENT).getItem();
@@ -481,8 +535,8 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
     }
 
     private void drawEnhancementLayout(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float time) {
-        int equipmentX = leftPos + 24;
-        int runeX = leftPos + 272;
+        int equipmentX = leftPos + 36;
+        int runeX = leftPos + 300;
         int slotY = topPos + 72;
         ItemStack equipment = menu.getSlot(CelestialAltarBlockEntity.ENHANCE_EQUIPMENT).getItem();
         ItemStack runes = menu.getSlot(CelestialAltarBlockEntity.ENHANCE_RUNES).getItem();
@@ -491,12 +545,23 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         boolean validRunes = !runes.isEmpty()
                 && runes.is(com.github.ob_yekt.simpleskills.runes.RuneContent.RUNE);
 
+        // Dedicated, symmetrical bays keep the equipment and Rune slots centered in
+        // their own columns instead of pushing either label outside the machine area.
+        int sidePanelY = topPos + 45;
+        // Keep the side bays centered on the 16x16 equipment/rune slots and leave
+        // a clear gap above the player-inventory divider at y=127.
+        int sidePanelH = 70;
+        graphics.fill(leftPos + 12, sidePanelY, leftPos + 76, sidePanelY + sidePanelH, 0x99120D20);
+        drawOutline(graphics, leftPos + 12, sidePanelY, 64, sidePanelH, OBSIDIAN_EDGE);
+        graphics.fill(leftPos + 276, sidePanelY, leftPos + 340, sidePanelY + sidePanelH, 0x99120D20);
+        drawOutline(graphics, leftPos + 276, sidePanelY, 64, sidePanelH, OBSIDIAN_EDGE);
+
         drawFittedCenteredText(graphics,
                 Component.translatable("gui.simpleskills.celestial_altar.enhance_equipment"),
-                equipmentX + 8, topPos + 53, 48, GOLD);
+                equipmentX + 8, topPos + 53, 56, GOLD);
         drawFittedCenteredText(graphics,
                 Component.translatable("gui.simpleskills.celestial_altar.enhance_runes"),
-                runeX + 8, topPos + 53, 48, RUNE_BRIGHT);
+                runeX + 8, topPos + 53, 56, RUNE_BRIGHT);
 
         SlotState equipmentState = equipment.isEmpty() ? SlotState.EMPTY
                 : (validEquipment ? SlotState.VALID_GOLD : SlotState.INVALID);
@@ -519,15 +584,17 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         // Center column: each attribute/perk is its own button. Clicking it applies one Rune immediately.
         int listX = leftPos + ENHANCE_LIST_X;
         int listY = topPos + ENHANCE_LIST_Y;
-        graphics.fill(listX - 2, listY - 3, listX + ENHANCE_LIST_W + 2,
-                listY + ENHANCE_ROW_H * ENHANCE_VISIBLE_ROWS + 2, 0xAA090613);
-        drawOutline(graphics, listX - 2, listY - 3, ENHANCE_LIST_W + 4,
-                ENHANCE_ROW_H * ENHANCE_VISIBLE_ROWS + 5, OBSIDIAN_EDGE);
+        graphics.fill(listX - 2, listY - 2, listX + ENHANCE_LIST_W + 2,
+                listY + ENHANCE_ROW_H * ENHANCE_VISIBLE_ROWS, 0xAA090613);
+        drawOutline(graphics, listX - 2, listY - 2, ENHANCE_LIST_W + 4,
+                ENHANCE_ROW_H * ENHANCE_VISIBLE_ROWS + 2, OBSIDIAN_EDGE);
         graphics.centeredText(font,
                 Component.translatable("gui.simpleskills.celestial_altar.enhance_options"),
-                listX + ENHANCE_LIST_W / 2, topPos + 39, GOLD);
+                listX + ENHANCE_LIST_W / 2, topPos + 40, GOLD);
 
         List<EnhancementRow> rows = getEnhancementRows();
+        for (int i = 0; i < renderedEnhancementRows.length; i++) renderedEnhancementRows[i] = null;
+        renderedEnhancementEquipment = validEquipment ? equipment.copy() : ItemStack.EMPTY;
         if (!validEquipment) {
             drawFittedCenteredText(graphics,
                     Component.translatable("gui.simpleskills.celestial_altar.enhance_equipment_hint"),
@@ -542,28 +609,41 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
                 int rowIndex = enhancementScroll + visible;
                 if (rowIndex >= rows.size()) break;
                 EnhancementRow row = rows.get(rowIndex);
+                renderedEnhancementRows[visible] = row;
                 int rowY = listY + visible * ENHANCE_ROW_H;
                 boolean hovered = isInside(mouseX, mouseY, listX, rowY, ENHANCE_LIST_W, ENHANCE_ROW_H);
-                boolean enabled = row.actionable() && validEquipment && validRunes;
-                int background = enabled ? (hovered ? 0xFF35234D : 0xFF20172F)
+                boolean enabled = (row.actionable() || row.rerollable()) && validEquipment && validRunes;
+                // Attribute rolls use green; perks use cyan. This mirrors the item tooltip
+                // and makes it immediately clear which rows are stats versus special effects.
+                int baseBg = row.perk() ? 0xFF102631 : 0xFF14291E;
+                int hoverBg = row.perk() ? 0xFF1A3B4B : 0xFF1C3A2B;
+                int accent = row.perk() ? 0xFF70DDF2 : 0xFF78E39A;
+                int edge = enabled ? (hovered ? (row.perk() ? 0xFFB7F2FF : 0xFFC0FFD0)
+                        : (row.perk() ? 0xFF28758A : 0xFF347C50)) : 0xFF30263F;
+                int background = enabled ? (hovered ? hoverBg : baseBg)
                         : (hovered ? 0xFF1B1528 : 0xFF120E1C);
-                int edge = enabled ? (hovered ? GOLD_BRIGHT : RUNE_DEEP) : 0xFF30263F;
                 graphics.fill(listX, rowY, listX + ENHANCE_LIST_W, rowY + ENHANCE_ROW_H - 1, background);
                 graphics.fill(listX, rowY, listX + ENHANCE_LIST_W, rowY + 1, edge);
 
                 int iconX = listX + 3;
-                int iconY = rowY + 1;
+                int iconY = rowY;
                 if (!row.perk()) {
-                    drawPlusActionIcon(graphics, iconX, iconY, enabled);
-                } else if (row.actionable()) {
-                    drawRerollActionIcon(graphics, iconX, iconY, enabled, (int) time);
+                    // Left roulette changes the attribute type; right + strengthens its value.
+                    drawRerollActionIcon(graphics, iconX, iconY,
+                            row.rerollable() && validEquipment && validRunes, (int) time,
+                            0xFF78E39A, 0xFF245B3B, 0xFF183626);
+                    drawPlusActionIcon(graphics, listX + ENHANCE_LIST_W - 13, iconY,
+                            row.actionable() && validEquipment && validRunes);
+                } else if (row.rerollable()) {
+                    drawRerollActionIcon(graphics, iconX, iconY, enabled, (int) time,
+                            0xFF70DDF2, 0xFF1D6173, 0xFF143541);
                 } else {
                     drawLockedPerkIcon(graphics, iconX, iconY);
                 }
 
-                int textColor = enabled ? (hovered ? GOLD_BRIGHT : TEXT) : MUTED;
-                drawFittedText(graphics, row.label(), listX + 19, rowY + 2,
-                        ENHANCE_LIST_W - 24, textColor);
+                int textColor = enabled ? (hovered ? GOLD_BRIGHT : accent) : MUTED;
+                drawFittedText(graphics, row.label(), listX + 19, rowY,
+                        ENHANCE_LIST_W - (row.perk() ? 24 : 39), textColor);
             }
             if (rows.size() > ENHANCE_VISIBLE_ROWS) {
                 int trackX = listX + ENHANCE_LIST_W - 2;
@@ -575,6 +655,8 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
                 graphics.fill(trackX, thumbY, trackX + 1, thumbY + thumbH, RUNE_BRIGHT);
             }
         }
+        // The hitboxes now point to the same row records that were just rendered.
+        updateEnhancementButtonStates(true);
 
         if (validEquipment && !validRunes) {
             drawFittedCenteredText(graphics,
@@ -586,7 +668,16 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         }
     }
 
-    private record EnhancementRow(String id, Component label, boolean perk, boolean actionable) {}
+    private record EnhancementRow(String id, Component label, boolean perk,
+                                  boolean actionable, boolean rerollable) {}
+
+    /** Shows a concise perk name/rank in the narrow Altar row; the full effect stays in the item tooltip. */
+    private Component getCompactPerkDisplayComponent(PerkRerollInfo perk) {
+        String display = CraftingEquipmentManager.getPerkDisplayComponent(perk).getString();
+        int descriptionSeparator = display.indexOf(':');
+        if (descriptionSeparator > 0) display = display.substring(0, descriptionSeparator).trim();
+        return Component.literal(display);
+    }
 
     private List<EnhancementRow> getEnhancementRows() {
         ItemStack equipment = menu.getSlot(CelestialAltarBlockEntity.ENHANCE_EQUIPMENT).getItem();
@@ -595,14 +686,24 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         }
         java.util.ArrayList<EnhancementRow> rows = new java.util.ArrayList<>();
         for (StatUpgradeInfo info : menu.getEnhancementStats()) {
+            boolean reach = info.id().equals("attackReach");
+            String unit = reach ? " blocks" : "%";
             String label = Component.translatable(info.translationKey()).getString()
-                    + "  +" + formatScreenPercent(info.currentPercent()) + "%"
+                    + "  +" + formatScreenPercent(info.currentPercent()) + unit
+                    + " [" + formatScreenPercent(info.minimumPercent()) + " - "
+                    + formatScreenPercent(info.maximumPercent()) + unit + "]"
                     + (info.isMaxed() ? "  MAX" : "");
-            rows.add(new EnhancementRow(info.id(), Component.literal(label), false, !info.isMaxed()));
+            boolean canEnhance = CraftingEquipmentManager.canEnhanceStat(equipment, info.id());
+            boolean canReplace = CraftingEquipmentManager.canRerollStat(equipment, info.id());
+            rows.add(new EnhancementRow(info.id(), Component.literal(label), false,
+                    canEnhance, canReplace));
         }
+        // getEnhancementPerks() follows the exact serialized perk order stored in CustomData.
+        // The action ID carries the original index and rolled amplifier so the server can
+        // replace that exact row without sorting or resolving by perk name.
         for (PerkRerollInfo perk : menu.getEnhancementPerks()) {
-            rows.add(new EnhancementRow(perk.id(), CraftingEquipmentManager.getPerkDisplayComponent(perk),
-                    true, perk.rerollable()));
+            rows.add(new EnhancementRow(perk.actionTargetId(), getCompactPerkDisplayComponent(perk),
+                    true, perk.rerollable(), perk.rerollable()));
         }
         return rows;
     }
@@ -618,7 +719,7 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
             graphics.text(font, text, x, y, color, false);
             return;
         }
-        float scale = Math.max(0.60F, (float) maxWidth / (float) rawWidth);
+        float scale = Math.min(1.0F, (float) maxWidth / (float) rawWidth);
         graphics.pose().pushMatrix();
         graphics.pose().translate(x, y + 1.0F);
         graphics.pose().scale(scale, scale);
@@ -638,10 +739,16 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
 
     private void drawRerollActionIcon(GuiGraphicsExtractor graphics, int x, int y,
                                       boolean enabled, int tick) {
-        int color = enabled ? RUNE_BRIGHT : DIM;
-        int dark = enabled ? RUNE_DEEP : 0xFF30283B;
-        graphics.fill(x, y, x + 11, y + 10, enabled ? 0xFF2B1B40 : 0xFF211A2B);
-        drawOutline(graphics, x, y, 11, 10, enabled ? RUNE_PURPLE : 0xFF51445E);
+        drawRerollActionIcon(graphics, x, y, enabled, tick,
+                RUNE_BRIGHT, RUNE_DEEP, 0xFF2B1B40);
+    }
+
+    private void drawRerollActionIcon(GuiGraphicsExtractor graphics, int x, int y,
+                                      boolean enabled, int tick, int accent, int darkAccent, int background) {
+        int color = enabled ? accent : DIM;
+        int dark = enabled ? darkAccent : 0xFF30283B;
+        graphics.fill(x, y, x + 11, y + 10, enabled ? background : 0xFF211A2B);
+        drawOutline(graphics, x, y, 11, 10, enabled ? accent : 0xFF51445E);
         // Tiny roulette wheel: outer ring, hub and rotating pointer.
         graphics.fill(x + 3, y + 2, x + 8, y + 3, dark);
         graphics.fill(x + 2, y + 3, x + 3, y + 7, dark);
@@ -711,7 +818,7 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
     }
 
     private void drawFullWidthPlayerInventory(GuiGraphicsExtractor graphics) {
-        // Full-width bottom inventory vault spanning x=8..304 (296px wide)
+        // Full-width bottom inventory vault spanning x=8..344 (336px wide)
         int trayX = leftPos + 8;
         int trayY = topPos + 139;
         int trayW = imageWidth - 16;
@@ -719,10 +826,10 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         graphics.fill(trayX, trayY, trayX + trayW, trayY + trayH, 0xCC0A0713);
         drawBevelBorder(graphics, trayX, trayY, trayW, trayH, OBSIDIAN_VOID, OBSIDIAN_EDGE);
 
-        // Symmetrical left & right obsidian wings flanking the centered 9-column inventory (x=75..237)
+        // Symmetrical left & right obsidian wings flanking the centered 9-column inventory (x=95..257)
         int leftWingX0 = trayX + 3;
-        int leftWingX1 = leftPos + 72;
-        int rightWingX0 = leftPos + 240;
+        int leftWingX1 = leftPos + 92;
+        int rightWingX0 = leftPos + 260;
         int rightWingX1 = trayX + trayW - 3;
 
         graphics.fill(leftWingX0, trayY + 3, leftWingX1, trayY + trayH - 3, 0x88120D20);
@@ -732,7 +839,7 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
 
         // Continuous golden hotbar separator line across the entire bottom section
         graphics.fill(leftWingX0 + 5, topPos + 197, leftWingX1 - 5, topPos + 198, GOLD_DARK);
-        graphics.fill(leftPos + 74, topPos + 197, leftPos + 238, topPos + 198, GOLD_DARK);
+        graphics.fill(leftPos + 94, topPos + 197, leftPos + 258, topPos + 198, GOLD_DARK);
         graphics.fill(rightWingX0 + 5, topPos + 197, rightWingX1 - 5, topPos + 198, GOLD_DARK);
 
         // Subtle diamond filigree centered inside each wing
@@ -748,18 +855,18 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
     }
 
     private void drawPlayerInventorySlotFrames(GuiGraphicsExtractor graphics) {
-        // Exact match for addStandardInventorySlots(inventory, 75, 142)
+        // Exact match for addStandardInventorySlots(inventory, 95, 142)
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
                 int slotIndex = 8 + row * 9 + column;
-                int sx = leftPos + 75 + column * 18;
+                int sx = leftPos + 95 + column * 18;
                 int sy = topPos + 142 + row * 18;
                 drawInventorySlotFrame(graphics, sx, sy, slotIndex);
             }
         }
         for (int column = 0; column < 9; column++) {
             int slotIndex = 35 + column;
-            int sx = leftPos + 75 + column * 18;
+            int sx = leftPos + 95 + column * 18;
             int sy = topPos + 200;
             drawInventorySlotFrame(graphics, sx, sy, slotIndex);
         }
@@ -798,7 +905,23 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
                 ? "gui.simpleskills.celestial_altar.salvage_hint"
                 : "gui.simpleskills.celestial_altar.enhance_hint");
         Component hint = Component.translatable(key);
-        drawFittedCenteredText(graphics, hint, leftPos + imageWidth / 2, fy + 4, fw - 12, MUTED);
+        drawFooterFittedCenteredText(graphics, hint, leftPos + imageWidth / 2, fy + 4, fw - 12, MUTED);
+    }
+
+    /** Footer instructions use an exact fit so long translations never escape the GUI frame. */
+    private void drawFooterFittedCenteredText(GuiGraphicsExtractor graphics, Component text,
+                                              int centerX, int y, int maxWidth, int color) {
+        int rawWidth = font.width(text);
+        if (rawWidth <= maxWidth || rawWidth <= 0) {
+            graphics.centeredText(font, text, centerX, y, color);
+            return;
+        }
+        float scale = (float) maxWidth / (float) rawWidth;
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(centerX, y + 4.0F);
+        graphics.pose().scale(scale, scale);
+        graphics.centeredText(font, text, 0, -4, color);
+        graphics.pose().popMatrix();
     }
 
     private void drawEssenceCounterPlaque(GuiGraphicsExtractor graphics, int x, int y, int w, int h, int validEssences) {
@@ -858,7 +981,7 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
             graphics.centeredText(font, text, centerX, y, color);
             return;
         }
-        float scale = Math.max(0.65F, (float) maxWidth / (float) rawWidth);
+        float scale = Math.min(1.0F, (float) maxWidth / (float) rawWidth);
         graphics.pose().pushMatrix();
         graphics.pose().translate(centerX, y + 4.0F);
         graphics.pose().scale(scale, scale);

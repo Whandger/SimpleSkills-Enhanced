@@ -65,7 +65,7 @@ public final class CraftingRevealScreen extends Screen {
     private static final List<String> NO_LEVEL_TEXT = List.of(
             "runic_edge", "anvil_ward",
             "guardian_oath", "arcane_mastery", "godslayer", "eternal_guardian",
-            "divine_blessing", "aegis_of_ages", "fire_resistance", "featherweight",
+            "divine_blessing", "aegis_of_ages", "fire_resistance", "featherweight", "thermal_smelting",
             "celestial_wings", "celestial_range", "oracle_vision", "aegis_of_purity",
             "phantom_stride", "divine_reflection", "astral_pursuit", "singularity_bolt",
             "poseidons_wrath", "worldbreaker", "buried_truth", "edens_dominion",
@@ -700,13 +700,29 @@ public final class CraftingRevealScreen extends Screen {
         RarityTheme theme = themeFor(entry.rarityId());
         List<Component> lines = buildDetailLines(entry);
 
-        int contentMaxW = 190;
-        contentMaxW = Math.max(contentMaxW, this.font.width(entry.itemName()) + 16);
+        // Let the inspect panel grow to the available panel width. This keeps long perk
+        // descriptions readable and avoids the old fitText(...)+ellipsis data loss.
+        int contentMaxW = Math.max(220, this.font.width(entry.itemName()) + 16);
         for (Component line : lines) {
             contentMaxW = Math.max(contentMaxW, this.font.width(line) + 22);
         }
-        int width = Math.min(276, Math.max(210, contentMaxW));
-        int height = 46 + lines.size() * 13;
+        int width = Math.min(PANEL_WIDTH - 12, Math.max(250, contentMaxW + 4));
+        int textWidth = width - 24;
+        List<List<String>> wrappedLines = new ArrayList<>(lines.size());
+        int visualLineCount = 0;
+        for (Component line : lines) {
+            List<String> fragments = wrapTooltipText(line.getString(), textWidth);
+            wrappedLines.add(fragments);
+            visualLineCount += fragments.size();
+        }
+
+        int lineHeight = 13;
+        int maxBodyHeight = PANEL_HEIGHT - 58;
+        if (visualLineCount * lineHeight > maxBodyHeight) {
+            // Keep all entries visible even for Transcendent items with long translated perks.
+            lineHeight = Math.max(9, maxBodyHeight / Math.max(1, visualLineCount));
+        }
+        int height = 46 + visualLineCount * lineHeight;
 
         int x = mouseX + 14;
         int y = mouseY + 14;
@@ -716,63 +732,93 @@ public final class CraftingRevealScreen extends Screen {
         y = Math.max(6, Math.min(y, PANEL_HEIGHT - height - 6));
 
         graphics.nextStratum();
-        // Tooltip shadow & double ornate frame
         graphics.fill(x - 2, y - 2, x + width + 4, y + height + 4, 0xA0020306);
         graphics.fill(x - 2, y - 2, x + width + 2, y + height + 2, theme.deep());
         graphics.fill(x - 1, y - 1, x + width + 1, y + height + 1, theme.primary());
         graphics.fill(x, y, x + width, y + height, 0xF70A0D15);
-
-        // Header tint band
         graphics.fill(x + 1, y + 1, x + width - 1, y + 32, theme.badgeBg());
         drawCornerBrackets(graphics, x + 1, y + 1, width - 2, height - 2, theme.primary(), theme.bright(), 5);
-
         graphics.text(this.font, Component.literal(fitText(entry.itemName(), width - 14)),
                 x + 8, y + 6, TEXT, true);
-
         Component raritySub = Component.literal(theme.tierStars() + " ").append(rarityName(entry.rarityId()));
         graphics.text(this.font, raritySub, x + 8, y + 19, theme.bright(), true);
-
-        // Ornamental divider
         graphics.fill(x + 6, y + 34, x + width - 6, y + 35, withAlpha(theme.primary(), 170));
 
         int statCount = countPrimaryStats(entry);
         int lineY = y + 40;
         for (int i = 0; i < lines.size(); i++) {
-            Component line = lines.get(i);
             boolean isStat = i < statCount;
             boolean maxRollStat = isStat && isMaxRollStatLine(entry, i);
             boolean goldenPerk = !isStat && isGoldenPerkLine(entry, i);
-            int bulletColor = maxRollStat || goldenPerk ? GOLD_BRIGHT : (isStat ? STAT_GREEN : theme.bright());
-            int textColor = maxRollStat || goldenPerk ? GOLD_BRIGHT : (isStat ? 0xFFE5F7EC : 0xFFE3ECF8);
-            String bullet = isStat ? "◆" : "✦";
-
-            graphics.text(this.font, Component.literal(bullet), x + 8, lineY, bulletColor, false);
-            if (isStat) {
-                // Keep the rolled value prominent, but render the possible range in a
-                // quieter gray so it reads as reference information rather than a bonus.
-                String fullText = line.getString();
-                int rangeStart = fullText.lastIndexOf(" [");
-                if (rangeStart >= 0) {
-                    String rolledText = fullText.substring(0, rangeStart);
-                    String rangeText = fullText.substring(rangeStart + 1);
-                    int availableWidth = width - 24;
-                    int rangeWidth = this.font.width(rangeText);
-                    String fittedRolled = fitText(rolledText, Math.max(1, availableWidth - rangeWidth));
-                    graphics.text(this.font, Component.literal(fittedRolled), x + 18, lineY, textColor, false);
-                    int rangeX = x + 18 + this.font.width(fittedRolled);
-                    if (rangeX + rangeWidth <= x + 18 + availableWidth) {
-                        graphics.text(this.font, Component.literal(rangeText), rangeX, lineY, STAT_RANGE_GRAY, false);
+            int bulletColor = maxRollStat || goldenPerk ? GOLD_BRIGHT
+                    : (isStat ? STAT_GREEN : PERK_CYAN);
+            int textColor = maxRollStat || goldenPerk ? GOLD_BRIGHT
+                    : (isStat ? 0xFFE5F7EC : 0xFFD8F6FF);
+            List<String> fragments = wrappedLines.get(i);
+            for (int part = 0; part < fragments.size(); part++) {
+                String fragment = fragments.get(part);
+                if (part == 0) {
+                    graphics.text(this.font, Component.literal(isStat ? "◆" : "✦"),
+                            x + 8, lineY, bulletColor, false);
+                }
+                if (isStat && fragments.size() == 1) {
+                    int rangeStart = fragment.lastIndexOf(" [");
+                    if (rangeStart >= 0) {
+                        String rolledText = fragment.substring(0, rangeStart);
+                        String rangeText = fragment.substring(rangeStart + 1);
+                        int availableWidth = width - 24;
+                        int rangeWidth = this.font.width(rangeText);
+                        String fittedRolled = fitText(rolledText, Math.max(1, availableWidth - rangeWidth));
+                        graphics.text(this.font, Component.literal(fittedRolled), x + 18, lineY, textColor, false);
+                        int rangeX = x + 18 + this.font.width(fittedRolled);
+                        if (rangeX + rangeWidth <= x + 18 + availableWidth) {
+                            graphics.text(this.font, Component.literal(rangeText), rangeX, lineY,
+                                    STAT_RANGE_GRAY, false);
+                        }
+                    } else {
+                        graphics.text(this.font, Component.literal(fragment), x + 18, lineY, textColor, false);
                     }
                 } else {
-                    String fitted = fitText(fullText, width - 24);
-                    graphics.text(this.font, Component.literal(fitted), x + 18, lineY, textColor, false);
+                    // Wrapped continuation lines are indented and never discarded.
+                    graphics.text(this.font, Component.literal(fragment), x + 18, lineY, textColor, false);
                 }
-            } else {
-                String fitted = fitText(line.getString(), width - 24);
-                graphics.text(this.font, Component.literal(fitted), x + 18, lineY, textColor, false);
+                lineY += lineHeight;
             }
-            lineY += 13;
         }
+    }
+
+    private List<String> wrapTooltipText(String text, int maxWidth) {
+        if (text == null || text.isBlank()) return List.of("");
+        List<String> wrapped = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        for (String word : text.split("\\s+")) {
+            String candidate = current.length() == 0 ? word : current + " " + word;
+            if (this.font.width(candidate) <= maxWidth) {
+                if (current.length() > 0) current.append(' ');
+                current.append(word);
+                continue;
+            }
+            if (current.length() > 0) {
+                wrapped.add(current.toString());
+                current.setLength(0);
+            }
+            if (this.font.width(word) <= maxWidth) {
+                current.append(word);
+                continue;
+            }
+            StringBuilder piece = new StringBuilder();
+            for (int offset = 0; offset < word.length(); offset++) {
+                char character = word.charAt(offset);
+                if (piece.length() > 0 && this.font.width(piece.toString() + character) > maxWidth) {
+                    wrapped.add(piece.toString());
+                    piece.setLength(0);
+                }
+                piece.append(character);
+            }
+            current.append(piece);
+        }
+        if (current.length() > 0) wrapped.add(current.toString());
+        return wrapped.isEmpty() ? List.of("") : List.copyOf(wrapped);
     }
 
     private record StatChip(String label, int bgColor, int accentColor, int textColor) {}
@@ -790,22 +836,22 @@ public final class CraftingRevealScreen extends Screen {
             chips.add(new StatChip("+" + formatPercent(dmg) + "% ATK", 0x66163826, STAT_GREEN, 0xFFC8F7D8));
         }
         if (breakSpeed > 0.0) {
-            chips.add(new StatChip("+" + formatPercent(breakSpeed) + "% BREAK SPD", 0x66142B3D, PERK_CYAN, 0xFFC9F2FF));
+            chips.add(new StatChip("+" + formatPercent(breakSpeed) + "% BREAK SPD", 0x66163826, STAT_GREEN, 0xFFC8F7D8));
         }
         if (attackSpeed > 0.0) {
-            chips.add(new StatChip("+" + formatPercent(attackSpeed) + "% ATK SPD", 0x662B2050, 0xFFB58CFF, 0xFFE3D8FF));
+            chips.add(new StatChip("+" + formatPercent(attackSpeed) + "% ATK SPD", 0x66163826, STAT_GREEN, 0xFFC8F7D8));
         }
         if (crit > 0.0) {
-            chips.add(new StatChip("+" + formatPercent(crit) + "% CRIT", 0x663D2B10, GOLD, GOLD_BRIGHT));
+            chips.add(new StatChip("+" + formatPercent(crit) + "% CRIT", 0x66163826, STAT_GREEN, 0xFFC8F7D8));
         }
         if (armor > 0.0) {
-            chips.add(new StatChip("+" + formatPercent(armor) + "% ARMOR", 0x662A3218, 0xFFC5D98A, 0xFFEAF5C9));
+            chips.add(new StatChip("+" + formatPercent(armor) + "% ARMOR", 0x66163826, STAT_GREEN, 0xFFC8F7D8));
         }
         if (toughness > 0.0) {
-            chips.add(new StatChip("+" + formatPercent(toughness) + "% TOUGH", 0x66312B20, 0xFFD9B78A, 0xFFF3E2C8));
+            chips.add(new StatChip("+" + formatPercent(toughness) + "% TOUGH", 0x66163826, STAT_GREEN, 0xFFC8F7D8));
         }
         if (dur > 0) {
-            chips.add(new StatChip("+" + dur + "% DUR", 0x66142B3D, PERK_CYAN, 0xFFC9F2FF));
+            chips.add(new StatChip("+" + dur + "% DUR", 0x66163826, STAT_GREEN, 0xFFC8F7D8));
         }
         if (chips.isEmpty()) {
             int perks = countPerks(entry);
@@ -837,14 +883,9 @@ public final class CraftingRevealScreen extends Screen {
 
     private List<Component> buildDetailLines(Entry entry) {
         List<Component> lines = new ArrayList<>();
-        addStat(lines, entry.details(), "damage", "item.simpleskills.crafting_stat.damage");
-        addStat(lines, entry.details(), "durability", "item.simpleskills.crafting_stat.durability");
-        addStat(lines, entry.details(), "breakSpeed", "item.simpleskills.crafting_stat.break_speed");
-        addStat(lines, entry.details(), "excavationTime", "item.simpleskills.crafting_stat.excavation_time");
-        addStat(lines, entry.details(), "critical", "item.simpleskills.crafting_stat.critical_chance");
-        addStat(lines, entry.details(), "attackSpeed", "item.simpleskills.crafting_stat.attack_speed");
-        addStat(lines, entry.details(), "armor", "item.simpleskills.crafting_stat.armor");
-        addStat(lines, entry.details(), "toughness", "item.simpleskills.crafting_stat.armor_toughness");
+        for (String field : getOrderedStatFields(entry.details())) {
+            addOrderedStat(lines, entry.details(), field);
+        }
         JsonArray perks = entry.details().has("perks") && entry.details().get("perks").isJsonArray()
                 ? entry.details().getAsJsonArray("perks") : new JsonArray();
         for (int i = 0; i < perks.size(); i++) {
@@ -862,6 +903,14 @@ public final class CraftingRevealScreen extends Screen {
                 lines.add(Component.translatable(key, roman(level), level * 4));
             } else if (id.equals("resilient")) {
                 lines.add(Component.translatable(key, roman(level), level * 2));
+            } else if (id.equals("eternal_guardian")) {
+                int amplifier = level - 1;
+                lines.add(Component.translatable(key, 10 + amplifier * 5,
+                        roman(Math.min(5, 3 + amplifier)), roman(Math.min(5, 2 + amplifier))));
+            } else if (id.equals("aegis_of_ages")) {
+                int amplifier = level - 1;
+                lines.add(Component.translatable(key, roman(level),
+                        roman(Math.min(5, 3 + amplifier)), roman(Math.min(4, 2 + amplifier))));
             } else {
                 lines.add(NO_LEVEL_TEXT.contains(id) ? Component.translatable(key)
                         : Component.translatable(key, roman(level)));
@@ -869,6 +918,55 @@ public final class CraftingRevealScreen extends Screen {
         }
         if (lines.isEmpty()) lines.add(Component.translatable("gui.simpleskills.crafting_reveal.no_extra_stats"));
         return lines;
+    }
+
+    /** Returns the persisted crafting order, with a canonical fallback for old reveal packets. */
+    private static List<String> getOrderedStatFields(JsonObject details) {
+        List<String> fallback = List.of("damage", "durability", "breakSpeed", "excavationTime", "critical",
+                "attackSpeed", "armor", "toughness", "armorPenetration", "combatFrenzy", "firstStrike",
+                "rhythmicDischarge", "tenacity", "mobility", "attackReach", "elementalResistance");
+        List<String> ordered = new ArrayList<>();
+        if (details.has("attributeOrder") && details.get("attributeOrder").isJsonArray()) {
+            JsonArray stored = details.getAsJsonArray("attributeOrder");
+            for (int i = 0; i < stored.size(); i++) {
+                if (!stored.get(i).isJsonPrimitive()) continue;
+                String field;
+                try { field = stored.get(i).getAsString(); } catch (RuntimeException ignored) { continue; }
+                if (fallback.contains(field) && doubleStat(details, field) > 0.0 && !ordered.contains(field)) {
+                    ordered.add(field);
+                }
+            }
+        }
+        // Older reveal payloads do not carry attributeOrder; append any still-present field
+        // using the historical order so old batches remain readable.
+        for (String field : fallback) {
+            if (doubleStat(details, field) > 0.0 && !ordered.contains(field)) ordered.add(field);
+        }
+        return List.copyOf(ordered);
+    }
+
+    private static void addOrderedStat(List<Component> lines, JsonObject details, String field) {
+        switch (field) {
+            case "damage" -> addStat(lines, details, field, "item.simpleskills.crafting_stat.damage");
+            case "durability" -> addStat(lines, details, field, "item.simpleskills.crafting_stat.durability");
+            case "breakSpeed" -> addStat(lines, details, field, "item.simpleskills.crafting_stat.break_speed");
+            case "excavationTime" -> addStat(lines, details, field, "item.simpleskills.crafting_stat.excavation_time");
+            case "critical" -> addStat(lines, details, field, "item.simpleskills.crafting_stat.critical_chance");
+            case "attackSpeed" -> addStat(lines, details, field, "item.simpleskills.crafting_stat.attack_speed");
+            case "armor" -> addStat(lines, details, field, "item.simpleskills.crafting_stat.armor");
+            case "toughness" -> addStat(lines, details, field, "item.simpleskills.crafting_stat.armor_toughness");
+            case "armorPenetration" -> addStat(lines, details, field, "item.simpleskills.crafting_stat.armor_penetration");
+            case "combatFrenzy" -> addStat(lines, details, field, "item.simpleskills.crafting_stat.combat_frenzy");
+            case "firstStrike" -> addStat(lines, details, field, "item.simpleskills.crafting_stat.first_strike");
+            case "rhythmicDischarge" -> addStat(lines, details, field, "item.simpleskills.crafting_stat.rhythmic_discharge");
+            case "tenacity" -> addStat(lines, details, field, "item.simpleskills.crafting_stat.tenacity");
+            case "mobility" -> addStat(lines, details, field,
+                    "item.simpleskills.crafting_stat.mobility_" + stringValue(details, "mobilityType", "walk"));
+            case "attackReach" -> addBlockStat(lines, details, field, "item.simpleskills.crafting_stat.attack_reach");
+            case "elementalResistance" -> addStat(lines, details, field,
+                    "item.simpleskills.crafting_stat.elemental_resistance_" + stringValue(details, "elementalType", "fire"));
+            default -> { }
+        }
     }
 
     private static void addStat(List<Component> lines, JsonObject details, String field, String key) {
@@ -887,14 +985,20 @@ public final class CraftingRevealScreen extends Screen {
         lines.add(Component.literal(text));
     }
 
+    private static void addBlockStat(List<Component> lines, JsonObject details, String field, String key) {
+        double value = doubleStat(details, field);
+        if (value <= 0.0) return;
+        double minimum = doubleStat(details, field + "Min", value);
+        double maximum = doubleStat(details, field + "Max", value);
+        String label = Component.translatable(key).getString();
+        lines.add(Component.literal(label + ": +" + formatPercent(value) + " blocks ["
+                + formatPercent(minimum) + " - " + formatPercent(maximum) + " blocks]"));
+    }
+
     private static boolean isMaxRollStatLine(Entry entry, int statLineIndex) {
-        String[] fields = {"damage", "durability", "breakSpeed", "excavationTime", "critical", "attackSpeed", "armor", "toughness"};
-        int visibleIndex = 0;
-        for (String field : fields) {
-            if (doubleStat(entry.details(), field) <= 0.0) continue;
-            if (visibleIndex++ == statLineIndex) return isMaxRoll(entry.details(), field);
-        }
-        return false;
+        List<String> fields = getOrderedStatFields(entry.details());
+        if (statLineIndex < 0 || statLineIndex >= fields.size()) return false;
+        return isMaxRoll(entry.details(), fields.get(statLineIndex));
     }
 
     private static boolean isMaxRoll(JsonObject details, String field) {
@@ -903,6 +1007,7 @@ public final class CraftingRevealScreen extends Screen {
         double maximum = doubleStat(details, field + "Max");
         double step = switch (field) {
             case "durability", "breakSpeed", "excavationTime" -> 1.0;
+            case "attackReach" -> 0.05;
             case "attackSpeed" -> 0.5;
             default -> 0.1;
         };
@@ -939,13 +1044,21 @@ public final class CraftingRevealScreen extends Screen {
     private static int countPrimaryStats(Entry entry) {
         int count = 0;
         if (doubleStat(entry.details(), "damage") > 0.0) count++;
-        if (intStat(entry.details(), "durability") > 0) count++;
+        if (doubleStat(entry.details(), "durability") > 0.0) count++;
         if (doubleStat(entry.details(), "breakSpeed") > 0.0) count++;
         if (doubleStat(entry.details(), "excavationTime") > 0.0) count++;
         if (doubleStat(entry.details(), "critical") > 0.0) count++;
         if (doubleStat(entry.details(), "attackSpeed") > 0.0) count++;
         if (doubleStat(entry.details(), "armor") > 0.0) count++;
         if (doubleStat(entry.details(), "toughness") > 0.0) count++;
+        if (doubleStat(entry.details(), "armorPenetration") > 0.0) count++;
+        if (doubleStat(entry.details(), "combatFrenzy") > 0.0) count++;
+        if (doubleStat(entry.details(), "firstStrike") > 0.0) count++;
+        if (doubleStat(entry.details(), "rhythmicDischarge") > 0.0) count++;
+        if (doubleStat(entry.details(), "tenacity") > 0.0) count++;
+        if (doubleStat(entry.details(), "mobility") > 0.0) count++;
+        if (doubleStat(entry.details(), "attackReach") > 0.0) count++;
+        if (doubleStat(entry.details(), "elementalResistance") > 0.0) count++;
         return count;
     }
 

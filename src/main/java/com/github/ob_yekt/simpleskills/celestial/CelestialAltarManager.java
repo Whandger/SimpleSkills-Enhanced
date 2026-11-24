@@ -39,7 +39,7 @@ public final class CelestialAltarManager {
                     if (player == null || payload == null || payload.targetId() == null
                             || payload.targetId().length() > 128) return;
                     if (player.containerMenu instanceof CelestialAltarMenu menu) {
-                        menu.handleUiAction(player, payload.action(), payload.targetId());
+                        menu.handleUiAction(player, payload.action(), payload.targetId(), payload.expectedRevision());
                     }
                 }));
         ServerLivingEntityEvents.AFTER_DAMAGE.register(CelestialAltarManager::recordPlayerDamage);
