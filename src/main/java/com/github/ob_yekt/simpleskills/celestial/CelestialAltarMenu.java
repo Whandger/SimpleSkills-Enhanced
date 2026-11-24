@@ -4,7 +4,11 @@ import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager;
 import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager.PerkRerollInfo;
 import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager.StatUpgradeInfo;
 import com.github.ob_yekt.simpleskills.runes.RuneContent;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.Container;
@@ -180,7 +184,9 @@ public final class CelestialAltarMenu extends AbstractContainerMenu {
             }
         }
 
+        ItemStack beforeSnapshot = equipment.copy();
         if (!CraftingEquipmentManager.applyCelestialAltarReroll(equipment, player)) return;
+        ItemStack afterSnapshot = equipment.copy();
         container.setChanged();
         for (int slot = CelestialAltarBlockEntity.ESSENCE_TOP; slot <= CelestialAltarBlockEntity.ESSENCE_RIGHT; slot++) {
             ItemStack essence = container.getItem(slot);
@@ -194,7 +200,8 @@ public final class CelestialAltarMenu extends AbstractContainerMenu {
         }
         player.playSound(SoundEvents.PLAYER_LEVELUP, 0.9F, 1.0F);
         player.sendSystemMessage(Component.translatable("message.simpleskills.celestial_altar.ascended"), true);
-        player.closeContainer();
+        spawnAltarOperationParticles(player, CelestialAltarVisualPayload.KIND_INFUSION);
+        sendVisualConfirmation(player, CelestialAltarVisualPayload.infusion(containerId, beforeSnapshot, afterSnapshot));
     }
 
     private void executeSalvage(ServerPlayer player) {
@@ -219,6 +226,7 @@ public final class CelestialAltarMenu extends AbstractContainerMenu {
             return;
         }
 
+        ItemStack sacrificedSnapshot = sacrifice.copy();
         container.setItem(CelestialAltarBlockEntity.SALVAGE_EQUIPMENT, ItemStack.EMPTY);
         container.setItem(CelestialAltarBlockEntity.SALVAGE_OUTPUT,
                 new ItemStack(CelestialAltarContent.TRANSCENDENCY_ESSENCE));
@@ -226,6 +234,8 @@ public final class CelestialAltarMenu extends AbstractContainerMenu {
         pendingSalvageConfirmation = ItemStack.EMPTY;
         player.playSound(SoundEvents.ANVIL_USE, 0.8F, 1.3F);
         player.sendSystemMessage(Component.translatable("message.simpleskills.celestial_altar.salvaged"), true);
+        spawnAltarOperationParticles(player, CelestialAltarVisualPayload.KIND_SALVAGE);
+        sendVisualConfirmation(player, CelestialAltarVisualPayload.salvage(containerId, sacrificedSnapshot));
     }
 
     private boolean matchesPendingSalvageItems() {
@@ -250,13 +260,15 @@ public final class CelestialAltarMenu extends AbstractContainerMenu {
         }
 
         boolean applied;
+        PerkRerollInfo oldPerkSnapshot = null;
+        StatUpgradeInfo oldStatSnapshot = null;
+        int perkIndex = -1;
         if (rerollPerk) {
             // The client sends perk:<original-index>:<id>:<amplifier>. Validate the full
             // serialized entry before replacing it, so a reordered display can never target
             // a different perk with the same or similar label.
             String[] targetParts = targetId.split(":", 4);
             if (targetParts.length != 4 || !targetParts[0].equals("perk")) return;
-            int perkIndex;
             try {
                 perkIndex = Integer.parseInt(targetParts[1]);
             } catch (NumberFormatException ignored) {
@@ -264,11 +276,18 @@ public final class CelestialAltarMenu extends AbstractContainerMenu {
             }
             String expectedEntry = targetParts[2] + ":" + targetParts[3];
             if (!CraftingEquipmentManager.canRerollPerkAt(equipment, perkIndex, expectedEntry)) return;
+            final int capturedPerkIndex = perkIndex;
+            oldPerkSnapshot = getEnhancementPerks().stream()
+                    .filter(info -> info.index() == capturedPerkIndex)
+                    .findFirst().orElse(null);
             applied = CraftingEquipmentManager.rerollEquipmentPerkAt(
                     equipment, perkIndex, expectedEntry, player);
         } else {
             // Verify the requested stat exists on this item and is not already at its cap.
             if (!CraftingEquipmentManager.canEnhanceStat(equipment, targetId)) return;
+            oldStatSnapshot = getEnhancementStats().stream()
+                    .filter(info -> info.id().equals(targetId))
+                    .findFirst().orElse(null);
             applied = CraftingEquipmentManager.enhanceEquipmentStat(equipment, targetId);
         }
         if (!applied) return;
@@ -279,13 +298,40 @@ public final class CelestialAltarMenu extends AbstractContainerMenu {
         player.playSound(SoundEvents.ANVIL_USE, 0.65F, rerollPerk ? 1.25F : 1.55F);
         if (rerollPerk) {
             player.sendSystemMessage(Component.translatable("message.simpleskills.celestial_altar.perk_rerolled"), true);
+            final int capturedPerkIndex = perkIndex;
+            PerkRerollInfo newPerkSnapshot = getEnhancementPerks().stream()
+                    .filter(info -> info.index() == capturedPerkIndex)
+                    .findFirst().orElse(null);
+            if (oldPerkSnapshot != null && newPerkSnapshot != null) {
+                spawnAltarOperationParticles(player, CelestialAltarVisualPayload.KIND_REROLL_PERK);
+                sendVisualConfirmation(player, CelestialAltarVisualPayload.rerollPerk(
+                        containerId,
+                        oldPerkSnapshot.actionTargetId(), oldPerkSnapshot.id(), oldPerkSnapshot.amplifier(),
+                        newPerkSnapshot.actionTargetId(), newPerkSnapshot.id(), newPerkSnapshot.amplifier()
+                ));
+            }
         } else {
-            String translationKey = getEnhancementStats().stream()
+            StatUpgradeInfo newStatSnapshot = getEnhancementStats().stream()
                     .filter(info -> info.id().equals(targetId))
-                    .map(StatUpgradeInfo::translationKey)
-                    .findFirst().orElse("item.simpleskills.crafting_stat." + targetId);
+                    .findFirst().orElse(null);
+            String translationKey = newStatSnapshot != null
+                    ? newStatSnapshot.translationKey()
+                    : "item.simpleskills.crafting_stat." + targetId;
             player.sendSystemMessage(Component.translatable("message.simpleskills.celestial_altar.enhanced",
                     Component.translatable(translationKey)), true);
+            if (oldStatSnapshot != null && newStatSnapshot != null) {
+                spawnAltarOperationParticles(player, CelestialAltarVisualPayload.KIND_ENHANCE_STAT);
+                sendVisualConfirmation(player, CelestialAltarVisualPayload.enhanceStat(
+                        containerId,
+                        targetId,
+                        newStatSnapshot.translationKey(),
+                        oldStatSnapshot.currentPercent(),
+                        newStatSnapshot.currentPercent(),
+                        newStatSnapshot.minimumPercent(),
+                        newStatSnapshot.maximumPercent(),
+                        newStatSnapshot.isMaxed()
+                ));
+            }
         }
     }
 
@@ -300,6 +346,18 @@ public final class CelestialAltarMenu extends AbstractContainerMenu {
             player.sendSystemMessage(Component.translatable("message.simpleskills.celestial_altar.enhancement_invalid"), true);
             return;
         }
+        List<StatUpgradeInfo> beforeStats = getEnhancementStats();
+        int selectedPosition = -1;
+        StatUpgradeInfo oldStatSnapshot = null;
+        for (int i = 0; i < beforeStats.size(); i++) {
+            if (beforeStats.get(i).id().equals(targetId)) {
+                selectedPosition = i;
+                oldStatSnapshot = beforeStats.get(i);
+                break;
+            }
+        }
+        if (selectedPosition < 0 || oldStatSnapshot == null) return;
+
         // This left-side action replaces the selected attribute type with a different
         // category-valid random attribute; it is intentionally separate from + enhancement.
         if (!CraftingEquipmentManager.replaceEquipmentAttribute(equipment, targetId, player)) return;
@@ -309,6 +367,46 @@ public final class CelestialAltarMenu extends AbstractContainerMenu {
         container.setChanged();
         player.playSound(SoundEvents.ANVIL_USE, 0.8F, 0.95F);
         player.sendSystemMessage(Component.translatable("message.simpleskills.celestial_altar.stat_rerolled"), true);
+
+        List<StatUpgradeInfo> afterStats = getEnhancementStats();
+        if (selectedPosition < afterStats.size()) {
+            StatUpgradeInfo newStatSnapshot = afterStats.get(selectedPosition);
+            spawnAltarOperationParticles(player, CelestialAltarVisualPayload.KIND_REROLL_STAT);
+            sendVisualConfirmation(player, CelestialAltarVisualPayload.rerollStat(
+                    containerId,
+                    oldStatSnapshot.id(), oldStatSnapshot.translationKey(), oldStatSnapshot.currentPercent(),
+                    newStatSnapshot.id(), newStatSnapshot.translationKey(), newStatSnapshot.currentPercent(),
+                    newStatSnapshot.minimumPercent(), newStatSnapshot.maximumPercent(),
+                    newStatSnapshot.isMaxed()
+            ));
+        }
+    }
+
+    private void sendVisualConfirmation(ServerPlayer player, CelestialAltarVisualPayload payload) {
+        if (player != null && ServerPlayNetworking.canSend(player, CelestialAltarVisualPayload.TYPE)) {
+            ServerPlayNetworking.send(player, payload);
+        }
+    }
+
+    private void spawnAltarOperationParticles(ServerPlayer player, int kind) {
+        if (altar == null || !(player.level() instanceof ServerLevel serverLevel)) return;
+        BlockPos pos = altar.getBlockPos();
+        double cx = pos.getX() + 0.5;
+        double cy = pos.getY() + 1.15;
+        double cz = pos.getZ() + 0.5;
+        switch (kind) {
+            case CelestialAltarVisualPayload.KIND_INFUSION -> {
+                serverLevel.sendParticles(ParticleTypes.ENCHANT, cx, cy + 0.25, cz, 24, 0.35, 0.25, 0.35, 0.15);
+                serverLevel.sendParticles(ParticleTypes.END_ROD, cx, cy + 0.20, cz, 10, 0.20, 0.20, 0.20, 0.04);
+            }
+            case CelestialAltarVisualPayload.KIND_SALVAGE -> {
+                serverLevel.sendParticles(ParticleTypes.WITCH, cx, cy + 0.15, cz, 18, 0.25, 0.18, 0.25, 0.03);
+                serverLevel.sendParticles(ParticleTypes.ENCHANT, cx, cy + 0.20, cz, 12, 0.22, 0.15, 0.22, 0.08);
+            }
+            default -> {
+                serverLevel.sendParticles(ParticleTypes.ENCHANT, cx, cy + 0.15, cz, 10, 0.22, 0.15, 0.22, 0.08);
+            }
+        }
     }
 
     @Override

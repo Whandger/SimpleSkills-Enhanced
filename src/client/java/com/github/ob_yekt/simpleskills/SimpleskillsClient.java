@@ -3,8 +3,10 @@ package com.github.ob_yekt.simpleskills;
 import com.github.ob_yekt.simpleskills.excavating.InvestigationHud;
 import com.github.ob_yekt.simpleskills.crafting.CraftingRevealPayload;
 import com.github.ob_yekt.simpleskills.crafting.CraftingRevealScreen;
+import com.github.ob_yekt.simpleskills.celestial.CelestialAltarAnimationController;
 import com.github.ob_yekt.simpleskills.celestial.CelestialAltarContent;
 import com.github.ob_yekt.simpleskills.celestial.CelestialAltarScreen;
+import com.github.ob_yekt.simpleskills.celestial.CelestialAltarVisualPayload;
 import com.github.ob_yekt.simpleskills.grinder.OreGrinderContent;
 import com.github.ob_yekt.simpleskills.grinder.OreGrinderRenderer;
 import com.github.ob_yekt.simpleskills.grinder.OreGrinderScreen;
@@ -79,8 +81,10 @@ public class SimpleskillsClient implements ClientModInitializer {
         PrayerCooldownHud.register();
         PrayerImpactFeedback.registerClientHooks();
 
+        ClientPlayNetworking.registerGlobalReceiver(CelestialAltarVisualPayload.TYPE, (payload, context) ->
+                context.client().execute(() -> CelestialAltarAnimationController.onServerConfirmed(payload)));
         ClientPlayNetworking.registerGlobalReceiver(CraftingRevealPayload.TYPE, (payload, context) ->
-                context.client().execute(() -> CraftingRevealScreen.accept(payload)));
+                context.client().execute(() -> CelestialAltarAnimationController.interceptOrForwardReveal(payload)));
         ClientPlayNetworking.registerGlobalReceiver(TranscendentVisionPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> TranscendentVisionHud.accept(payload)));
         ClientPlayNetworking.registerGlobalReceiver(WorldbreakerPreviewPayload.TYPE, (payload, context) ->
@@ -102,7 +106,6 @@ public class SimpleskillsClient implements ClientModInitializer {
                 context.client().execute(() -> PrayerCooldownHud.accept(payload)));
 
         // Gathering Speed: levels pushed by the server (applied in GatheringSpeedMixin)
-        // Redireciona a atualização para a thread principal do cliente para garantir thread safety
         ClientPlayNetworking.registerGlobalReceiver(GatheringSpeed.LevelsPayload.TYPE, (payload, context) ->
             context.client().execute(() ->
                 GatheringSpeed.setClientLevels(payload.mining(), payload.woodcutting(), payload.excavating())
@@ -160,8 +163,6 @@ public class SimpleskillsClient implements ClientModInitializer {
                     default -> "message.simpleskills.rune_infusion.invalid_selection";
                 };
 
-                // In this Minecraft API, LocalPlayer exposes sendSystemMessage(Component).
-                // Gui.getChat() and Gui.setOverlayMessage() are not available.
                 context.client().player.sendSystemMessage(Component.translatable(key));
             })
         );
@@ -171,7 +172,6 @@ public class SimpleskillsClient implements ClientModInitializer {
             context.client().execute(() -> {
                 RuneInfusionClientState.accept(payload);
                 if (payload.state() == RuneInfusionStatePayload.STOP) {
-                    // The screen shows the result for a moment and closes itself.
                     if (!RuneInfusionClientState.hasScreen()) RuneInfusionClientState.reset();
                     return;
                 }
@@ -194,6 +194,7 @@ public class SimpleskillsClient implements ClientModInitializer {
         );
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            CelestialAltarAnimationController.reset();
             GatheringSpeed.resetClientLevels();
             AgilityClientState.reset();
             RankTitleMenuScreen.clearActive();

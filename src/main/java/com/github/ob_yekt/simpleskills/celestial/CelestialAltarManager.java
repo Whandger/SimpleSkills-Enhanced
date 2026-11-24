@@ -30,6 +30,8 @@ public final class CelestialAltarManager {
     public static void registerPayloads() {
         PayloadTypeRegistry.serverboundPlay().register(CelestialAltarActionPayload.TYPE,
                 CelestialAltarActionPayload.CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(CelestialAltarVisualPayload.TYPE,
+                CelestialAltarVisualPayload.CODEC);
     }
 
     public static void register() {

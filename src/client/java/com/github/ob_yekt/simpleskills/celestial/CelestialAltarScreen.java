@@ -1,8 +1,15 @@
 package com.github.ob_yekt.simpleskills.celestial;
 
+import com.github.ob_yekt.simpleskills.celestial.CelestialAltarAnimationController.CrackSegment;
+import com.github.ob_yekt.simpleskills.celestial.CelestialAltarAnimationController.DisintegrationFragment;
+import com.github.ob_yekt.simpleskills.celestial.CelestialAltarAnimationController.EnhanceState;
+import com.github.ob_yekt.simpleskills.celestial.CelestialAltarAnimationController.FracturePath;
+import com.github.ob_yekt.simpleskills.celestial.CelestialAltarAnimationController.InfusionState;
+import com.github.ob_yekt.simpleskills.celestial.CelestialAltarAnimationController.ItemSilhouette;
+import com.github.ob_yekt.simpleskills.celestial.CelestialAltarAnimationController.SalvageState;
 import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager;
-import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager.StatUpgradeInfo;
 import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager.PerkRerollInfo;
+import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager.StatUpgradeInfo;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -12,6 +19,7 @@ import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 
@@ -142,6 +150,7 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
     }
 
     private void sendTab(int action) {
+        if (CelestialAltarAnimationController.isBlockingRitualActive()) return;
         int targetMode = switch (action) {
             case CelestialAltarActionPayload.TAB_INFUSION -> CelestialAltarMenu.MODE_INFUSION;
             case CelestialAltarActionPayload.TAB_SALVAGE -> CelestialAltarMenu.MODE_SALVAGE;
@@ -186,6 +195,7 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
     }
 
     private void clickRitualAction() {
+        if (CelestialAltarAnimationController.isBlockingRitualActive()) return;
         int mode = menu.getMode();
         if (mode == CelestialAltarMenu.MODE_INFUSION) {
             if (menu.canInfuse()) sendAction(CelestialAltarActionPayload.ASCEND, "");
@@ -196,17 +206,18 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
     }
 
     private void updateWidgetStates() {
+        boolean blocking = CelestialAltarAnimationController.isBlockingRitualActive();
         boolean enhance = menu.getMode() == CelestialAltarMenu.MODE_ENHANCE;
         updateEnhancementButtonStates(enhance);
         if (ritualActionButton != null) {
             boolean infusion = menu.getMode() == CelestialAltarMenu.MODE_INFUSION;
             boolean salvage = menu.getMode() == CelestialAltarMenu.MODE_SALVAGE;
             ritualActionButton.visible = infusion || salvage;
-            ritualActionButton.active = infusion ? menu.canInfuse() : (salvage && menu.canSalvage());
+            ritualActionButton.active = !blocking && (infusion ? menu.canInfuse() : (salvage && menu.canSalvage()));
         }
-        if (infusionTabButton != null) infusionTabButton.active = menu.getMode() != CelestialAltarMenu.MODE_INFUSION;
-        if (salvageTabButton != null) salvageTabButton.active = menu.getMode() != CelestialAltarMenu.MODE_SALVAGE;
-        if (enhanceTabButton != null) enhanceTabButton.active = menu.getMode() != CelestialAltarMenu.MODE_ENHANCE;
+        if (infusionTabButton != null) infusionTabButton.active = !blocking && menu.getMode() != CelestialAltarMenu.MODE_INFUSION;
+        if (salvageTabButton != null) salvageTabButton.active = !blocking && menu.getMode() != CelestialAltarMenu.MODE_SALVAGE;
+        if (enhanceTabButton != null) enhanceTabButton.active = !blocking && menu.getMode() != CelestialAltarMenu.MODE_ENHANCE;
     }
 
     private void updateEnhancementButtonStates(boolean enhanceMode) {
@@ -227,6 +238,7 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
     protected void containerTick() {
         super.containerTick();
         clientTicks++;
+        CelestialAltarAnimationController.tick(menu.containerId);
         if (menu.getMode() != CelestialAltarMenu.MODE_SALVAGE || !menu.canSalvage()) {
             salvageArmedTick = -100;
         }
@@ -292,7 +304,7 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         drawHeaderBanner(graphics, time);
         drawModeTabs(graphics, mouseX, mouseY, mode);
 
-        // Ritual sanctuary chamber (full width 8..304)
+        // Ritual sanctuary chamber (full width 8..344)
         int chamberX = leftPos + 8;
         int chamberY = topPos + 38;
         int chamberW = imageWidth - 16;
@@ -303,18 +315,18 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         drawAmbientStarlight(graphics, chamberX, chamberY, chamberW, chamberH, time);
 
         if (mode == CelestialAltarMenu.MODE_INFUSION) {
-            drawInfusionLayout(graphics, mouseX, mouseY, time);
+            drawInfusionLayout(graphics, mouseX, mouseY, time, partialTick);
         } else if (mode == CelestialAltarMenu.MODE_SALVAGE) {
-            drawSalvageLayout(graphics, mouseX, mouseY, time);
+            drawSalvageLayout(graphics, mouseX, mouseY, time, partialTick);
         } else {
-            drawEnhancementLayout(graphics, mouseX, mouseY, time);
+            drawEnhancementLayout(graphics, mouseX, mouseY, time, partialTick);
         }
 
         if (mode != CelestialAltarMenu.MODE_ENHANCE) {
             drawActionButton(graphics, mouseX, mouseY, mode, time);
         }
 
-        // Full-width bottom player inventory section (36 slots centered at x=75, y=142)
+        // Full-width bottom player inventory section
         graphics.fill(leftPos + 8, topPos + 127, leftPos + imageWidth - 8, topPos + 128, GOLD_DARK);
         graphics.fill(leftPos + 20, topPos + 127, leftPos + imageWidth - 20, topPos + 128, RUNE_DEEP);
         graphics.text(font, Component.translatable("container.inventory"),
@@ -322,6 +334,37 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
 
         drawFullWidthPlayerInventory(graphics);
         drawFooterHint(graphics, mode);
+    }
+
+    @Override
+    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+        // extractLabels renders AFTER container slots, allowing preserved snapshots and ritual
+        // animations to layer cleanly over the slots even after the server consumes/updates items.
+        float partialTick = Minecraft.getInstance().getDeltaTracker().getGameTimeDeltaPartialTick(true);
+        float time = clientTicks + partialTick;
+        int mode = menu.getMode();
+
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(-leftPos, -topPos);
+
+        if (mode == CelestialAltarMenu.MODE_INFUSION) {
+            InfusionState infusion = CelestialAltarAnimationController.getInfusion();
+            if (infusion != null) {
+                renderInfusionForeground(graphics, infusion, time, partialTick);
+            }
+        } else if (mode == CelestialAltarMenu.MODE_SALVAGE) {
+            SalvageState salvage = CelestialAltarAnimationController.getSalvage();
+            if (salvage != null) {
+                renderSalvageForeground(graphics, salvage, time, partialTick);
+            }
+        } else if (mode == CelestialAltarMenu.MODE_ENHANCE) {
+            EnhanceState enhance = CelestialAltarAnimationController.getEnhance();
+            if (enhance != null) {
+                renderEnhanceForeground(graphics, enhance, time, partialTick);
+            }
+        }
+
+        graphics.pose().popMatrix();
     }
 
     private void drawMainAltarFrame(GuiGraphicsExtractor graphics, float time) {
@@ -398,9 +441,10 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         }
     }
 
-    private void drawInfusionLayout(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float time) {
-        // Exact slot coordinates from CelestialAltarMenu:
-        // Equipment: (168, 74), Top Essence: (168, 50), Left Essence: (132, 74), Right Essence: (204, 74)
+    // ------------------------------------------------------------------ INFUSION LAYOUT & RITUAL VFX
+
+    private void drawInfusionLayout(GuiGraphicsExtractor graphics, int mouseX, int mouseY,
+                                    float time, float partialTick) {
         int equipmentX = leftPos + 168;
         int equipmentY = topPos + 74;
         int topEssenceX = leftPos + 168;
@@ -409,17 +453,29 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         int sideEssenceY = topPos + 74;
         int rightEssenceX = leftPos + 204;
 
-        ItemStack equipStack = menu.getSlot(CelestialAltarBlockEntity.INFUSION_EQUIPMENT).getItem();
-        ItemStack topStack = menu.getSlot(CelestialAltarBlockEntity.ESSENCE_TOP).getItem();
-        ItemStack leftStack = menu.getSlot(CelestialAltarBlockEntity.ESSENCE_LEFT).getItem();
-        ItemStack rightStack = menu.getSlot(CelestialAltarBlockEntity.ESSENCE_RIGHT).getItem();
+        InfusionState infusion = CelestialAltarAnimationController.getInfusion();
+        boolean ritualActive = infusion != null;
 
-        boolean topValid = topStack.is(CelestialAltarContent.TRANSCENDENCY_ESSENCE);
-        boolean leftValid = leftStack.is(CelestialAltarContent.TRANSCENDENCY_ESSENCE);
-        boolean rightValid = rightStack.is(CelestialAltarContent.TRANSCENDENCY_ESSENCE);
-        boolean equipValid = !equipStack.isEmpty() && CraftingEquipmentManager.isEligibleForCelestialAltar(equipStack);
+        ItemStack equipStack = ritualActive
+                ? infusion.beforeEquipment
+                : menu.getSlot(CelestialAltarBlockEntity.INFUSION_EQUIPMENT).getItem();
+        ItemStack topStack = ritualActive
+                ? infusion.essenceSnapshot
+                : menu.getSlot(CelestialAltarBlockEntity.ESSENCE_TOP).getItem();
+        ItemStack leftStack = ritualActive
+                ? infusion.essenceSnapshot
+                : menu.getSlot(CelestialAltarBlockEntity.ESSENCE_LEFT).getItem();
+        ItemStack rightStack = ritualActive
+                ? infusion.essenceSnapshot
+                : menu.getSlot(CelestialAltarBlockEntity.ESSENCE_RIGHT).getItem();
+
+        boolean topValid = ritualActive || topStack.is(CelestialAltarContent.TRANSCENDENCY_ESSENCE);
+        boolean leftValid = ritualActive || leftStack.is(CelestialAltarContent.TRANSCENDENCY_ESSENCE);
+        boolean rightValid = ritualActive || rightStack.is(CelestialAltarContent.TRANSCENDENCY_ESSENCE);
+        boolean equipValid = ritualActive
+                || (!equipStack.isEmpty() && CraftingEquipmentManager.isEligibleForCelestialAltar(equipStack));
         boolean equipAlreadyTranscendent = equipValid && CraftingEquipmentManager.isTranscendent(equipStack);
-        boolean ready = menu.canInfuse();
+        boolean ready = ritualActive || menu.canInfuse();
 
         int centerEquipX = equipmentX + 8;
         int centerEquipY = equipmentY + 8;
@@ -435,6 +491,15 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
                 ready ? withAlpha(GOLD, 165) : withAlpha(RUNE_DEEP, 140));
         drawArcaneDiamondRing(graphics, centerEquipX, centerEquipY, 25,
                 ready ? withAlpha(STAR_CYAN, 110) : withAlpha(OBSIDIAN_EDGE, 90));
+
+        // Rotating magical rune circle beneath the equipment during Infusion ritual
+        if (ritualActive) {
+            float p = infusion.progress(partialTick);
+            float circleAlpha = Mth.clamp(p / 0.18F, 0.0F, 1.0F)
+                    * (p > 0.85F ? Mth.clamp((1.0F - p) / 0.15F, 0.0F, 1.0F) : 1.0F);
+            drawRotatingRuneCircle(graphics, centerEquipX, centerEquipY + 2, 23.0F,
+                    time * 0.11F, circleAlpha);
+        }
 
         // Outer triangular ley-lines connecting the 3 essences
         drawEnergyConduit(graphics, centerTopX, centerTopY, centerLeftX, centerLeftY,
@@ -452,19 +517,16 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         drawEnergyConduit(graphics, centerRightX, centerRightY, centerEquipX, centerEquipY,
                 rightValid, ready, time, 0.75F);
 
-        // Wide side status plaques (96px wide each) so all labels fit cleanly inside their boxes
         int validEssences = (topValid ? 1 : 0) + (leftValid ? 1 : 0) + (rightValid ? 1 : 0);
         drawEssenceCounterPlaque(graphics, leftPos + 31, topPos + 46, 96, 50, validEssences);
         drawEquipmentStatusPlaque(graphics, leftPos + 225, topPos + 46, 96, 50,
                 equipStack, equipValid, equipAlreadyTranscendent);
 
-        // Central equipment pedestal
         SlotState equipState = equipStack.isEmpty() ? SlotState.EMPTY
                 : (!equipValid ? SlotState.INVALID : (equipAlreadyTranscendent ? SlotState.REFORGE : SlotState.VALID_GOLD));
         drawCentralPedestal(graphics, equipmentX, equipmentY, equipState,
                 isInside(mouseX, mouseY, equipmentX, equipmentY, 16, 16), time);
 
-        // Three triangular Transcendency Essence slots
         drawEssenceSlotFrame(graphics, topEssenceX, topEssenceY,
                 essenceState(topStack, topValid), isInside(mouseX, mouseY, topEssenceX, topEssenceY, 16, 16), time);
         drawEssenceSlotFrame(graphics, leftEssenceX, sideEssenceY,
@@ -472,69 +534,457 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         drawEssenceSlotFrame(graphics, rightEssenceX, sideEssenceY,
                 essenceState(rightStack, rightValid), isInside(mouseX, mouseY, rightEssenceX, sideEssenceY, 16, 16), time);
 
-        // Empty slot glyphs
-        if (equipStack.isEmpty()) drawEquipmentGlyph(graphics, equipmentX, equipmentY);
-        if (topStack.isEmpty()) drawEssenceGlyph(graphics, topEssenceX, topEssenceY);
-        if (leftStack.isEmpty()) drawEssenceGlyph(graphics, leftEssenceX, sideEssenceY);
-        if (rightStack.isEmpty()) drawEssenceGlyph(graphics, rightEssenceX, sideEssenceY);
+        if (!ritualActive) {
+            if (equipStack.isEmpty()) drawEquipmentGlyph(graphics, equipmentX, equipmentY);
+            if (topStack.isEmpty()) drawEssenceGlyph(graphics, topEssenceX, topEssenceY);
+            if (leftStack.isEmpty()) drawEssenceGlyph(graphics, leftEssenceX, sideEssenceY);
+            if (rightStack.isEmpty()) drawEssenceGlyph(graphics, rightEssenceX, sideEssenceY);
+        }
     }
 
-    private void drawSalvageLayout(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float time) {
-        // Exact slot coordinates from CelestialAltarMenu:
-        // Input: (104, 72), Output: (192, 72)
+    private void renderInfusionForeground(GuiGraphicsExtractor graphics, InfusionState infusion,
+                                          float time, float partialTick) {
+        float p = infusion.progress(partialTick);
+        // Phases:
+        // Phase 1: 0.00..0.28 (Essence Activation & three beams launching)
+        // Phase 2: 0.28..0.72 (Equipment Ascension, levitation, vertical rotation, intensifying glow)
+        // Phase 3: 0.72..0.93 (Transcendence Burst, flash, expanding magical rings)
+        // Phase 4: 0.93..1.00 (Clean settle into CraftingRevealScreen)
+        int topX = leftPos + 168;
+        int topY = topPos + 50;
+        int leftX = leftPos + 132;
+        int sideY = topPos + 74;
+        int rightX = leftPos + 204;
+        int equipSlotX = leftPos + 168;
+        int equipSlotY = topPos + 74;
+
+        float ascensionFactor = p < 0.25F ? 0.0F
+                : (p < 0.75F ? easeInOutCubic((p - 0.25F) / 0.50F) : 1.0F);
+        float floatOffsetY = -13.0F * ascensionFactor - (float) Math.sin(time * 0.24F) * 1.4F * ascensionFactor;
+        float equipCenterX = equipSlotX + 8.0F;
+        float equipCenterY = equipSlotY + 8.0F + floatOffsetY;
+
+        // 1. Render the three preserved Transcendency Essences glowing in their input slots
+        float essencePresence = p < 0.72F ? 1.0F : Mth.clamp((0.86F - p) / 0.14F, 0.0F, 1.0F);
+        if (essencePresence > 0.02F) {
+            drawGlowingEssenceSlot(graphics, infusion.essenceSnapshot, topX, topY, essencePresence, time, 0.0F);
+            drawGlowingEssenceSlot(graphics, infusion.essenceSnapshot, leftX, sideY, essencePresence, time, 2.1F);
+            drawGlowingEssenceSlot(graphics, infusion.essenceSnapshot, rightX, sideY, essencePresence, time, 4.2F);
+        }
+
+        // 2. Render the three continuous energy beams from each individual Essence into the floating equipment
+        if (p < 0.80F) {
+            float beamReach = Mth.clamp(p / 0.24F, 0.0F, 1.0F);
+            float intensity = p < 0.70F
+                    ? (0.45F + 0.55F * Mth.clamp(p / 0.65F, 0.0F, 1.0F))
+                    : Mth.clamp((0.80F - p) / 0.10F, 0.0F, 1.0F);
+            drawInfusionEnergyBeam(graphics, topX + 8.0F, topY + 8.0F, equipCenterX, equipCenterY,
+                    beamReach, intensity, time, 0.0F, -6.0F);
+            drawInfusionEnergyBeam(graphics, leftX + 8.0F, sideY + 8.0F, equipCenterX, equipCenterY,
+                    beamReach, intensity, time, 0.33F, 7.0F);
+            drawInfusionEnergyBeam(graphics, rightX + 8.0F, sideY + 8.0F, equipCenterX, equipCenterY,
+                    beamReach, intensity, time, 0.66F, 7.0F);
+        }
+
+        // 3. Levitating, rotating, glowing central equipment
+        boolean postBurst = p >= 0.73F;
+        ItemStack shownEquipment = postBurst && !infusion.afterEquipment.isEmpty()
+                ? infusion.afterEquipment
+                : infusion.beforeEquipment;
+
+        float glowStrength = p < 0.73F
+                ? Mth.clamp(p / 0.73F, 0.15F, 1.0F)
+                : Mth.clamp((1.0F - p) / 0.27F, 0.25F, 1.0F);
+        int auraRadius = Math.round(11 + glowStrength * 9.0F + (float) Math.sin(time * 0.45F) * 2.0F);
+        int purpleAuraAlpha = Math.round(55 + glowStrength * 115.0F);
+        int whiteCoreAlpha = Math.round(30 + glowStrength * 110.0F);
+        fillSoftCircle(graphics, Math.round(equipCenterX), Math.round(equipCenterY),
+                auraRadius, withAlpha(RUNE_PURPLE, purpleAuraAlpha));
+        fillSoftCircle(graphics, Math.round(equipCenterX), Math.round(equipCenterY),
+                Math.max(5, auraRadius - 5), withAlpha(STAR_CORE, whiteCoreAlpha));
+
+        // Orbiting energized particles rising around the ascending equipment
+        int orbitCount = 10;
+        float orbitRadius = 15.0F - ascensionFactor * 3.0F;
+        for (int i = 0; i < orbitCount; i++) {
+            float angle = time * (0.16F + ascensionFactor * 0.14F) + i * (float) (Math.PI * 2.0 / orbitCount);
+            float ox = equipCenterX + (float) Math.cos(angle) * orbitRadius;
+            float oy = equipCenterY + (float) Math.sin(angle) * (orbitRadius * 0.65F);
+            int pColor = (i % 2 == 0)
+                    ? withAlpha(STAR_CORE, Math.round(140 + 115 * glowStrength))
+                    : withAlpha(RUNE_BRIGHT, Math.round(150 + 105 * glowStrength));
+            graphics.fill(Math.round(ox) - 1, Math.round(oy) - 1, Math.round(ox) + 1, Math.round(oy) + 1, pColor);
+        }
+
+        // Vertical-axis rotation + pulse scale
+        float spinPhase = ascensionFactor * (float) (Math.PI * 4.0);
+        float rawCos = (float) Math.cos(spinPhase);
+        float horizontalSpinScale = Math.copySign(Math.max(0.16F, Math.abs(rawCos)), rawCos);
+        float burstPop = postBurst
+                ? 1.0F + 0.34F * (float) Math.sin(Math.min(1.0F, (p - 0.73F) / 0.18F) * Math.PI)
+                : 1.0F + 0.14F * ascensionFactor + 0.04F * (float) Math.sin(time * 0.5F);
+        float tiltRad = (float) Math.sin(spinPhase * 0.5F) * 0.09F * ascensionFactor;
+
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(equipCenterX, equipCenterY);
+        if (tiltRad != 0.0F) graphics.pose().rotate(tiltRad);
+        graphics.pose().scale(horizontalSpinScale * burstPop, burstPop);
+        graphics.item(shownEquipment, -8, -8);
+        graphics.pose().popMatrix();
+
+        // 4. Phase 3 — Transcendence Burst (intense flash, expanding rings, radial particles)
+        if (p >= 0.70F && p <= 0.96F) {
+            float burstT = (p - 0.70F) / 0.26F;
+            int cx = Math.round(equipCenterX);
+            int cy = Math.round(equipCenterY);
+
+            // Brief intense purple & white flash over equipment
+            if (burstT < 0.45F) {
+                float flashAlpha = (1.0F - burstT / 0.45F);
+                fillSoftCircle(graphics, cx, cy, Math.round(16 + flashAlpha * 14),
+                        withAlpha(STAR_CORE, Math.round(flashAlpha * 225)));
+                fillSoftCircle(graphics, cx, cy, Math.round(22 + flashAlpha * 18),
+                        withAlpha(RUNE_BRIGHT, Math.round(flashAlpha * 165)));
+            }
+
+            // Dual expanding magical rings
+            float ring1R = 8.0F + burstT * 44.0F;
+            float ring2R = 4.0F + Math.max(0.0F, burstT - 0.12F) * 38.0F;
+            int ringAlpha = Math.round((1.0F - burstT) * 230.0F);
+            drawCircleRing(graphics, cx, cy, ring1R, withAlpha(STAR_CORE, ringAlpha));
+            drawCircleRing(graphics, cx, cy, ring1R - 1.5F, withAlpha(RUNE_BRIGHT, ringAlpha));
+            if (burstT > 0.12F) {
+                drawCircleRing(graphics, cx, cy, ring2R, withAlpha(GOLD_BRIGHT, Math.round(ringAlpha * 0.85F)));
+            }
+
+            // Radial burst particles
+            int rayCount = 24;
+            for (int i = 0; i < rayCount; i++) {
+                double a = i * (Math.PI * 2.0 / rayCount) + 0.15;
+                float dist = 6.0F + burstT * (28.0F + (i % 3) * 10.0F);
+                int px = cx + (int) Math.round(Math.cos(a) * dist);
+                int py = cy + (int) Math.round(Math.sin(a) * dist * 0.82);
+                int color = (i % 3 == 0) ? withAlpha(STAR_CORE, ringAlpha)
+                        : (i % 3 == 1 ? withAlpha(RUNE_BRIGHT, ringAlpha) : withAlpha(GOLD_BRIGHT, ringAlpha));
+                graphics.fill(px - 1, py - 1, px + 1, py + 1, color);
+            }
+        }
+    }
+
+    private void drawGlowingEssenceSlot(GuiGraphicsExtractor graphics, ItemStack essence,
+                                        int slotX, int slotY, float strength, float time, float phase) {
+        int cx = slotX + 8;
+        int cy = slotY + 8;
+        float pulse = 0.7F + 0.3F * (float) Math.sin(time * 0.35F + phase);
+        int haloAlpha = Math.round(115 * strength * pulse);
+        fillSoftCircle(graphics, cx, cy, 11, withAlpha(RUNE_BRIGHT, haloAlpha));
+        fillSoftCircle(graphics, cx, cy, 7, withAlpha(STAR_CORE, Math.round(90 * strength * pulse)));
+
+        float scale = 1.0F + 0.14F * strength * pulse;
+        graphics.pose().pushMatrix();
+        graphics.pose().translate(cx, cy);
+        graphics.pose().scale(scale, scale);
+        graphics.item(essence, -8, -8);
+        graphics.pose().popMatrix();
+    }
+
+    private void drawInfusionEnergyBeam(GuiGraphicsExtractor graphics,
+                                        float x0, float y0, float x1, float y1,
+                                        float reach, float intensity, float time,
+                                        float phaseOffset, float arcOffset) {
+        float midX = (x0 + x1) * 0.5F + arcOffset * 0.45F;
+        float midY = (y0 + y1) * 0.5F - Math.abs(arcOffset) * 0.55F;
+        int steps = 28;
+        int maxStep = Math.max(1, Math.round(steps * reach));
+
+        int outerAlpha = Math.round(135 * intensity);
+        int coreAlpha = Math.round(235 * intensity);
+        for (int i = 0; i <= maxStep; i++) {
+            float t = i / (float) steps;
+            float inv = 1.0F - t;
+            float bx = inv * inv * x0 + 2.0F * inv * t * midX + t * t * x1;
+            float by = inv * inv * y0 + 2.0F * inv * t * midY + t * t * y1;
+            int px = Math.round(bx);
+            int py = Math.round(by);
+            graphics.fill(px - 2, py - 2, px + 3, py + 3, withAlpha(RUNE_PURPLE, outerAlpha));
+            graphics.fill(px - 1, py - 1, px + 2, py + 2, withAlpha(RUNE_BRIGHT, Math.min(255, outerAlpha + 45)));
+            graphics.fill(px, py, px + 1, py + 1, withAlpha(STAR_CORE, coreAlpha));
+        }
+
+        // Traveling high-energy pulses along each stream
+        for (int p = 0; p < 3; p++) {
+            float pulseT = ((time * 0.085F) + phaseOffset + p * 0.33F) % 1.0F;
+            if (pulseT > reach) continue;
+            float inv = 1.0F - pulseT;
+            float bx = inv * inv * x0 + 2.0F * inv * pulseT * midX + pulseT * pulseT * x1;
+            float by = inv * inv * y0 + 2.0F * inv * pulseT * midY + pulseT * pulseT * y1;
+            int px = Math.round(bx);
+            int py = Math.round(by);
+            graphics.fill(px - 2, py - 2, px + 3, py + 3, withAlpha(STAR_CORE, coreAlpha));
+        }
+    }
+
+    private void drawRotatingRuneCircle(GuiGraphicsExtractor graphics, int cx, int cy,
+                                        float radius, float angleRad, float alphaFactor) {
+        if (alphaFactor <= 0.02F) return;
+        int outerColor = withAlpha(RUNE_BRIGHT, Math.round(160 * alphaFactor));
+        int innerColor = withAlpha(GOLD_BRIGHT, Math.round(145 * alphaFactor));
+        drawCircleRing(graphics, cx, cy, radius, outerColor);
+        drawCircleRing(graphics, cx, cy, radius - 4.0F, innerColor);
+
+        int glyphCount = 8;
+        for (int i = 0; i < glyphCount; i++) {
+            float a = angleRad + i * (float) (Math.PI * 2.0 / glyphCount);
+            int gx = cx + Math.round((float) Math.cos(a) * (radius - 2.0F));
+            int gy = cy + Math.round((float) Math.sin(a) * (radius - 2.0F));
+            graphics.fill(gx - 1, gy - 1, gx + 2, gy + 2,
+                    i % 2 == 0 ? withAlpha(STAR_CORE, Math.round(210 * alphaFactor)) : innerColor);
+        }
+    }
+
+    // ------------------------------------------------------------------ SALVAGE LAYOUT & DESTRUCTION VFX
+
+    private void drawSalvageLayout(GuiGraphicsExtractor graphics, int mouseX, int mouseY,
+                                   float time, float partialTick) {
         int inputX = leftPos + 124;
         int outputX = leftPos + 212;
         int slotY = topPos + 72;
 
+        SalvageState salvage = CelestialAltarAnimationController.getSalvage();
+        boolean salvageAnimating = salvage != null;
+
         ItemStack inputStack = menu.getSlot(CelestialAltarBlockEntity.SALVAGE_EQUIPMENT).getItem();
-        ItemStack outputStack = menu.getSlot(CelestialAltarBlockEntity.SALVAGE_OUTPUT).getItem();
+        ItemStack outputStack = salvageAnimating
+                ? ItemStack.EMPTY
+                : menu.getSlot(CelestialAltarBlockEntity.SALVAGE_OUTPUT).getItem();
 
         boolean inputValid = !inputStack.isEmpty()
                 && CraftingEquipmentManager.isEligibleForCelestialAltar(inputStack)
                 && CraftingEquipmentManager.isTranscendent(inputStack);
         boolean ready = menu.canSalvage();
 
-        // Column headers cleanly centered over their respective sides
         drawFittedCenteredText(graphics, Component.translatable("gui.simpleskills.celestial_altar.one_item"),
                 inputX + 8, topPos + 45, 134, TEXT);
         drawFittedCenteredText(graphics, Component.translatable("gui.simpleskills.celestial_altar.essence_output"),
                 outputX + 8, topPos + 45, 120, RUNE_BRIGHT);
 
-        // Transmutation conduit between sacrifice input and essence output
         int pipeY = slotY + 8;
         int pipeStartX = inputX + 21;
         int pipeEndX = outputX - 5;
         graphics.fill(pipeStartX, pipeY - 1, pipeEndX, pipeY + 2, OBSIDIAN_EDGE);
-        if (ready || !outputStack.isEmpty()) {
-            int flowColor = !outputStack.isEmpty() ? STAR_CYAN : RUNE_BRIGHT;
+        if (ready || !outputStack.isEmpty() || salvageAnimating) {
+            int flowColor = (!outputStack.isEmpty() || salvageAnimating) ? STAR_CYAN : RUNE_BRIGHT;
             graphics.fill(pipeStartX, pipeY, pipeEndX, pipeY + 1, flowColor);
             int pulseOffset = (int) ((time * 1.4F) % Math.max(1, (pipeEndX - pipeStartX - 4)));
             graphics.fill(pipeStartX + pulseOffset, pipeY - 1, pipeStartX + pulseOffset + 4, pipeY + 2, GOLD_BRIGHT);
         }
         int midX = (pipeStartX + pipeEndX) / 2;
-        drawMiniStar(graphics, midX, pipeY, ready ? GOLD_BRIGHT : GOLD_DARK,
-                !outputStack.isEmpty() ? STAR_CORE : (ready ? RUNE_BRIGHT : RUNE_DEEP));
+        drawMiniStar(graphics, midX, pipeY, (ready || salvageAnimating) ? GOLD_BRIGHT : GOLD_DARK,
+                !outputStack.isEmpty() ? STAR_CORE : ((ready || salvageAnimating) ? RUNE_BRIGHT : RUNE_DEEP));
 
-        // Input pedestal
         SlotState inputState = inputStack.isEmpty() ? SlotState.EMPTY
                 : (inputValid ? SlotState.VALID_GOLD : SlotState.INVALID);
         drawCentralPedestal(graphics, inputX, slotY, inputState,
                 isInside(mouseX, mouseY, inputX, slotY, 16, 16), time);
 
-        // Salvage Output Reliquary Pedestal
         drawSalvageOutputPedestal(graphics, outputX, slotY, !outputStack.isEmpty(),
                 isInside(mouseX, mouseY, outputX, slotY, 16, 16), time);
 
-        if (inputStack.isEmpty()) drawEquipmentGlyph(graphics, inputX, slotY);
+        if (inputStack.isEmpty() && !salvageAnimating) drawEquipmentGlyph(graphics, inputX, slotY);
         if (outputStack.isEmpty()) drawEssenceGlyph(graphics, outputX, slotY);
 
-        // Double-click confirmation notice cleanly inside the chamber
         int confirmTextColor = isSalvageArmed() ? SALVAGE_WARN : MUTED;
         drawFittedCenteredText(graphics, Component.translatable("gui.simpleskills.celestial_altar.double_confirm"),
                 leftPos + imageWidth / 2, topPos + 95, imageWidth - 26, confirmTextColor);
     }
 
-    private void drawEnhancementLayout(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float time) {
+    private void renderSalvageForeground(GuiGraphicsExtractor graphics, SalvageState salvage,
+                                         float time, float partialTick) {
+        float p = salvage.progress(partialTick);
+        // Phases:
+        // Phase 1: 0.00..0.18 (Magical Destabilization: levitate + vibrate + purple aura)
+        // Phase 2: 0.18..0.54 (Progressive Cracking: glowing purple/white cracks + detaching fragments)
+        // Phase 3: 0.54..0.80 (Disintegration: item breaks into fragments converging at center + burst)
+        // Phase 4: 0.80..1.00 (Essence Formation: Transcendency Essence forms & moves to output slot)
+        int inputCenterX = leftPos + 124 + 8;
+        int inputCenterY = topPos + 72 + 8;
+        int chamberCenterX = leftPos + 176;
+        int chamberCenterY = topPos + 80;
+        int outputCenterX = leftPos + 212 + 8;
+        int outputCenterY = topPos + 72 + 8;
+
+        // Mask the real output slot until the formed Essence arrives in Phase 4
+        if (p < 0.94F) {
+            int outX = leftPos + 212;
+            int outY = topPos + 72;
+            graphics.fill(outX, outY, outX + 16, outY + 16, OBSIDIAN_VOID);
+            drawEssenceGlyph(graphics, outX, outY);
+        }
+
+        // Phases 1–3: Sacrificed equipment destabilizing, cracking, and disintegrating
+        if (p < 0.78F) {
+            float liftT = Mth.clamp(p / 0.18F, 0.0F, 1.0F);
+            float crackT = Mth.clamp((p - 0.16F) / 0.42F, 0.0F, 1.0F);
+            float disintegrateT = Mth.clamp((p - 0.52F) / 0.26F, 0.0F, 1.0F);
+
+            float vibAmp = 0.65F + crackT * 1.45F + disintegrateT * 1.1F;
+            float itemX = inputCenterX + (float) Math.cos(time * 2.7F) * vibAmp;
+            float itemY = inputCenterY - liftT * 6.0F + (float) Math.sin(time * 3.3F) * vibAmp;
+            float itemScale = (1.18F + 0.06F * (float) Math.sin(time * 0.65F)) * (1.0F - disintegrateT * 0.58F);
+
+            // Destabilizing purple aura surrounding the equipment
+            int auraR = Math.round(13 + crackT * 6.0F);
+            fillSoftCircle(graphics, Math.round(itemX), Math.round(itemY), auraR,
+                    withAlpha(RUNE_PURPLE, Math.round(70 + crackT * 95)));
+
+            // Render preserved equipment copy while it still has structural cohesion
+            if (disintegrateT < 0.85F) {
+                graphics.pose().pushMatrix();
+                graphics.pose().translate(itemX, itemY);
+                graphics.pose().rotate((float) Math.sin(time * 1.9F) * (0.04F + crackT * 0.08F));
+                graphics.pose().scale(itemScale, itemScale);
+                graphics.item(salvage.sacrificedEquipment, -8, -8);
+                graphics.pose().popMatrix();
+
+                // Progressive glowing purple & white cracks clipped strictly to the item's silhouette
+                if (crackT > 0.01F) {
+                    drawSalvageCracksOverlay(graphics, salvage, itemX, itemY, itemScale,
+                            Math.min(1.0F, crackT + disintegrateT * 0.5F), time);
+                }
+            }
+
+            // Rising destabilization particles in Phase 1 & 2
+            for (int i = 0; i < 8; i++) {
+                float cycle = ((time * 0.09F) + i * 0.125F) % 1.0F;
+                int px = Math.round(itemX - 8 + (i * 5) % 17 + (float) Math.sin(time * 0.4F + i) * 2.0F);
+                int py = Math.round(itemY + 6 - cycle * 18.0F);
+                int alpha = Math.round((float) Math.sin(cycle * Math.PI) * 190.0F);
+                graphics.fill(px, py, px + 2, py + 2,
+                        i % 2 == 0 ? withAlpha(RUNE_BRIGHT, alpha) : withAlpha(STAR_CORE, alpha));
+            }
+        }
+
+        // Phase 2 & 3: Detached glowing fragments separating and converging to the center
+        if (p >= 0.28F && p <= 0.82F) {
+            float fragPhase = (p - 0.28F) / 0.54F;
+            float detachT = Mth.clamp(fragPhase / 0.42F, 0.0F, 1.0F);
+            float convergeT = Mth.clamp((fragPhase - 0.35F) / 0.65F, 0.0F, 1.0F);
+            float easeConverge = easeInOutCubic(convergeT);
+
+            float originX = inputCenterX;
+            float originY = inputCenterY - 6.0F;
+
+            for (DisintegrationFragment frag : salvage.fragments) {
+                float localX = originX + (frag.u() - 0.5F) * 18.0F + frag.burstDx() * detachT;
+                float localY = originY + (frag.v() - 0.5F) * 18.0F + frag.burstDy() * detachT;
+
+                // Spiral inward toward central transmutation point
+                float swirlAngle = easeConverge * 3.8F + frag.spinSpeed() * 10.0F;
+                float swirlRadius = (1.0F - easeConverge) * 6.0F;
+                float fx = Mth.lerp(easeConverge, localX, chamberCenterX) + (float) Math.cos(swirlAngle) * swirlRadius;
+                float fy = Mth.lerp(easeConverge, localY, chamberCenterY) + (float) Math.sin(swirlAngle) * swirlRadius;
+
+                int fragAlpha = Math.round(235 * (1.0F - Math.max(0.0F, (convergeT - 0.82F) / 0.18F)));
+                int coreColor = switch (frag.colorVariant()) {
+                    case 0 -> withAlpha(STAR_CORE, fragAlpha);
+                    case 1 -> withAlpha(RUNE_BRIGHT, fragAlpha);
+                    default -> withAlpha(GOLD_BRIGHT, fragAlpha);
+                };
+                int ix = Math.round(fx);
+                int iy = Math.round(fy);
+                graphics.fill(ix - 1, iy - 1, ix + 2, iy + 2, withAlpha(RUNE_PURPLE, fragAlpha / 2));
+                graphics.fill(ix, iy, ix + 1, iy + 1, coreColor);
+            }
+        }
+
+        // Phase 3 -> 4 Convergence Burst at center
+        if (p >= 0.72F && p <= 0.90F) {
+            float burstT = (p - 0.72F) / 0.18F;
+            float flash = (float) Math.sin(burstT * Math.PI);
+            fillSoftCircle(graphics, chamberCenterX, chamberCenterY, Math.round(8 + flash * 16),
+                    withAlpha(RUNE_BRIGHT, Math.round(flash * 190)));
+            fillSoftCircle(graphics, chamberCenterX, chamberCenterY, Math.round(4 + flash * 10),
+                    withAlpha(STAR_CORE, Math.round(flash * 235)));
+            drawCircleRing(graphics, chamberCenterX, chamberCenterY, 5.0F + burstT * 22.0F,
+                    withAlpha(STAR_CORE, Math.round((1.0F - burstT) * 210)));
+        }
+
+        // Phase 4: Transcendency Essence formation, amplified glint, orbiting particles, glide to output slot
+        if (p >= 0.78F) {
+            float formT = (p - 0.78F) / 0.22F;
+            float moveT = easeInOutCubic(Mth.clamp((formT - 0.28F) / 0.72F, 0.0F, 1.0F));
+
+            float ex = Mth.lerp(moveT, chamberCenterX, outputCenterX);
+            float ey = Mth.lerp(moveT, chamberCenterY, outputCenterY)
+                    - (float) Math.sin(moveT * Math.PI) * 7.0F;
+            float essenceScale = Mth.lerp(moveT, 1.38F, 1.0F);
+
+            // Prominent enchanted glint & starlight aura
+            float glintPulse = 0.65F + 0.35F * (float) Math.sin(time * 0.55F);
+            fillSoftCircle(graphics, Math.round(ex), Math.round(ey), 12,
+                    withAlpha(RUNE_BRIGHT, Math.round(135 * glintPulse)));
+            fillSoftCircle(graphics, Math.round(ex), Math.round(ey), 7,
+                    withAlpha(GOLD_BRIGHT, Math.round(115 * glintPulse)));
+
+            // Orbiting particles around the newly formed Essence
+            for (int i = 0; i < 6; i++) {
+                float a = time * 0.28F + i * (float) (Math.PI / 3.0);
+                float r = 11.0F * (1.0F - moveT * 0.35F);
+                int ox = Math.round(ex + (float) Math.cos(a) * r);
+                int oy = Math.round(ey + (float) Math.sin(a) * r);
+                graphics.fill(ox, oy, ox + 2, oy + 2,
+                        i % 2 == 0 ? STAR_CORE : RUNE_BRIGHT);
+            }
+
+            graphics.pose().pushMatrix();
+            graphics.pose().translate(ex, ey);
+            graphics.pose().scale(essenceScale, essenceScale);
+            graphics.item(salvage.formedEssence, -8, -8);
+            graphics.pose().popMatrix();
+        }
+    }
+
+    private void drawSalvageCracksOverlay(GuiGraphicsExtractor graphics, SalvageState salvage,
+                                          float centerX, float centerY, float scale,
+                                          float crackProgress, float time) {
+        ItemSilhouette sil = salvage.silhouette;
+        float iconSize = 16.0F * scale;
+        float iconLeft = centerX - iconSize * 0.5F;
+        float iconTop = centerY - iconSize * 0.5F;
+        float pulse = 0.65F + 0.35F * (float) Math.sin(time * 0.65F);
+
+        int glowColor = withAlpha(RUNE_BRIGHT, Math.round(155 + 90 * pulse));
+        int coreColor = withAlpha(STAR_CORE, Math.round(210 + 45 * pulse));
+
+        for (FracturePath path : salvage.fractures) {
+            float revealed = crackProgress * path.maxDistance();
+            for (CrackSegment seg : path.segments()) {
+                if (revealed <= seg.d1()) continue;
+                float t = Math.min(1.0F, (revealed - seg.d1()) / Math.max(0.0001F, seg.d2() - seg.d1()));
+                float eu = seg.x1() + (seg.x2() - seg.x1()) * t;
+                float ev = seg.y1() + (seg.y2() - seg.y1()) * t;
+
+                int steps = Math.max(1, Math.round(Math.max(Math.abs(eu - seg.x1()), Math.abs(ev - seg.y1())) * iconSize * 1.5F));
+                for (int s = 0; s <= steps; s++) {
+                    float f = s / (float) steps;
+                    float u = seg.x1() + (eu - seg.x1()) * f;
+                    float v = seg.y1() + (ev - seg.y1()) * f;
+                    if (!sil.isOpaqueAt(u, v)) continue;
+
+                    int px = Math.round(iconLeft + u * iconSize);
+                    int py = Math.round(iconTop + v * iconSize);
+                    graphics.fill(px - 1, py, px + 2, py + 1, glowColor);
+                    graphics.fill(px, py - 1, px + 1, py + 2, glowColor);
+                    graphics.fill(px, py, px + 1, py + 1, coreColor);
+                }
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------ ENHANCE LAYOUT & RUNE ENERGY STREAM
+
+    private void drawEnhancementLayout(GuiGraphicsExtractor graphics, int mouseX, int mouseY,
+                                       float time, float partialTick) {
         int equipmentX = leftPos + 36;
         int runeX = leftPos + 300;
         int slotY = topPos + 72;
@@ -545,11 +995,7 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         boolean validRunes = !runes.isEmpty()
                 && runes.is(com.github.ob_yekt.simpleskills.runes.RuneContent.RUNE);
 
-        // Dedicated, symmetrical bays keep the equipment and Rune slots centered in
-        // their own columns instead of pushing either label outside the machine area.
         int sidePanelY = topPos + 45;
-        // Keep the side bays centered on the 16x16 equipment/rune slots and leave
-        // a clear gap above the player-inventory divider at y=127.
         int sidePanelH = 70;
         graphics.fill(leftPos + 12, sidePanelY, leftPos + 76, sidePanelY + sidePanelH, 0x99120D20);
         drawOutline(graphics, leftPos + 12, sidePanelY, 64, sidePanelH, OBSIDIAN_EDGE);
@@ -572,7 +1018,6 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         if (equipment.isEmpty()) drawEquipmentGlyph(graphics, equipmentX, slotY);
         if (runes.isEmpty()) drawEssenceGlyph(graphics, runeX, slotY);
 
-        // Small animated link makes the Rune flow visually clear without covering the option list.
         int conduitY = slotY + 8;
         graphics.fill(equipmentX + 22, conduitY, equipmentX + 25, conduitY + 1, OBSIDIAN_EDGE);
         graphics.fill(runeX - 8, conduitY, runeX - 5, conduitY + 1, OBSIDIAN_EDGE);
@@ -581,7 +1026,6 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
             graphics.fill(pulseX, conduitY - 1, pulseX + 3, conduitY + 2, RUNE_BRIGHT);
         }
 
-        // Center column: each attribute/perk is its own button. Clicking it applies one Rune immediately.
         int listX = leftPos + ENHANCE_LIST_X;
         int listY = topPos + ENHANCE_LIST_Y;
         graphics.fill(listX - 2, listY - 2, listX + ENHANCE_LIST_W + 2,
@@ -591,6 +1035,9 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         graphics.centeredText(font,
                 Component.translatable("gui.simpleskills.celestial_altar.enhance_options"),
                 listX + ENHANCE_LIST_W / 2, topPos + 40, GOLD);
+
+        EnhanceState enhance = CelestialAltarAnimationController.getEnhance();
+        float enhanceProgress = enhance != null ? enhance.progress(partialTick) : -1.0F;
 
         List<EnhancementRow> rows = getEnhancementRows();
         for (int i = 0; i < renderedEnhancementRows.length; i++) renderedEnhancementRows[i] = null;
@@ -613,8 +1060,8 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
                 int rowY = listY + visible * ENHANCE_ROW_H;
                 boolean hovered = isInside(mouseX, mouseY, listX, rowY, ENHANCE_LIST_W, ENHANCE_ROW_H);
                 boolean enabled = (row.actionable() || row.rerollable()) && validEquipment && validRunes;
-                // Attribute rolls use green; perks use cyan. This mirrors the item tooltip
-                // and makes it immediately clear which rows are stats versus special effects.
+                boolean isAnimatedTarget = enhance != null && row.id().equals(enhance.targetId);
+
                 int baseBg = row.perk() ? 0xFF102631 : 0xFF14291E;
                 int hoverBg = row.perk() ? 0xFF1A3B4B : 0xFF1C3A2B;
                 int accent = row.perk() ? 0xFF70DDF2 : 0xFF78E39A;
@@ -622,13 +1069,24 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
                         : (row.perk() ? 0xFF28758A : 0xFF347C50)) : 0xFF30263F;
                 int background = enabled ? (hovered ? hoverBg : baseBg)
                         : (hovered ? 0xFF1B1528 : 0xFF120E1C);
+
+                if (isAnimatedTarget && enhanceProgress >= 0.30F) {
+                    float pulseT = (float) Math.sin(Math.min(1.0F, (enhanceProgress - 0.30F) / 0.70F) * Math.PI);
+                    int pulseTint = switch (enhance.kind) {
+                        case CelestialAltarVisualPayload.KIND_ENHANCE_STAT -> 0xFF2C5E3B;
+                        case CelestialAltarVisualPayload.KIND_REROLL_STAT -> 0xFF43256B;
+                        default -> 0xFF1E5269;
+                    };
+                    background = lerpColor(background, pulseTint, pulseT * 0.85F);
+                    edge = lerpColor(edge, GOLD_BRIGHT, pulseT);
+                }
+
                 graphics.fill(listX, rowY, listX + ENHANCE_LIST_W, rowY + ENHANCE_ROW_H - 1, background);
                 graphics.fill(listX, rowY, listX + ENHANCE_LIST_W, rowY + 1, edge);
 
                 int iconX = listX + 3;
                 int iconY = rowY;
                 if (!row.perk()) {
-                    // Left roulette changes the attribute type; right + strengthens its value.
                     drawRerollActionIcon(graphics, iconX, iconY,
                             row.rerollable() && validEquipment && validRunes, (int) time,
                             0xFF78E39A, 0xFF245B3B, 0xFF183626);
@@ -641,9 +1099,14 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
                     drawLockedPerkIcon(graphics, iconX, iconY);
                 }
 
+                int textMaxW = ENHANCE_LIST_W - (row.perk() ? 24 : 39);
                 int textColor = enabled ? (hovered ? GOLD_BRIGHT : accent) : MUTED;
-                drawFittedText(graphics, row.label(), listX + 19, rowY,
-                        ENHANCE_LIST_W - (row.perk() ? 24 : 39), textColor);
+                if (isAnimatedTarget) {
+                    drawAnimatedEnhancementRowText(graphics, enhance, row, listX + 19, rowY,
+                            textMaxW, textColor, enhanceProgress, time);
+                } else {
+                    drawFittedText(graphics, row.label(), listX + 19, rowY, textMaxW, textColor);
+                }
             }
             if (rows.size() > ENHANCE_VISIBLE_ROWS) {
                 int trackX = listX + ENHANCE_LIST_W - 2;
@@ -655,7 +1118,6 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
                 graphics.fill(trackX, thumbY, trackX + 1, thumbY + thumbH, RUNE_BRIGHT);
             }
         }
-        // The hitboxes now point to the same row records that were just rendered.
         updateEnhancementButtonStates(true);
 
         if (validEquipment && !validRunes) {
@@ -665,6 +1127,183 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         } else if (validEquipment && validRunes) {
             drawFittedCenteredText(graphics, Component.literal("×" + runes.getCount()),
                     runeX + 8, topPos + 99, 48, GOLD_BRIGHT);
+        }
+    }
+
+    private void drawAnimatedEnhancementRowText(GuiGraphicsExtractor graphics, EnhanceState enhance,
+                                                EnhancementRow row, int x, int y, int maxWidth,
+                                                int defaultColor, float p, float time) {
+        if (enhance.kind == CelestialAltarVisualPayload.KIND_ENHANCE_STAT) {
+            // Smoothly interpolate the numerical value from oldValue -> newValue
+            float numT = easeInOutCubic(Mth.clamp((p - 0.32F) / 0.52F, 0.0F, 1.0F));
+            double shownValue = Mth.lerp(numT, enhance.oldValue, enhance.newValue);
+            boolean reach = enhance.targetId.equals("attackReach");
+            String unit = reach ? " blocks" : "%";
+            boolean showMax = enhance.reachedMax && numT >= 0.85F;
+            String label = Component.translatable(enhance.newTranslationKey).getString()
+                    + "  +" + formatScreenPercent(shownValue) + unit
+                    + " [" + formatScreenPercent(enhance.minValue) + " - "
+                    + formatScreenPercent(enhance.maxValue) + unit + "]"
+                    + (showMax ? "  MAX" : "");
+            int color = lerpColor(defaultColor, GOLD_BRIGHT,
+                    (float) Math.sin(Mth.clamp((p - 0.30F) / 0.70F, 0.0F, 1.0F) * Math.PI));
+            drawFittedText(graphics, Component.literal(label), x, y, maxWidth, color);
+
+            // Stronger golden sparkle burst when attribute reaches MAX
+            if (enhance.reachedMax && p >= 0.45F) {
+                float sparkleT = (p - 0.45F) / 0.55F;
+                int alpha = Math.round((1.0F - sparkleT) * 240.0F);
+                for (int i = 0; i < 10; i++) {
+                    int sx = x + 6 + ((i * 23) % Math.max(12, maxWidth - 12));
+                    int sy = y + 4 - (int) (Math.sin(sparkleT * Math.PI + i) * 5.0F);
+                    graphics.fill(sx, sy, sx + 2, sy + 2,
+                            i % 2 == 0 ? withAlpha(GOLD_BRIGHT, alpha) : withAlpha(STAR_CORE, alpha));
+                }
+            }
+            return;
+        }
+
+        // Attribute Reroll or Perk Reroll: fade out old label in place, then fade in replacement at exact same position
+        Component oldComp;
+        Component newComp;
+        int accentFlash = enhance.kind == CelestialAltarVisualPayload.KIND_REROLL_STAT
+                ? RUNE_BRIGHT : STAR_CYAN;
+
+        if (enhance.kind == CelestialAltarVisualPayload.KIND_REROLL_STAT) {
+            boolean oldReach = "attackReach".equals(enhance.oldId);
+            String oldUnit = oldReach ? " blocks" : "%";
+            oldComp = Component.literal(Component.translatable(enhance.oldTranslationKey).getString()
+                    + "  +" + formatScreenPercent(enhance.oldValue) + oldUnit);
+
+            float newCountT = easeInOutCubic(Mth.clamp((p - 0.55F) / 0.40F, 0.0F, 1.0F));
+            double shownNew = Mth.lerp(newCountT, enhance.minValue, enhance.newValue);
+            boolean newReach = "attackReach".equals(enhance.targetId);
+            String newUnit = newReach ? " blocks" : "%";
+            String newStr = Component.translatable(enhance.newTranslationKey).getString()
+                    + "  +" + formatScreenPercent(shownNew) + newUnit
+                    + " [" + formatScreenPercent(enhance.minValue) + " - "
+                    + formatScreenPercent(enhance.maxValue) + newUnit + "]"
+                    + (enhance.reachedMax ? "  MAX" : "");
+            newComp = Component.literal(newStr);
+        } else {
+            oldComp = getCompactPerkDisplayComponent(
+                    new PerkRerollInfo(enhance.oldTranslationKey, enhance.oldAmplifier, false, true, 0));
+            newComp = row.label();
+        }
+
+        if (p < 0.56F) {
+            float fadeOut = 1.0F - Mth.clamp((p - 0.30F) / 0.26F, 0.0F, 1.0F);
+            int alpha = Math.max(24, Math.round(255 * fadeOut));
+            int fadedColor = withAlpha(lerpColor(defaultColor, accentFlash, 1.0F - fadeOut), alpha);
+            drawFittedText(graphics, oldComp, x, y, maxWidth, fadedColor);
+        } else {
+            float fadeIn = Mth.clamp((p - 0.56F) / 0.34F, 0.0F, 1.0F);
+            int alpha = Math.max(32, Math.round(255 * fadeIn));
+            int revealColor = withAlpha(lerpColor(STAR_CORE, defaultColor, fadeIn), alpha);
+            drawFittedText(graphics, newComp, x, y, maxWidth, revealColor);
+        }
+    }
+
+    private void renderEnhanceForeground(GuiGraphicsExtractor graphics, EnhanceState enhance,
+                                         float time, float partialTick) {
+        float p = enhance.progress(partialTick);
+        int runeSlotX = leftPos + 300;
+        int runeSlotY = topPos + 72;
+        float runeCenterX = runeSlotX + 8.0F;
+        float runeCenterY = runeSlotY + 8.0F;
+
+        int primaryColor;
+        int secondaryColor;
+        switch (enhance.kind) {
+            case CelestialAltarVisualPayload.KIND_ENHANCE_STAT -> {
+                primaryColor = 0xFF5CE68A;  // Emerald Green
+                secondaryColor = GOLD_BRIGHT;
+            }
+            case CelestialAltarVisualPayload.KIND_REROLL_STAT -> {
+                primaryColor = RUNE_BRIGHT; // Violet
+                secondaryColor = STAR_CORE;   // White
+            }
+            default -> {
+                primaryColor = STAR_CYAN;   // Cyan
+                secondaryColor = RUNE_PURPLE; // Violet
+            }
+        }
+
+        // 1. Preserve and glow the Rune in the right slot even if the stack reached 0
+        float runeGlow = p < 0.35F
+                ? (float) Math.sin((p / 0.35F) * Math.PI)
+                : Math.max(0.0F, 1.0F - (p - 0.35F) / 0.65F);
+        fillSoftCircle(graphics, Math.round(runeCenterX), Math.round(runeCenterY), 11,
+                withAlpha(primaryColor, Math.round(135 * runeGlow)));
+        fillSoftCircle(graphics, Math.round(runeCenterX), Math.round(runeCenterY), 7,
+                withAlpha(secondaryColor, Math.round(115 * runeGlow)));
+
+        if (menu.getSlot(CelestialAltarBlockEntity.ENHANCE_RUNES).getItem().isEmpty() && p < 0.75F) {
+            graphics.item(enhance.runeSnapshot, runeSlotX, runeSlotY);
+        }
+
+        // Particles emerging from the Rune slot
+        for (int i = 0; i < 6; i++) {
+            float cycle = ((time * 0.12F) + i * 0.16F) % 1.0F;
+            int px = Math.round(runeCenterX - 5 + (i * 3) % 11);
+            int py = Math.round(runeCenterY + 4 - cycle * 15.0F);
+            int alpha = Math.round((1.0F - p) * (float) Math.sin(cycle * Math.PI) * 210.0F);
+            graphics.fill(px, py, px + 2, py + 2,
+                    i % 2 == 0 ? withAlpha(primaryColor, alpha) : withAlpha(secondaryColor, alpha));
+        }
+
+        // 2. Locate the exact target row by stable targetId
+        int targetVisibleRow = -1;
+        for (int i = 0; i < renderedEnhancementRows.length; i++) {
+            EnhancementRow r = renderedEnhancementRows[i];
+            if (r != null && r.id().equals(enhance.targetId)) {
+                targetVisibleRow = i;
+                break;
+            }
+        }
+        if (targetVisibleRow < 0) return;
+
+        float targetX = leftPos + ENHANCE_LIST_X + ENHANCE_LIST_W - 6.0F;
+        float targetY = topPos + ENHANCE_LIST_Y + targetVisibleRow * ENHANCE_ROW_H + ENHANCE_ROW_H * 0.5F;
+
+        // 3. Visible energy stream from Rune slot to the exact target row
+        if (p < 0.78F) {
+            float travelReach = Mth.clamp((p - 0.06F) / 0.34F, 0.0F, 1.0F);
+            float streamAlpha = p < 0.45F ? 1.0F : Mth.clamp((0.78F - p) / 0.33F, 0.0F, 1.0F);
+            float ctrlX = (runeCenterX + targetX) * 0.5F;
+            float ctrlY = Math.min(runeCenterY, targetY) - 10.0F;
+
+            int steps = 26;
+            int maxStep = Math.max(1, Math.round(steps * travelReach));
+            for (int s = 0; s <= maxStep; s++) {
+                float t = s / (float) steps;
+                float inv = 1.0F - t;
+                float bx = inv * inv * runeCenterX + 2.0F * inv * t * ctrlX + t * t * targetX;
+                float by = inv * inv * runeCenterY + 2.0F * inv * t * ctrlY + t * t * targetY;
+                int px = Math.round(bx);
+                int py = Math.round(by);
+                graphics.fill(px - 1, py - 1, px + 2, py + 2,
+                        withAlpha(primaryColor, Math.round(170 * streamAlpha)));
+                graphics.fill(px, py, px + 1, py + 1,
+                        withAlpha(secondaryColor, Math.round(240 * streamAlpha)));
+            }
+
+            // Luminous head at the front of the stream
+            float headT = travelReach;
+            float inv = 1.0F - headT;
+            int hx = Math.round(inv * inv * runeCenterX + 2.0F * inv * headT * ctrlX + headT * headT * targetX);
+            int hy = Math.round(inv * inv * runeCenterY + 2.0F * inv * headT * ctrlY + headT * headT * targetY);
+            fillSoftCircle(graphics, hx, hy, 4, withAlpha(secondaryColor, Math.round(220 * streamAlpha)));
+        }
+
+        // 4. Short luminous pulse border on the selected row upon impact
+        if (p >= 0.30F) {
+            float impactT = (p - 0.30F) / 0.70F;
+            float pulse = (float) Math.sin(impactT * Math.PI);
+            int rowX = leftPos + ENHANCE_LIST_X;
+            int rowY = topPos + ENHANCE_LIST_Y + targetVisibleRow * ENHANCE_ROW_H;
+            drawOutline(graphics, rowX, rowY, ENHANCE_LIST_W, ENHANCE_ROW_H - 1,
+                    withAlpha(secondaryColor, Math.round(220 * pulse)));
         }
     }
 
@@ -698,9 +1337,6 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
             rows.add(new EnhancementRow(info.id(), Component.literal(label), false,
                     canEnhance, canReplace));
         }
-        // getEnhancementPerks() follows the exact serialized perk order stored in CustomData.
-        // The action ID carries the original index and rolled amplifier so the server can
-        // replace that exact row without sorting or resolving by perk name.
         for (PerkRerollInfo perk : menu.getEnhancementPerks()) {
             rows.add(new EnhancementRow(perk.actionTargetId(), getCompactPerkDisplayComponent(perk),
                     true, perk.rerollable(), perk.rerollable()));
@@ -749,7 +1385,6 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         int dark = enabled ? darkAccent : 0xFF30283B;
         graphics.fill(x, y, x + 11, y + 10, enabled ? background : 0xFF211A2B);
         drawOutline(graphics, x, y, 11, 10, enabled ? accent : 0xFF51445E);
-        // Tiny roulette wheel: outer ring, hub and rotating pointer.
         graphics.fill(x + 3, y + 2, x + 8, y + 3, dark);
         graphics.fill(x + 2, y + 3, x + 3, y + 7, dark);
         graphics.fill(x + 8, y + 3, x + 9, y + 7, dark);
@@ -788,7 +1423,8 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         int w = ACTION_BTN_W;
         int h = ACTION_BTN_H;
         boolean infusion = mode == CelestialAltarMenu.MODE_INFUSION;
-        boolean enabled = infusion ? menu.canInfuse() : menu.canSalvage();
+        boolean blocking = CelestialAltarAnimationController.isBlockingRitualActive();
+        boolean enabled = !blocking && (infusion ? menu.canInfuse() : menu.canSalvage());
         boolean hovered = enabled && isInside(mouseX, mouseY, x, y, w, h);
         boolean armed = !infusion && isSalvageArmed();
 
@@ -818,7 +1454,6 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
     }
 
     private void drawFullWidthPlayerInventory(GuiGraphicsExtractor graphics) {
-        // Full-width bottom inventory vault spanning x=8..344 (336px wide)
         int trayX = leftPos + 8;
         int trayY = topPos + 139;
         int trayW = imageWidth - 16;
@@ -826,7 +1461,6 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         graphics.fill(trayX, trayY, trayX + trayW, trayY + trayH, 0xCC0A0713);
         drawBevelBorder(graphics, trayX, trayY, trayW, trayH, OBSIDIAN_VOID, OBSIDIAN_EDGE);
 
-        // Symmetrical left & right obsidian wings flanking the centered 9-column inventory (x=95..257)
         int leftWingX0 = trayX + 3;
         int leftWingX1 = leftPos + 92;
         int rightWingX0 = leftPos + 260;
@@ -837,12 +1471,10 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         graphics.fill(rightWingX0, trayY + 3, rightWingX1, trayY + trayH - 3, 0x88120D20);
         drawOutline(graphics, rightWingX0, trayY + 3, rightWingX1 - rightWingX0, trayH - 6, 0xFF261C3B);
 
-        // Continuous golden hotbar separator line across the entire bottom section
         graphics.fill(leftWingX0 + 5, topPos + 197, leftWingX1 - 5, topPos + 198, GOLD_DARK);
         graphics.fill(leftPos + 94, topPos + 197, leftPos + 258, topPos + 198, GOLD_DARK);
         graphics.fill(rightWingX0 + 5, topPos + 197, rightWingX1 - 5, topPos + 198, GOLD_DARK);
 
-        // Subtle diamond filigree centered inside each wing
         int leftMidX = (leftWingX0 + leftWingX1) / 2;
         int rightMidX = (rightWingX0 + rightWingX1) / 2;
         int wingMidY = trayY + 30;
@@ -855,7 +1487,6 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
     }
 
     private void drawPlayerInventorySlotFrames(GuiGraphicsExtractor graphics) {
-        // Exact match for addStandardInventorySlots(inventory, 95, 142)
         for (int row = 0; row < 3; row++) {
             for (int column = 0; column < 9; column++) {
                 int slotIndex = 8 + row * 9 + column;
@@ -908,7 +1539,6 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         drawFooterFittedCenteredText(graphics, hint, leftPos + imageWidth / 2, fy + 4, fw - 12, MUTED);
     }
 
-    /** Footer instructions use an exact fit so long translations never escape the GUI frame. */
     private void drawFooterFittedCenteredText(GuiGraphicsExtractor graphics, Component text,
                                               int centerX, int y, int maxWidth, int color) {
         int rawWidth = font.width(text);
@@ -973,7 +1603,6 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         graphics.centeredText(font, Component.literal(badge), x + w / 2, y + 29, badgeColor);
     }
 
-    /** Renders centered text at native 1.0x scale when it fits, scaling smoothly only if a translation exceeds maxWidth. */
     private void drawFittedCenteredText(GuiGraphicsExtractor graphics, Component text,
                                         int centerX, int y, int maxWidth, int color) {
         int rawWidth = font.width(text);
@@ -1221,6 +1850,43 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
         graphics.fill(x + w - 1, y, x + w, y + h, bottomRight);
     }
 
+    private static void fillSoftCircle(GuiGraphicsExtractor graphics, int cx, int cy, int radius, int color) {
+        if (radius <= 0) return;
+        for (int dy = -radius; dy <= radius; dy++) {
+            int span = (int) Math.round(Math.sqrt(radius * radius - dy * dy));
+            graphics.fill(cx - span, cy + dy, cx + span + 1, cy + dy + 1, color);
+        }
+    }
+
+    private static void drawCircleRing(GuiGraphicsExtractor graphics, int cx, int cy, float radius, int color) {
+        if (radius <= 0.5F) return;
+        int segments = Math.max(24, Math.round(radius * 3.5F));
+        for (int i = 0; i < segments; i++) {
+            double a = i * (Math.PI * 2.0 / segments);
+            int px = cx + (int) Math.round(Math.cos(a) * radius);
+            int py = cy + (int) Math.round(Math.sin(a) * radius);
+            graphics.fill(px, py, px + 1, py + 1, color);
+        }
+    }
+
+    private static float easeInOutCubic(float t) {
+        float clamped = Mth.clamp(t, 0.0F, 1.0F);
+        return clamped < 0.5F
+                ? 4.0F * clamped * clamped * clamped
+                : 1.0F - (float) Math.pow(-2.0F * clamped + 2.0F, 3.0) / 2.0F;
+    }
+
+    private static int lerpColor(int c1, int c2, float t) {
+        float clamped = Mth.clamp(t, 0.0F, 1.0F);
+        int a1 = (c1 >>> 24) & 0xFF, r1 = (c1 >>> 16) & 0xFF, g1 = (c1 >>> 8) & 0xFF, b1 = c1 & 0xFF;
+        int a2 = (c2 >>> 24) & 0xFF, r2 = (c2 >>> 16) & 0xFF, g2 = (c2 >>> 8) & 0xFF, b2 = c2 & 0xFF;
+        int a = Math.round(a1 + (a2 - a1) * clamped);
+        int r = Math.round(r1 + (r2 - r1) * clamped);
+        int g = Math.round(g1 + (g2 - g1) * clamped);
+        int b = Math.round(b1 + (b2 - b1) * clamped);
+        return (a << 24) | (r << 16) | (g << 8) | b;
+    }
+
     private static boolean isInside(double mx, double my, int x, int y, int w, int h) {
         return mx >= x && mx < x + w && my >= y && my < y + h;
     }
@@ -1231,7 +1897,14 @@ public final class CelestialAltarScreen extends AbstractContainerScreen<Celestia
     }
 
     @Override
-    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
-        // Rendered inside extractBackground using the custom Celestial Altar palette.
+    public void onClose() {
+        CelestialAltarAnimationController.onScreenClosed();
+        super.onClose();
+    }
+
+    @Override
+    public void removed() {
+        CelestialAltarAnimationController.onScreenClosed();
+        super.removed();
     }
 }
