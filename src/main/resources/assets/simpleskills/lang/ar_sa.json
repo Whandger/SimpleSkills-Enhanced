@@ -609,5 +609,6 @@
   "gui.simpleskills.celestial_altar.perk_reroll_hint": "تعيد رونية واحدة سحب هذه الميزة فقط، وتبقى بقية المزايا كما هي.",
   "gui.simpleskills.celestial_altar.reroll_perk_action": "إعادة سحب الميزة (رونية واحدة)",
   "message.simpleskills.celestial_altar.perk_rerolled": "تمت إعادة سحب الميزة المحددة.",
-  "gui.simpleskills.celestial_altar.enhance_options": "السمات والمزايا"
+  "gui.simpleskills.celestial_altar.enhance_options": "السمات والمزايا",
+  "item.simpleskills.crafting_stat.excavation_time": "تقليل وقت التنقيب"
 }

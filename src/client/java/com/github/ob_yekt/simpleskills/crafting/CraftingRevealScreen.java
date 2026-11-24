@@ -840,6 +840,7 @@ public final class CraftingRevealScreen extends Screen {
         addStat(lines, entry.details(), "damage", "item.simpleskills.crafting_stat.damage");
         addStat(lines, entry.details(), "durability", "item.simpleskills.crafting_stat.durability");
         addStat(lines, entry.details(), "breakSpeed", "item.simpleskills.crafting_stat.break_speed");
+        addStat(lines, entry.details(), "excavationTime", "item.simpleskills.crafting_stat.excavation_time");
         addStat(lines, entry.details(), "critical", "item.simpleskills.crafting_stat.critical_chance");
         addStat(lines, entry.details(), "attackSpeed", "item.simpleskills.crafting_stat.attack_speed");
         addStat(lines, entry.details(), "armor", "item.simpleskills.crafting_stat.armor");
@@ -887,7 +888,7 @@ public final class CraftingRevealScreen extends Screen {
     }
 
     private static boolean isMaxRollStatLine(Entry entry, int statLineIndex) {
-        String[] fields = {"damage", "durability", "breakSpeed", "critical", "attackSpeed", "armor", "toughness"};
+        String[] fields = {"damage", "durability", "breakSpeed", "excavationTime", "critical", "attackSpeed", "armor", "toughness"};
         int visibleIndex = 0;
         for (String field : fields) {
             if (doubleStat(entry.details(), field) <= 0.0) continue;
@@ -901,7 +902,7 @@ public final class CraftingRevealScreen extends Screen {
         double value = doubleStat(details, field);
         double maximum = doubleStat(details, field + "Max");
         double step = switch (field) {
-            case "durability", "breakSpeed" -> 1.0;
+            case "durability", "breakSpeed", "excavationTime" -> 1.0;
             case "attackSpeed" -> 0.5;
             default -> 0.1;
         };
@@ -940,6 +941,7 @@ public final class CraftingRevealScreen extends Screen {
         if (doubleStat(entry.details(), "damage") > 0.0) count++;
         if (intStat(entry.details(), "durability") > 0) count++;
         if (doubleStat(entry.details(), "breakSpeed") > 0.0) count++;
+        if (doubleStat(entry.details(), "excavationTime") > 0.0) count++;
         if (doubleStat(entry.details(), "critical") > 0.0) count++;
         if (doubleStat(entry.details(), "attackSpeed") > 0.0) count++;
         if (doubleStat(entry.details(), "armor") > 0.0) count++;

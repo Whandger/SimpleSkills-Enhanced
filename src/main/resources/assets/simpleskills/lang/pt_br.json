@@ -614,5 +614,6 @@
   "gui.simpleskills.celestial_altar.perk_reroll_hint": "Uma Runa rerrola somente este perk. Os demais permanecem iguais.",
   "gui.simpleskills.celestial_altar.reroll_perk_action": "Rerrolar Perk (1 Runa)",
   "message.simpleskills.celestial_altar.perk_rerolled": "O perk selecionado foi rerrolado.",
-  "gui.simpleskills.celestial_altar.enhance_options": "Atributos e Perks"
+  "gui.simpleskills.celestial_altar.enhance_options": "Atributos e Perks",
+  "item.simpleskills.crafting_stat.excavation_time": "Redução do Tempo de Escavação"
 }

@@ -142,6 +142,13 @@ public final class ExcavatingLoot {
         }
 
         public int getTotalXp() {
+            // Nine nuggets craft into one ingot, so the nugget's loot bonus is
+            // one ninth of the Rare-tier bonus. The universal investigation base XP
+            // is still granted, including when a nugget is found.
+            if (this == IRON_NUGGET || this == GOLD_NUGGET) {
+                return ExcavatingRarity.BASE_XP
+                        + Math.round(ExcavatingRarity.RARE.getBonusXp() / 9.0f);
+            }
             return rarity.getTotalXp();
         }
 

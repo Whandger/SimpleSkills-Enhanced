@@ -16,6 +16,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemLore;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
 
 public final class CraftingCommon {
     private static final String AIR_ID = "minecraft:air";
@@ -30,6 +31,16 @@ public final class CraftingCommon {
         return stack.get(DataComponents.MAX_DAMAGE) != null;
     }
 
+    /**
+     * Shields carry an empty BANNER_PATTERNS component by default. Only actual dye or
+     * non-empty banner layers indicate a cosmetic re-craft that should skip equipment rolls.
+     */
+    private static boolean isCosmeticRecraft(ItemStack stack) {
+        if (stack.has(DataComponents.DYED_COLOR)) return true;
+        BannerPatternLayers patterns = stack.get(DataComponents.BANNER_PATTERNS);
+        return patterns != null && !patterns.layers().isEmpty();
+    }
+
     public static boolean isCookableFoodItem(ItemStack stack) {
         String itemKey = stack.getItem().getDescriptionId();
         return ConfigManager.getCookingXP(itemKey, Skills.COOKING) > 0;
@@ -39,7 +50,7 @@ public final class CraftingCommon {
         if (!isValidStack(stack) || !isCraftableItem(stack)) return;
 
         // Cosmetic recipes must not grant Crafting XP or amplify XP from an existing rare item.
-        if (stack.has(DataComponents.DYED_COLOR) || stack.has(DataComponents.BANNER_PATTERNS)) {
+        if (isCosmeticRecraft(stack)) {
             return;
         }
 
@@ -75,7 +86,7 @@ public final class CraftingCommon {
         if (!isCraftingLoreInTooltipsEnabled()) return;
 
         // Prevent durability bonus on "cosmetic re-crafting" (dyeing armor, applying banner to shield, etc.)
-        if (stack.has(DataComponents.DYED_COLOR) || stack.has(DataComponents.BANNER_PATTERNS)) {
+        if (isCosmeticRecraft(stack)) {
             return;
         }
 
@@ -121,7 +132,7 @@ public final class CraftingCommon {
         if (!isValidStack(stack) || !isCraftableItem(stack)) return;
 
         // Prevent durability bonus on "cosmetic re-crafting" (dyeing armor, applying banner to shield, etc.)
-        if (stack.has(DataComponents.DYED_COLOR) || stack.has(DataComponents.BANNER_PATTERNS)) {
+        if (isCosmeticRecraft(stack)) {
             return;
         }
 

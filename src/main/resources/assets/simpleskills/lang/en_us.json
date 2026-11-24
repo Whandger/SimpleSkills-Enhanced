@@ -614,5 +614,6 @@
   "gui.simpleskills.celestial_altar.perk_reroll_hint": "One Rune rerolls only this perk. All other perks stay unchanged.",
   "gui.simpleskills.celestial_altar.reroll_perk_action": "Reroll Perk (1 Rune)",
   "message.simpleskills.celestial_altar.perk_rerolled": "The selected perk has been rerolled.",
-  "gui.simpleskills.celestial_altar.enhance_options": "Attributes & Perks"
+  "gui.simpleskills.celestial_altar.enhance_options": "Attributes & Perks",
+  "item.simpleskills.crafting_stat.excavation_time": "Excavation Time Reduction"
 }

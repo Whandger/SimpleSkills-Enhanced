@@ -609,5 +609,6 @@
   "gui.simpleskills.celestial_altar.perk_reroll_hint": "Une rune relance uniquement cet avantage. Les autres restent inchangés.",
   "gui.simpleskills.celestial_altar.reroll_perk_action": "Relancer l’avantage (1 rune)",
   "message.simpleskills.celestial_altar.perk_rerolled": "L’avantage sélectionné a été relancé.",
-  "gui.simpleskills.celestial_altar.enhance_options": "Attributs et avantages"
+  "gui.simpleskills.celestial_altar.enhance_options": "Attributs et avantages",
+  "item.simpleskills.crafting_stat.excavation_time": "Réduction du temps de fouille"
 }

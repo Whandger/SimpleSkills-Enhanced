@@ -9,15 +9,15 @@ package com.github.ob_yekt.simpleskills.excavating;
  */
 public enum ExcavatingRarity {
     COMMON("Common", 100, "§f"),
-    UNCOMMON("Uncommon", 150, "§a"),
-    RARE("Rare", 200, "§9"),
-    VERY_RARE("Very Rare", 300, "§5"),
-    EPIC("Epic", 500, "§d"),
-    LEGENDARY("Legendary", 800, "§6"),
-    MYTHIC("Mythic", 1500, "§c");
+    UNCOMMON("Uncommon", 175, "§a"),
+    RARE("Rare", 250, "§9"),
+    VERY_RARE("Very Rare", 450, "§5"),
+    EPIC("Epic", 750, "§d"),
+    LEGENDARY("Legendary", 1200, "§6"),
+    MYTHIC("Mythic", 2000, "§c");
 
     /** XP granted for every completed investigation (also when the result is Nothing). */
-    public static final int BASE_XP = 40;
+    public static final int BASE_XP = 100;
 
     private final String displayName;
     private final int bonusXp;

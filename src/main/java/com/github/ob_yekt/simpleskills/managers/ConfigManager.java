@@ -251,6 +251,27 @@ public class ConfigManager {
             BLOCK_SKILL_MAP.putIfAbsent("block.simpleskills.deepslate_rune_ore", Skills.MINING);
             BLOCK_XP_MAP.putIfAbsent("block.simpleskills.deepslate_rune_ore", 1100);
 
+            // Apply new Excavating defaults to existing installations without overwriting
+            // any block values explicitly configured by the server owner.
+            Map<String, Integer> excavatingDefaults = Map.ofEntries(
+                    Map.entry("block.minecraft.dirt", 100),
+                    Map.entry("block.minecraft.grass_block", 100),
+                    Map.entry("block.minecraft.coarse_dirt", 100),
+                    Map.entry("block.minecraft.rooted_dirt", 100),
+                    Map.entry("block.minecraft.podzol", 100),
+                    Map.entry("block.minecraft.mycelium", 100),
+                    Map.entry("block.minecraft.sand", 150),
+                    Map.entry("block.minecraft.red_sand", 150),
+                    Map.entry("block.minecraft.gravel", 150),
+                    Map.entry("block.minecraft.clay", 250),
+                    Map.entry("block.minecraft.soul_sand", 400),
+                    Map.entry("block.minecraft.soul_soil", 400)
+            );
+            excavatingDefaults.forEach((block, xp) -> {
+                BLOCK_SKILL_MAP.putIfAbsent(block, Skills.EXCAVATING);
+                BLOCK_XP_MAP.putIfAbsent(block, xp);
+            });
+
             Simpleskills.LOGGER.info("Loaded {} block mappings.", BLOCK_SKILL_MAP.size());
         } catch (JsonSyntaxException e) {
             Simpleskills.LOGGER.error("JSON syntax error in block_mappings.json: {}", e.getMessage());
@@ -1017,6 +1038,20 @@ public class ConfigManager {
 
         defaults.add(new BlockMapping("block.minecraft.bamboo_sapling", "WOODCUTTING", 10));
         defaults.add(new BlockMapping("block.minecraft.bamboo", "WOODCUTTING", 10));
+
+        // === EXCAVATING MAPPINGS ===
+        defaults.add(new BlockMapping("block.minecraft.dirt", "EXCAVATING", 100));
+        defaults.add(new BlockMapping("block.minecraft.grass_block", "EXCAVATING", 100));
+        defaults.add(new BlockMapping("block.minecraft.coarse_dirt", "EXCAVATING", 100));
+        defaults.add(new BlockMapping("block.minecraft.rooted_dirt", "EXCAVATING", 100));
+        defaults.add(new BlockMapping("block.minecraft.podzol", "EXCAVATING", 100));
+        defaults.add(new BlockMapping("block.minecraft.mycelium", "EXCAVATING", 100));
+        defaults.add(new BlockMapping("block.minecraft.sand", "EXCAVATING", 150));
+        defaults.add(new BlockMapping("block.minecraft.red_sand", "EXCAVATING", 150));
+        defaults.add(new BlockMapping("block.minecraft.gravel", "EXCAVATING", 150));
+        defaults.add(new BlockMapping("block.minecraft.clay", "EXCAVATING", 250));
+        defaults.add(new BlockMapping("block.minecraft.soul_sand", "EXCAVATING", 400));
+        defaults.add(new BlockMapping("block.minecraft.soul_soil", "EXCAVATING", 400));
 
         // === MINING MAPPINGS (ORE OVERRIDES ONLY) ===
 

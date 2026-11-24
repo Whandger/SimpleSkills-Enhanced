@@ -609,5 +609,6 @@
   "gui.simpleskills.celestial_altar.perk_reroll_hint": "Una runa vuelve a sortear solo esta ventaja. Las demás no cambian.",
   "gui.simpleskills.celestial_altar.reroll_perk_action": "Volver a sortear ventaja (1 runa)",
   "message.simpleskills.celestial_altar.perk_rerolled": "La ventaja seleccionada se volvió a sortear.",
-  "gui.simpleskills.celestial_altar.enhance_options": "Atributos y ventajas"
+  "gui.simpleskills.celestial_altar.enhance_options": "Atributos y ventajas",
+  "item.simpleskills.crafting_stat.excavation_time": "Reducción del tiempo de excavación"
 }

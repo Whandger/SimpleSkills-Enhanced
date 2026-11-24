@@ -3,6 +3,7 @@ package com.github.ob_yekt.simpleskills.crafting;
 import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.github.ob_yekt.simpleskills.managers.DatabaseManager;
 import com.github.ob_yekt.simpleskills.mixin.LivingEntityDamageCooldownAccessor;
+import com.github.ob_yekt.simpleskills.shields.GlowstoneShields;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.util.ArrayList;
@@ -68,6 +69,7 @@ public final class CraftingEquipmentManager {
             "simpleskills_crafting_damage_attribute_includes_affixes";
     private static final String DATA_DURABILITY = "simpleskills_crafting_durability_bonus";
     private static final String DATA_BREAK_SPEED = "simpleskills_crafting_break_speed_bonus";
+    private static final String DATA_EXCAVATION_TIME = "simpleskills_crafting_excavation_time_reduction";
     private static final String DATA_CRITICAL_CHANCE = "simpleskills_crafting_critical_chance";
     private static final String DATA_ATTACK_SPEED = "simpleskills_crafting_attack_speed_bonus";
     private static final String DATA_ARMOR = "simpleskills_crafting_armor_bonus";
@@ -518,6 +520,10 @@ public final class CraftingEquipmentManager {
                 rarity.minDurabilityBonus(), rarity.maxDurabilityBonus(), false);
         addUpgradeInfo(result, tag, "breakSpeed", "item.simpleskills.crafting_stat.break_speed",
                 rarity.minBreakSpeedBonus(), rarity.maxBreakSpeedBonus(), false);
+        if (classify(stack) == EquipmentKind.SHOVEL) {
+            addUpgradeInfo(result, tag, "excavationTime", "item.simpleskills.crafting_stat.excavation_time",
+                    rarity.minBreakSpeedBonus(), rarity.maxBreakSpeedBonus(), false);
+        }
         addUpgradeInfo(result, tag, "critical", "item.simpleskills.crafting_stat.critical_chance",
                 rarity.minCriticalChance(), rarity.maxCriticalChance(), criticalMasteryBonus);
         addUpgradeInfo(result, tag, "attackSpeed", "item.simpleskills.crafting_stat.attack_speed",
@@ -569,6 +575,7 @@ public final class CraftingEquipmentManager {
             case "damage" -> DATA_DAMAGE;
             case "durability" -> DATA_DURABILITY;
             case "breakSpeed" -> DATA_BREAK_SPEED;
+            case "excavationTime" -> DATA_EXCAVATION_TIME;
             case "critical" -> DATA_CRITICAL_CHANCE;
             case "attackSpeed" -> DATA_ATTACK_SPEED;
             case "armor" -> DATA_ARMOR;
@@ -621,6 +628,8 @@ public final class CraftingEquipmentManager {
             case "damage" -> new double[]{rarity.minDamageBonus(), rarity.maxDamageBonus()};
             case "durability" -> new double[]{rarity.minDurabilityBonus(), rarity.maxDurabilityBonus()};
             case "breakSpeed" -> new double[]{rarity.minBreakSpeedBonus(), rarity.maxBreakSpeedBonus()};
+            case "excavationTime" -> classify(stack) == EquipmentKind.SHOVEL
+                    ? new double[]{rarity.minBreakSpeedBonus(), rarity.maxBreakSpeedBonus()} : null;
             case "critical" -> {
                 int mastery = getPerkAmplifier(stack, "critical_mastery");
                 double masteryBonus = mastery >= 0 ? 0.05 + mastery * 0.05 : 0.0;
@@ -679,6 +688,7 @@ public final class CraftingEquipmentManager {
             generated += tag.getDoubleOr(DATA_DAMAGE, 0.0) > 0.0 ? 1 : 0;
             generated += tag.getDoubleOr(DATA_DURABILITY, 0.0) > 0.0 ? 1 : 0;
             generated += tag.getDoubleOr(DATA_BREAK_SPEED, 0.0) > 0.0 ? 1 : 0;
+            generated += tag.getDoubleOr(DATA_EXCAVATION_TIME, 0.0) > 0.0 ? 1 : 0;
             generated += tag.getDoubleOr(DATA_CRITICAL_CHANCE, 0.0) > 0.0 ? 1 : 0;
             generated += tag.getDoubleOr(DATA_ATTACK_SPEED, 0.0) > 0.0 ? 1 : 0;
             generated += tag.getDoubleOr(DATA_ARMOR, 0.0) > 0.0 ? 1 : 0;
@@ -697,6 +707,7 @@ public final class CraftingEquipmentManager {
         appendTooltip(stack, rarity, totalDamage,
                 tag.getDoubleOr(DATA_DURABILITY, 0.0),
                 tag.getDoubleOr(DATA_BREAK_SPEED, 0.0),
+                tag.getDoubleOr(DATA_EXCAVATION_TIME, 0.0),
                 getEffectiveCriticalChance(stack),
                 tag.getDoubleOr(DATA_ATTACK_SPEED, 0.0),
                 tag.getDoubleOr(DATA_ARMOR, 0.0),
@@ -740,6 +751,7 @@ public final class CraftingEquipmentManager {
                 generated += tag.getDoubleOr(DATA_DAMAGE, 0.0) > 0.0 ? 1 : 0;
                 generated += tag.getDoubleOr(DATA_DURABILITY, 0.0) > 0.0 ? 1 : 0;
                 generated += tag.getDoubleOr(DATA_BREAK_SPEED, 0.0) > 0.0 ? 1 : 0;
+                generated += tag.getDoubleOr(DATA_EXCAVATION_TIME, 0.0) > 0.0 ? 1 : 0;
                 generated += tag.getDoubleOr(DATA_CRITICAL_CHANCE, 0.0) > 0.0 ? 1 : 0;
                 generated += tag.getDoubleOr(DATA_ATTACK_SPEED, 0.0) > 0.0 ? 1 : 0;
                 generated += tag.getDoubleOr(DATA_ARMOR, 0.0) > 0.0 ? 1 : 0;
@@ -858,6 +870,11 @@ public final class CraftingEquipmentManager {
         // Break Speed is a basic equipment stat (not a blue perk) and has its own rarity-based appearance roll.
         double breakSpeedBonus = breakSpeedEligible && rollStatPresence(player, rarity.breakSpeedStatChance())
                 ? rollStat(player, rarity.minBreakSpeedBonus(), rarity.maxBreakSpeedBonus(), 0.01) : 0.0;
+        // Shovels can also roll a separate percentage reduction to sand investigation time.
+        // It follows the same rarity ranges and appearance chance as the Break Speed stat.
+        double excavationTimeReduction = kind == EquipmentKind.SHOVEL
+                && rollStatPresence(player, rarity.breakSpeedStatChance())
+                ? rollStat(player, rarity.minBreakSpeedBonus(), rarity.maxBreakSpeedBonus(), 0.01) : 0.0;
         double criticalChance = weapon && damageBonus > 0.0
                 ? rollStat(player, rarity.minCriticalChance(), rarity.maxCriticalChance(), 0.001) : 0.0;
         double attackSpeedBonus = attackSpeedEligible && rollStatPresence(player, rarity.attackSpeedStatChance())
@@ -899,6 +916,7 @@ public final class CraftingEquipmentManager {
             tag.putDouble(DATA_DAMAGE, finalDamageBonus);
             tag.putDouble(DATA_DURABILITY, durabilityBonus);
             tag.putDouble(DATA_BREAK_SPEED, breakSpeedBonus);
+            tag.putDouble(DATA_EXCAVATION_TIME, excavationTimeReduction);
             tag.putDouble(DATA_CRITICAL_CHANCE, criticalChance);
             tag.putDouble(DATA_ATTACK_SPEED, finalAttackSpeedBonus);
             tag.putDouble(DATA_ARMOR, finalArmorBonus);
@@ -918,13 +936,14 @@ public final class CraftingEquipmentManager {
                 .withStyle(style -> style.withColor(rarity.color()).withItalic(false)));
         double displayedCriticalChance = getEffectiveCriticalChance(stack);
         // Display the combined rarity + Runic Edge percentage so it matches the real main-hand attribute modifier.
-        appendTooltip(stack, rarity, totalDamageBonus, durabilityBonus, breakSpeedBonus, displayedCriticalChance,
-                attackSpeedBonus, armorBonus, toughnessBonus);
+        appendTooltip(stack, rarity, totalDamageBonus, durabilityBonus, breakSpeedBonus,
+                excavationTimeReduction, displayedCriticalChance, attackSpeedBonus, armorBonus, toughnessBonus);
 
         if (weapon) unlockWeaponTitle(player, rarity);
         announceHighRarityCraft(player, stack, rarity);
         sendReveal(player, stack, originalName.getString(), rarity, totalDamageBonus, durabilityBonus,
-                breakSpeedBonus, displayedCriticalChance, attackSpeedBonus, armorBonus, toughnessBonus, encodedPerks);
+                breakSpeedBonus, excavationTimeReduction, displayedCriticalChance,
+                attackSpeedBonus, armorBonus, toughnessBonus, encodedPerks);
     }
 
     /** Announces Legendary, Mythic and Transcendent equipment to the entire server. */
@@ -958,7 +977,7 @@ public final class CraftingEquipmentManager {
      */
     private static void sendReveal(ServerPlayer player, ItemStack stack, String itemName, CraftingRarity rarity,
                                    double damageBonus, double durabilityBonus, double breakSpeedBonus,
-                                   double criticalChance,
+                                   double excavationTimeReduction, double criticalChance,
                                    double attackSpeedBonus, double armorBonus, double toughnessBonus,
                                    String encodedPerks) {
         // Common and Rare are intentionally silent; the reveal screen is reserved for Unique+.
@@ -969,6 +988,7 @@ public final class CraftingEquipmentManager {
         details.addProperty("damage", damageBonus * 100.0);
         details.addProperty("durability", (int) Math.round(durabilityBonus * 100.0));
         details.addProperty("breakSpeed", breakSpeedBonus * 100.0);
+        details.addProperty("excavationTime", excavationTimeReduction * 100.0);
         details.addProperty("critical", criticalChance * 100.0);
         details.addProperty("attackSpeed", attackSpeedBonus * 100.0);
         details.addProperty("armor", armorBonus * 100.0);
@@ -988,6 +1008,10 @@ public final class CraftingEquipmentManager {
                 rarity.minDurabilityBonus() * 100.0, rarity.maxDurabilityBonus() * 100.0);
         addRevealStatRange(details, "breakSpeed",
                 rarity.minBreakSpeedBonus() * 100.0, rarity.maxBreakSpeedBonus() * 100.0);
+        if (classify(stack) == EquipmentKind.SHOVEL) {
+            addRevealStatRange(details, "excavationTime",
+                    rarity.minBreakSpeedBonus() * 100.0, rarity.maxBreakSpeedBonus() * 100.0);
+        }
         int criticalMastery = getPerkAmplifier(stack, "critical_mastery");
         double criticalMasteryBonus = criticalMastery >= 0 ? 5.0 + criticalMastery * 5.0 : 0.0;
         addRevealStatRange(details, "critical",
@@ -1069,7 +1093,7 @@ public final class CraftingEquipmentManager {
     private static EquipmentKind classify(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return EquipmentKind.OTHER;
         String path = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath().toLowerCase(java.util.Locale.ROOT);
-        if (path.contains("shield")) return EquipmentKind.SHIELD;
+        if (stack.is(GlowstoneShields.SHIELDS) || path.contains("shield")) return EquipmentKind.SHIELD;
 
         Equippable equippable = stack.get(DataComponents.EQUIPPABLE);
         if (equippable != null) {
@@ -1431,7 +1455,8 @@ public final class CraftingEquipmentManager {
     }
 
     private static void appendTooltip(ItemStack stack, CraftingRarity rarity, double damageBonus,
-                                      double durabilityBonus, double breakSpeedBonus, double criticalChance,
+                                      double durabilityBonus, double breakSpeedBonus,
+                                      double excavationTimeReduction, double criticalChance,
                                       double attackSpeedBonus, double armorBonus, double toughnessBonus) {
         ItemLore current = stack.getOrDefault(DataComponents.LORE, new ItemLore(List.of()));
         List<Component> lines = new ArrayList<>(current.lines());
@@ -1460,6 +1485,12 @@ public final class CraftingEquipmentManager {
         }
         if (breakSpeedBonus > 0.0) {
             lines.add(rangeStatLine("item.simpleskills.crafting_stat.break_speed", breakSpeedBonus * 100.0,
+                    rarity.minBreakSpeedBonus() * 100.0, rarity.maxBreakSpeedBonus() * 100.0));
+            generatedLines++;
+        }
+        if (excavationTimeReduction > 0.0 && classify(stack) == EquipmentKind.SHOVEL) {
+            lines.add(rangeStatLine("item.simpleskills.crafting_stat.excavation_time",
+                    excavationTimeReduction * 100.0,
                     rarity.minBreakSpeedBonus() * 100.0, rarity.maxBreakSpeedBonus() * 100.0));
             generatedLines++;
         }
@@ -1847,6 +1878,17 @@ public final class CraftingEquipmentManager {
         int mastery = getPerkAmplifier(weapon, "critical_mastery");
         if (mastery >= 0) chance += 0.05 + mastery * 0.05;
         return Math.min(0.60, Math.max(0.0, chance));
+    }
+
+    /**
+     * Returns the percentage reduction to sand investigation time rolled on a shovel.
+     * The value is stored as a fraction (0.20 = 20%) and is capped to preserve a short
+     * but non-instant investigation even with the strongest equipment.
+     */
+    public static double getExcavationTimeReduction(ItemStack stack) {
+        if (stack == null || stack.isEmpty() || classify(stack) != EquipmentKind.SHOVEL) return 0.0;
+        double reduction = getTag(stack).getDoubleOr(DATA_EXCAVATION_TIME, 0.0);
+        return Math.max(0.0, Math.min(0.70, reduction));
     }
 
     /**

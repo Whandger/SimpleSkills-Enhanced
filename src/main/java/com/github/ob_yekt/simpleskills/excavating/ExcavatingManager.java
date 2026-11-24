@@ -250,7 +250,11 @@ public final class ExcavatingManager {
             BLOCK_OWNERS.remove(globalPos, owner); // stale entry
         }
 
-        int durationTicks = ExcavatingRank.investigationTicks(getLevel(serverPlayer));
+        int baseDurationTicks = ExcavatingRank.investigationTicks(getLevel(serverPlayer));
+        double equipmentReduction = com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager
+                .getExcavationTimeReduction(serverPlayer.getMainHandItem());
+        // Keep at least a quarter-second of server-side investigation time to avoid instant completion.
+        int durationTicks = Math.max(5, (int) Math.ceil(baseDurationTicks * (1.0 - equipmentReduction)));
         Session session = new Session(
                 playerId,
                 dimension,
@@ -466,7 +470,7 @@ public final class ExcavatingManager {
             }
         }
 
-        // XP through the existing progression system: 40 base, plus the rarity bonus of the item.
+        // XP through the existing progression system: 100 base, plus the item's rarity bonus.
         int xp = (reward != null && !found.isEmpty())
                 ? reward.getTotalXp()
                 : ExcavatingRarity.BASE_XP;
