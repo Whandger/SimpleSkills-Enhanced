@@ -623,5 +623,6 @@
   "gui.simpleskills.ore_grinder.output": "Recovered ore",
   "gui.simpleskills.ore_grinder.working": "Grinding...",
   "gui.simpleskills.ore_grinder.waiting_fuel": "Waiting for fuel",
-  "gui.simpleskills.ore_grinder.ready": "Ready to grind"
+  "gui.simpleskills.ore_grinder.ready": "Ready to grind",
+  "gui.simpleskills.ore_grinder.complete": "Salvage complete"
 }

@@ -1,9 +1,14 @@
 package com.github.ob_yekt.simpleskills.grinder;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -17,6 +22,7 @@ import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
+import org.jetbrains.annotations.Nullable;
 
 /** Server-authoritative three-slot inventory and fuel-driven ore grinding process. */
 public final class OreGrinderBlockEntity extends AbstractFurnaceBlockEntity {
@@ -29,6 +35,7 @@ public final class OreGrinderBlockEntity extends AbstractFurnaceBlockEntity {
     private int burnTime;
     private int totalBurnTime;
     private int grindProgress;
+    private ItemStack lastSyncedInput = ItemStack.EMPTY;
 
     public OreGrinderBlockEntity(BlockPos pos, BlockState state) {
         super(OreGrinderContent.BLOCK_ENTITY_TYPE, pos, state, RecipeType.SMELTING);
@@ -36,6 +43,7 @@ public final class OreGrinderBlockEntity extends AbstractFurnaceBlockEntity {
 
     @Override
     protected void loadAdditional(ValueInput input) {
+        this.items.clear();
         super.loadAdditional(input);
         burnTime = Math.max(0, input.getIntOr("BurnTime", 0));
         totalBurnTime = Math.max(0, input.getIntOr("TotalBurnTime", 0));
@@ -50,16 +58,42 @@ public final class OreGrinderBlockEntity extends AbstractFurnaceBlockEntity {
         output.putInt("GrindProgress", grindProgress);
     }
 
+    @Override
+    public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+        return saveCustomOnly(registries);
+    }
+
+    @Override
+    public @Nullable Packet<ClientGamePacketListener> getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    private void syncToClients() {
+        if (level != null && !level.isClientSide()) {
+            lastSyncedInput = items.get(INPUT_SLOT).copy();
+            BlockState state = getBlockState();
+            level.sendBlockUpdated(worldPosition, state, state, 3);
+        }
+    }
+
     /** Small orbiting sparks and smoke make the machine visibly grind while its casing is lit. */
     public static void clientTick(Level level, BlockPos pos, BlockState state, OreGrinderBlockEntity grinder) {
         if (!state.getValue(OreGrinderBlock.LIT)) return;
         long time = level.getGameTime();
-        double angle = time * 0.19D;
-        double radius = 0.20D;
+        boolean hasItem = !grinder.items.get(INPUT_SLOT).isEmpty();
+        double angle = time * (hasItem ? 0.24D : 0.19D);
+        double radius = hasItem ? 0.22D : 0.18D;
         double x = pos.getX() + 0.5D + Math.cos(angle) * radius;
         double z = pos.getZ() + 0.5D + Math.sin(angle) * radius;
-        level.addParticle(ParticleTypes.CRIT, x, pos.getY() + 1.02D, z,
-                Math.cos(angle) * 0.015D, 0.015D, Math.sin(angle) * 0.015D);
+        level.addParticle(ParticleTypes.CRIT, x, pos.getY() + 1.03D, z,
+                Math.cos(angle) * 0.018D, 0.018D, Math.sin(angle) * 0.018D);
+        if (hasItem && time % 3L == 0L) {
+            level.addParticle(ParticleTypes.SMALL_FLAME,
+                    pos.getX() + 0.5D - Math.sin(angle) * 0.14D,
+                    pos.getY() + 1.02D,
+                    pos.getZ() + 0.5D + Math.cos(angle) * 0.14D,
+                    -Math.sin(angle) * 0.012D, 0.01D, Math.cos(angle) * 0.012D);
+        }
         if (time % 6L == 0L) {
             level.addParticle(ParticleTypes.SMOKE,
                     pos.getX() + 0.5D, pos.getY() + 1.05D, pos.getZ() + 0.5D,
@@ -70,6 +104,7 @@ public final class OreGrinderBlockEntity extends AbstractFurnaceBlockEntity {
     public static void serverTick(Level world, BlockPos pos, BlockState state, OreGrinderBlockEntity grinder) {
         if (!(world instanceof ServerLevel level)) return;
         boolean changed = false;
+        boolean needsClientSync = false;
         boolean wasLit = state.getValue(OreGrinderBlock.LIT);
 
         if (grinder.burnTime > 0) {
@@ -85,28 +120,40 @@ public final class OreGrinderBlockEntity extends AbstractFurnaceBlockEntity {
                 grinder.totalBurnTime = duration;
                 grinder.consumeFuel();
                 changed = true;
+                needsClientSync = true;
             }
         }
 
         if (canGrind && grinder.burnTime > 0) {
             grinder.grindProgress++;
             changed = true;
+            if (grinder.grindProgress == 1 || grinder.grindProgress % 4 == 0) {
+                needsClientSync = true;
+            }
             if (grinder.grindProgress >= GRIND_TIME) {
                 grinder.completeGrinding();
                 changed = true;
+                needsClientSync = true;
             }
         } else if (!canGrind && grinder.grindProgress != 0) {
             grinder.grindProgress = 0;
             changed = true;
+            needsClientSync = true;
         }
 
         boolean isLit = grinder.burnTime > 0;
         if (wasLit != isLit) {
             level.setBlock(pos, state.setValue(OreGrinderBlock.LIT, isLit), 3);
             changed = true;
+            needsClientSync = true;
+        }
+
+        if (!ItemStack.matches(grinder.lastSyncedInput, grinder.items.get(INPUT_SLOT))) {
+            needsClientSync = true;
         }
 
         if (changed) grinder.setChanged();
+        if (needsClientSync) grinder.syncToClients();
     }
 
     private boolean canGrind() {
@@ -168,7 +215,30 @@ public final class OreGrinderBlockEntity extends AbstractFurnaceBlockEntity {
     @Override
     public void setItem(int slot, ItemStack stack) {
         super.setItem(slot, stack);
-        if (slot == INPUT_SLOT) grindProgress = 0;
+        if (slot == INPUT_SLOT) {
+            grindProgress = 0;
+            syncToClients();
+        }
+    }
+
+    @Override
+    public ItemStack removeItem(int slot, int amount) {
+        ItemStack removed = super.removeItem(slot, amount);
+        if (slot == INPUT_SLOT && !removed.isEmpty()) {
+            grindProgress = 0;
+            syncToClients();
+        }
+        return removed;
+    }
+
+    @Override
+    public ItemStack removeItemNoUpdate(int slot) {
+        ItemStack removed = super.removeItemNoUpdate(slot);
+        if (slot == INPUT_SLOT && !removed.isEmpty()) {
+            grindProgress = 0;
+            syncToClients();
+        }
+        return removed;
     }
 
     public static boolean isFuel(ItemStack stack) {

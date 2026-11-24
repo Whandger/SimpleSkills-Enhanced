@@ -9,7 +9,7 @@ import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
-/** Furnace-style input/fuel/output menu for the Ore Grinder. */
+/** Furnace-style input/fuel/output menu aligned to the industrial Ore Grinder layout. */
 public final class OreGrinderMenu extends AbstractContainerMenu {
     private final Container container;
     private final OreGrinderBlockEntity grinder;
@@ -36,21 +36,26 @@ public final class OreGrinderMenu extends AbstractContainerMenu {
         this.grinder = grinder;
         container.startOpen(inventory.player);
 
-        addSlot(new Slot(container, OreGrinderBlockEntity.INPUT_SLOT, 44, 34) {
+        // Left control column: Equipment input (top) & Fuel input (bottom)
+        addSlot(new Slot(container, OreGrinderBlockEntity.INPUT_SLOT, 23, 42) {
             @Override public boolean mayPlace(ItemStack stack) { return OreGrinderSalvage.canRecover(stack); }
             @Override public int getMaxStackSize() { return 1; }
         });
-        addSlot(new Slot(container, OreGrinderBlockEntity.FUEL_SLOT, 44, 70) {
+        addSlot(new Slot(container, OreGrinderBlockEntity.FUEL_SLOT, 23, 82) {
             @Override public boolean mayPlace(ItemStack stack) {
                 return grinder != null ? grinder.canPlaceItem(OreGrinderBlockEntity.FUEL_SLOT, stack)
                         : OreGrinderBlockEntity.isFuel(stack);
             }
         });
-        addSlot(new Slot(container, OreGrinderBlockEntity.OUTPUT_SLOT, 116, 52) {
+
+        // Right control column: Recovered mineral output
+        addSlot(new Slot(container, OreGrinderBlockEntity.OUTPUT_SLOT, 165, 62) {
             @Override public boolean mayPlace(ItemStack stack) { return false; }
         });
 
-        addStandardInventorySlots(inventory, 8, 116);
+        // Centered 9-column player inventory (27 main slots at y=127..179, 9 hotbar slots at y=185..201)
+        addStandardInventorySlots(inventory, 22, 127);
+
         addDataSlot(burnTime);
         addDataSlot(totalBurnTime);
         addDataSlot(progress);

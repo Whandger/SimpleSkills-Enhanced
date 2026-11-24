@@ -618,5 +618,6 @@
   "gui.simpleskills.ore_grinder.output": "الخامات المستعادة",
   "gui.simpleskills.ore_grinder.working": "جارٍ الطحن...",
   "gui.simpleskills.ore_grinder.waiting_fuel": "بانتظار الوقود",
-  "gui.simpleskills.ore_grinder.ready": "جاهز للطحن"
+  "gui.simpleskills.ore_grinder.ready": "جاهز للطحن",
+  "gui.simpleskills.ore_grinder.complete": "اكتمل الاستخلاص"
 }

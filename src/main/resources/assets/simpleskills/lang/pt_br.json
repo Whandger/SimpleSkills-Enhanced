@@ -623,5 +623,6 @@
   "gui.simpleskills.ore_grinder.output": "Minério recuperado",
   "gui.simpleskills.ore_grinder.working": "Moendo...",
   "gui.simpleskills.ore_grinder.waiting_fuel": "Aguardando combustível",
-  "gui.simpleskills.ore_grinder.ready": "Pronto para moer"
+  "gui.simpleskills.ore_grinder.ready": "Pronto para moer",
+  "gui.simpleskills.ore_grinder.complete": "Recuperação concluída"
 }

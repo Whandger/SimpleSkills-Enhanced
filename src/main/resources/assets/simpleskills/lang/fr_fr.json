@@ -618,5 +618,6 @@
   "gui.simpleskills.ore_grinder.output": "Minerai récupéré",
   "gui.simpleskills.ore_grinder.working": "Broyage...",
   "gui.simpleskills.ore_grinder.waiting_fuel": "En attente de combustible",
-  "gui.simpleskills.ore_grinder.ready": "Prêt à broyer"
+  "gui.simpleskills.ore_grinder.ready": "Prêt à broyer",
+  "gui.simpleskills.ore_grinder.complete": "Récupération terminée"
 }
