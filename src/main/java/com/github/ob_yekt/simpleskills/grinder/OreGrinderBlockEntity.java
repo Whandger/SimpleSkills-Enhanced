@@ -12,6 +12,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.Containers;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
@@ -197,6 +198,16 @@ public final class OreGrinderBlockEntity extends AbstractFurnaceBlockEntity {
         if (level != null) {
             level.playSound(null, worldPosition, SoundEvents.GRINDSTONE_USE, SoundSource.BLOCKS, 0.85F, 0.85F);
         }
+    }
+
+    /** Drops every stored stack when the block is actually removed, never on chunk unload. */
+    @Override
+    public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+        super.preRemoveSideEffects(pos, state);
+        if (level == null || level.isClientSide() || isEmpty()) return;
+
+        Containers.dropContents(level, pos, this);
+        clearContent();
     }
 
     public int getBurnTime() { return burnTime; }
