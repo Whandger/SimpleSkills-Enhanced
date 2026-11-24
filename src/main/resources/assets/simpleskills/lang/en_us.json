@@ -615,5 +615,13 @@
   "gui.simpleskills.celestial_altar.reroll_perk_action": "Reroll Perk (1 Rune)",
   "message.simpleskills.celestial_altar.perk_rerolled": "The selected perk has been rerolled.",
   "gui.simpleskills.celestial_altar.enhance_options": "Attributes & Perks",
-  "item.simpleskills.crafting_stat.excavation_time": "Excavation Time Reduction"
+  "item.simpleskills.crafting_stat.excavation_time": "Excavation Time Reduction",
+  "block.simpleskills.ore_grinder": "Ore Grinder",
+  "gui.simpleskills.ore_grinder.title": "Ore Grinder",
+  "gui.simpleskills.ore_grinder.input": "Equipment",
+  "gui.simpleskills.ore_grinder.fuel": "Fuel",
+  "gui.simpleskills.ore_grinder.output": "Recovered ore",
+  "gui.simpleskills.ore_grinder.working": "Grinding...",
+  "gui.simpleskills.ore_grinder.waiting_fuel": "Waiting for fuel",
+  "gui.simpleskills.ore_grinder.ready": "Ready to grind"
 }

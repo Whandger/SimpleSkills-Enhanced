@@ -610,5 +610,13 @@
   "gui.simpleskills.celestial_altar.reroll_perk_action": "Volver a sortear ventaja (1 runa)",
   "message.simpleskills.celestial_altar.perk_rerolled": "La ventaja seleccionada se ha vuelto a sortear.",
   "gui.simpleskills.celestial_altar.enhance_options": "Atributos y ventajas",
-  "item.simpleskills.crafting_stat.excavation_time": "Reducción del tiempo de excavación"
+  "item.simpleskills.crafting_stat.excavation_time": "Reducción del tiempo de excavación",
+  "block.simpleskills.ore_grinder": "Molino de minerales",
+  "gui.simpleskills.ore_grinder.title": "Molino de minerales",
+  "gui.simpleskills.ore_grinder.input": "Equipo",
+  "gui.simpleskills.ore_grinder.fuel": "Combustible",
+  "gui.simpleskills.ore_grinder.output": "Mineral recuperado",
+  "gui.simpleskills.ore_grinder.working": "Moliendo...",
+  "gui.simpleskills.ore_grinder.waiting_fuel": "Esperando combustible",
+  "gui.simpleskills.ore_grinder.ready": "Listo para moler"
 }

@@ -1,0 +1,10 @@
+{
+  "variants": {
+    "lit=false": {
+      "model": "simpleskills:block/ore_grinder"
+    },
+    "lit=true": {
+      "model": "simpleskills:block/ore_grinder_on"
+    }
+  }
+}

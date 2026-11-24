@@ -610,5 +610,13 @@
   "gui.simpleskills.celestial_altar.reroll_perk_action": "إعادة سحب الميزة (رونية واحدة)",
   "message.simpleskills.celestial_altar.perk_rerolled": "تمت إعادة سحب الميزة المحددة.",
   "gui.simpleskills.celestial_altar.enhance_options": "السمات والمزايا",
-  "item.simpleskills.crafting_stat.excavation_time": "تقليل وقت التنقيب"
+  "item.simpleskills.crafting_stat.excavation_time": "تقليل وقت التنقيب",
+  "block.simpleskills.ore_grinder": "مطحنة الخامات",
+  "gui.simpleskills.ore_grinder.title": "مطحنة الخامات",
+  "gui.simpleskills.ore_grinder.input": "المعدات",
+  "gui.simpleskills.ore_grinder.fuel": "الوقود",
+  "gui.simpleskills.ore_grinder.output": "الخامات المستعادة",
+  "gui.simpleskills.ore_grinder.working": "جارٍ الطحن...",
+  "gui.simpleskills.ore_grinder.waiting_fuel": "بانتظار الوقود",
+  "gui.simpleskills.ore_grinder.ready": "جاهز للطحن"
 }

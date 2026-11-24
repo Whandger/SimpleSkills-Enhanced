@@ -5,6 +5,8 @@ import com.github.ob_yekt.simpleskills.crafting.CraftingRevealPayload;
 import com.github.ob_yekt.simpleskills.crafting.CraftingRevealScreen;
 import com.github.ob_yekt.simpleskills.celestial.CelestialAltarContent;
 import com.github.ob_yekt.simpleskills.celestial.CelestialAltarScreen;
+import com.github.ob_yekt.simpleskills.grinder.OreGrinderContent;
+import com.github.ob_yekt.simpleskills.grinder.OreGrinderScreen;
 import com.github.ob_yekt.simpleskills.crafting.TranscendentVisionPayload;
 import com.github.ob_yekt.simpleskills.crafting.TranscendentVisionHud;
 import com.github.ob_yekt.simpleskills.crafting.WorldbreakerPreviewPayload;
@@ -62,6 +64,7 @@ public class SimpleskillsClient implements ClientModInitializer {
 
         FishingEntityClient.register();
         MenuScreens.register(CelestialAltarContent.MENU_TYPE, CelestialAltarScreen::new);
+        MenuScreens.register(OreGrinderContent.MENU_TYPE, OreGrinderScreen::new);
         EntityRendererRegistry.register(PrayerVfxEntity.TYPE, PrayerVfxRenderer::new);
         Keybinds.register();
         SkillHudRenderer.register();

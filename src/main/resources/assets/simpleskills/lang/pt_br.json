@@ -615,5 +615,13 @@
   "gui.simpleskills.celestial_altar.reroll_perk_action": "Rerrolar Perk (1 Runa)",
   "message.simpleskills.celestial_altar.perk_rerolled": "O perk selecionado foi rerrolado.",
   "gui.simpleskills.celestial_altar.enhance_options": "Atributos e Perks",
-  "item.simpleskills.crafting_stat.excavation_time": "Redução do Tempo de Escavação"
+  "item.simpleskills.crafting_stat.excavation_time": "Redução do Tempo de Escavação",
+  "block.simpleskills.ore_grinder": "Moedor de Minérios",
+  "gui.simpleskills.ore_grinder.title": "Moedor de Minérios",
+  "gui.simpleskills.ore_grinder.input": "Equipamento",
+  "gui.simpleskills.ore_grinder.fuel": "Combustível",
+  "gui.simpleskills.ore_grinder.output": "Minério recuperado",
+  "gui.simpleskills.ore_grinder.working": "Moendo...",
+  "gui.simpleskills.ore_grinder.waiting_fuel": "Aguardando combustível",
+  "gui.simpleskills.ore_grinder.ready": "Pronto para moer"
 }

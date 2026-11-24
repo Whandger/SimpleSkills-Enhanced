@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "simpleskills:block/ore_grinder_top_on",
+    "bottom": "simpleskills:block/ore_grinder_bottom",
+    "side": "simpleskills:block/ore_grinder_side_on"
+  }
+}
