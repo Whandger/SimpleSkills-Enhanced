@@ -1,6 +1,6 @@
 package com.github.ob_yekt.simpleskills.grinder;
 
-import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
@@ -9,15 +9,18 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 /**
- * Calculates the mineral return from dismantling equipment which received a
- * SimpleSkills crafting rarity. Only the mineral ingredient is returned; sticks,
- * planks, string, templates and other recipe components are never duplicated.
+ * Calculates the mineral return from dismantling durable equipment made with
+ * recoverable mining materials. Equipment does not need a SimpleSkills rarity or rank.
+ * Only the mineral ingredient is returned; sticks, planks, string, templates and
+ * other recipe components are never duplicated.
  *
- * Fractional recovery is handled as a chance to return the next whole item. This
- * keeps the long-term average at the configured 30% / 50% yield without rounding
- * every small recipe up to a guaranteed ingot.
+ * Recovery is fixed at 50% of the equipment's known mineral ingredient cost.
+ * Fractional amounts are handled as a chance to return the next whole item, keeping
+ * the long-term average at exactly the configured recovery rate.
  */
 public final class OreGrinderSalvage {
+    private static final double RECOVERY_RATE = 0.50D;
+
     private OreGrinderSalvage() {}
 
     private record SalvageData(Item mineral, int ingredientCount, double recoveryRate) {}
@@ -54,7 +57,13 @@ public final class OreGrinderSalvage {
     }
 
     private static SalvageData getSalvageData(ItemStack equipment) {
-        if (!CraftingEquipmentManager.isEligibleForCelestialAltar(equipment)) return null;
+        // The Ore Grinder accepts ordinary equipment too; a crafting rarity/rank is
+        // intentionally not required. Durability prevents unrelated material items
+        // from being treated as equipment.
+        if (equipment == null || equipment.isEmpty()
+                || equipment.get(DataComponents.MAX_DAMAGE) == null) {
+            return null;
+        }
 
         Identifier id = BuiltInRegistries.ITEM.getKey(equipment.getItem());
         String path = id.getPath().toLowerCase(java.util.Locale.ROOT);
@@ -64,20 +73,21 @@ public final class OreGrinderSalvage {
         int ingredientCount = getMineralIngredientCount(path);
         if (ingredientCount <= 0) return null;
 
-        // Only swords receive the special 50% return for two-material recipes.
-        // Every other accepted equipment type uses the standard 30% recovery rate.
-        double recoveryRate = path.endsWith("_sword") && ingredientCount == 2 ? 0.50D : 0.30D;
-        return new SalvageData(mineral, ingredientCount, recoveryRate);
+        return new SalvageData(mineral, ingredientCount, RECOVERY_RATE);
     }
 
     private static Item getMineralFor(String path) {
         // SimpleSkills' custom Glowstone Shields have explicit, mineral-only recipes.
         if (path.equals("glowstone_shield")) return Items.IRON_INGOT;
-        if (path.equals("diamond_glowstone_shield") || path.equals("netherite_glowstone_shield")) return Items.DIAMOND;
+        if (path.equals("diamond_glowstone_shield") || path.equals("netherite_glowstone_shield")) {
+            return Items.DIAMOND;
+        }
+
+        // Vanilla shield and crossbow recipes each consume one iron ingot.
+        if (path.equals("shield") || path.equals("crossbow")) return Items.IRON_INGOT;
 
         // Netherite gear is made by upgrading a diamond base item with one netherite
-        // ingot. That single upgrade ingot is below the >2-material recovery threshold;
-        // recover the eligible portion of the original diamond recipe instead.
+        // ingot. The grinder recovers the original equipment's primary mineral cost.
         if (path.startsWith("netherite_")) return Items.DIAMOND;
         if (path.startsWith("diamond_")) return Items.DIAMOND;
         if (path.startsWith("iron_")) return Items.IRON_INGOT;
@@ -86,10 +96,11 @@ public final class OreGrinderSalvage {
         return null;
     }
 
-    /** Counts only the mineral ingredient in the corresponding vanilla-style recipe. */
+    /** Counts only the primary mineral ingredient in the corresponding equipment recipe. */
     private static int getMineralIngredientCount(String path) {
         if (path.equals("glowstone_shield") || path.equals("diamond_glowstone_shield")
                 || path.equals("netherite_glowstone_shield")) return 4;
+        if (path.equals("shield") || path.equals("crossbow")) return 1;
         if (path.endsWith("_sword")) return 2;
         if (path.endsWith("_pickaxe") || path.endsWith("_axe")) return 3;
         if (path.endsWith("_shovel")) return 1;
