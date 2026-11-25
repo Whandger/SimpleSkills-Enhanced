@@ -676,5 +676,6 @@
   "block.simpleskills.abyssal_chest": "Abyssal Strongbox",
   "block.simpleskills.abyssal_charred_timber": "Abyssal Charred Timber",
   "block.simpleskills.abyssal_black_bookshelf": "Empty Abyssal Bookshelf",
-  "block.simpleskills.abyssal_furnace": "Abyssal Furnace"
+  "block.simpleskills.abyssal_furnace": "Abyssal Furnace",
+  "entity.simpleskills.abyssal_fallen_king": "Fallen King of the Abyss"
 }

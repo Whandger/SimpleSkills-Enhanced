@@ -1,0 +1,7554 @@
+{
+  "meta": {
+    "format_version": "4.10",
+    "model_format": "modded_entity",
+    "box_uv": true
+  },
+  "name": "abyssal_fallen_king",
+  "model_identifier": "abyssal_fallen_king",
+  "visible_box": [
+    2.2,
+    3.0,
+    2.2
+  ],
+  "variable_placeholders": "",
+  "variable_placeholder_buttons": [],
+  "timeline_setups": [],
+  "unhandled_root_fields": {},
+  "resolution": {
+    "width": 128,
+    "height": 128
+  },
+  "elements": [
+    {
+      "name": "pelvis_core",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.5,
+        14.0,
+        -2.5
+      ],
+      "to": [
+        4.5,
+        17.0,
+        2.5
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        16,
+        0
+      ],
+      "uv_offset": [
+        0,
+        0
+      ],
+      "type": "cube",
+      "uuid": "cube-01-00-abyssal-king"
+    },
+    {
+      "name": "pelvis_hip_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        2.5,
+        13.5,
+        -2.0
+      ],
+      "to": [
+        4.5,
+        16.5,
+        2.0
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        16,
+        0
+      ],
+      "uv_offset": [
+        0,
+        8
+      ],
+      "type": "cube",
+      "uuid": "cube-01-01-abyssal-king"
+    },
+    {
+      "name": "pelvis_hip_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.5,
+        13.5,
+        -2.0
+      ],
+      "to": [
+        -2.5,
+        16.5,
+        2.0
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        16,
+        0
+      ],
+      "uv_offset": [
+        12,
+        8
+      ],
+      "type": "cube",
+      "uuid": "cube-01-02-abyssal-king"
+    },
+    {
+      "name": "belt_buckle",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -1.5,
+        14.8,
+        -3.0
+      ],
+      "to": [
+        1.5,
+        16.8,
+        -2.0
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        16,
+        0
+      ],
+      "uv_offset": [
+        28,
+        0
+      ],
+      "type": "cube",
+      "uuid": "cube-01-03-abyssal-king"
+    },
+    {
+      "name": "tasset_front_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        0.8,
+        10.5,
+        -2.8
+      ],
+      "to": [
+        3.8,
+        14.5,
+        -1.8
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        16,
+        0
+      ],
+      "uv_offset": [
+        28,
+        4
+      ],
+      "type": "cube",
+      "uuid": "cube-01-04-abyssal-king"
+    },
+    {
+      "name": "tasset_front_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -3.8,
+        10.5,
+        -2.8
+      ],
+      "to": [
+        -0.8,
+        14.5,
+        -1.8
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        16,
+        0
+      ],
+      "uv_offset": [
+        36,
+        4
+      ],
+      "type": "cube",
+      "uuid": "cube-01-05-abyssal-king"
+    },
+    {
+      "name": "spine_lumbar",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -1.5,
+        17.0,
+        -1.0
+      ],
+      "to": [
+        1.5,
+        22.0,
+        2.0
+      ],
+      "autouv": 0,
+      "color": 2,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        17,
+        0
+      ],
+      "uv_offset": [
+        0,
+        16
+      ],
+      "type": "cube",
+      "uuid": "cube-02-00-abyssal-king"
+    },
+    {
+      "name": "vertebra_1",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -2.0,
+        17.5,
+        1.5
+      ],
+      "to": [
+        2.0,
+        18.5,
+        2.5
+      ],
+      "autouv": 0,
+      "color": 2,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        17,
+        0
+      ],
+      "uv_offset": [
+        12,
+        16
+      ],
+      "type": "cube",
+      "uuid": "cube-02-01-abyssal-king"
+    },
+    {
+      "name": "vertebra_2",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -2.0,
+        19.5,
+        1.5
+      ],
+      "to": [
+        2.0,
+        20.5,
+        2.5
+      ],
+      "autouv": 0,
+      "color": 2,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        17,
+        0
+      ],
+      "uv_offset": [
+        12,
+        18
+      ],
+      "type": "cube",
+      "uuid": "cube-02-02-abyssal-king"
+    },
+    {
+      "name": "abdomen_plate",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.0,
+        17.0,
+        -2.5
+      ],
+      "to": [
+        4.0,
+        22.0,
+        2.5
+      ],
+      "autouv": 0,
+      "color": 2,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        17,
+        0
+      ],
+      "uv_offset": [
+        44,
+        0
+      ],
+      "type": "cube",
+      "uuid": "cube-02-03-abyssal-king"
+    },
+    {
+      "name": "chest_cuirass",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -5.0,
+        22.0,
+        -3.0
+      ],
+      "to": [
+        5.0,
+        30.0,
+        3.0
+      ],
+      "autouv": 0,
+      "color": 3,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        22,
+        0
+      ],
+      "uv_offset": [
+        70,
+        0
+      ],
+      "type": "cube",
+      "uuid": "cube-03-00-abyssal-king"
+    },
+    {
+      "name": "sternum_crest",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -2.0,
+        23.5,
+        -3.5
+      ],
+      "to": [
+        2.0,
+        28.5,
+        -2.5
+      ],
+      "autouv": 0,
+      "color": 3,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        22,
+        0
+      ],
+      "uv_offset": [
+        102,
+        0
+      ],
+      "type": "cube",
+      "uuid": "cube-03-01-abyssal-king"
+    },
+    {
+      "name": "collar_gorget",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.5,
+        29.5,
+        -3.2
+      ],
+      "to": [
+        4.5,
+        31.5,
+        2.8
+      ],
+      "autouv": 0,
+      "color": 3,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        22,
+        0
+      ],
+      "uv_offset": [
+        70,
+        14
+      ],
+      "type": "cube",
+      "uuid": "cube-03-02-abyssal-king"
+    },
+    {
+      "name": "rib_cage_inner",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.2,
+        22.5,
+        -2.2
+      ],
+      "to": [
+        3.8,
+        29.5,
+        1.8
+      ],
+      "autouv": 0,
+      "color": 3,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        22,
+        0
+      ],
+      "uv_offset": [
+        102,
+        6
+      ],
+      "type": "cube",
+      "uuid": "cube-03-03-abyssal-king"
+    },
+    {
+      "name": "back_plate",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.5,
+        22.5,
+        2.6
+      ],
+      "to": [
+        4.5,
+        29.5,
+        3.6
+      ],
+      "autouv": 0,
+      "color": 3,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        22,
+        0
+      ],
+      "uv_offset": [
+        102,
+        17
+      ],
+      "type": "cube",
+      "uuid": "cube-03-04-abyssal-king"
+    },
+    {
+      "name": "chest_trim_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        2.2,
+        25.0,
+        -3.4
+      ],
+      "to": [
+        4.2,
+        28.0,
+        -2.4
+      ],
+      "autouv": 0,
+      "color": 3,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        22,
+        0
+      ],
+      "uv_offset": [
+        24,
+        16
+      ],
+      "type": "cube",
+      "uuid": "cube-03-05-abyssal-king"
+    },
+    {
+      "name": "chest_trim_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.2,
+        25.0,
+        -3.4
+      ],
+      "to": [
+        -2.2,
+        28.0,
+        -2.4
+      ],
+      "autouv": 0,
+      "color": 3,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        22,
+        0
+      ],
+      "uv_offset": [
+        30,
+        16
+      ],
+      "type": "cube",
+      "uuid": "cube-03-06-abyssal-king"
+    },
+    {
+      "name": "cape_mantle_top",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -5.5,
+        20.0,
+        2.8
+      ],
+      "to": [
+        5.5,
+        30.0,
+        3.8
+      ],
+      "autouv": 0,
+      "color": 4,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        29.5,
+        3.2
+      ],
+      "uv_offset": [
+        0,
+        26
+      ],
+      "type": "cube",
+      "uuid": "cube-04-00-abyssal-king"
+    },
+    {
+      "name": "cape_clasp_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        3.5,
+        28.5,
+        -2.5
+      ],
+      "to": [
+        5.5,
+        30.5,
+        3.5
+      ],
+      "autouv": 0,
+      "color": 4,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        29.5,
+        3.2
+      ],
+      "uv_offset": [
+        24,
+        26
+      ],
+      "type": "cube",
+      "uuid": "cube-04-01-abyssal-king"
+    },
+    {
+      "name": "cape_clasp_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -5.5,
+        28.5,
+        -2.5
+      ],
+      "to": [
+        -3.5,
+        30.5,
+        3.5
+      ],
+      "autouv": 0,
+      "color": 4,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        29.5,
+        3.2
+      ],
+      "uv_offset": [
+        40,
+        26
+      ],
+      "type": "cube",
+      "uuid": "cube-04-02-abyssal-king"
+    },
+    {
+      "name": "cape_trim_upper",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -5.0,
+        20.0,
+        3.3
+      ],
+      "to": [
+        5.0,
+        22.0,
+        4.3
+      ],
+      "autouv": 0,
+      "color": 4,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        29.5,
+        3.2
+      ],
+      "uv_offset": [
+        24,
+        34
+      ],
+      "type": "cube",
+      "uuid": "cube-04-03-abyssal-king"
+    },
+    {
+      "name": "cape_drape_main",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -5.5,
+        9.0,
+        2.8
+      ],
+      "to": [
+        5.5,
+        20.0,
+        3.8
+      ],
+      "autouv": 0,
+      "color": 5,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        20.0,
+        3.2
+      ],
+      "uv_offset": [
+        0,
+        38
+      ],
+      "type": "cube",
+      "uuid": "cube-05-00-abyssal-king"
+    },
+    {
+      "name": "cape_tatter_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        2.5,
+        5.0,
+        2.8
+      ],
+      "to": [
+        5.5,
+        9.0,
+        3.8
+      ],
+      "autouv": 0,
+      "color": 5,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        20.0,
+        3.2
+      ],
+      "uv_offset": [
+        24,
+        38
+      ],
+      "type": "cube",
+      "uuid": "cube-05-01-abyssal-king"
+    },
+    {
+      "name": "cape_tatter_c",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -1.5,
+        4.0,
+        2.8
+      ],
+      "to": [
+        1.5,
+        9.0,
+        3.8
+      ],
+      "autouv": 0,
+      "color": 5,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        20.0,
+        3.2
+      ],
+      "uv_offset": [
+        32,
+        38
+      ],
+      "type": "cube",
+      "uuid": "cube-05-02-abyssal-king"
+    },
+    {
+      "name": "cape_tatter_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -5.5,
+        5.5,
+        2.8
+      ],
+      "to": [
+        -2.5,
+        9.5,
+        3.8
+      ],
+      "autouv": 0,
+      "color": 5,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        20.0,
+        3.2
+      ],
+      "uv_offset": [
+        40,
+        38
+      ],
+      "type": "cube",
+      "uuid": "cube-05-03-abyssal-king"
+    },
+    {
+      "name": "neck_cervical",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -1.5,
+        30.0,
+        -1.5
+      ],
+      "to": [
+        1.5,
+        33.0,
+        1.5
+      ],
+      "autouv": 0,
+      "color": 6,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        30.5,
+        0
+      ],
+      "uv_offset": [
+        48,
+        38
+      ],
+      "type": "cube",
+      "uuid": "cube-06-00-abyssal-king"
+    },
+    {
+      "name": "neck_tendon_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        1.0,
+        30.2,
+        -0.5
+      ],
+      "to": [
+        2.0,
+        32.2,
+        0.5
+      ],
+      "autouv": 0,
+      "color": 6,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        30.5,
+        0
+      ],
+      "uv_offset": [
+        60,
+        38
+      ],
+      "type": "cube",
+      "uuid": "cube-06-01-abyssal-king"
+    },
+    {
+      "name": "neck_tendon_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -2.0,
+        30.2,
+        -0.5
+      ],
+      "to": [
+        -1.0,
+        32.2,
+        0.5
+      ],
+      "autouv": 0,
+      "color": 6,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        30.5,
+        0
+      ],
+      "uv_offset": [
+        64,
+        38
+      ],
+      "type": "cube",
+      "uuid": "cube-06-02-abyssal-king"
+    },
+    {
+      "name": "skull_cranium",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.0,
+        34.5,
+        -4.0
+      ],
+      "to": [
+        4.0,
+        40.5,
+        4.0
+      ],
+      "autouv": 0,
+      "color": 7,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        32.5,
+        0
+      ],
+      "uv_offset": [
+        0,
+        52
+      ],
+      "type": "cube",
+      "uuid": "cube-07-00-abyssal-king"
+    },
+    {
+      "name": "skull_face_upper",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -3.5,
+        32.5,
+        -4.0
+      ],
+      "to": [
+        3.5,
+        34.5,
+        1.0
+      ],
+      "autouv": 0,
+      "color": 7,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        32.5,
+        0
+      ],
+      "uv_offset": [
+        32,
+        52
+      ],
+      "type": "cube",
+      "uuid": "cube-07-01-abyssal-king"
+    },
+    {
+      "name": "brow_ridge",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -3.8,
+        35.0,
+        -4.4
+      ],
+      "to": [
+        4.2,
+        36.0,
+        -3.4
+      ],
+      "autouv": 0,
+      "color": 7,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        32.5,
+        0
+      ],
+      "uv_offset": [
+        32,
+        59
+      ],
+      "type": "cube",
+      "uuid": "cube-07-02-abyssal-king"
+    },
+    {
+      "name": "cheekbone_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        2.0,
+        32.8,
+        -4.2
+      ],
+      "to": [
+        4.0,
+        34.8,
+        -1.2
+      ],
+      "autouv": 0,
+      "color": 7,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        32.5,
+        0
+      ],
+      "uv_offset": [
+        32,
+        61
+      ],
+      "type": "cube",
+      "uuid": "cube-07-03-abyssal-king"
+    },
+    {
+      "name": "cheekbone_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.0,
+        32.8,
+        -4.2
+      ],
+      "to": [
+        -2.0,
+        34.8,
+        -1.2
+      ],
+      "autouv": 0,
+      "color": 7,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        32.5,
+        0
+      ],
+      "uv_offset": [
+        42,
+        61
+      ],
+      "type": "cube",
+      "uuid": "cube-07-04-abyssal-king"
+    },
+    {
+      "name": "nasal_bridge",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -1.0,
+        33.2,
+        -4.3
+      ],
+      "to": [
+        1.0,
+        35.2,
+        -3.3
+      ],
+      "autouv": 0,
+      "color": 7,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        32.5,
+        0
+      ],
+      "uv_offset": [
+        52,
+        61
+      ],
+      "type": "cube",
+      "uuid": "cube-07-05-abyssal-king"
+    },
+    {
+      "name": "eye_glow_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 15,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        1.2,
+        34.0,
+        -4.1
+      ],
+      "to": [
+        3.2,
+        35.0,
+        -3.1
+      ],
+      "autouv": 0,
+      "color": 7,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        32.5,
+        0
+      ],
+      "uv_offset": [
+        58,
+        61
+      ],
+      "type": "cube",
+      "uuid": "cube-07-06-abyssal-king"
+    },
+    {
+      "name": "eye_glow_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 15,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -3.2,
+        34.0,
+        -4.1
+      ],
+      "to": [
+        -1.2,
+        35.0,
+        -3.1
+      ],
+      "autouv": 0,
+      "color": 7,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        32.5,
+        0
+      ],
+      "uv_offset": [
+        64,
+        61
+      ],
+      "type": "cube",
+      "uuid": "cube-07-07-abyssal-king"
+    },
+    {
+      "name": "mandible_base",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -2.5,
+        31.2,
+        -3.6
+      ],
+      "to": [
+        2.5,
+        33.2,
+        0.4
+      ],
+      "autouv": 0,
+      "color": 0,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        33.0,
+        -1.0
+      ],
+      "uv_offset": [
+        56,
+        52
+      ],
+      "type": "cube",
+      "uuid": "cube-08-00-abyssal-king"
+    },
+    {
+      "name": "teeth_lower",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -2.0,
+        32.4,
+        -3.7
+      ],
+      "to": [
+        2.0,
+        33.4,
+        -2.7
+      ],
+      "autouv": 0,
+      "color": 0,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        33.0,
+        -1.0
+      ],
+      "uv_offset": [
+        56,
+        58
+      ],
+      "type": "cube",
+      "uuid": "cube-08-01-abyssal-king"
+    },
+    {
+      "name": "chin_guard",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -1.5,
+        31.0,
+        -3.9
+      ],
+      "to": [
+        1.5,
+        32.0,
+        -2.9
+      ],
+      "autouv": 0,
+      "color": 0,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        33.0,
+        -1.0
+      ],
+      "uv_offset": [
+        66,
+        58
+      ],
+      "type": "cube",
+      "uuid": "cube-08-02-abyssal-king"
+    },
+    {
+      "name": "crown_band",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.4,
+        39.5,
+        -4.4
+      ],
+      "to": [
+        4.6,
+        41.5,
+        4.6
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        40.0,
+        0
+      ],
+      "uv_offset": [
+        0,
+        68
+      ],
+      "type": "cube",
+      "uuid": "cube-09-00-abyssal-king"
+    },
+    {
+      "name": "crown_spike_front",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -1.0,
+        41.5,
+        -4.6
+      ],
+      "to": [
+        1.0,
+        44.5,
+        -3.6
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        40.0,
+        0
+      ],
+      "uv_offset": [
+        36,
+        68
+      ],
+      "type": "cube",
+      "uuid": "cube-09-01-abyssal-king"
+    },
+    {
+      "name": "crown_spike_fl",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        2.6,
+        41.5,
+        -4.5
+      ],
+      "to": [
+        4.6,
+        43.5,
+        -3.5
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        40.0,
+        0
+      ],
+      "uv_offset": [
+        42,
+        68
+      ],
+      "type": "cube",
+      "uuid": "cube-09-02-abyssal-king"
+    },
+    {
+      "name": "crown_spike_fr",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.6,
+        41.5,
+        -4.5
+      ],
+      "to": [
+        -2.6,
+        43.5,
+        -3.5
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        40.0,
+        0
+      ],
+      "uv_offset": [
+        48,
+        68
+      ],
+      "type": "cube",
+      "uuid": "cube-09-03-abyssal-king"
+    },
+    {
+      "name": "crown_spike_bl",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        2.6,
+        41.5,
+        3.5
+      ],
+      "to": [
+        4.6,
+        43.5,
+        4.5
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        40.0,
+        0
+      ],
+      "uv_offset": [
+        36,
+        72
+      ],
+      "type": "cube",
+      "uuid": "cube-09-04-abyssal-king"
+    },
+    {
+      "name": "crown_spike_br",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.6,
+        41.5,
+        3.5
+      ],
+      "to": [
+        -2.6,
+        43.5,
+        4.5
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        40.0,
+        0
+      ],
+      "uv_offset": [
+        42,
+        72
+      ],
+      "type": "cube",
+      "uuid": "cube-09-05-abyssal-king"
+    },
+    {
+      "name": "crown_spike_back",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -1.0,
+        41.5,
+        3.6
+      ],
+      "to": [
+        1.0,
+        44.5,
+        4.6
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        40.0,
+        0
+      ],
+      "uv_offset": [
+        48,
+        72
+      ],
+      "type": "cube",
+      "uuid": "cube-09-06-abyssal-king"
+    },
+    {
+      "name": "crown_spike_side_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        3.6,
+        41.5,
+        -1.0
+      ],
+      "to": [
+        4.6,
+        44.5,
+        1.0
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        40.0,
+        0
+      ],
+      "uv_offset": [
+        54,
+        72
+      ],
+      "type": "cube",
+      "uuid": "cube-09-07-abyssal-king"
+    },
+    {
+      "name": "crown_spike_side_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.6,
+        41.5,
+        -1.0
+      ],
+      "to": [
+        -3.6,
+        44.5,
+        1.0
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        40.0,
+        0
+      ],
+      "uv_offset": [
+        60,
+        72
+      ],
+      "type": "cube",
+      "uuid": "cube-09-08-abyssal-king"
+    },
+    {
+      "name": "gem_ruby_center",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 15,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -1.0,
+        40.2,
+        -4.8
+      ],
+      "to": [
+        1.0,
+        42.2,
+        -3.8
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        40.0,
+        0
+      ],
+      "uv_offset": [
+        54,
+        68
+      ],
+      "type": "cube",
+      "uuid": "cube-09-09-abyssal-king"
+    },
+    {
+      "name": "gem_sapphire_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 15,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        3.6,
+        40.0,
+        -1.0
+      ],
+      "to": [
+        4.6,
+        42.0,
+        1.0
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        40.0,
+        0
+      ],
+      "uv_offset": [
+        60,
+        68
+      ],
+      "type": "cube",
+      "uuid": "cube-09-10-abyssal-king"
+    },
+    {
+      "name": "gem_emerald_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 15,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.7,
+        40.0,
+        -1.0
+      ],
+      "to": [
+        -3.7,
+        42.0,
+        1.0
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        40.0,
+        0
+      ],
+      "uv_offset": [
+        66,
+        68
+      ],
+      "type": "cube",
+      "uuid": "cube-09-11-abyssal-king"
+    },
+    {
+      "name": "pauldron_l_main",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        4.8,
+        26.5,
+        -3.2
+      ],
+      "to": [
+        8.8,
+        30.5,
+        2.8
+      ],
+      "autouv": 0,
+      "color": 2,
+      "inflate": 0.0,
+      "origin": [
+        5.5,
+        28.5,
+        0
+      ],
+      "uv_offset": [
+        74,
+        52
+      ],
+      "type": "cube",
+      "uuid": "cube-10-00-abyssal-king"
+    },
+    {
+      "name": "pauldron_l_rim",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        5.2,
+        29.8,
+        -3.5
+      ],
+      "to": [
+        9.2,
+        30.8,
+        3.5
+      ],
+      "autouv": 0,
+      "color": 2,
+      "inflate": 0.0,
+      "origin": [
+        5.5,
+        28.5,
+        0
+      ],
+      "uv_offset": [
+        74,
+        62
+      ],
+      "type": "cube",
+      "uuid": "cube-10-01-abyssal-king"
+    },
+    {
+      "name": "pauldron_l_spike",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        7.5,
+        30.2,
+        -1.0
+      ],
+      "to": [
+        9.5,
+        32.2,
+        1.0
+      ],
+      "autouv": 0,
+      "color": 2,
+      "inflate": 0.0,
+      "origin": [
+        5.5,
+        28.5,
+        0
+      ],
+      "uv_offset": [
+        96,
+        52
+      ],
+      "type": "cube",
+      "uuid": "cube-10-02-abyssal-king"
+    },
+    {
+      "name": "humerus_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        5.5,
+        21.0,
+        -1.5
+      ],
+      "to": [
+        8.5,
+        27.0,
+        1.5
+      ],
+      "autouv": 0,
+      "color": 3,
+      "inflate": 0.0,
+      "origin": [
+        6.5,
+        27.5,
+        0
+      ],
+      "uv_offset": [
+        96,
+        56
+      ],
+      "type": "cube",
+      "uuid": "cube-11-00-abyssal-king"
+    },
+    {
+      "name": "arm_strap_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        5.3,
+        23.0,
+        -1.8
+      ],
+      "to": [
+        8.3,
+        24.0,
+        2.2
+      ],
+      "autouv": 0,
+      "color": 3,
+      "inflate": 0.0,
+      "origin": [
+        6.5,
+        27.5,
+        0
+      ],
+      "uv_offset": [
+        108,
+        56
+      ],
+      "type": "cube",
+      "uuid": "cube-11-01-abyssal-king"
+    },
+    {
+      "name": "ulna_radius_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        5.6,
+        15.0,
+        -1.4
+      ],
+      "to": [
+        8.6,
+        21.0,
+        1.6
+      ],
+      "autouv": 0,
+      "color": 4,
+      "inflate": 0.0,
+      "origin": [
+        6.5,
+        21.0,
+        0
+      ],
+      "uv_offset": [
+        96,
+        65
+      ],
+      "type": "cube",
+      "uuid": "cube-12-00-abyssal-king"
+    },
+    {
+      "name": "gauntlet_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        5.2,
+        14.0,
+        -2.0
+      ],
+      "to": [
+        9.2,
+        18.0,
+        2.0
+      ],
+      "autouv": 0,
+      "color": 4,
+      "inflate": 0.0,
+      "origin": [
+        6.5,
+        21.0,
+        0
+      ],
+      "uv_offset": [
+        108,
+        65
+      ],
+      "type": "cube",
+      "uuid": "cube-12-01-abyssal-king"
+    },
+    {
+      "name": "knuckle_guard_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        5.4,
+        13.5,
+        -2.2
+      ],
+      "to": [
+        8.4,
+        14.5,
+        1.8
+      ],
+      "autouv": 0,
+      "color": 4,
+      "inflate": 0.0,
+      "origin": [
+        6.5,
+        21.0,
+        0
+      ],
+      "uv_offset": [
+        108,
+        73
+      ],
+      "type": "cube",
+      "uuid": "cube-12-02-abyssal-king"
+    },
+    {
+      "name": "pauldron_r_main",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -8.8,
+        26.5,
+        -3.2
+      ],
+      "to": [
+        -4.8,
+        30.5,
+        2.8
+      ],
+      "autouv": 0,
+      "color": 5,
+      "inflate": 0.0,
+      "origin": [
+        -5.5,
+        28.5,
+        0
+      ],
+      "uv_offset": [
+        74,
+        70
+      ],
+      "type": "cube",
+      "uuid": "cube-13-00-abyssal-king"
+    },
+    {
+      "name": "pauldron_r_rim",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -9.2,
+        29.8,
+        -3.5
+      ],
+      "to": [
+        -5.2,
+        30.8,
+        3.5
+      ],
+      "autouv": 0,
+      "color": 5,
+      "inflate": 0.0,
+      "origin": [
+        -5.5,
+        28.5,
+        0
+      ],
+      "uv_offset": [
+        74,
+        80
+      ],
+      "type": "cube",
+      "uuid": "cube-13-01-abyssal-king"
+    },
+    {
+      "name": "pauldron_r_spike",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -9.5,
+        30.2,
+        -1.0
+      ],
+      "to": [
+        -7.5,
+        32.2,
+        1.0
+      ],
+      "autouv": 0,
+      "color": 5,
+      "inflate": 0.0,
+      "origin": [
+        -5.5,
+        28.5,
+        0
+      ],
+      "uv_offset": [
+        96,
+        74
+      ],
+      "type": "cube",
+      "uuid": "cube-13-02-abyssal-king"
+    },
+    {
+      "name": "humerus_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -8.5,
+        21.0,
+        -1.5
+      ],
+      "to": [
+        -5.5,
+        27.0,
+        1.5
+      ],
+      "autouv": 0,
+      "color": 6,
+      "inflate": 0.0,
+      "origin": [
+        -6.5,
+        27.5,
+        0
+      ],
+      "uv_offset": [
+        96,
+        78
+      ],
+      "type": "cube",
+      "uuid": "cube-14-00-abyssal-king"
+    },
+    {
+      "name": "arm_strap_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -8.3,
+        23.0,
+        -1.8
+      ],
+      "to": [
+        -5.3,
+        24.0,
+        2.2
+      ],
+      "autouv": 0,
+      "color": 6,
+      "inflate": 0.0,
+      "origin": [
+        -6.5,
+        27.5,
+        0
+      ],
+      "uv_offset": [
+        108,
+        78
+      ],
+      "type": "cube",
+      "uuid": "cube-14-01-abyssal-king"
+    },
+    {
+      "name": "ulna_radius_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -8.6,
+        15.0,
+        -1.4
+      ],
+      "to": [
+        -5.6,
+        21.0,
+        1.6
+      ],
+      "autouv": 0,
+      "color": 7,
+      "inflate": 0.0,
+      "origin": [
+        -6.5,
+        21.0,
+        0
+      ],
+      "uv_offset": [
+        96,
+        87
+      ],
+      "type": "cube",
+      "uuid": "cube-15-00-abyssal-king"
+    },
+    {
+      "name": "gauntlet_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -9.2,
+        14.0,
+        -2.0
+      ],
+      "to": [
+        -5.2,
+        18.0,
+        2.0
+      ],
+      "autouv": 0,
+      "color": 7,
+      "inflate": 0.0,
+      "origin": [
+        -6.5,
+        21.0,
+        0
+      ],
+      "uv_offset": [
+        108,
+        87
+      ],
+      "type": "cube",
+      "uuid": "cube-15-01-abyssal-king"
+    },
+    {
+      "name": "knuckle_guard_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -8.4,
+        13.5,
+        -2.2
+      ],
+      "to": [
+        -5.4,
+        14.5,
+        1.8
+      ],
+      "autouv": 0,
+      "color": 7,
+      "inflate": 0.0,
+      "origin": [
+        -6.5,
+        21.0,
+        0
+      ],
+      "uv_offset": [
+        108,
+        95
+      ],
+      "type": "cube",
+      "uuid": "cube-15-02-abyssal-king"
+    },
+    {
+      "name": "sword_pommel",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -8.0,
+        13.5,
+        2.0
+      ],
+      "to": [
+        -6.0,
+        15.5,
+        4.0
+      ],
+      "autouv": 0,
+      "color": 0,
+      "inflate": 0.0,
+      "origin": [
+        -7.0,
+        14.5,
+        -1.5
+      ],
+      "uv_offset": [
+        0,
+        80
+      ],
+      "type": "cube",
+      "uuid": "cube-16-00-abyssal-king"
+    },
+    {
+      "name": "sword_grip",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -7.5,
+        14.0,
+        -3.0
+      ],
+      "to": [
+        -6.5,
+        15.0,
+        2.0
+      ],
+      "autouv": 0,
+      "color": 0,
+      "inflate": 0.0,
+      "origin": [
+        -7.0,
+        14.5,
+        -1.5
+      ],
+      "uv_offset": [
+        8,
+        80
+      ],
+      "type": "cube",
+      "uuid": "cube-16-01-abyssal-king"
+    },
+    {
+      "name": "sword_crossguard",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -10.0,
+        13.5,
+        -4.5
+      ],
+      "to": [
+        -4.0,
+        15.5,
+        -2.5
+      ],
+      "autouv": 0,
+      "color": 0,
+      "inflate": 0.0,
+      "origin": [
+        -7.0,
+        14.5,
+        -1.5
+      ],
+      "uv_offset": [
+        20,
+        80
+      ],
+      "type": "cube",
+      "uuid": "cube-16-02-abyssal-king"
+    },
+    {
+      "name": "sword_guard_wing_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.5,
+        13.8,
+        -5.2
+      ],
+      "to": [
+        -3.5,
+        15.8,
+        -3.2
+      ],
+      "autouv": 0,
+      "color": 0,
+      "inflate": 0.0,
+      "origin": [
+        -7.0,
+        14.5,
+        -1.5
+      ],
+      "uv_offset": [
+        36,
+        80
+      ],
+      "type": "cube",
+      "uuid": "cube-16-03-abyssal-king"
+    },
+    {
+      "name": "sword_guard_wing_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -10.5,
+        13.8,
+        -5.2
+      ],
+      "to": [
+        -9.5,
+        15.8,
+        -3.2
+      ],
+      "autouv": 0,
+      "color": 0,
+      "inflate": 0.0,
+      "origin": [
+        -7.0,
+        14.5,
+        -1.5
+      ],
+      "uv_offset": [
+        42,
+        80
+      ],
+      "type": "cube",
+      "uuid": "cube-16-04-abyssal-king"
+    },
+    {
+      "name": "sword_guard_gem",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -7.5,
+        14.0,
+        -4.8
+      ],
+      "to": [
+        -6.5,
+        15.0,
+        -3.8
+      ],
+      "autouv": 0,
+      "color": 0,
+      "inflate": 0.0,
+      "origin": [
+        -7.0,
+        14.5,
+        -1.5
+      ],
+      "uv_offset": [
+        48,
+        80
+      ],
+      "type": "cube",
+      "uuid": "cube-16-05-abyssal-king"
+    },
+    {
+      "name": "blade_ricasso",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -8.0,
+        13.8,
+        -9.5
+      ],
+      "to": [
+        -6.0,
+        14.8,
+        -4.5
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        -7.0,
+        14.5,
+        -4.5
+      ],
+      "uv_offset": [
+        0,
+        86
+      ],
+      "type": "cube",
+      "uuid": "cube-17-00-abyssal-king"
+    },
+    {
+      "name": "blade_body",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -8.5,
+        14.0,
+        -21.5
+      ],
+      "to": [
+        -5.5,
+        15.0,
+        -9.5
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        -7.0,
+        14.5,
+        -4.5
+      ],
+      "uv_offset": [
+        14,
+        86
+      ],
+      "type": "cube",
+      "uuid": "cube-17-01-abyssal-king"
+    },
+    {
+      "name": "blade_fuller_rune",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 15,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -7.5,
+        14.2,
+        -20.5
+      ],
+      "to": [
+        -6.5,
+        15.2,
+        -9.5
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        -7.0,
+        14.5,
+        -4.5
+      ],
+      "uv_offset": [
+        44,
+        86
+      ],
+      "type": "cube",
+      "uuid": "cube-17-02-abyssal-king"
+    },
+    {
+      "name": "blade_rune_sigil_1",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 15,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -7.5,
+        13.7,
+        -13.5
+      ],
+      "to": [
+        -6.5,
+        14.7,
+        -11.5
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        -7.0,
+        14.5,
+        -4.5
+      ],
+      "uv_offset": [
+        68,
+        86
+      ],
+      "type": "cube",
+      "uuid": "cube-17-03-abyssal-king"
+    },
+    {
+      "name": "blade_rune_sigil_2",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 15,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -7.5,
+        13.7,
+        -18.5
+      ],
+      "to": [
+        -6.5,
+        14.7,
+        -16.5
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        -7.0,
+        14.5,
+        -4.5
+      ],
+      "uv_offset": [
+        74,
+        86
+      ],
+      "type": "cube",
+      "uuid": "cube-17-04-abyssal-king"
+    },
+    {
+      "name": "blade_tip_mid",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -8.0,
+        14.0,
+        -24.5
+      ],
+      "to": [
+        -6.0,
+        15.0,
+        -21.5
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        -7.0,
+        14.5,
+        -4.5
+      ],
+      "uv_offset": [
+        0,
+        92
+      ],
+      "type": "cube",
+      "uuid": "cube-17-05-abyssal-king"
+    },
+    {
+      "name": "blade_tip_point",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -7.5,
+        14.0,
+        -26.5
+      ],
+      "to": [
+        -6.5,
+        15.0,
+        -24.5
+      ],
+      "autouv": 0,
+      "color": 1,
+      "inflate": 0.0,
+      "origin": [
+        -7.0,
+        14.5,
+        -4.5
+      ],
+      "uv_offset": [
+        10,
+        92
+      ],
+      "type": "cube",
+      "uuid": "cube-17-06-abyssal-king"
+    },
+    {
+      "name": "femur_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        1.2,
+        7.5,
+        -1.5
+      ],
+      "to": [
+        4.2,
+        14.5,
+        1.5
+      ],
+      "autouv": 0,
+      "color": 2,
+      "inflate": 0.0,
+      "origin": [
+        2.5,
+        14.0,
+        0
+      ],
+      "uv_offset": [
+        0,
+        100
+      ],
+      "type": "cube",
+      "uuid": "cube-18-00-abyssal-king"
+    },
+    {
+      "name": "cuisses_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        0.9,
+        9.5,
+        -1.9
+      ],
+      "to": [
+        3.9,
+        13.5,
+        2.1
+      ],
+      "autouv": 0,
+      "color": 2,
+      "inflate": 0.0,
+      "origin": [
+        2.5,
+        14.0,
+        0
+      ],
+      "uv_offset": [
+        12,
+        100
+      ],
+      "type": "cube",
+      "uuid": "cube-18-01-abyssal-king"
+    },
+    {
+      "name": "knee_poleyn_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        1.0,
+        7.0,
+        -2.2
+      ],
+      "to": [
+        4.0,
+        9.0,
+        -0.2
+      ],
+      "autouv": 0,
+      "color": 2,
+      "inflate": 0.0,
+      "origin": [
+        2.5,
+        14.0,
+        0
+      ],
+      "uv_offset": [
+        26,
+        100
+      ],
+      "type": "cube",
+      "uuid": "cube-18-02-abyssal-king"
+    },
+    {
+      "name": "tibia_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        1.3,
+        1.5,
+        -1.4
+      ],
+      "to": [
+        4.3,
+        7.5,
+        1.6
+      ],
+      "autouv": 0,
+      "color": 3,
+      "inflate": 0.0,
+      "origin": [
+        2.5,
+        7.5,
+        0
+      ],
+      "uv_offset": [
+        36,
+        100
+      ],
+      "type": "cube",
+      "uuid": "cube-19-00-abyssal-king"
+    },
+    {
+      "name": "greave_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        1.0,
+        2.0,
+        -1.8
+      ],
+      "to": [
+        4.0,
+        7.0,
+        2.2
+      ],
+      "autouv": 0,
+      "color": 3,
+      "inflate": 0.0,
+      "origin": [
+        2.5,
+        7.5,
+        0
+      ],
+      "uv_offset": [
+        48,
+        100
+      ],
+      "type": "cube",
+      "uuid": "cube-19-01-abyssal-king"
+    },
+    {
+      "name": "sabaton_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        1.0,
+        0.0,
+        -2.8
+      ],
+      "to": [
+        4.0,
+        2.0,
+        2.2
+      ],
+      "autouv": 0,
+      "color": 3,
+      "inflate": 0.0,
+      "origin": [
+        2.5,
+        7.5,
+        0
+      ],
+      "uv_offset": [
+        62,
+        100
+      ],
+      "type": "cube",
+      "uuid": "cube-19-02-abyssal-king"
+    },
+    {
+      "name": "femur_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.2,
+        7.5,
+        -1.5
+      ],
+      "to": [
+        -1.2,
+        14.5,
+        1.5
+      ],
+      "autouv": 0,
+      "color": 4,
+      "inflate": 0.0,
+      "origin": [
+        -2.5,
+        14.0,
+        0
+      ],
+      "uv_offset": [
+        0,
+        112
+      ],
+      "type": "cube",
+      "uuid": "cube-20-00-abyssal-king"
+    },
+    {
+      "name": "cuisses_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -3.9,
+        9.5,
+        -1.9
+      ],
+      "to": [
+        -0.9,
+        13.5,
+        2.1
+      ],
+      "autouv": 0,
+      "color": 4,
+      "inflate": 0.0,
+      "origin": [
+        -2.5,
+        14.0,
+        0
+      ],
+      "uv_offset": [
+        12,
+        112
+      ],
+      "type": "cube",
+      "uuid": "cube-20-01-abyssal-king"
+    },
+    {
+      "name": "knee_poleyn_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.0,
+        7.0,
+        -2.2
+      ],
+      "to": [
+        -1.0,
+        9.0,
+        -0.2
+      ],
+      "autouv": 0,
+      "color": 4,
+      "inflate": 0.0,
+      "origin": [
+        -2.5,
+        14.0,
+        0
+      ],
+      "uv_offset": [
+        26,
+        112
+      ],
+      "type": "cube",
+      "uuid": "cube-20-02-abyssal-king"
+    },
+    {
+      "name": "tibia_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.3,
+        1.5,
+        -1.4
+      ],
+      "to": [
+        -1.3,
+        7.5,
+        1.6
+      ],
+      "autouv": 0,
+      "color": 5,
+      "inflate": 0.0,
+      "origin": [
+        -2.5,
+        7.5,
+        0
+      ],
+      "uv_offset": [
+        36,
+        112
+      ],
+      "type": "cube",
+      "uuid": "cube-21-00-abyssal-king"
+    },
+    {
+      "name": "greave_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.0,
+        2.0,
+        -1.8
+      ],
+      "to": [
+        -1.0,
+        7.0,
+        2.2
+      ],
+      "autouv": 0,
+      "color": 5,
+      "inflate": 0.0,
+      "origin": [
+        -2.5,
+        7.5,
+        0
+      ],
+      "uv_offset": [
+        48,
+        112
+      ],
+      "type": "cube",
+      "uuid": "cube-21-01-abyssal-king"
+    },
+    {
+      "name": "sabaton_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.0,
+        0.0,
+        -2.8
+      ],
+      "to": [
+        -1.0,
+        2.0,
+        2.2
+      ],
+      "autouv": 0,
+      "color": 5,
+      "inflate": 0.0,
+      "origin": [
+        -2.5,
+        7.5,
+        0
+      ],
+      "uv_offset": [
+        62,
+        112
+      ],
+      "type": "cube",
+      "uuid": "cube-21-02-abyssal-king"
+    },
+    {
+      "name": "halo_arch_top",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -3.0,
+        41.5,
+        2.5
+      ],
+      "to": [
+        3.0,
+        42.5,
+        3.5
+      ],
+      "autouv": 0,
+      "color": 6,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        31.0,
+        2.5
+      ],
+      "uv_offset": [
+        80,
+        100
+      ],
+      "type": "cube",
+      "uuid": "cube-22-00-abyssal-king"
+    },
+    {
+      "name": "halo_pillar_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        3.0,
+        34.5,
+        2.5
+      ],
+      "to": [
+        4.0,
+        41.5,
+        3.5
+      ],
+      "autouv": 0,
+      "color": 6,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        31.0,
+        2.5
+      ],
+      "uv_offset": [
+        80,
+        104
+      ],
+      "type": "cube",
+      "uuid": "cube-22-01-abyssal-king"
+    },
+    {
+      "name": "halo_pillar_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 0,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.0,
+        34.5,
+        2.5
+      ],
+      "to": [
+        -3.0,
+        41.5,
+        3.5
+      ],
+      "autouv": 0,
+      "color": 6,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        31.0,
+        2.5
+      ],
+      "uv_offset": [
+        84,
+        104
+      ],
+      "type": "cube",
+      "uuid": "cube-22-02-abyssal-king"
+    },
+    {
+      "name": "halo_rune_l",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 15,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        3.2,
+        37.5,
+        2.2
+      ],
+      "to": [
+        4.2,
+        39.5,
+        3.2
+      ],
+      "autouv": 0,
+      "color": 6,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        31.0,
+        2.5
+      ],
+      "uv_offset": [
+        88,
+        104
+      ],
+      "type": "cube",
+      "uuid": "cube-22-03-abyssal-king"
+    },
+    {
+      "name": "halo_rune_r",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 15,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -4.2,
+        37.5,
+        2.2
+      ],
+      "to": [
+        -3.2,
+        39.5,
+        3.2
+      ],
+      "autouv": 0,
+      "color": 6,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        31.0,
+        2.5
+      ],
+      "uv_offset": [
+        92,
+        104
+      ],
+      "type": "cube",
+      "uuid": "cube-22-04-abyssal-king"
+    },
+    {
+      "name": "halo_rune_top",
+      "box_uv": true,
+      "rescale": false,
+      "locked": false,
+      "light_emission": 15,
+      "render_order": "default",
+      "allow_mirror_modeling": true,
+      "from": [
+        -0.5,
+        42.2,
+        2.2
+      ],
+      "to": [
+        0.5,
+        44.2,
+        3.2
+      ],
+      "autouv": 0,
+      "color": 6,
+      "inflate": 0.0,
+      "origin": [
+        0,
+        31.0,
+        2.5
+      ],
+      "uv_offset": [
+        96,
+        104
+      ],
+      "type": "cube",
+      "uuid": "cube-22-05-abyssal-king"
+    }
+  ],
+  "outliner": [
+    {
+      "name": "root",
+      "origin": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "bedrock_binding": "",
+      "color": 0,
+      "uuid": "bone-00-abyssal-king",
+      "export": true,
+      "mirror_uv": false,
+      "isOpen": true,
+      "locked": false,
+      "visibility": true,
+      "autouv": 0,
+      "children": [
+        {
+          "name": "pelvis",
+          "origin": [
+            0,
+            16,
+            0
+          ],
+          "rotation": [
+            0,
+            0,
+            0
+          ],
+          "bedrock_binding": "",
+          "color": 0,
+          "uuid": "bone-01-abyssal-king",
+          "export": true,
+          "mirror_uv": false,
+          "isOpen": true,
+          "locked": false,
+          "visibility": true,
+          "autouv": 0,
+          "children": [
+            "cube-01-00-abyssal-king",
+            "cube-01-01-abyssal-king",
+            "cube-01-02-abyssal-king",
+            "cube-01-03-abyssal-king",
+            "cube-01-04-abyssal-king",
+            "cube-01-05-abyssal-king",
+            {
+              "name": "torso",
+              "origin": [
+                0,
+                17,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "bedrock_binding": "",
+              "color": 0,
+              "uuid": "bone-02-abyssal-king",
+              "export": true,
+              "mirror_uv": false,
+              "isOpen": true,
+              "locked": false,
+              "visibility": true,
+              "autouv": 0,
+              "children": [
+                "cube-02-00-abyssal-king",
+                "cube-02-01-abyssal-king",
+                "cube-02-02-abyssal-king",
+                "cube-02-03-abyssal-king",
+                {
+                  "name": "chest",
+                  "origin": [
+                    0,
+                    22,
+                    0
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "bedrock_binding": "",
+                  "color": 0,
+                  "uuid": "bone-03-abyssal-king",
+                  "export": true,
+                  "mirror_uv": false,
+                  "isOpen": true,
+                  "locked": false,
+                  "visibility": true,
+                  "autouv": 0,
+                  "children": [
+                    "cube-03-00-abyssal-king",
+                    "cube-03-01-abyssal-king",
+                    "cube-03-02-abyssal-king",
+                    "cube-03-03-abyssal-king",
+                    "cube-03-04-abyssal-king",
+                    "cube-03-05-abyssal-king",
+                    "cube-03-06-abyssal-king",
+                    {
+                      "name": "cape_upper",
+                      "origin": [
+                        0,
+                        29.5,
+                        3.2
+                      ],
+                      "rotation": [
+                        6,
+                        0,
+                        0
+                      ],
+                      "bedrock_binding": "",
+                      "color": 0,
+                      "uuid": "bone-04-abyssal-king",
+                      "export": true,
+                      "mirror_uv": false,
+                      "isOpen": true,
+                      "locked": false,
+                      "visibility": true,
+                      "autouv": 0,
+                      "children": [
+                        "cube-04-00-abyssal-king",
+                        "cube-04-01-abyssal-king",
+                        "cube-04-02-abyssal-king",
+                        "cube-04-03-abyssal-king",
+                        {
+                          "name": "cape_lower",
+                          "origin": [
+                            0,
+                            20.0,
+                            3.2
+                          ],
+                          "rotation": [
+                            5,
+                            0,
+                            0
+                          ],
+                          "bedrock_binding": "",
+                          "color": 0,
+                          "uuid": "bone-05-abyssal-king",
+                          "export": true,
+                          "mirror_uv": false,
+                          "isOpen": true,
+                          "locked": false,
+                          "visibility": true,
+                          "autouv": 0,
+                          "children": [
+                            "cube-05-00-abyssal-king",
+                            "cube-05-01-abyssal-king",
+                            "cube-05-02-abyssal-king",
+                            "cube-05-03-abyssal-king"
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "neck",
+                      "origin": [
+                        0,
+                        30.5,
+                        0
+                      ],
+                      "rotation": [
+                        0,
+                        0,
+                        0
+                      ],
+                      "bedrock_binding": "",
+                      "color": 0,
+                      "uuid": "bone-06-abyssal-king",
+                      "export": true,
+                      "mirror_uv": false,
+                      "isOpen": true,
+                      "locked": false,
+                      "visibility": true,
+                      "autouv": 0,
+                      "children": [
+                        "cube-06-00-abyssal-king",
+                        "cube-06-01-abyssal-king",
+                        "cube-06-02-abyssal-king",
+                        {
+                          "name": "head",
+                          "origin": [
+                            0,
+                            32.5,
+                            0
+                          ],
+                          "rotation": [
+                            0,
+                            0,
+                            0
+                          ],
+                          "bedrock_binding": "",
+                          "color": 0,
+                          "uuid": "bone-07-abyssal-king",
+                          "export": true,
+                          "mirror_uv": false,
+                          "isOpen": true,
+                          "locked": false,
+                          "visibility": true,
+                          "autouv": 0,
+                          "children": [
+                            "cube-07-00-abyssal-king",
+                            "cube-07-01-abyssal-king",
+                            "cube-07-02-abyssal-king",
+                            "cube-07-03-abyssal-king",
+                            "cube-07-04-abyssal-king",
+                            "cube-07-05-abyssal-king",
+                            "cube-07-06-abyssal-king",
+                            "cube-07-07-abyssal-king",
+                            {
+                              "name": "jaw",
+                              "origin": [
+                                0,
+                                33.0,
+                                -1.0
+                              ],
+                              "rotation": [
+                                4,
+                                0,
+                                0
+                              ],
+                              "bedrock_binding": "",
+                              "color": 0,
+                              "uuid": "bone-08-abyssal-king",
+                              "export": true,
+                              "mirror_uv": false,
+                              "isOpen": true,
+                              "locked": false,
+                              "visibility": true,
+                              "autouv": 0,
+                              "children": [
+                                "cube-08-00-abyssal-king",
+                                "cube-08-01-abyssal-king",
+                                "cube-08-02-abyssal-king"
+                              ]
+                            },
+                            {
+                              "name": "crown",
+                              "origin": [
+                                0,
+                                40.0,
+                                0
+                              ],
+                              "rotation": [
+                                0,
+                                0,
+                                0
+                              ],
+                              "bedrock_binding": "",
+                              "color": 0,
+                              "uuid": "bone-09-abyssal-king",
+                              "export": true,
+                              "mirror_uv": false,
+                              "isOpen": true,
+                              "locked": false,
+                              "visibility": true,
+                              "autouv": 0,
+                              "children": [
+                                "cube-09-00-abyssal-king",
+                                "cube-09-01-abyssal-king",
+                                "cube-09-02-abyssal-king",
+                                "cube-09-03-abyssal-king",
+                                "cube-09-04-abyssal-king",
+                                "cube-09-05-abyssal-king",
+                                "cube-09-06-abyssal-king",
+                                "cube-09-07-abyssal-king",
+                                "cube-09-08-abyssal-king",
+                                "cube-09-09-abyssal-king",
+                                "cube-09-10-abyssal-king",
+                                "cube-09-11-abyssal-king"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "left_shoulder",
+                      "origin": [
+                        5.5,
+                        28.5,
+                        0
+                      ],
+                      "rotation": [
+                        0,
+                        0,
+                        0
+                      ],
+                      "bedrock_binding": "",
+                      "color": 0,
+                      "uuid": "bone-10-abyssal-king",
+                      "export": true,
+                      "mirror_uv": false,
+                      "isOpen": true,
+                      "locked": false,
+                      "visibility": true,
+                      "autouv": 0,
+                      "children": [
+                        "cube-10-00-abyssal-king",
+                        "cube-10-01-abyssal-king",
+                        "cube-10-02-abyssal-king",
+                        {
+                          "name": "left_arm",
+                          "origin": [
+                            6.5,
+                            27.5,
+                            0
+                          ],
+                          "rotation": [
+                            0,
+                            0,
+                            -4
+                          ],
+                          "bedrock_binding": "",
+                          "color": 0,
+                          "uuid": "bone-11-abyssal-king",
+                          "export": true,
+                          "mirror_uv": false,
+                          "isOpen": true,
+                          "locked": false,
+                          "visibility": true,
+                          "autouv": 0,
+                          "children": [
+                            "cube-11-00-abyssal-king",
+                            "cube-11-01-abyssal-king",
+                            {
+                              "name": "left_forearm",
+                              "origin": [
+                                6.5,
+                                21.0,
+                                0
+                              ],
+                              "rotation": [
+                                -12,
+                                0,
+                                0
+                              ],
+                              "bedrock_binding": "",
+                              "color": 0,
+                              "uuid": "bone-12-abyssal-king",
+                              "export": true,
+                              "mirror_uv": false,
+                              "isOpen": true,
+                              "locked": false,
+                              "visibility": true,
+                              "autouv": 0,
+                              "children": [
+                                "cube-12-00-abyssal-king",
+                                "cube-12-01-abyssal-king",
+                                "cube-12-02-abyssal-king"
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "right_shoulder",
+                      "origin": [
+                        -5.5,
+                        28.5,
+                        0
+                      ],
+                      "rotation": [
+                        0,
+                        0,
+                        0
+                      ],
+                      "bedrock_binding": "",
+                      "color": 0,
+                      "uuid": "bone-13-abyssal-king",
+                      "export": true,
+                      "mirror_uv": false,
+                      "isOpen": true,
+                      "locked": false,
+                      "visibility": true,
+                      "autouv": 0,
+                      "children": [
+                        "cube-13-00-abyssal-king",
+                        "cube-13-01-abyssal-king",
+                        "cube-13-02-abyssal-king",
+                        {
+                          "name": "right_arm",
+                          "origin": [
+                            -6.5,
+                            27.5,
+                            0
+                          ],
+                          "rotation": [
+                            0,
+                            0,
+                            4
+                          ],
+                          "bedrock_binding": "",
+                          "color": 0,
+                          "uuid": "bone-14-abyssal-king",
+                          "export": true,
+                          "mirror_uv": false,
+                          "isOpen": true,
+                          "locked": false,
+                          "visibility": true,
+                          "autouv": 0,
+                          "children": [
+                            "cube-14-00-abyssal-king",
+                            "cube-14-01-abyssal-king",
+                            {
+                              "name": "right_forearm",
+                              "origin": [
+                                -6.5,
+                                21.0,
+                                0
+                              ],
+                              "rotation": [
+                                -18,
+                                0,
+                                0
+                              ],
+                              "bedrock_binding": "",
+                              "color": 0,
+                              "uuid": "bone-15-abyssal-king",
+                              "export": true,
+                              "mirror_uv": false,
+                              "isOpen": true,
+                              "locked": false,
+                              "visibility": true,
+                              "autouv": 0,
+                              "children": [
+                                "cube-15-00-abyssal-king",
+                                "cube-15-01-abyssal-king",
+                                "cube-15-02-abyssal-king",
+                                {
+                                  "name": "sword_hilt",
+                                  "origin": [
+                                    -7.0,
+                                    14.5,
+                                    -1.5
+                                  ],
+                                  "rotation": [
+                                    0,
+                                    0,
+                                    0
+                                  ],
+                                  "bedrock_binding": "",
+                                  "color": 0,
+                                  "uuid": "bone-16-abyssal-king",
+                                  "export": true,
+                                  "mirror_uv": false,
+                                  "isOpen": true,
+                                  "locked": false,
+                                  "visibility": true,
+                                  "autouv": 0,
+                                  "children": [
+                                    "cube-16-00-abyssal-king",
+                                    "cube-16-01-abyssal-king",
+                                    "cube-16-02-abyssal-king",
+                                    "cube-16-03-abyssal-king",
+                                    "cube-16-04-abyssal-king",
+                                    "cube-16-05-abyssal-king",
+                                    {
+                                      "name": "sword_blade",
+                                      "origin": [
+                                        -7.0,
+                                        14.5,
+                                        -4.5
+                                      ],
+                                      "rotation": [
+                                        0,
+                                        0,
+                                        0
+                                      ],
+                                      "bedrock_binding": "",
+                                      "color": 0,
+                                      "uuid": "bone-17-abyssal-king",
+                                      "export": true,
+                                      "mirror_uv": false,
+                                      "isOpen": true,
+                                      "locked": false,
+                                      "visibility": true,
+                                      "autouv": 0,
+                                      "children": [
+                                        "cube-17-00-abyssal-king",
+                                        "cube-17-01-abyssal-king",
+                                        "cube-17-02-abyssal-king",
+                                        "cube-17-03-abyssal-king",
+                                        "cube-17-04-abyssal-king",
+                                        "cube-17-05-abyssal-king",
+                                        "cube-17-06-abyssal-king"
+                                      ]
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "abyssal_aura_crest",
+                      "origin": [
+                        0,
+                        31.0,
+                        2.5
+                      ],
+                      "rotation": [
+                        0,
+                        0,
+                        0
+                      ],
+                      "bedrock_binding": "",
+                      "color": 0,
+                      "uuid": "bone-22-abyssal-king",
+                      "export": true,
+                      "mirror_uv": false,
+                      "isOpen": true,
+                      "locked": false,
+                      "visibility": true,
+                      "autouv": 0,
+                      "children": [
+                        "cube-22-00-abyssal-king",
+                        "cube-22-01-abyssal-king",
+                        "cube-22-02-abyssal-king",
+                        "cube-22-03-abyssal-king",
+                        "cube-22-04-abyssal-king",
+                        "cube-22-05-abyssal-king"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "left_thigh",
+              "origin": [
+                2.5,
+                14.0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "bedrock_binding": "",
+              "color": 0,
+              "uuid": "bone-18-abyssal-king",
+              "export": true,
+              "mirror_uv": false,
+              "isOpen": true,
+              "locked": false,
+              "visibility": true,
+              "autouv": 0,
+              "children": [
+                "cube-18-00-abyssal-king",
+                "cube-18-01-abyssal-king",
+                "cube-18-02-abyssal-king",
+                {
+                  "name": "left_shin",
+                  "origin": [
+                    2.5,
+                    7.5,
+                    0
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "bedrock_binding": "",
+                  "color": 0,
+                  "uuid": "bone-19-abyssal-king",
+                  "export": true,
+                  "mirror_uv": false,
+                  "isOpen": true,
+                  "locked": false,
+                  "visibility": true,
+                  "autouv": 0,
+                  "children": [
+                    "cube-19-00-abyssal-king",
+                    "cube-19-01-abyssal-king",
+                    "cube-19-02-abyssal-king"
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "right_thigh",
+              "origin": [
+                -2.5,
+                14.0,
+                0
+              ],
+              "rotation": [
+                0,
+                0,
+                0
+              ],
+              "bedrock_binding": "",
+              "color": 0,
+              "uuid": "bone-20-abyssal-king",
+              "export": true,
+              "mirror_uv": false,
+              "isOpen": true,
+              "locked": false,
+              "visibility": true,
+              "autouv": 0,
+              "children": [
+                "cube-20-00-abyssal-king",
+                "cube-20-01-abyssal-king",
+                "cube-20-02-abyssal-king",
+                {
+                  "name": "right_shin",
+                  "origin": [
+                    -2.5,
+                    7.5,
+                    0
+                  ],
+                  "rotation": [
+                    0,
+                    0,
+                    0
+                  ],
+                  "bedrock_binding": "",
+                  "color": 0,
+                  "uuid": "bone-21-abyssal-king",
+                  "export": true,
+                  "mirror_uv": false,
+                  "isOpen": true,
+                  "locked": false,
+                  "visibility": true,
+                  "autouv": 0,
+                  "children": [
+                    "cube-21-00-abyssal-king",
+                    "cube-21-01-abyssal-king",
+                    "cube-21-02-abyssal-king"
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "path": "src/main/resources/assets/simpleskills/textures/entity/abyssal_fallen_king.png",
+      "name": "abyssal_fallen_king.png",
+      "folder": "entity",
+      "namespace": "simpleskills",
+      "id": "0",
+      "width": 128,
+      "height": 128,
+      "uv_width": 128,
+      "uv_height": 128,
+      "particle": true,
+      "use_as_default": true,
+      "layers_enabled": false,
+      "sync_to_project": "",
+      "render_mode": "default",
+      "render_sides": "auto",
+      "frame_time": 1,
+      "frame_order_type": "loop",
+      "frame_order": "",
+      "frame_interpolate": false,
+      "visible": true,
+      "internal": true,
+      "saved": true,
+      "uuid": "tex-00-abyssal-king-diffuse",
+      "source": "data:image/png;base64,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"
+    },
+    {
+      "path": "src/main/resources/assets/simpleskills/textures/entity/abyssal_fallen_king_emissive.png",
+      "name": "abyssal_fallen_king_emissive.png",
+      "folder": "entity",
+      "namespace": "simpleskills",
+      "id": "1",
+      "width": 128,
+      "height": 128,
+      "uv_width": 128,
+      "uv_height": 128,
+      "particle": false,
+      "use_as_default": false,
+      "layers_enabled": false,
+      "sync_to_project": "",
+      "render_mode": "emissive",
+      "render_sides": "auto",
+      "frame_time": 1,
+      "frame_order_type": "loop",
+      "frame_order": "",
+      "frame_interpolate": false,
+      "visible": true,
+      "internal": true,
+      "saved": true,
+      "uuid": "tex-01-abyssal-king-emissive",
+      "source": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAABeElEQVR4nO3br07DQAAH4BvBgUJNIPYQZGKSTOwBEJMoHoEgp/cIKCThCRCkcmLZQ0wgUFPMkQwF6ZqN/aPt2vs+1V7W5pK7/np3vYUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAv2mUXYEiPXY+k/T53ej8+q/yGETTAbKNvElMnQAAgMjUehYwabaXRv5XH+PfkX3rdpqEEML0qbU02r987SchhPDee45iFnBSdgXykm38dWWxq20CrGvsm97Lyt9/9R9Wltc9CU7LrkBe0nGf1gpBCgAAAABU1aTZTizz7qfy3wLSDa8TAAAQht1ZMuzO9hoYrrv2kHseo8rPAjhMoTuCRoPFvDNonGWP8/LzpN6/XWy9q2fXp3uXe1OwusV1Hgp9BYwGi/mqY8pTaAdIR37e8c92JEDkJEDkJEDkJEDkJEDkKvfXsLzn9RZ2AAAAOFD2s/Sm8yJVbh2gao59g4ktYQAAAAAAAAAAAABQdd+GEoZYNi4DJwAAAABJRU5ErkJggg=="
+    }
+  ],
+  "animations": [
+    {
+      "uuid": "anim-00-abyssal-king",
+      "name": "SITTING_IDLE",
+      "loop": "loop",
+      "override": false,
+      "length": 3.0,
+      "snapping": 24,
+      "selected": true,
+      "animators": {
+        "bone-01-abyssal-king": {
+          "name": "pelvis",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "-6.5",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-pelvis-position-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "-6.7",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-pelvis-position-1.5",
+              "time": 1.5,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "-6.5",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-pelvis-position-3.0",
+              "time": 3.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "4",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-pelvis-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "6",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-pelvis-rotation-1.5",
+              "time": 1.5,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "4",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-pelvis-rotation-3.0",
+              "time": 3.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-02-abyssal-king": {
+          "name": "torso",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "8",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-torso-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "11",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-torso-rotation-1.5",
+              "time": 1.5,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "8",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-torso-rotation-3.0",
+              "time": 3.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-03-abyssal-king": {
+          "name": "chest",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "6",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-chest-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "9",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-chest-rotation-1.5",
+              "time": 1.5,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "6",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-chest-rotation-3.0",
+              "time": 3.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-07-abyssal-king": {
+          "name": "head",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "22",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-head-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "26",
+                  "y": "2",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-head-rotation-1.5",
+              "time": 1.5,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "22",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-head-rotation-3.0",
+              "time": 3.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-08-abyssal-king": {
+          "name": "jaw",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "8",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-jaw-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "12",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-jaw-rotation-1.5",
+              "time": 1.5,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "8",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-jaw-rotation-3.0",
+              "time": 3.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-18-abyssal-king": {
+          "name": "left_thigh",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-82",
+                  "y": "-10",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-left_thigh-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-82",
+                  "y": "-10",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-left_thigh-rotation-3.0",
+              "time": 3.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-19-abyssal-king": {
+          "name": "left_shin",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "78",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-left_shin-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "78",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-left_shin-rotation-3.0",
+              "time": 3.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-20-abyssal-king": {
+          "name": "right_thigh",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-82",
+                  "y": "10",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-right_thigh-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-82",
+                  "y": "10",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-right_thigh-rotation-3.0",
+              "time": 3.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-21-abyssal-king": {
+          "name": "right_shin",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "78",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-right_shin-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "78",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-right_shin-rotation-3.0",
+              "time": 3.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-11-abyssal-king": {
+          "name": "left_arm",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-28",
+                  "y": "0",
+                  "z": "-8"
+                }
+              ],
+              "uuid": "kf-0-left_arm-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-26",
+                  "y": "0",
+                  "z": "-8"
+                }
+              ],
+              "uuid": "kf-0-left_arm-rotation-1.5",
+              "time": 1.5,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-28",
+                  "y": "0",
+                  "z": "-8"
+                }
+              ],
+              "uuid": "kf-0-left_arm-rotation-3.0",
+              "time": 3.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-12-abyssal-king": {
+          "name": "left_forearm",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-35",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-left_forearm-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-35",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-left_forearm-rotation-3.0",
+              "time": 3.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-14-abyssal-king": {
+          "name": "right_arm",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-32",
+                  "y": "0",
+                  "z": "8"
+                }
+              ],
+              "uuid": "kf-0-right_arm-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-30",
+                  "y": "0",
+                  "z": "8"
+                }
+              ],
+              "uuid": "kf-0-right_arm-rotation-1.5",
+              "time": 1.5,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-32",
+                  "y": "0",
+                  "z": "8"
+                }
+              ],
+              "uuid": "kf-0-right_arm-rotation-3.0",
+              "time": 3.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-15-abyssal-king": {
+          "name": "right_forearm",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-40",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-right_forearm-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-40",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-right_forearm-rotation-3.0",
+              "time": 3.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-16-abyssal-king": {
+          "name": "sword_hilt",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "55",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-sword_hilt-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "55",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-sword_hilt-rotation-3.0",
+              "time": 3.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-04-abyssal-king": {
+          "name": "cape_upper",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "18",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-cape_upper-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "18",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-cape_upper-rotation-3.0",
+              "time": 3.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-05-abyssal-king": {
+          "name": "cape_lower",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "25",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-cape_lower-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "25",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-0-cape_lower-rotation-3.0",
+              "time": 3.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "uuid": "anim-01-abyssal-king",
+      "name": "AWAKENING",
+      "loop": "hold_on_last_frame",
+      "override": false,
+      "length": 2.4,
+      "snapping": 24,
+      "selected": false,
+      "animators": {
+        "bone-01-abyssal-king": {
+          "name": "pelvis",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "-6.5",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-pelvis-position-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "-3.0",
+                  "z": "-1.0"
+                }
+              ],
+              "uuid": "kf-1-pelvis-position-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-pelvis-position-2.4",
+              "time": 2.4,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "4",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-pelvis-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "14",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-pelvis-rotation-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-pelvis-rotation-2.4",
+              "time": 2.4,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-02-abyssal-king": {
+          "name": "torso",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "8",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-torso-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "16",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-torso-rotation-1.0",
+              "time": 1.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-torso-rotation-2.4",
+              "time": 2.4,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-03-abyssal-king": {
+          "name": "chest",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "6",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-chest-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-10",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-chest-rotation-1.4",
+              "time": 1.4,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-chest-rotation-2.4",
+              "time": 2.4,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-07-abyssal-king": {
+          "name": "head",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "24",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-head-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "20",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-head-rotation-0.8",
+              "time": 0.8,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-18",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-head-rotation-1.6",
+              "time": 1.6,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-head-rotation-2.4",
+              "time": 2.4,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-08-abyssal-king": {
+          "name": "jaw",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "8",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-jaw-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "28",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-jaw-rotation-1.5",
+              "time": 1.5,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "4",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-jaw-rotation-2.4",
+              "time": 2.4,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-18-abyssal-king": {
+          "name": "left_thigh",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-82",
+                  "y": "-10",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-left_thigh-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-40",
+                  "y": "-5",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-left_thigh-rotation-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-left_thigh-rotation-2.4",
+              "time": 2.4,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-19-abyssal-king": {
+          "name": "left_shin",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "78",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-left_shin-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "42",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-left_shin-rotation-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-left_shin-rotation-2.4",
+              "time": 2.4,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-20-abyssal-king": {
+          "name": "right_thigh",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-82",
+                  "y": "10",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-right_thigh-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-40",
+                  "y": "5",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-right_thigh-rotation-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-right_thigh-rotation-2.4",
+              "time": 2.4,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-21-abyssal-king": {
+          "name": "right_shin",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "78",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-right_shin-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "42",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-right_shin-rotation-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-right_shin-rotation-2.4",
+              "time": 2.4,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-11-abyssal-king": {
+          "name": "left_arm",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-28",
+                  "y": "0",
+                  "z": "-8"
+                }
+              ],
+              "uuid": "kf-1-left_arm-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-15",
+                  "y": "0",
+                  "z": "-28"
+                }
+              ],
+              "uuid": "kf-1-left_arm-rotation-1.5",
+              "time": 1.5,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "-4"
+                }
+              ],
+              "uuid": "kf-1-left_arm-rotation-2.4",
+              "time": 2.4,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-14-abyssal-king": {
+          "name": "right_arm",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-32",
+                  "y": "0",
+                  "z": "8"
+                }
+              ],
+              "uuid": "kf-1-right_arm-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-45",
+                  "y": "0",
+                  "z": "24"
+                }
+              ],
+              "uuid": "kf-1-right_arm-rotation-1.5",
+              "time": 1.5,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "4"
+                }
+              ],
+              "uuid": "kf-1-right_arm-rotation-2.4",
+              "time": 2.4,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-16-abyssal-king": {
+          "name": "sword_hilt",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "55",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-sword_hilt-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-25",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-sword_hilt-rotation-1.6",
+              "time": 1.6,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-1-sword_hilt-rotation-2.4",
+              "time": 2.4,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "uuid": "anim-02-abyssal-king",
+      "name": "IDLE",
+      "loop": "loop",
+      "override": false,
+      "length": 2.6,
+      "snapping": 24,
+      "selected": false,
+      "animators": {
+        "bone-01-abyssal-king": {
+          "name": "pelvis",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-pelvis-position-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "-0.35",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-pelvis-position-1.3",
+              "time": 1.3,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-pelvis-position-2.6",
+              "time": 2.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-02-abyssal-king": {
+          "name": "torso",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-torso-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "2.5",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-torso-rotation-1.3",
+              "time": 1.3,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-torso-rotation-2.6",
+              "time": 2.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-03-abyssal-king": {
+          "name": "chest",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-chest-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "3.0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-chest-rotation-1.3",
+              "time": 1.3,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-chest-rotation-2.6",
+              "time": 2.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-07-abyssal-king": {
+          "name": "head",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-head-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-3.0",
+                  "y": "2.0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-head-rotation-1.3",
+              "time": 1.3,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-head-rotation-2.6",
+              "time": 2.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-08-abyssal-king": {
+          "name": "jaw",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "4",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-jaw-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "8",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-jaw-rotation-1.3",
+              "time": 1.3,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "4",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-jaw-rotation-2.6",
+              "time": 2.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-11-abyssal-king": {
+          "name": "left_arm",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "-4"
+                }
+              ],
+              "uuid": "kf-2-left_arm-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "3",
+                  "y": "0",
+                  "z": "-7"
+                }
+              ],
+              "uuid": "kf-2-left_arm-rotation-1.3",
+              "time": 1.3,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "-4"
+                }
+              ],
+              "uuid": "kf-2-left_arm-rotation-2.6",
+              "time": 2.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-14-abyssal-king": {
+          "name": "right_arm",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "4"
+                }
+              ],
+              "uuid": "kf-2-right_arm-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-4",
+                  "y": "0",
+                  "z": "7"
+                }
+              ],
+              "uuid": "kf-2-right_arm-rotation-1.3",
+              "time": 1.3,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "4"
+                }
+              ],
+              "uuid": "kf-2-right_arm-rotation-2.6",
+              "time": 2.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-04-abyssal-king": {
+          "name": "cape_upper",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "6",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-cape_upper-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "11",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-cape_upper-rotation-1.3",
+              "time": 1.3,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "6",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-cape_upper-rotation-2.6",
+              "time": 2.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-05-abyssal-king": {
+          "name": "cape_lower",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "5",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-cape_lower-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "13",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-cape_lower-rotation-1.3",
+              "time": 1.3,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "5",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-cape_lower-rotation-2.6",
+              "time": 2.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-22-abyssal-king": {
+          "name": "abyssal_aura_crest",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-abyssal_aura_crest-position-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0.6",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-abyssal_aura_crest-position-1.3",
+              "time": 1.3,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-2-abyssal_aura_crest-position-2.6",
+              "time": 2.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "uuid": "anim-03-abyssal-king",
+      "name": "WALK",
+      "loop": "loop",
+      "override": false,
+      "length": 1.2,
+      "snapping": 24,
+      "selected": false,
+      "animators": {
+        "bone-01-abyssal-king": {
+          "name": "pelvis",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-pelvis-position-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "-0.8",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-pelvis-position-0.3",
+              "time": 0.3,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-pelvis-position-0.6",
+              "time": 0.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "-0.8",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-pelvis-position-0.9",
+              "time": 0.9,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-pelvis-position-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "4",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-pelvis-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "-4",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-pelvis-rotation-0.6",
+              "time": 0.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "4",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-pelvis-rotation-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-02-abyssal-king": {
+          "name": "torso",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "4",
+                  "y": "-4",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-torso-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "4",
+                  "y": "4",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-torso-rotation-0.6",
+              "time": 0.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "4",
+                  "y": "-4",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-torso-rotation-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-03-abyssal-king": {
+          "name": "chest",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "3",
+                  "y": "-5",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-chest-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "3",
+                  "y": "5",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-chest-rotation-0.6",
+              "time": 0.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "3",
+                  "y": "-5",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-chest-rotation-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-18-abyssal-king": {
+          "name": "left_thigh",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-26",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-left_thigh-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "24",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-left_thigh-rotation-0.6",
+              "time": 0.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-26",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-left_thigh-rotation-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-19-abyssal-king": {
+          "name": "left_shin",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "12",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-left_shin-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "28",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-left_shin-rotation-0.3",
+              "time": 0.3,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "6",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-left_shin-rotation-0.6",
+              "time": 0.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "12",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-left_shin-rotation-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-20-abyssal-king": {
+          "name": "right_thigh",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "24",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-right_thigh-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-26",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-right_thigh-rotation-0.6",
+              "time": 0.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "24",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-right_thigh-rotation-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-21-abyssal-king": {
+          "name": "right_shin",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "6",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-right_shin-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "12",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-right_shin-rotation-0.6",
+              "time": 0.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "28",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-right_shin-rotation-0.9",
+              "time": 0.9,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "6",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-right_shin-rotation-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-11-abyssal-king": {
+          "name": "left_arm",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "20",
+                  "y": "0",
+                  "z": "-5"
+                }
+              ],
+              "uuid": "kf-3-left_arm-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-20",
+                  "y": "0",
+                  "z": "-5"
+                }
+              ],
+              "uuid": "kf-3-left_arm-rotation-0.6",
+              "time": 0.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "20",
+                  "y": "0",
+                  "z": "-5"
+                }
+              ],
+              "uuid": "kf-3-left_arm-rotation-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-14-abyssal-king": {
+          "name": "right_arm",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-18",
+                  "y": "0",
+                  "z": "5"
+                }
+              ],
+              "uuid": "kf-3-right_arm-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "16",
+                  "y": "0",
+                  "z": "5"
+                }
+              ],
+              "uuid": "kf-3-right_arm-rotation-0.6",
+              "time": 0.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-18",
+                  "y": "0",
+                  "z": "5"
+                }
+              ],
+              "uuid": "kf-3-right_arm-rotation-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-04-abyssal-king": {
+          "name": "cape_upper",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "16",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-cape_upper-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "22",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-cape_upper-rotation-0.6",
+              "time": 0.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "16",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-cape_upper-rotation-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        },
+        "bone-05-abyssal-king": {
+          "name": "cape_lower",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "18",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-cape_lower-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "26",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-cape_lower-rotation-0.6",
+              "time": 0.6,
+              "color": -1,
+              "interpolation": "catmullrom"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "18",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-3-cape_lower-rotation-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "catmullrom"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "uuid": "anim-04-abyssal-king",
+      "name": "ATTACK",
+      "loop": "once",
+      "override": false,
+      "length": 1.0,
+      "snapping": 24,
+      "selected": false,
+      "animators": {
+        "bone-02-abyssal-king": {
+          "name": "torso",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-torso-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-14",
+                  "y": "-18",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-torso-rotation-0.35",
+              "time": 0.35,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "22",
+                  "y": "20",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-torso-rotation-0.65",
+              "time": 0.65,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-torso-rotation-1.0",
+              "time": 1.0,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-03-abyssal-king": {
+          "name": "chest",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-chest-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-16",
+                  "y": "-22",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-chest-rotation-0.35",
+              "time": 0.35,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "24",
+                  "y": "24",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-chest-rotation-0.65",
+              "time": 0.65,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-chest-rotation-1.0",
+              "time": 1.0,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-13-abyssal-king": {
+          "name": "right_shoulder",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-right_shoulder-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-45",
+                  "y": "0",
+                  "z": "15"
+                }
+              ],
+              "uuid": "kf-4-right_shoulder-rotation-0.35",
+              "time": 0.35,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "35",
+                  "y": "0",
+                  "z": "-10"
+                }
+              ],
+              "uuid": "kf-4-right_shoulder-rotation-0.65",
+              "time": 0.65,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-right_shoulder-rotation-1.0",
+              "time": 1.0,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-14-abyssal-king": {
+          "name": "right_arm",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "4"
+                }
+              ],
+              "uuid": "kf-4-right_arm-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-115",
+                  "y": "0",
+                  "z": "12"
+                }
+              ],
+              "uuid": "kf-4-right_arm-rotation-0.35",
+              "time": 0.35,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "42",
+                  "y": "0",
+                  "z": "-8"
+                }
+              ],
+              "uuid": "kf-4-right_arm-rotation-0.65",
+              "time": 0.65,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "4"
+                }
+              ],
+              "uuid": "kf-4-right_arm-rotation-1.0",
+              "time": 1.0,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-15-abyssal-king": {
+          "name": "right_forearm",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-18",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-right_forearm-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-35",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-right_forearm-rotation-0.35",
+              "time": 0.35,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-8",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-right_forearm-rotation-0.65",
+              "time": 0.65,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-18",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-right_forearm-rotation-1.0",
+              "time": 1.0,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-16-abyssal-king": {
+          "name": "sword_hilt",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-sword_hilt-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-25",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-sword_hilt-rotation-0.35",
+              "time": 0.35,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "35",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-sword_hilt-rotation-0.65",
+              "time": 0.65,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-sword_hilt-rotation-1.0",
+              "time": 1.0,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-11-abyssal-king": {
+          "name": "left_arm",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "-4"
+                }
+              ],
+              "uuid": "kf-4-left_arm-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "25",
+                  "y": "0",
+                  "z": "-18"
+                }
+              ],
+              "uuid": "kf-4-left_arm-rotation-0.35",
+              "time": 0.35,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-22",
+                  "y": "0",
+                  "z": "-10"
+                }
+              ],
+              "uuid": "kf-4-left_arm-rotation-0.65",
+              "time": 0.65,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "-4"
+                }
+              ],
+              "uuid": "kf-4-left_arm-rotation-1.0",
+              "time": 1.0,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-07-abyssal-king": {
+          "name": "head",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-head-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-12",
+                  "y": "12",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-head-rotation-0.35",
+              "time": 0.35,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "10",
+                  "y": "-12",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-head-rotation-0.65",
+              "time": 0.65,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-4-head-rotation-1.0",
+              "time": 1.0,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "uuid": "anim-05-abyssal-king",
+      "name": "DEATH",
+      "loop": "hold_on_last_frame",
+      "override": false,
+      "length": 1.8,
+      "snapping": 24,
+      "selected": false,
+      "animators": {
+        "bone-01-abyssal-king": {
+          "name": "pelvis",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-pelvis-position-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "-7.0",
+                  "z": "2.0"
+                }
+              ],
+              "uuid": "kf-5-pelvis-position-0.8",
+              "time": 0.8,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "-14.5",
+                  "z": "6.0"
+                }
+              ],
+              "uuid": "kf-5-pelvis-position-1.8",
+              "time": 1.8,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-pelvis-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "25",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-pelvis-rotation-0.8",
+              "time": 0.8,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "84",
+                  "y": "0",
+                  "z": "4"
+                }
+              ],
+              "uuid": "kf-5-pelvis-rotation-1.8",
+              "time": 1.8,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-02-abyssal-king": {
+          "name": "torso",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-torso-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "18",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-torso-rotation-0.8",
+              "time": 0.8,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "8",
+                  "y": "0",
+                  "z": "-3"
+                }
+              ],
+              "uuid": "kf-5-torso-rotation-1.8",
+              "time": 1.8,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-03-abyssal-king": {
+          "name": "chest",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-chest-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "15",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-chest-rotation-0.8",
+              "time": 0.8,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "6",
+                  "y": "0",
+                  "z": "2"
+                }
+              ],
+              "uuid": "kf-5-chest-rotation-1.8",
+              "time": 1.8,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-07-abyssal-king": {
+          "name": "head",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-head-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "28",
+                  "y": "-10",
+                  "z": "8"
+                }
+              ],
+              "uuid": "kf-5-head-rotation-0.8",
+              "time": 0.8,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "14",
+                  "y": "-22",
+                  "z": "16"
+                }
+              ],
+              "uuid": "kf-5-head-rotation-1.8",
+              "time": 1.8,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-08-abyssal-king": {
+          "name": "jaw",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "4",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-jaw-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "32",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-jaw-rotation-1.8",
+              "time": 1.8,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-09-abyssal-king": {
+          "name": "crown",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-crown-position-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-crown-position-1.2",
+              "time": 1.2,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "position",
+              "data_points": [
+                {
+                  "x": "2.5",
+                  "y": "-3.0",
+                  "z": "-3.5"
+                }
+              ],
+              "uuid": "kf-5-crown-position-1.8",
+              "time": 1.8,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-crown-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "25",
+                  "y": "18",
+                  "z": "-32"
+                }
+              ],
+              "uuid": "kf-5-crown-rotation-1.8",
+              "time": 1.8,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-18-abyssal-king": {
+          "name": "left_thigh",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-left_thigh-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-65",
+                  "y": "-12",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-left_thigh-rotation-0.8",
+              "time": 0.8,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-15",
+                  "y": "-16",
+                  "z": "8"
+                }
+              ],
+              "uuid": "kf-5-left_thigh-rotation-1.8",
+              "time": 1.8,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-19-abyssal-king": {
+          "name": "left_shin",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-left_shin-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "110",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-left_shin-rotation-0.8",
+              "time": 0.8,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "20",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-left_shin-rotation-1.8",
+              "time": 1.8,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-20-abyssal-king": {
+          "name": "right_thigh",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-right_thigh-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-65",
+                  "y": "12",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-right_thigh-rotation-0.8",
+              "time": 0.8,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-12",
+                  "y": "18",
+                  "z": "-10"
+                }
+              ],
+              "uuid": "kf-5-right_thigh-rotation-1.8",
+              "time": 1.8,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-21-abyssal-king": {
+          "name": "right_shin",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-right_shin-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "110",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-right_shin-rotation-0.8",
+              "time": 0.8,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "18",
+                  "y": "0",
+                  "z": "0"
+                }
+              ],
+              "uuid": "kf-5-right_shin-rotation-1.8",
+              "time": 1.8,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-11-abyssal-king": {
+          "name": "left_arm",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "-4"
+                }
+              ],
+              "uuid": "kf-5-left_arm-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-20",
+                  "y": "0",
+                  "z": "-42"
+                }
+              ],
+              "uuid": "kf-5-left_arm-rotation-1.8",
+              "time": 1.8,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        },
+        "bone-14-abyssal-king": {
+          "name": "right_arm",
+          "type": "bone",
+          "keyframes": [
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "0",
+                  "y": "0",
+                  "z": "4"
+                }
+              ],
+              "uuid": "kf-5-right_arm-rotation-0.0",
+              "time": 0.0,
+              "color": -1,
+              "interpolation": "linear"
+            },
+            {
+              "channel": "rotation",
+              "data_points": [
+                {
+                  "x": "-15",
+                  "y": "0",
+                  "z": "48"
+                }
+              ],
+              "uuid": "kf-5-right_arm-rotation-1.8",
+              "time": 1.8,
+              "color": -1,
+              "interpolation": "linear"
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

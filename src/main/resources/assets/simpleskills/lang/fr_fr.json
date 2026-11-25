@@ -657,5 +657,6 @@
   "block.simpleskills.abyssal_chest": "Coffre abyssal",
   "block.simpleskills.abyssal_charred_timber": "Bois carbonisé abyssal",
   "block.simpleskills.abyssal_black_bookshelf": "Bibliothèque abyssale vide",
-  "block.simpleskills.abyssal_furnace": "Four des abysses"
+  "block.simpleskills.abyssal_furnace": "Four des abysses",
+  "entity.simpleskills.abyssal_fallen_king": "Roi déchu des Abysses"
 }

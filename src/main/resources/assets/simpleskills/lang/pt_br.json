@@ -676,5 +676,6 @@
   "block.simpleskills.abyssal_chest": "Baú Abissal",
   "block.simpleskills.abyssal_charred_timber": "Madeira Carbonizada Abissal",
   "block.simpleskills.abyssal_black_bookshelf": "Estante Abissal Vazia",
-  "block.simpleskills.abyssal_furnace": "Fornalha Abissal"
+  "block.simpleskills.abyssal_furnace": "Fornalha Abissal",
+  "entity.simpleskills.abyssal_fallen_king": "Rei Caído do Abismo"
 }

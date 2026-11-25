@@ -657,5 +657,6 @@
   "block.simpleskills.abyssal_chest": "صندوق الهاوية",
   "block.simpleskills.abyssal_charred_timber": "خشب الهاوية المتفحم",
   "block.simpleskills.abyssal_black_bookshelf": "رف كتب الهاوية الفارغ",
-  "block.simpleskills.abyssal_furnace": "Abyssal Furnace"
+  "block.simpleskills.abyssal_furnace": "Abyssal Furnace",
+  "entity.simpleskills.abyssal_fallen_king": "ملك الهاوية الساقط"
 }

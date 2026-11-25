@@ -7,6 +7,7 @@ import com.github.ob_yekt.simpleskills.celestial.CelestialAltarAnimationControll
 import com.github.ob_yekt.simpleskills.celestial.CelestialAltarContent;
 import com.github.ob_yekt.simpleskills.abyss.AbyssContent;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalChestScreen;
+import com.github.ob_yekt.simpleskills.abyss.AbyssalFallenKingClient;
 import com.github.ob_yekt.simpleskills.celestial.CelestialAltarScreen;
 import com.github.ob_yekt.simpleskills.celestial.CelestialAltarVisualPayload;
 import com.github.ob_yekt.simpleskills.grinder.OreGrinderContent;
@@ -69,6 +70,7 @@ public class SimpleskillsClient implements ClientModInitializer {
         );
 
         FishingEntityClient.register();
+        AbyssalFallenKingClient.register();
         MenuScreens.register(CelestialAltarContent.MENU_TYPE, CelestialAltarScreen::new);
         MenuScreens.register(OreGrinderContent.MENU_TYPE, OreGrinderScreen::new);
         MenuScreens.register(AbyssContent.ABYSSAL_CHEST_MENU_TYPE, AbyssalChestScreen::new);

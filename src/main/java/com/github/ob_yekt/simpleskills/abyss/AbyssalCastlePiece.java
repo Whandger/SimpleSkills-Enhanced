@@ -10,6 +10,9 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.StructureManager;
 import net.minecraft.world.level.WorldGenLevel;
@@ -170,6 +173,29 @@ public class AbyssalCastlePiece extends StructurePiece {
 
         // 11. A handful of exposed Transcendent Ore deposits are embedded in the sewer walls.
         placeSewerTranscendentOres(level, box);
+
+        // 12. The Fallen King is placed exactly once on the throne, in the chunk containing its seat.
+        placeFallenKing(level, box);
+    }
+
+    /**
+     * Places the throne guardian once, in the one structure chunk that contains the throne seat.
+     * The entity is created directly so the structure controls its exact throne position and initial pose.
+     */
+    private void placeFallenKing(WorldGenLevel level, BoundingBox box) {
+        BlockPos seat = center.offset(0, 4, -20);
+        if (!box.isInside(seat)) return;
+
+        AbyssalFallenKingEntity king = new AbyssalFallenKingEntity(AbyssalFallenKingEntity.TYPE, level.getLevel());
+        // Spawn one block forward of the raised cushion, on the lower dais floor.
+        // The front support block is at center Y+3, so its top face is Y+4.
+        // Entity position is its feet/base; using Y+5 here leaves it one block airborne.
+        // ThroneSlumberGoal prevents wandering while he is seated.
+        king.snapTo(center.getX() + 0.5D, center.getY() + 4.0D, center.getZ() - 18.5D, 0.0F, 0.0F);
+        king.setPersistenceRequired();
+        king.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.NETHERITE_SWORD));
+        king.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
+        level.addFreshEntity(king);
     }
 
     // =========================================================================

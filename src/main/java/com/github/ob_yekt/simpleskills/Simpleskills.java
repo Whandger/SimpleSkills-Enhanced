@@ -4,6 +4,7 @@ import com.github.ob_yekt.simpleskills.commands.SimpleskillsCommands;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalSolidCaveFormationFeature;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalDeadTreeFeature;
 import com.github.ob_yekt.simpleskills.abyss.AbyssContent;
+import com.github.ob_yekt.simpleskills.abyss.AbyssalFallenKingEntity;
 import com.github.ob_yekt.simpleskills.abyss.AbyssWorldgen;
 import com.github.ob_yekt.simpleskills.managers.*;
 import com.github.ob_yekt.simpleskills.events.EventHandlers;
@@ -57,6 +58,7 @@ public class Simpleskills implements ModInitializer {
 
 		// Register aquatic content before FishingConfig reads the registered species list.
 		FishingEntities.register();
+		AbyssalFallenKingEntity.register();
 		FishingItems.register();
 		FishingSpeciesRegistration.register();
 
