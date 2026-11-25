@@ -5,6 +5,7 @@ import com.github.ob_yekt.simpleskills.abyss.AbyssalSolidCaveFormationFeature;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalDeadTreeFeature;
 import com.github.ob_yekt.simpleskills.abyss.AbyssContent;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalFallenKingEntity;
+import com.github.ob_yekt.simpleskills.abyss.AbyssalKingItems;
 import com.github.ob_yekt.simpleskills.abyss.AbyssWorldgen;
 import com.github.ob_yekt.simpleskills.managers.*;
 import com.github.ob_yekt.simpleskills.events.EventHandlers;
@@ -66,6 +67,7 @@ public class Simpleskills implements ModInitializer {
 		ModBlocks.register();
 		RuneContent.register();
 		AbyssContent.register();
+		AbyssalKingItems.register();
 		AbyssalSolidCaveFormationFeature.registerType();
 		AbyssalDeadTreeFeature.registerType();
 		RuneMiningManager.register();

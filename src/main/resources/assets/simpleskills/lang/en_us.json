@@ -677,5 +677,9 @@
   "block.simpleskills.abyssal_charred_timber": "Abyssal Charred Timber",
   "block.simpleskills.abyssal_black_bookshelf": "Empty Abyssal Bookshelf",
   "block.simpleskills.abyssal_furnace": "Abyssal Furnace",
-  "entity.simpleskills.abyssal_fallen_king": "Fallen King of the Abyss"
+  "entity.simpleskills.abyssal_fallen_king": "Fallen King of the Abyss",
+  "item.simpleskills.abyssal_king_sword": "Abyssal King's Sword",
+  "item.simpleskills.abyssal_king_crown": "Abyssal King's Crown",
+  "message.simpleskills.abyssal_king_relic_inventory_full": "Your inventory is full. The relic remains here.",
+  "message.simpleskills.abyssal_king_relic_collected": "Collected %s"
 }

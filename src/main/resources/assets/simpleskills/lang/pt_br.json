@@ -677,5 +677,9 @@
   "block.simpleskills.abyssal_charred_timber": "Madeira Carbonizada Abissal",
   "block.simpleskills.abyssal_black_bookshelf": "Estante Abissal Vazia",
   "block.simpleskills.abyssal_furnace": "Fornalha Abissal",
-  "entity.simpleskills.abyssal_fallen_king": "Rei Caído do Abismo"
+  "entity.simpleskills.abyssal_fallen_king": "Rei Caído do Abismo",
+  "item.simpleskills.abyssal_king_sword": "Espada do Rei Abissal",
+  "item.simpleskills.abyssal_king_crown": "Coroa do Rei Abissal",
+  "message.simpleskills.abyssal_king_relic_inventory_full": "Seu inventário está cheio. A relíquia continuará aqui.",
+  "message.simpleskills.abyssal_king_relic_collected": "Você coletou %s"
 }

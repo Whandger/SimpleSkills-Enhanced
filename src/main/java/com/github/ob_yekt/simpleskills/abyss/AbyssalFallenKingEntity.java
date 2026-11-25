@@ -5,6 +5,8 @@ import com.github.ob_yekt.simpleskills.prayer.PrayerAbility;
 import com.github.ob_yekt.simpleskills.prayer.PrayerScaling;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVisualEffects;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVfxEntity;
+import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager;
+import com.github.ob_yekt.simpleskills.crafting.CraftingRarity;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
@@ -28,6 +30,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.AnimationState;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -39,12 +42,13 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -107,6 +111,8 @@ public class AbyssalFallenKingEntity extends Monster {
     private static final double AWAKEN_TRIGGER_RANGE = 10.0D;
     private static final double RANGED_SPELL_MIN_RANGE = 8.0D;
     private static final double RANGED_SPELL_MAX_RANGE = 36.0D;
+    // Return to the throne only after 20 full seconds without a valid player in combat range.
+    private static final int NO_PLAYERS_RESET_DELAY_TICKS = 20 * 20;
     private static final int BOSS_PRAYER_LEVEL = 35;
     private static final PrayerAbility[] RANGED_SPELL_ROTATION = {
             PrayerAbility.FIREBALL,
@@ -133,7 +139,9 @@ public class AbyssalFallenKingEntity extends Monster {
     private int lastClientAttackTick = -1;
     private int rangedSpellCooldownTicks = 0;
     private int nextRangedSpellIndex = 0;
+    private int noPlayersNearbyTicks = 0;
     private boolean deathSequenceStarted = false;
+    private boolean kingRelicsDropped = false;
 
     // Immutable return point captured at the throne before the first awakening.
     private boolean throneAnchorCaptured = false;
@@ -142,11 +150,6 @@ public class AbyssalFallenKingEntity extends Monster {
     private double throneZ;
     private float throneYaw;
     private float thronePitch;
-
-    // Also catches delayed fire deaths caused by the King's fireball.
-    @Nullable
-    private UUID recentlyDamagedPlayerUuid;
-    private long recentlyDamagedPlayerAt = -1L;
 
     public AbyssalFallenKingEntity(EntityType<? extends Monster> entityType, Level level) {
         super(entityType, level);
@@ -182,7 +185,6 @@ public class AbyssalFallenKingEntity extends Monster {
         // While the target is beyond melee range, keep pursuing it with pathfinding
         // instead of standing still to cast ranged spells.
         this.goalSelector.addGoal(3, new KingRangedSpellPursuitGoal(this, 1.05D));
-        this.goalSelector.addGoal(5, new WaterAvoidingRandomStrollGoal(this, 0.85D));
         this.goalSelector.addGoal(6, new LookAtPlayerGoal(this, Player.class, 12.0F));
         this.goalSelector.addGoal(7, new RandomLookAroundGoal(this));
 
@@ -255,6 +257,7 @@ public class AbyssalFallenKingEntity extends Monster {
     public void triggerAwakening() {
         if (!this.isDeadOrDying() && getKingState() == STATE_SITTING) {
             this.awakeningTicks = 0;
+            this.noPlayersNearbyTicks = 0;
             setKingState(STATE_AWAKENING);
             this.playSound(SoundEvents.WITHER_SPAWN, 1.3F, 0.72F);
         }
@@ -295,9 +298,6 @@ public class AbyssalFallenKingEntity extends Monster {
         this.getNavigation().stop();
         this.setTarget(null);
         this.setDeltaMovement(0.0D, Math.min(0.0D, this.getDeltaMovement().y), 0.0D);
-        this.recentlyDamagedPlayerUuid = null;
-        this.recentlyDamagedPlayerAt = -1L;
-
         if (!this.level().isClientSide()) {
             this.bossEvent.setProgress(0.0F);
             this.bossEvent.setVisible(false);
@@ -317,6 +317,11 @@ public class AbyssalFallenKingEntity extends Monster {
             emitServerDeathEffects(serverLevel, this.deathTime);
 
             if (this.deathTime >= DEATH_DURATION_TICKS && !this.isRemoved()) {
+                if (!this.kingRelicsDropped) {
+                    // Set the guard before spawning either entity: reloads cannot duplicate the rewards.
+                    this.kingRelicsDropped = true;
+                    spawnKingRelics(serverLevel);
+                }
                 serverLevel.sendParticles(ParticleTypes.ASH,
                         this.getX(), this.getY() + 0.15D, this.getZ(),
                         24, 0.48D, 0.08D, 0.48D, 0.01D);
@@ -326,6 +331,32 @@ public class AbyssalFallenKingEntity extends Monster {
                 this.remove(Entity.RemovalReason.KILLED);
             }
         }
+    }
+
+    private void spawnKingRelics(ServerLevel serverLevel) {
+        // Each reward rolls independently: 5% Transcendent, otherwise Mythic.
+        CraftingRarity swordRarity = this.getRandom().nextFloat() < 0.05F
+                ? CraftingRarity.TRANSCENDENT : CraftingRarity.MYTHIC;
+        CraftingRarity crownRarity = this.getRandom().nextFloat() < 0.05F
+                ? CraftingRarity.TRANSCENDENT : CraftingRarity.MYTHIC;
+
+        spawnKingRelic(serverLevel, AbyssalKingItems.ABYSSAL_KING_SWORD,
+                getPlantedSwordAnchor(), swordRarity);
+        spawnKingRelic(serverLevel, AbyssalKingItems.ABYSSAL_KING_CROWN,
+                getFallenCrownAnchor(), crownRarity);
+    }
+
+    private void spawnKingRelic(ServerLevel serverLevel, Item item, Vec3 anchor, CraftingRarity rarity) {
+        if (item == null) return;
+        ItemStack stack = new ItemStack(item);
+        CraftingEquipmentManager.markAbyssalLootRarity(stack, rarity);
+
+        // Standard vanilla item drop: gravity, normal proximity pickup and no despawn.
+        // The rarity marker is materialized by the active ItemEntityMixin before pickup.
+        ItemEntity relic = new ItemEntity(serverLevel, anchor.x, anchor.y, anchor.z, stack);
+        relic.setUnlimitedLifetime();
+        relic.setYRot(this.getYRot());
+        serverLevel.addFreshEntity(relic);
     }
 
     private void emitServerDeathEffects(ServerLevel serverLevel, int tick) {
@@ -420,41 +451,94 @@ public class AbyssalFallenKingEntity extends Monster {
     }
 
     private void updateServerState() {
+        if (!(this.level() instanceof ServerLevel serverLevel)) {
+            return;
+        }
+
         int state = getKingState();
 
         if (!this.throneAnchorCaptured) {
             captureThroneAnchor();
         }
 
-        if (this.level() instanceof ServerLevel serverLevel && checkRecentlyDamagedPlayerDeath(serverLevel)) {
-            this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
-            return;
-        }
-
         if (state == STATE_SITTING) {
+            this.noPlayersNearbyTicks = 0;
             this.setDeltaMovement(0.0D, this.getDeltaMovement().y, 0.0D);
-            Player nearest = this.level().getNearestPlayer(this, AWAKEN_TRIGGER_RANGE);
-            if (nearest != null && nearest.isAlive() && !nearest.isCreative() && !nearest.isSpectator()
-                    && this.hasLineOfSight(nearest)) {
+            Player nearest = findNearestValidPlayer(serverLevel, AWAKEN_TRIGGER_RANGE);
+            if (nearest != null && this.hasLineOfSight(nearest)) {
                 this.setTarget(nearest);
                 triggerAwakening();
             }
         } else if (state == STATE_AWAKENING) {
+            this.noPlayersNearbyTicks = 0;
             this.awakeningTicks++;
             this.getNavigation().stop();
-            if (this.level() instanceof ServerLevel serverLevel && this.awakeningTicks % 3 == 0) {
+            if (this.awakeningTicks % 3 == 0) {
                 serverLevel.sendParticles(ParticleTypes.SOUL_FIRE_FLAME,
                         this.getX(), this.getY() + 1.2D, this.getZ(),
                         6, 0.6D, 0.8D, 0.6D, 0.03D);
             }
             if (this.awakeningTicks >= AWAKENING_DURATION_TICKS) {
                 setKingState(STATE_ACTIVE);
+                this.noPlayersNearbyTicks = 0;
             }
-        } else if (state == STATE_ACTIVE && this.level() instanceof ServerLevel serverLevel) {
-            updateRangedSpellAttack(serverLevel);
+        } else if (state == STATE_ACTIVE) {
+            // Always retarget the nearest valid player, rather than remaining focused on
+            // a player who has died, disconnected, entered spectator mode, or moved away.
+            boolean hasNearbyPlayer = updateNearestPlayerTarget(serverLevel);
+            if (this.getKingState() == STATE_ACTIVE && hasNearbyPlayer) {
+                updateRangedSpellAttack(serverLevel);
+            }
         }
 
         this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
+    }
+
+    /** Finds the nearest living, non-creative, non-spectator player within the requested radius. */
+    @Nullable
+    private Player findNearestValidPlayer(ServerLevel serverLevel, double range) {
+        double rangeSqr = range * range;
+        Player nearest = null;
+        double nearestDistanceSqr = rangeSqr;
+        AABB searchBox = this.getBoundingBox().inflate(range);
+
+        for (Player candidate : serverLevel.getEntitiesOfClass(Player.class, searchBox,
+                player -> player.isAlive() && !player.isCreative() && !player.isSpectator())) {
+            double distanceSqr = this.distanceToSqr(candidate);
+            if (distanceSqr <= rangeSqr && distanceSqr < nearestDistanceSqr) {
+                nearest = candidate;
+                nearestDistanceSqr = distanceSqr;
+            }
+        }
+        return nearest;
+    }
+
+    /**
+     * Keeps the King focused on the closest valid player within his 36-block combat range.
+     * If nobody remains nearby, he waits in place for 20 seconds before returning to throne stasis.
+     */
+    private boolean updateNearestPlayerTarget(ServerLevel serverLevel) {
+        Player nearest = findNearestValidPlayer(serverLevel, RANGED_SPELL_MAX_RANGE);
+        if (nearest != null) {
+            this.noPlayersNearbyTicks = 0;
+            if (this.getTarget() != nearest) {
+                this.setTarget(nearest);
+            }
+            return true;
+        }
+
+        this.setTarget(null);
+        this.getNavigation().stop();
+        this.setDeltaMovement(0.0D, this.getDeltaMovement().y, 0.0D);
+        this.noPlayersNearbyTicks = Math.min(
+                NO_PLAYERS_RESET_DELAY_TICKS,
+                this.noPlayersNearbyTicks + 1
+        );
+
+        if (this.noPlayersNearbyTicks >= NO_PLAYERS_RESET_DELAY_TICKS) {
+            returnToThroneStasis();
+        }
+        return false;
     }
 
     private void captureThroneAnchor() {
@@ -518,32 +602,7 @@ public class AbyssalFallenKingEntity extends Monster {
                 ability, BOSS_PRAYER_LEVEL);
     }
 
-    private void rememberPlayerDamage(Player player) {
-        this.recentlyDamagedPlayerUuid = player.getUUID();
-        this.recentlyDamagedPlayerAt = this.level().getGameTime();
-    }
-
-    private boolean checkRecentlyDamagedPlayerDeath(ServerLevel serverLevel) {
-        if (this.recentlyDamagedPlayerUuid == null) {
-            return false;
-        }
-
-        long elapsed = serverLevel.getGameTime() - this.recentlyDamagedPlayerAt;
-        if (elapsed > 100L) {
-            this.recentlyDamagedPlayerUuid = null;
-            this.recentlyDamagedPlayerAt = -1L;
-            return false;
-        }
-
-        Player recentlyDamaged = serverLevel.getServer().getPlayerList().getPlayer(this.recentlyDamagedPlayerUuid);
-        if (recentlyDamaged != null && !recentlyDamaged.isAlive()) {
-            returnToThroneStasis();
-            return true;
-        }
-        return false;
-    }
-
-    /** Called when one of the King's melee or Prayer spell hits kills a player. */
+    /** Returns the King to his original throne after the arena has been empty for 20 seconds. */
     public void returnToThroneStasis() {
         if (this.level().isClientSide() || !this.isAlive()) {
             return;
@@ -555,9 +614,6 @@ public class AbyssalFallenKingEntity extends Monster {
         this.rangedSpellCooldownTicks = 0;
         this.nextRangedSpellIndex = 0;
         this.awakeningTicks = 0;
-        this.recentlyDamagedPlayerUuid = null;
-        this.recentlyDamagedPlayerAt = -1L;
-
         if (this.throneAnchorCaptured) {
             this.snapTo(this.throneX, this.throneY, this.throneZ, this.throneYaw, this.thronePitch);
         }
@@ -620,7 +676,6 @@ public class AbyssalFallenKingEntity extends Monster {
             return;
         }
 
-        king.rememberPlayerDamage(victim);
         switch (ability) {
             case FIREBALL -> {
                 victim.igniteForSeconds(3.0F);
@@ -649,9 +704,6 @@ public class AbyssalFallenKingEntity extends Monster {
             default -> { }
         }
 
-        if (!victim.isAlive()) {
-            king.returnToThroneStasis();
-        }
     }
 
     private void updateClientAnimations() {
@@ -717,12 +769,6 @@ public class AbyssalFallenKingEntity extends Monster {
         this.entityData.set(DATA_ATTACK_TICK, this.tickCount);
         boolean hurt = super.doHurtTarget(level, target);
         if (hurt) {
-            if (target instanceof Player player) {
-                this.rememberPlayerDamage(player);
-                if (!player.isAlive()) {
-                    this.returnToThroneStasis();
-                }
-            }
             this.playSound(SoundEvents.PLAYER_ATTACK_SWEEP, 1.1F, 0.75F);
             level.sendParticles(ParticleTypes.WITCH,
                     target.getX(), target.getY() + target.getBbHeight() * 0.5D, target.getZ(),
@@ -774,7 +820,9 @@ public class AbyssalFallenKingEntity extends Monster {
             output.putFloat("ThronePitch", this.thronePitch);
         }
         output.putInt("NextRangedSpell", this.nextRangedSpellIndex);
+        output.putInt("NoPlayersNearbyTicks", this.noPlayersNearbyTicks);
         output.putInt("DeathTicks", this.deathTime);
+        output.putBoolean("KingRelicsDropped", this.kingRelicsDropped);
     }
 
     @Override
@@ -794,7 +842,10 @@ public class AbyssalFallenKingEntity extends Monster {
         }
         this.nextRangedSpellIndex = Math.floorMod(
                 input.getIntOr("NextRangedSpell", 0), RANGED_SPELL_ROTATION.length);
+        this.noPlayersNearbyTicks = Math.max(0, Math.min(
+                NO_PLAYERS_RESET_DELAY_TICKS, input.getIntOr("NoPlayersNearbyTicks", 0)));
 
+        this.kingRelicsDropped = input.getBooleanOr("KingRelicsDropped", false);
         int savedDeathTicks = Math.max(0, Math.min(DEATH_DURATION_TICKS, input.getIntOr("DeathTicks", 0)));
         if (savedDeathTicks > 0 || this.isDeadOrDying()) {
             this.deathTime = Math.max(1, savedDeathTicks);
