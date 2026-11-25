@@ -54,6 +54,13 @@ public class AbyssalCastlePiece extends StructurePiece {
     public static final int MIN_OFFSET_Z = -74;
     public static final int MAX_OFFSET_Z = 104;
 
+    private static final double FOUNDATION_RADIUS_X = 68.0;
+    private static final double FOUNDATION_RADIUS_Z = 68.0;
+    private static final int PLATFORM_MIN_X = -42;
+    private static final int PLATFORM_MAX_X = 42;
+    private static final int PLATFORM_MIN_Z = -48;
+    private static final int PLATFORM_MAX_Z = 60;
+
     /** Chance (0-99) that a perimeter tower leans. */
     public static final int LEAN_CHANCE = 35;
     /** Chance (0-99) that a perimeter tower has collapsed onto the ground. */
@@ -153,47 +160,46 @@ public class AbyssalCastlePiece extends StructurePiece {
     private void buildCraggyMountainFoundation(WorldGenLevel level, BoundingBox box) {
         int yMinLimit = Math.max(level.getMinY() + 2, -254);
 
+        // Keep every terrain read inside the current structure chunk bounds.
         int minDx = Math.max(-HALF, box.minX() - center.getX());
         int maxDx = Math.min(HALF, box.maxX() - center.getX());
         int minDz = Math.max(MIN_OFFSET_Z, box.minZ() - center.getZ());
         int maxDz = Math.min(MAX_OFFSET_Z, box.maxZ() - center.getZ());
 
-        final double foundationCenterZ = 8.0;
-        final double foundationRadiusX = 48.0;
-        final double foundationRadiusZ = 54.0;
-
         for (int dx = minDx; dx <= maxDx; dx++) {
             for (int dz = minDz; dz <= maxDz; dz++) {
                 int wx = center.getX() + dx;
                 int wz = center.getZ() + dz;
-                double relativeDz = dz - foundationCenterZ;
-                double normDist = Math.hypot(dx / foundationRadiusX, relativeDz / foundationRadiusZ);
-                double ridge = ridgeNoise(dx, (int) relativeDz);
+                double relativeDz = dz - 8.0;
+                double normDist = Math.hypot(dx / FOUNDATION_RADIUS_X, relativeDz / FOUNDATION_RADIUS_Z);
+                int surfaceDrop = getFoundationSurfaceDrop(dx, dz);
 
                 int solidDepth = 0;
-                for (int d = 0; d <= BELOW_FLOOR_DEPTH; d++) {
+                for (int d = surfaceDrop; d <= BELOW_FLOOR_DEPTH; d++) {
                     int wy = center.getY() - d;
                     if (wy < yMinLimit) break;
 
-                    double depthProgress = d / (double) BELOW_FLOOR_DEPTH;
-                    // Jagged cliff edge: ridge amplitude raised from 0.10 to 0.20 for a craggier silhouette
-                    double maxRadiusFactor = 1.08 + (depthProgress * 0.85) + ((ridge - 0.5) * 0.20);
+                    double depthBelowSurface = d - surfaceDrop;
+                    double depthProgress = depthBelowSurface / (double) Math.max(1, BELOW_FLOOR_DEPTH - surfaceDrop);
+                    double maxRadiusFactor = foundationRadiusFactor(dx, (int) relativeDz, depthProgress);
                     if (normDist > maxRadiusFactor) continue;
 
                     BlockPos pos = new BlockPos(wx, wy, wz);
                     BlockState existing = level.getBlockState(pos);
-                    // Never terminate early above dy = -23 so subterranean sewers & dungeons stay enclosed in rock
-                    if (d > 23 && existing.isSolidRender() && !existing.is(Blocks.WATER) && !existing.is(Blocks.LAVA)) {
+
+                    // Keep enough solid rock around the underground rooms before joining natural terrain.
+                    if (depthBelowSurface > 23 && existing.isSolidRender()
+                            && !existing.is(Blocks.WATER) && !existing.is(Blocks.LAVA)) {
                         solidDepth++;
                         if (solidDepth >= 4) break;
                     } else {
                         solidDepth = 0;
                     }
 
-                    if (d == 0 && normDist <= 1.02) {
+                    if (d == 0 && isCastlePlatform(dx, dz)) {
                         setSafe(level, box, pos, pickFloorBlock(dx, dz));
                     } else {
-                        boolean isEdge = normDist > (maxRadiusFactor - 0.13);
+                        boolean isEdge = d == surfaceDrop || normDist > (maxRadiusFactor - 0.15);
                         setSafe(level, box, pos, pickMountainBlock(dx, wy, dz, isEdge));
                     }
                 }
@@ -233,7 +239,7 @@ public class AbyssalCastlePiece extends StructurePiece {
         fillVolume(level, box, -28, -20, -30, -20, -14, -20, Blocks.AIR.defaultBlockState());
         for (int x = -28; x <= -20; x++) {
             for (int z = -30; z <= -20; z++) {
-                setSafe(level, box, center.offset(x, -21, z), Blocks.MOSSY_STONE_BRICKS.defaultBlockState());
+                setSafe(level, box, center.offset(x, -21, z), AbyssContent.CRACKED_ABYSSAL_BRICKS.defaultBlockState());
                 setSafe(level, box, center.offset(x, -13, z), AbyssContent.CRACKED_ABYSSAL_BRICKS.defaultBlockState());
             }
         }
@@ -284,7 +290,7 @@ public class AbyssalCastlePiece extends StructurePiece {
                     setSafe(level, box, center.offset(x, -20, z), Blocks.WATER.defaultBlockState());
                 } else {
                     BlockState walk = coordMod(x, -20, z, 4) == 0
-                            ? Blocks.MOSSY_STONE_BRICKS.defaultBlockState()
+                            ? AbyssContent.CRACKED_ABYSSAL_BRICKS.defaultBlockState()
                             : AbyssContent.CRACKED_ABYSSAL_TILES.defaultBlockState();
                     setSafe(level, box, center.offset(x, -20, z), walk);
                 }
@@ -327,7 +333,7 @@ public class AbyssalCastlePiece extends StructurePiece {
                         setSafe(level, box, center.offset(x, -21, z), AbyssContent.CRACKED_ABYSSAL_BRICKS.defaultBlockState());
                         setSafe(level, box, center.offset(x, -20, z), Blocks.WATER.defaultBlockState());
                     } else {
-                        setSafe(level, box, center.offset(x, -20, z), Blocks.MOSSY_STONE_BRICKS.defaultBlockState());
+                        setSafe(level, box, center.offset(x, -20, z), AbyssContent.CRACKED_ABYSSAL_BRICKS.defaultBlockState());
                     }
                 }
 
@@ -755,7 +761,7 @@ public class AbyssalCastlePiece extends StructurePiece {
             if (roll < 70) return AbyssContent.ABYSSAL_BRICK_WALL.defaultBlockState();
         }
         if (roll < 38) return AbyssContent.CRACKED_ABYSSAL_BRICKS.defaultBlockState();
-        if (roll < 62) return Blocks.COBBLED_DEEPSLATE.defaultBlockState();
+        if (roll < 62) return AbyssContent.CRACKED_ABYSSAL_STONE.defaultBlockState();
         if (roll < 78) return AbyssContent.POLISHED_ABYSSAL_STONE.defaultBlockState();
         return AbyssContent.ABYSSAL_BRICKS.defaultBlockState();
     }
@@ -2146,14 +2152,66 @@ public class AbyssalCastlePiece extends StructurePiece {
     }
 
     /**
-     * Checks whether the mountain foundation occupies this horizontal position at its top
-     * surface (d = 0), using the exact same ellipse and ridge profile as the foundation builder.
+     * Flat structural plateau kept under the courtyard, curtain walls and tower footprints.
+     * The surrounding mountain drops away irregularly, so this support area is not visible as a slab.
+     */
+    private boolean isCastlePlatform(int dx, int dz) {
+        return dx >= PLATFORM_MIN_X && dx <= PLATFORM_MAX_X
+                && dz >= PLATFORM_MIN_Z && dz <= PLATFORM_MAX_Z;
+    }
+
+    /**
+     * Low-frequency terrain variation. Combining two scales avoids a perfect oval while keeping
+     * the mountain continuous rather than turning it into random one-block spikes.
+     */
+    private double foundationDetailNoise(int x, int z) {
+        // Seed offsets give each generated castle its own ridge layout while remaining chunk-stable.
+        double seedX = (seed & 0xFFFFL) * 0.0007;
+        double seedZ = ((seed >>> 16) & 0xFFFFL) * 0.0007;
+        double broad = Math.sin(x * 0.045 + z * 0.035 + seedX)
+                * Math.cos(z * 0.052 - x * 0.031 + seedZ);
+        double medium = Math.sin(x * 0.13 - z * 0.11 + seedZ)
+                * Math.cos(z * 0.12 + x * 0.08 + seedX);
+        return broad * 0.65 + medium * 0.35;
+    }
+
+    /**
+     * Number of blocks below the castle floor where the exposed mountain surface begins.
+     * Distance from the castle platform creates the broad slope; deterministic noise breaks up
+     * the edge into uneven ridges and shoulders.
+     */
+    private int getFoundationSurfaceDrop(int dx, int dz) {
+        if (isCastlePlatform(dx, dz)) return 0;
+
+        int outsideX = Math.max(0, Math.max(PLATFORM_MIN_X - dx, dx - PLATFORM_MAX_X));
+        int outsideZ = Math.max(0, Math.max(PLATFORM_MIN_Z - dz, dz - PLATFORM_MAX_Z));
+        double distance = Math.hypot(outsideX, outsideZ);
+        double broadRidge = Math.sin(dx * 0.055 + dz * 0.041)
+                * Math.cos(dz * 0.047 - dx * 0.033);
+        double erosion = broadRidge * 1.9
+                + foundationDetailNoise(dx, dz) * 1.0
+                + (ridgeNoise(dx, dz - 8) - 0.5) * 1.0;
+        return Math.max(0, Math.min(9, (int) Math.round(distance * 0.18 + erosion)));
+    }
+
+    /** Same irregular radial profile used by the foundation writer and support checks. */
+    private double foundationRadiusFactor(int dx, int relativeDz, double depthProgress) {
+        double ridge = ridgeNoise(dx, relativeDz);
+        double detail = foundationDetailNoise(dx, relativeDz + 8);
+        double factor = 1.10 + (depthProgress * 0.14) + ((ridge - 0.5) * 0.08) + (detail * 0.02);
+        return Math.min(1.30, factor);
+    }
+
+    /**
+     * Checks whether the mountain foundation reaches the top surface at this horizontal position.
+     * This mirrors the same platform, surface drop and rough radial profile used during generation.
      */
     private boolean hasFoundationAtSurface(int dx, int dz) {
+        if (isCastlePlatform(dx, dz)) return true;
+
         double relativeDz = dz - 8.0;
-        double normDist = Math.hypot(dx / 48.0, relativeDz / 54.0);
-        double ridge = ridgeNoise(dx, (int) relativeDz);
-        double maxRadiusFactor = 1.08 + ((ridge - 0.5) * 0.20);
+        double normDist = Math.hypot(dx / FOUNDATION_RADIUS_X, relativeDz / FOUNDATION_RADIUS_Z);
+        double maxRadiusFactor = foundationRadiusFactor(dx, (int) relativeDz, 0.0);
         return normDist <= maxRadiusFactor;
     }
 
@@ -2179,12 +2237,19 @@ public class AbyssalCastlePiece extends StructurePiece {
         hash ^= hash >>> 31;
         int roll = (int) Math.floorMod(hash, 100L);
 
-        // Mixed rock: abyssal stone dominates, with cracked, blackstone and frosted variants for a weathered cliff
-        if (roll < 50) return AbyssContent.ABYSSAL_STONE.defaultBlockState();
+        // Custom Abyss palette only: rough edges use more cracked and corrupted variants.
+        if (isEdge) {
+            if (roll < 34) return AbyssContent.CRACKED_ABYSSAL_STONE.defaultBlockState();
+            if (roll < 57) return AbyssContent.ABYSSAL_STONE.defaultBlockState();
+            if (roll < 76) return AbyssContent.CRACKED_ABYSSAL_BRICKS.defaultBlockState();
+            if (roll < 91) return AbyssContent.AMETHYST_CORRUPTED_STONE.defaultBlockState();
+            return AbyssContent.ABYSSAL_BRICKS.defaultBlockState();
+        }
+        if (roll < 46) return AbyssContent.ABYSSAL_STONE.defaultBlockState();
         if (roll < 68) return AbyssContent.CRACKED_ABYSSAL_STONE.defaultBlockState();
-        if (roll < 78) return Blocks.BLACKSTONE.defaultBlockState();
-        if (roll < 88) return AbyssContent.FROSTED_ABYSSAL_STONE.defaultBlockState();
-        if (roll < 94) return AbyssContent.ABYSSAL_PILLAR.defaultBlockState();
+        if (roll < 82) return AbyssContent.ABYSSAL_BRICKS.defaultBlockState();
+        if (roll < 92) return AbyssContent.CRACKED_ABYSSAL_BRICKS.defaultBlockState();
+        if (roll < 97) return AbyssContent.POLISHED_ABYSSAL_STONE.defaultBlockState();
         return AbyssContent.AMETHYST_CORRUPTED_STONE.defaultBlockState();
     }
 
@@ -2195,9 +2260,8 @@ public class AbyssalCastlePiece extends StructurePiece {
         int roll = coordMod(dx, dy, dz, 100);
         if (roll < 12) return AbyssContent.CRACKED_ABYSSAL_BRICKS.defaultBlockState();
         if (roll < 18) return AbyssContent.CHISELED_ABYSSAL_STONE.defaultBlockState();
-        // Weathered variety: grey deepslate and soot-dark blackstone break up the clean brick walls
-        if (roll < 26) return Blocks.COBBLED_DEEPSLATE.defaultBlockState();
-        if (roll < 29) return Blocks.POLISHED_BLACKSTONE_BRICKS.defaultBlockState();
+        if (roll < 26) return AbyssContent.CRACKED_ABYSSAL_STONE.defaultBlockState();
+        if (roll < 31) return AbyssContent.AMETHYST_CORRUPTED_STONE.defaultBlockState();
         return AbyssContent.ABYSSAL_BRICKS.defaultBlockState();
     }
 
