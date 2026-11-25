@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=x": {
+      "model": "simpleskills:block/abyssal_charred_timber",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y": {
+      "model": "simpleskills:block/abyssal_charred_timber"
+    },
+    "axis=z": {
+      "model": "simpleskills:block/abyssal_charred_timber",
+      "x": 90
+    }
+  }
+}

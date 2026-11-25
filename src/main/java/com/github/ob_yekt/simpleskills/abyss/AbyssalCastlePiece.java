@@ -278,8 +278,8 @@ public class AbyssalCastlePiece extends StructurePiece {
                 setSafe(level, box, center.offset(x, y, -20), ironBars(false, false, true, true));
             }
         }
-        setSafe(level, box, center.offset(-27, -20, -29), Blocks.BARREL.defaultBlockState());
-        setSafe(level, box, center.offset(-26, -20, -29), Blocks.BARREL.defaultBlockState());
+        placeAbyssalStorage(level, box, -27, -20, -29, LOOT_CASTLE, 710);
+        placeAbyssalStorage(level, box, -26, -20, -29, LOOT_CASTLE, 711);
         setSafe(level, box, center.offset(-21, -20, -29), Blocks.COBWEB.defaultBlockState());
         setSafe(level, box, center.offset(-24, -14, -25), hangingLantern(true));
 
@@ -440,8 +440,8 @@ public class AbyssalCastlePiece extends StructurePiece {
         // Warden's furniture
         setSafe(level, box, center.offset(-26, -10, 20), Blocks.ANVIL.defaultBlockState());
         setSafe(level, box, center.offset(-25, -10, 20), Blocks.GRINDSTONE.defaultBlockState());
-        setSafe(level, box, center.offset(-26, -10, 32), Blocks.BARREL.defaultBlockState());
-        setSafe(level, box, center.offset(-25, -10, 32), Blocks.BARREL.defaultBlockState());
+        placeAbyssalStorage(level, box, -26, -10, 32, LOOT_CASTLE, 720);
+        placeAbyssalStorage(level, box, -25, -10, 32, LOOT_CASTLE, 721);
         setSafe(level, box, center.offset(-22, -10, 20), AbyssContent.ABYSSAL_BRAZIER.defaultBlockState());
         setSafe(level, box, center.offset(-22, -4, 27), hangingLantern(true));
 
@@ -968,7 +968,7 @@ public class AbyssalCastlePiece extends StructurePiece {
             }
         }
         // Seat cushion & gilded armrests
-        setSafe(level, box, center.offset(0, 4, -20), Blocks.WOOL.pick(DyeColor.RED).defaultBlockState());
+        setSafe(level, box, center.offset(0, 4, -20), Blocks.WOOL.pick(DyeColor.BLACK).defaultBlockState());
         setSafe(level, box, center.offset(-1, 4, -20), AbyssContent.GILDED_ABYSSAL_BRICKS.defaultBlockState());
         setSafe(level, box, center.offset(1, 4, -20), AbyssContent.GILDED_ABYSSAL_BRICKS.defaultBlockState());
         setSafe(level, box, center.offset(-2, 4, -20), AbyssContent.CHISELED_ABYSSAL_STONE.defaultBlockState());
@@ -1053,21 +1053,25 @@ public class AbyssalCastlePiece extends StructurePiece {
         for (int z = -22; z <= -6; z++) {
             if (z % 4 == 0) continue;
             for (int y = 1; y <= 5; y++) {
-                setSafe(level, box, center.offset(-30, y, z), Blocks.BOOKSHELF.defaultBlockState());
+                setSafe(level, box, center.offset(-30, y, z), AbyssContent.ABYSSAL_BLACK_BOOKSHELF.defaultBlockState()
+                                .setValue(AbyssalBookshelfBlock.FACING, Direction.EAST));
                 if (z != -14) {
-                    setSafe(level, box, center.offset(-23, y, z), Blocks.BOOKSHELF.defaultBlockState());
+                    setSafe(level, box, center.offset(-23, y, z), AbyssContent.ABYSSAL_BLACK_BOOKSHELF.defaultBlockState()
+                            .setValue(AbyssalBookshelfBlock.FACING, Direction.WEST));
                 }
             }
         }
-        setSafe(level, box, center.offset(-26, 1, -14), Blocks.LECTERN.defaultBlockState()
-                .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.EAST));
+        setSafe(level, box, center.offset(-26, 1, -14), AbyssContent.ABYSSAL_CHARRED_TIMBER.defaultBlockState());
+        setSafe(level, box, center.offset(-25, 1, -14), AbyssContent.ABYSSAL_TILE_SLAB.defaultBlockState());
         setSafe(level, box, center.offset(-26, 13, -14), hangingLantern(true));
 
         // West Floor 1 Room B (dz = -3..15): Enchanting & Alchemy Rotunda
         setSafe(level, box, center.offset(-24, 1, 6), Blocks.ENCHANTING_TABLE.defaultBlockState());
         for (int z = 2; z <= 10; z += 2) {
-            setSafe(level, box, center.offset(-28, 1, z), Blocks.BOOKSHELF.defaultBlockState());
-            setSafe(level, box, center.offset(-28, 2, z), Blocks.BOOKSHELF.defaultBlockState());
+            setSafe(level, box, center.offset(-28, 1, z), AbyssContent.ABYSSAL_BLACK_BOOKSHELF.defaultBlockState()
+                    .setValue(AbyssalBookshelfBlock.FACING, Direction.EAST));
+            setSafe(level, box, center.offset(-28, 2, z), AbyssContent.ABYSSAL_BLACK_BOOKSHELF.defaultBlockState()
+                    .setValue(AbyssalBookshelfBlock.FACING, Direction.EAST));
         }
         setSafe(level, box, center.offset(-29, 1, -1), Blocks.BREWING_STAND.defaultBlockState());
         setSafe(level, box, center.offset(-28, 1, -1), Blocks.CAULDRON.defaultBlockState());
@@ -1077,11 +1081,13 @@ public class AbyssalCastlePiece extends StructurePiece {
 
         // West Floor 1 Room C (dz = 17..31): Scribe Study & Staircase to Floor 2
         for (int z = 18; z <= 22; z++) {
-            setSafe(level, box, center.offset(-26, 1, z), Blocks.BOOKSHELF.defaultBlockState());
-            setSafe(level, box, center.offset(-26, 2, z), Blocks.BOOKSHELF.defaultBlockState());
+            setSafe(level, box, center.offset(-26, 1, z), AbyssContent.ABYSSAL_BLACK_BOOKSHELF.defaultBlockState()
+                    .setValue(AbyssalBookshelfBlock.FACING, Direction.EAST));
+            setSafe(level, box, center.offset(-26, 2, z), AbyssContent.ABYSSAL_BLACK_BOOKSHELF.defaultBlockState()
+                    .setValue(AbyssalBookshelfBlock.FACING, Direction.EAST));
         }
-        setSafe(level, box, center.offset(-20, 1, 20), Blocks.BARREL.defaultBlockState());
-        setSafe(level, box, center.offset(-20, 1, 21), Blocks.BARREL.defaultBlockState());
+        placeAbyssalStorage(level, box, -20, 1, 20, LOOT_LIBRARY, 730);
+        placeAbyssalStorage(level, box, -20, 1, 21, LOOT_LIBRARY, 731);
         buildWingStaircase(level, box, -30, -28, 18, 30, 1, 14, Direction.SOUTH);
 
         // West Floor 2 Room A (dz = -23..-5, dy = 14..26): King's Royal Bedchamber
@@ -1089,7 +1095,7 @@ public class AbyssalCastlePiece extends StructurePiece {
         for (int bx = -29; bx <= -26; bx++) {
             for (int bz = -18; bz <= -13; bz++) {
                 setSafe(level, box, center.offset(bx, 15, bz), AbyssContent.GILDED_ABYSSAL_BRICKS.defaultBlockState());
-                setSafe(level, box, center.offset(bx, 16, bz), Blocks.WOOL.pick(DyeColor.RED).defaultBlockState());
+                setSafe(level, box, center.offset(bx, 16, bz), Blocks.WOOL.pick(DyeColor.BLACK).defaultBlockState());
             }
         }
         for (int px : new int[]{-29, -26}) {
@@ -1110,7 +1116,7 @@ public class AbyssalCastlePiece extends StructurePiece {
 
         // West Floor 2 Room B (dz = -3..15, dy = 14..26): War Council Room
         for (int z = 1; z <= 11; z++) {
-            setSafe(level, box, center.offset(-24, 15, z), Blocks.DARK_OAK_PLANKS.defaultBlockState());
+            setSafe(level, box, center.offset(-24, 15, z), AbyssContent.ABYSSAL_CHARRED_TIMBER.defaultBlockState());
             if (z % 2 == 1) {
                 setSafe(level, box, center.offset(-26, 15, z), oakStairs(Direction.EAST));
                 setSafe(level, box, center.offset(-22, 15, z), oakStairs(Direction.WEST));
@@ -1149,7 +1155,7 @@ public class AbyssalCastlePiece extends StructurePiece {
 
         // East Floor 1 Room B (dz = -3..16): Great Banquet Hall
         for (int z = 0; z <= 13; z++) {
-            setSafe(level, box, center.offset(24, 1, z), Blocks.DARK_OAK_PLANKS.defaultBlockState());
+            setSafe(level, box, center.offset(24, 1, z), AbyssContent.ABYSSAL_CHARRED_TIMBER.defaultBlockState());
             setSafe(level, box, center.offset(22, 1, z), oakStairs(Direction.EAST));
             setSafe(level, box, center.offset(26, 1, z), oakStairs(Direction.WEST));
         }
@@ -1160,16 +1166,16 @@ public class AbyssalCastlePiece extends StructurePiece {
         setSafe(level, box, center.offset(20, 1, 20), Blocks.FURNACE.defaultBlockState()
                 .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH));
         setSafe(level, box, center.offset(21, 1, 20), Blocks.CAULDRON.defaultBlockState());
-        setSafe(level, box, center.offset(24, 1, 29), Blocks.BARREL.defaultBlockState());
-        setSafe(level, box, center.offset(25, 1, 29), Blocks.BARREL.defaultBlockState());
+        placeAbyssalStorage(level, box, 24, 1, 29, LOOT_CASTLE, 740);
+        placeAbyssalStorage(level, box, 25, 1, 29, LOOT_CASTLE, 741);
         buildWingStaircase(level, box, 28, 30, 18, 30, 1, 14, Direction.SOUTH);
 
         // East Floor 2 Room A (dz = -23..-5, dy = 14..25): Royal Guard Barracks
         for (int bz : new int[]{-20, -14, -8}) {
-            setSafe(level, box, center.offset(29, 15, bz), Blocks.DARK_OAK_PLANKS.defaultBlockState());
-            setSafe(level, box, center.offset(28, 15, bz), Blocks.WOOL.pick(DyeColor.RED).defaultBlockState());
-            setSafe(level, box, center.offset(29, 15, bz + 1), Blocks.DARK_OAK_PLANKS.defaultBlockState());
-            setSafe(level, box, center.offset(28, 15, bz + 1), Blocks.WOOL.pick(DyeColor.RED).defaultBlockState());
+            setSafe(level, box, center.offset(29, 15, bz), AbyssContent.ABYSSAL_CHARRED_TIMBER.defaultBlockState());
+            setSafe(level, box, center.offset(28, 15, bz), Blocks.WOOL.pick(DyeColor.BLACK).defaultBlockState());
+            setSafe(level, box, center.offset(29, 15, bz + 1), AbyssContent.ABYSSAL_CHARRED_TIMBER.defaultBlockState());
+            setSafe(level, box, center.offset(28, 15, bz + 1), Blocks.WOOL.pick(DyeColor.BLACK).defaultBlockState());
         }
         setSafe(level, box, center.offset(24, 25, -14), hangingLantern(true));
 
@@ -2033,20 +2039,36 @@ public class AbyssalCastlePiece extends StructurePiece {
     }
 
     // =========================================================================
-    // 9. CHEST PLACEMENT & LOOT TABLES (44 VALIDATED CHESTS)
+    // 9. ABYSSAL CHEST PLACEMENT & LOOT TABLES (48 MAIN CHESTS + UTILITY STORAGE)
     // =========================================================================
+
+    private void placeAbyssalStorage(WorldGenLevel level, BoundingBox box, int dx, int dy, int dz,
+                                      ResourceKey<LootTable> lootTable, int salt) {
+        BlockPos pos = center.offset(dx, dy, dz);
+        if (!box.isInside(pos)) return;
+        if (!level.getBlockState(pos.below()).isSolidRender()) {
+            setSafe(level, box, pos.below(), AbyssContent.POLISHED_ABYSSAL_STONE.defaultBlockState());
+        }
+        level.setBlock(pos, AbyssContent.ABYSSAL_CHEST.defaultBlockState()
+                .setValue(AbyssalChestBlock.FACING, Direction.SOUTH), 2);
+        BlockEntity blockEntity = level.getBlockEntity(pos);
+        if (blockEntity instanceof RandomizableContainerBlockEntity container) {
+            container.setLootTable(lootTable, seed ^ (dx * 31L + dz * 17L + dy * 13L + salt));
+        }
+    }
 
     private void placeAllCastleChests(WorldGenLevel level, BoundingBox box) {
         List<ChestSpec> specs = new ArrayList<>();
 
-        // 22 Chests: simpleskills:chests/abyssal_castle (Towers, Courtyard, Forge, Barracks, Dungeons & Sewers)
+        // 26 Chests: simpleskills:chests/abyssal_castle (Towers, Courtyard, Forge, Barracks, Dungeons & Sewers)
         int[][] castleCoords = {
                 {-36, 1, -42}, {-36, 15, -42}, {36, 1, -42},  {36, 15, -42},
                 {-36, 1, 54},  {-36, 15, 54},  {36, 1, 54},   {-10, 1, 54},
                 {10, 1, 54},   {-36, 1, 6},    {-36, 15, 6},  {36, 1, 6},
                 {29, 1, -8},   {29, 1, 29},    {22, 15, -20}, {22, 15, -8},
                 {-14, -10, -12},{14, -10, -4}, {-14, -10, 12},{-26, -10, 34},
-                {26, -10, 20}, {-22, -20, -28}
+                {26, -10, 20}, {-22, -20, -28},
+                {28, 1, -8}, {-28, 1, -10}, {0, -10, 42}, {22, 1, 29}
         };
         for (int[] c : castleCoords) {
             int cx = c[0];
@@ -2101,8 +2123,8 @@ public class AbyssalCastlePiece extends StructurePiece {
             if (!level.getBlockState(below).isSolidRender()) {
                 level.setBlock(below, AbyssContent.POLISHED_ABYSSAL_STONE.defaultBlockState(), 2);
             }
-            level.setBlock(pos, Blocks.CHEST.defaultBlockState()
-                    .setValue(BlockStateProperties.HORIZONTAL_FACING, Direction.SOUTH), 2);
+            level.setBlock(pos, AbyssContent.ABYSSAL_CHEST.defaultBlockState()
+                    .setValue(AbyssalChestBlock.FACING, Direction.SOUTH), 2);
             BlockEntity be = level.getBlockEntity(pos);
             if (be instanceof RandomizableContainerBlockEntity container) {
                 long chestSeed = seed ^ (spec.dx * 31L + spec.dz * 17L + spec.dy * 13L);
@@ -2154,7 +2176,8 @@ public class AbyssalCastlePiece extends StructurePiece {
     }
 
     private static BlockState oakStairs(Direction facing) {
-        return Blocks.DARK_OAK_STAIRS.defaultBlockState()
+        // Retain the old helper call sites, but use Abyssal masonry instead of exposed timber.
+        return AbyssContent.ABYSSAL_TILE_STAIRS.defaultBlockState()
                 .setValue(BlockStateProperties.HORIZONTAL_FACING, facing)
                 .setValue(BlockStateProperties.HALF, Half.BOTTOM);
     }

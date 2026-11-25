@@ -672,5 +672,9 @@
   "block.simpleskills.abyssal_brick_slab": "Laje de Tijolos Abissais",
   "block.simpleskills.abyssal_brick_wall": "Muro de Tijolos Abissais",
   "block.simpleskills.abyssal_tile_stairs": "Escadas de Telhas Abissais",
-  "block.simpleskills.abyssal_tile_slab": "Laje de Telhas Abissais"
+  "block.simpleskills.abyssal_tile_slab": "Laje de Telhas Abissais",
+  "block.simpleskills.abyssal_chest": "Baú Abissal",
+  "block.simpleskills.abyssal_charred_timber": "Madeira Carbonizada Abissal",
+  "block.simpleskills.abyssal_black_bookshelf": "Estante Abissal Vazia",
+  "block.simpleskills.abyssal_furnace": "Fornalha Abissal"
 }

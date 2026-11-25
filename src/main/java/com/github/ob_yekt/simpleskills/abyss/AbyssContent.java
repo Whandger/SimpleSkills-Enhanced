@@ -10,6 +10,11 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.AbstractFurnaceBlock;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.flag.FeatureFlagSet;
+import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.PointedDripstoneBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
@@ -20,6 +25,7 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 
 import java.util.List;
+import java.util.Set;
 
 /** Content registrations for The Abyss underground expansion. */
 public final class AbyssContent {
@@ -57,6 +63,14 @@ public final class AbyssContent {
     public static Block ABYSSAL_BRICK_WALL;
     public static Block ABYSSAL_TILE_STAIRS;
     public static Block ABYSSAL_TILE_SLAB;
+    public static Block ABYSSAL_CHARRED_TIMBER;
+    public static Block ABYSSAL_BLACK_BOOKSHELF;
+    public static Block ABYSSAL_CHEST;
+    public static Block ABYSSAL_FURNACE;
+    public static BlockEntityType<AbyssalChestBlockEntity> ABYSSAL_CHEST_BLOCK_ENTITY_TYPE;
+    public static BlockEntityType<AbyssalFurnaceBlockEntity> ABYSSAL_FURNACE_BLOCK_ENTITY_TYPE;
+    public static MenuType<AbyssalChestMenu> ABYSSAL_CHEST_MENU_TYPE;
+    public static MenuType<AbyssalChestMenu> ABYSSAL_DOUBLE_CHEST_MENU_TYPE;
 
     public static Item ABYSSAL_STONE_ITEM;
     public static Item CRACKED_ABYSSAL_STONE_ITEM;
@@ -88,6 +102,10 @@ public final class AbyssContent {
     public static Item ABYSSAL_BRICK_WALL_ITEM;
     public static Item ABYSSAL_TILE_STAIRS_ITEM;
     public static Item ABYSSAL_TILE_SLAB_ITEM;
+    public static Item ABYSSAL_CHARRED_TIMBER_ITEM;
+    public static Item ABYSSAL_BLACK_BOOKSHELF_ITEM;
+    public static Item ABYSSAL_CHEST_ITEM;
+    public static Item ABYSSAL_FURNACE_ITEM;
 
     private static boolean registered;
 
@@ -188,6 +206,51 @@ public final class AbyssContent {
         ABYSSAL_TILE_SLAB = Registry.register(BuiltInRegistries.BLOCK, tileSlabKey,
                 new SlabBlock(baseProperties(tileSlabKey, 8.5F, 12.0F)));
 
+        ResourceKey<Block> charredTimberKey = blockKey("abyssal_charred_timber");
+        // Abyssal timber is fossilized wood: stone-hard, axe-mineable, and harvested only
+        // with diamond-tier axes or better. Its pillar axis supports trunks and dead branches.
+        ABYSSAL_CHARRED_TIMBER = Registry.register(BuiltInRegistries.BLOCK, charredTimberKey,
+                new RotatedPillarBlock(BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.COLOR_BLACK)
+                        .instrument(NoteBlockInstrument.BASS)
+                        .strength(9.0F, 12.0F)
+                        .sound(SoundType.DEEPSLATE)
+                        .requiresCorrectToolForDrops()
+                        .setId(charredTimberKey)));
+
+        ResourceKey<Block> blackBookshelfKey = blockKey("abyssal_black_bookshelf");
+        ABYSSAL_BLACK_BOOKSHELF = Registry.register(BuiltInRegistries.BLOCK, blackBookshelfKey,
+                new AbyssalBookshelfBlock(BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.COLOR_BLACK)
+                        .instrument(NoteBlockInstrument.BASEDRUM)
+                        .strength(5.0F, 12.0F)
+                        .sound(SoundType.DEEPSLATE)
+                        .requiresCorrectToolForDrops()
+                        .noOcclusion()
+                        .setId(blackBookshelfKey)));
+
+        ResourceKey<Block> chestKey = blockKey("abyssal_chest");
+        ABYSSAL_CHEST = Registry.register(BuiltInRegistries.BLOCK, chestKey,
+                new AbyssalChestBlock(BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.COLOR_BLACK)
+                        .instrument(NoteBlockInstrument.BASEDRUM)
+                        .strength(6.0F, 1200.0F)
+                        .sound(SoundType.DEEPSLATE)
+                        .requiresCorrectToolForDrops()
+                        .noOcclusion()
+                        .setId(chestKey)));
+
+        ResourceKey<Block> furnaceKey = blockKey("abyssal_furnace");
+        ABYSSAL_FURNACE = Registry.register(BuiltInRegistries.BLOCK, furnaceKey,
+                new AbyssalFurnaceBlock(BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.COLOR_GRAY)
+                        .instrument(NoteBlockInstrument.BASEDRUM)
+                        .strength(9.0F, 12.0F)
+                        .sound(SoundType.DEEPSLATE)
+                        .requiresCorrectToolForDrops()
+                        .lightLevel(state -> state.getValue(AbstractFurnaceBlock.LIT) ? 9 : 0)
+                        .setId(furnaceKey)));
+
         ABYSSAL_STONE_ITEM = registerBlockItem(ABYSSAL_STONE, "abyssal_stone");
         CRACKED_ABYSSAL_STONE_ITEM = registerBlockItem(CRACKED_ABYSSAL_STONE, "cracked_abyssal_stone");
         AMETHYST_CORRUPTED_STONE_ITEM = registerBlockItem(AMETHYST_CORRUPTED_STONE, "amethyst_corrupted_stone");
@@ -219,6 +282,23 @@ public final class AbyssContent {
         ABYSSAL_BRICK_WALL_ITEM = registerBlockItem(ABYSSAL_BRICK_WALL, "abyssal_brick_wall");
         ABYSSAL_TILE_STAIRS_ITEM = registerBlockItem(ABYSSAL_TILE_STAIRS, "abyssal_tile_stairs");
         ABYSSAL_TILE_SLAB_ITEM = registerBlockItem(ABYSSAL_TILE_SLAB, "abyssal_tile_slab");
+        ABYSSAL_CHARRED_TIMBER_ITEM = registerBlockItem(ABYSSAL_CHARRED_TIMBER, "abyssal_charred_timber");
+        ABYSSAL_BLACK_BOOKSHELF_ITEM = registerBlockItem(ABYSSAL_BLACK_BOOKSHELF, "abyssal_black_bookshelf");
+        ABYSSAL_CHEST_ITEM = registerBlockItem(ABYSSAL_CHEST, "abyssal_chest");
+        ABYSSAL_FURNACE_ITEM = registerBlockItem(ABYSSAL_FURNACE, "abyssal_furnace");
+
+        ABYSSAL_CHEST_BLOCK_ENTITY_TYPE = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,
+                Identifier.fromNamespaceAndPath(Simpleskills.MOD_ID, "abyssal_chest"),
+                new BlockEntityType<>(AbyssalChestBlockEntity::new, Set.of(ABYSSAL_CHEST)));
+        ABYSSAL_FURNACE_BLOCK_ENTITY_TYPE = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE,
+                Identifier.fromNamespaceAndPath(Simpleskills.MOD_ID, "abyssal_furnace"),
+                new BlockEntityType<>(AbyssalFurnaceBlockEntity::new, Set.of(ABYSSAL_FURNACE)));
+        ABYSSAL_CHEST_MENU_TYPE = Registry.register(BuiltInRegistries.MENU,
+                Identifier.fromNamespaceAndPath(Simpleskills.MOD_ID, "abyssal_chest"),
+                new MenuType<>(AbyssalChestMenu::new, FeatureFlagSet.of()));
+        ABYSSAL_DOUBLE_CHEST_MENU_TYPE = Registry.register(BuiltInRegistries.MENU,
+                Identifier.fromNamespaceAndPath(Simpleskills.MOD_ID, "abyssal_double_chest"),
+                new MenuType<>(AbyssalChestMenu::createDoubleChestClient, FeatureFlagSet.of()));
 
         // Transcendent Ore drops CelestialAltarContent.TRANSCENDENCY_ESSENCE via loot table.
         // Do not register a duplicate essence item: the altar already owns this item.
@@ -287,7 +367,11 @@ public final class AbyssContent {
                 ABYSSAL_BRICK_SLAB_ITEM,
                 ABYSSAL_BRICK_WALL_ITEM,
                 ABYSSAL_TILE_STAIRS_ITEM,
-                ABYSSAL_TILE_SLAB_ITEM
+                ABYSSAL_TILE_SLAB_ITEM,
+                ABYSSAL_CHARRED_TIMBER_ITEM,
+                ABYSSAL_BLACK_BOOKSHELF_ITEM,
+                ABYSSAL_CHEST_ITEM,
+                ABYSSAL_FURNACE_ITEM
         );
     }
 }

@@ -653,5 +653,9 @@
   "block.simpleskills.abyssal_emerald_ore": "Minerai d’émeraude abyssal",
   "block.simpleskills.abyssal_rune_ore": "Minerai de runes abyssal",
   "block.simpleskills.transcendent_ore": "Minerai transcendant",
-  "block.simpleskills.abyssal_pointed_stalactite": "Stalactite pointue abyssale"
+  "block.simpleskills.abyssal_pointed_stalactite": "Stalactite pointue abyssale",
+  "block.simpleskills.abyssal_chest": "Coffre abyssal",
+  "block.simpleskills.abyssal_charred_timber": "Bois carbonisé abyssal",
+  "block.simpleskills.abyssal_black_bookshelf": "Bibliothèque abyssale vide",
+  "block.simpleskills.abyssal_furnace": "Four des abysses"
 }

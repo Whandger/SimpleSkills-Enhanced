@@ -672,5 +672,9 @@
   "block.simpleskills.abyssal_brick_slab": "Abyssal Brick Slab",
   "block.simpleskills.abyssal_brick_wall": "Abyssal Brick Wall",
   "block.simpleskills.abyssal_tile_stairs": "Abyssal Tile Stairs",
-  "block.simpleskills.abyssal_tile_slab": "Abyssal Tile Slab"
+  "block.simpleskills.abyssal_tile_slab": "Abyssal Tile Slab",
+  "block.simpleskills.abyssal_chest": "Abyssal Strongbox",
+  "block.simpleskills.abyssal_charred_timber": "Abyssal Charred Timber",
+  "block.simpleskills.abyssal_black_bookshelf": "Empty Abyssal Bookshelf",
+  "block.simpleskills.abyssal_furnace": "Abyssal Furnace"
 }

@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column",
+  "textures": {
+    "end": "simpleskills:block/abyssal_charred_timber",
+    "side": "simpleskills:block/abyssal_charred_timber"
+  }
+}

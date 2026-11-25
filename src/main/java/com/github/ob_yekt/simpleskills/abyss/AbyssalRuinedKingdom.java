@@ -2,8 +2,12 @@ package com.github.ob_yekt.simpleskills.abyss;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.WorldGenLevel;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Half;
@@ -1138,7 +1142,11 @@ final class AbyssalRuinedKingdom {
                     AbyssContent.ABYSSAL_BRAZIER.defaultBlockState());
         }
 
-        // 6. Compact rubble fan outside the main entrance (roads generated afterwards stay clear).
+        // 6. Interior life: charred-timber fittings, empty black shelves, black beds and stone storage.
+        buildHouseInterior(level, box, castle, cx, cz, halfWidth, halfDepth, baseY,
+                style, facing, id, totalWallHeight);
+
+        // 7. Compact rubble fan outside the main entrance (roads generated afterwards stay clear).
         if (ruin >= 48) {
             for (int lx = -2; lx <= 2; lx++) {
                 for (int lz = 1; lz <= 2; lz++) {
@@ -1155,6 +1163,113 @@ final class AbyssalRuinedKingdom {
                 }
             }
         }
+    }
+
+    private static void buildHouseInterior(WorldGenLevel level, BoundingBox box, AbyssalCastlePiece castle,
+                                            int cx, int cz, int halfWidth, int halfDepth, int baseY,
+                                            int style, int facing, int id, int wallHeight) {
+        // Every room gets a dark-stone work surface; the block silhouette stays low enough
+        // to preserve circulation from the front door into the house.
+        int tableLX = 0;
+        int tableLZ = 0;
+        int tableX = cx + rotX(tableLX, tableLZ, facing);
+        int tableZ = cz + rotZ(tableLX, tableLZ, facing);
+        BlockState workSurface = style == 2
+                ? AbyssContent.GILDED_ABYSSAL_BRICKS.defaultBlockState()
+                : (style == 1 || style == 5
+                    ? AbyssContent.POLISHED_ABYSSAL_STONE.defaultBlockState()
+                    : AbyssContent.ABYSSAL_CHARRED_TIMBER.defaultBlockState());
+        place(level, box, castle, tableX, baseY + 2, tableZ, workSurface);
+
+        // Empty, black shelves: the city archives survived as stone furniture, but their books did not.
+        // Keep the rear-right corner free for the storage chest and the rear-left corner for the hearth.
+        if (style == 0 || style == 1 || style == 2 || style == 4 || style == 5) {
+            int shelfLZ = -halfDepth + 1;
+            int[] shelfColumns = halfWidth >= 4 ? new int[]{-1, 0} : new int[]{0};
+            for (int shelfLX : shelfColumns) {
+                int shelfX = cx + rotX(shelfLX, shelfLZ, facing);
+                int shelfZ = cz + rotZ(shelfLX, shelfLZ, facing);
+                BlockState shelf = AbyssContent.ABYSSAL_BLACK_BOOKSHELF.defaultBlockState()
+                        .setValue(AbyssalBookshelfBlock.FACING, directionForLocalFacing(facing));
+                place(level, box, castle, shelfX, baseY + 2, shelfZ, shelf);
+                if (wallHeight >= 5) {
+                    place(level, box, castle, shelfX, baseY + 3, shelfZ, shelf);
+                }
+            }
+        }
+
+        // Residential rooms retain a real sleeping place, but no red wool or clean timber.
+        if (style == 0 || style == 2 || style == 3 || style == 4) {
+            Direction bedFacing = directionForLocalFacing(facing);
+            int bedLX = -halfWidth + 1;
+            int bedLZ = halfDepth - 2;
+            int bedX = cx + rotX(bedLX, bedLZ, facing);
+            int bedZ = cz + rotZ(bedLX, bedLZ, facing);
+            BlockPos footPos = new BlockPos(bedX, baseY + 2, bedZ);
+            BlockPos headPos = footPos.relative(bedFacing);
+            if (box.isInside(footPos) && box.isInside(headPos)) {
+                BlockState bed = BuiltInRegistries.BLOCK.getValue(
+                        Identifier.fromNamespaceAndPath("minecraft", "black_bed")).defaultBlockState()
+                        .setValue(net.minecraft.world.level.block.BedBlock.FACING, bedFacing)
+                        .setValue(net.minecraft.world.level.block.BedBlock.OCCUPIED, false);
+                place(level, box, castle, bedX, baseY + 2, bedZ,
+                        bed.setValue(net.minecraft.world.level.block.BedBlock.PART,
+                                net.minecraft.world.level.block.state.properties.BedPart.FOOT));
+                place(level, box, castle, headPos.getX(), baseY + 2,
+                        headPos.getZ(),
+                        bed.setValue(net.minecraft.world.level.block.BedBlock.PART,
+                                net.minecraft.world.level.block.state.properties.BedPart.HEAD));
+            }
+        }
+
+        // Charred beams and blackstone benches replace ordinary oak/dark-oak furniture.
+        if (halfWidth >= 4 && halfDepth >= 3) {
+            int benchLX = -halfWidth + 1;
+            int benchLZ = 0;
+            int benchX = cx + rotX(benchLX, benchLZ, facing);
+            int benchZ = cz + rotZ(benchLX, benchLZ, facing);
+            place(level, box, castle, benchX, baseY + 2, benchZ,
+                    AbyssContent.ABYSSAL_TILE_STAIRS.defaultBlockState()
+                            .setValue(BlockStateProperties.HORIZONTAL_FACING, directionForLocalFacing(facing))
+                            .setValue(BlockStateProperties.HALF, Half.BOTTOM));
+        }
+
+        // Merchant shops and noble homes always receive storage. Other houses receive it by seed,
+        // creating a believable mix of private strongboxes rather than putting one in every doorway.
+        boolean hasStorage = style == 1 || style == 2 || style == 6
+                || castle.cityHash(cx, id + 91, cz, 100) < 42;
+        if (hasStorage) {
+            int chestLX = halfWidth - 1;
+            int chestLZ = -halfDepth + 1;
+            int chestX = cx + rotX(chestLX, chestLZ, facing);
+            int chestZ = cz + rotZ(chestLX, chestLZ, facing);
+            BlockPos chestPos = new BlockPos(castle.getCityWorldX(chestX), baseY + 2,
+                    castle.getCityWorldZ(chestZ));
+            if (box.isInside(chestPos)) {
+                level.setBlock(chestPos, AbyssContent.ABYSSAL_CHEST.defaultBlockState()
+                        .setValue(AbyssalChestBlock.FACING, directionForLocalFacing(facing)), 2);
+                BlockEntity be = level.getBlockEntity(chestPos);
+                if (be instanceof net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity container) {
+                    String lootPath = (style == 2 || style == 5) ? "chests/abyssal_noble"
+                            : (style == 1 ? "chests/abyssal_merchant" : "chests/abyssal_house");
+                    long chestSeed = ((long) cx * 341873128712L) ^ ((long) cz * 42317861L)
+                            ^ ((long) id * 132897987541L) ^ baseY;
+                    ResourceKey<net.minecraft.world.level.storage.loot.LootTable> loot =
+                            ResourceKey.create(net.minecraft.core.registries.Registries.LOOT_TABLE,
+                                    net.minecraft.resources.Identifier.fromNamespaceAndPath("simpleskills", lootPath));
+                    container.setLootTable(loot, chestSeed);
+                }
+            }
+        }
+    }
+
+    private static Direction directionForLocalFacing(int facing) {
+        return switch (facing) {
+            case FACING_NORTH -> Direction.NORTH;
+            case FACING_WEST -> Direction.WEST;
+            case FACING_EAST -> Direction.EAST;
+            default -> Direction.SOUTH;
+        };
     }
 
     private static boolean isFootprintBoundary(int lx, int lz, int halfWidth, int halfDepth, boolean isLShaped) {

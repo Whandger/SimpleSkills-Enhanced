@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "TTT",
+    "B B",
+    "TTT"
+  ],
+  "key": {
+    "T": "simpleskills:abyssal_charred_timber",
+    "B": "simpleskills:abyssal_bricks"
+  },
+  "result": {
+    "id": "simpleskills:abyssal_black_bookshelf",
+    "count": 1
+  }
+}

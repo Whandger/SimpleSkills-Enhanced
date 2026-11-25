@@ -653,5 +653,9 @@
   "block.simpleskills.abyssal_emerald_ore": "Mena de Esmeralda Abisal",
   "block.simpleskills.abyssal_rune_ore": "Mena de Runas Abisal",
   "block.simpleskills.transcendent_ore": "Mena Trascendente",
-  "block.simpleskills.abyssal_pointed_stalactite": "Estalactita Puntiaguda del Abismo"
+  "block.simpleskills.abyssal_pointed_stalactite": "Estalactita Puntiaguda del Abismo",
+  "block.simpleskills.abyssal_chest": "Cofre Abisal",
+  "block.simpleskills.abyssal_charred_timber": "Madera Carbonizada Abisal",
+  "block.simpleskills.abyssal_black_bookshelf": "Estantería Abisal Vacía",
+  "block.simpleskills.abyssal_furnace": "Horno abisal"
 }

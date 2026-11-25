@@ -653,5 +653,9 @@
   "block.simpleskills.abyssal_emerald_ore": "خام الزمرد الهاوي",
   "block.simpleskills.abyssal_rune_ore": "خام الرون الهاوي",
   "block.simpleskills.transcendent_ore": "الخام السامي",
-  "block.simpleskills.abyssal_pointed_stalactite": "عمود هوابط الهاوية"
+  "block.simpleskills.abyssal_pointed_stalactite": "عمود هوابط الهاوية",
+  "block.simpleskills.abyssal_chest": "صندوق الهاوية",
+  "block.simpleskills.abyssal_charred_timber": "خشب الهاوية المتفحم",
+  "block.simpleskills.abyssal_black_bookshelf": "رف كتب الهاوية الفارغ",
+  "block.simpleskills.abyssal_furnace": "Abyssal Furnace"
 }

@@ -5,6 +5,8 @@ import com.github.ob_yekt.simpleskills.crafting.CraftingRevealPayload;
 import com.github.ob_yekt.simpleskills.crafting.CraftingRevealScreen;
 import com.github.ob_yekt.simpleskills.celestial.CelestialAltarAnimationController;
 import com.github.ob_yekt.simpleskills.celestial.CelestialAltarContent;
+import com.github.ob_yekt.simpleskills.abyss.AbyssContent;
+import com.github.ob_yekt.simpleskills.abyss.AbyssalChestScreen;
 import com.github.ob_yekt.simpleskills.celestial.CelestialAltarScreen;
 import com.github.ob_yekt.simpleskills.celestial.CelestialAltarVisualPayload;
 import com.github.ob_yekt.simpleskills.grinder.OreGrinderContent;
@@ -69,6 +71,8 @@ public class SimpleskillsClient implements ClientModInitializer {
         FishingEntityClient.register();
         MenuScreens.register(CelestialAltarContent.MENU_TYPE, CelestialAltarScreen::new);
         MenuScreens.register(OreGrinderContent.MENU_TYPE, OreGrinderScreen::new);
+        MenuScreens.register(AbyssContent.ABYSSAL_CHEST_MENU_TYPE, AbyssalChestScreen::new);
+        MenuScreens.register(AbyssContent.ABYSSAL_DOUBLE_CHEST_MENU_TYPE, AbyssalChestScreen::new);
         BlockEntityRenderers.register(OreGrinderContent.BLOCK_ENTITY_TYPE, OreGrinderRenderer::new);
         EntityRendererRegistry.register(PrayerVfxEntity.TYPE, PrayerVfxRenderer::new);
         Keybinds.register();

@@ -56,6 +56,8 @@ public final class AbyssWorldgen {
     public static final ResourceKey<PlacedFeature> ABYSSAL_SPELEOTHEMS = placed("abyssal_speleothem_clusters");
     public static final ResourceKey<PlacedFeature> ABYSSAL_MONUMENTAL_SPELEOTHEMS = placed("abyssal_monumental_speleothems");
     public static final ResourceKey<PlacedFeature> ABYSSAL_COLOSSAL_SPELEOTHEMS = placed("abyssal_colossal_speleothems");
+    public static final ResourceKey<PlacedFeature> ABYSSAL_DEAD_TREES = placed("abyssal_dead_trees");
+    public static final ResourceKey<PlacedFeature> ABYSSAL_ANCIENT_DEAD_TREES = placed("abyssal_ancient_dead_trees");
 
     private static boolean registered;
 
@@ -74,7 +76,9 @@ public final class AbyssWorldgen {
         addDecoration(ABYSSAL_SPELEOTHEMS);
         addDecoration(ABYSSAL_MONUMENTAL_SPELEOTHEMS);
         addDecoration(ABYSSAL_COLOSSAL_SPELEOTHEMS);
-        Simpleskills.LOGGER.info("Registered The Abyss ore, amethyst, cavern formations, and the ruined castle structure.");
+        addDecoration(ABYSSAL_DEAD_TREES);
+        addDecoration(ABYSSAL_ANCIENT_DEAD_TREES);
+        Simpleskills.LOGGER.info("Registered The Abyss ores, cavern formations, rare leafless dead trees, and the ruined castle structure.");
     }
 
     private static void add(ResourceKey<PlacedFeature> feature) {
