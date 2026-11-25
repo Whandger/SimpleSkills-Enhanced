@@ -13,7 +13,7 @@ import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
-/** Adds only rare Abyss ores, crystal corruption, and solid-block speleothem formations to new Overworld chunks. */
+/** Adds rare Abyss ores, crystal corruption, and solid-block speleothem formations to new Overworld chunks. The ruined castle is placed by its structure set. */
 public final class AbyssWorldgen {
     public static final int MIN_Y = -256;
     public static final int MAX_Y = -80;
@@ -61,6 +61,8 @@ public final class AbyssWorldgen {
     public static synchronized void register() {
         if (registered) return;
         registered = true;
+        // Structure and piece types must be registered before worldgen data is read.
+        AbyssalCastleStructure.register();
         // The Abyss is an endgame layer: only diamond, emerald, rune, and Transcendent ores spawn here.
         add(ABYSSAL_DIAMOND);
         add(ABYSSAL_EMERALD);
@@ -70,7 +72,7 @@ public final class AbyssWorldgen {
         addDecoration(ABYSSAL_SPELEOTHEMS);
         addDecoration(ABYSSAL_MONUMENTAL_SPELEOTHEMS);
         addDecoration(ABYSSAL_COLOSSAL_SPELEOTHEMS);
-        Simpleskills.LOGGER.info("Registered The Abyss ore, amethyst, and giant solid-block cavern formations.");
+        Simpleskills.LOGGER.info("Registered The Abyss ore, amethyst, cavern formations, and the ruined castle structure.");
     }
 
     private static void add(ResourceKey<PlacedFeature> feature) {
