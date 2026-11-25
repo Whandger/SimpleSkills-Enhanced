@@ -638,5 +638,20 @@
   "message.simpleskills.celestial_altar.stat_rerolled": "تمت إعادة تدوير السمة المحددة.",
   "item.simpleskills.crafting_stat.mobility_walk": "الحركة (سرعة المشي)",
   "item.simpleskills.crafting_stat.mobility_jump": "الحركة (قوة القفز)",
-  "item.simpleskills.crafting_stat.mobility_water": "الحركة (التنقل في الماء)"
+  "item.simpleskills.crafting_stat.mobility_water": "الحركة (التنقل في الماء)",
+  "block.simpleskills.abyssal_stone": "حجر الهاوية",
+  "block.simpleskills.cracked_abyssal_stone": "حجر الهاوية المتشقق",
+  "block.simpleskills.amethyst_corrupted_stone": "حجر ملوث بالجمشت",
+  "block.simpleskills.abyssal_pillar": "عمود الهاوية",
+  "block.simpleskills.abyssal_coal_ore": "خام الفحم الهاوي",
+  "block.simpleskills.abyssal_copper_ore": "خام النحاس الهاوي",
+  "block.simpleskills.abyssal_iron_ore": "خام الحديد الهاوي",
+  "block.simpleskills.abyssal_gold_ore": "خام الذهب الهاوي",
+  "block.simpleskills.abyssal_redstone_ore": "خام ريدستون الهاوي",
+  "block.simpleskills.abyssal_lapis_ore": "خام اللازورد الهاوي",
+  "block.simpleskills.abyssal_diamond_ore": "خام الألماس الهاوي",
+  "block.simpleskills.abyssal_emerald_ore": "خام الزمرد الهاوي",
+  "block.simpleskills.abyssal_rune_ore": "خام الرون الهاوي",
+  "block.simpleskills.transcendent_ore": "الخام السامي",
+  "block.simpleskills.abyssal_pointed_stalactite": "عمود هوابط الهاوية"
 }

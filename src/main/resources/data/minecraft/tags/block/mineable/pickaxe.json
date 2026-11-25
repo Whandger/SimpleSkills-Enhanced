@@ -4,6 +4,21 @@
     "simpleskills:rune_ore",
     "simpleskills:deepslate_rune_ore",
     "simpleskills:celestial_altar",
-    "simpleskills:ore_grinder"
+    "simpleskills:ore_grinder",
+    "simpleskills:abyssal_stone",
+    "simpleskills:cracked_abyssal_stone",
+    "simpleskills:amethyst_corrupted_stone",
+    "simpleskills:abyssal_pillar",
+    "simpleskills:abyssal_coal_ore",
+    "simpleskills:abyssal_copper_ore",
+    "simpleskills:abyssal_iron_ore",
+    "simpleskills:abyssal_gold_ore",
+    "simpleskills:abyssal_redstone_ore",
+    "simpleskills:abyssal_lapis_ore",
+    "simpleskills:abyssal_diamond_ore",
+    "simpleskills:abyssal_emerald_ore",
+    "simpleskills:abyssal_rune_ore",
+    "simpleskills:transcendent_ore",
+    "simpleskills:abyssal_pointed_stalactite"
   ]
 }

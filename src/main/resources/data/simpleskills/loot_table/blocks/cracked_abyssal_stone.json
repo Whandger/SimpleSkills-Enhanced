@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "simpleskills:cracked_abyssal_stone"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "simpleskills:blocks/cracked_abyssal_stone"
+}

@@ -1,6 +1,9 @@
 package com.github.ob_yekt.simpleskills;
 
 import com.github.ob_yekt.simpleskills.commands.SimpleskillsCommands;
+import com.github.ob_yekt.simpleskills.abyss.AbyssalSolidCaveFormationFeature;
+import com.github.ob_yekt.simpleskills.abyss.AbyssContent;
+import com.github.ob_yekt.simpleskills.abyss.AbyssWorldgen;
 import com.github.ob_yekt.simpleskills.managers.*;
 import com.github.ob_yekt.simpleskills.events.EventHandlers;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingManager;
@@ -59,8 +62,11 @@ public class Simpleskills implements ModInitializer {
 		// Blocks must be registered during initialization, before the registries freeze.
 		ModBlocks.register();
 		RuneContent.register();
+		AbyssContent.register();
+		AbyssalSolidCaveFormationFeature.registerType();
 		RuneMiningManager.register();
 		RuneWorldgen.register();
+		AbyssWorldgen.register();
 
 		// Escudos de glowstone (itens); precisam existir antes do registro congelar.
 		GlowstoneShields.register();

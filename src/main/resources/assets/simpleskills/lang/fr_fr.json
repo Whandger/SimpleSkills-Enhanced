@@ -638,5 +638,20 @@
   "message.simpleskills.celestial_altar.stat_rerolled": "L'attribut sélectionné a été relancé.",
   "item.simpleskills.crafting_stat.mobility_walk": "Mobilité (Vitesse de déplacement)",
   "item.simpleskills.crafting_stat.mobility_jump": "Mobilité (Puissance du saut)",
-  "item.simpleskills.crafting_stat.mobility_water": "Mobilité (Déplacement aquatique)"
+  "item.simpleskills.crafting_stat.mobility_water": "Mobilité (Déplacement aquatique)",
+  "block.simpleskills.abyssal_stone": "Pierre abyssale",
+  "block.simpleskills.cracked_abyssal_stone": "Pierre abyssale fissurée",
+  "block.simpleskills.amethyst_corrupted_stone": "Pierre corrompue par l’améthyste",
+  "block.simpleskills.abyssal_pillar": "Pilier abyssal",
+  "block.simpleskills.abyssal_coal_ore": "Minerai de charbon abyssal",
+  "block.simpleskills.abyssal_copper_ore": "Minerai de cuivre abyssal",
+  "block.simpleskills.abyssal_iron_ore": "Minerai de fer abyssal",
+  "block.simpleskills.abyssal_gold_ore": "Minerai d’or abyssal",
+  "block.simpleskills.abyssal_redstone_ore": "Minerai de redstone abyssal",
+  "block.simpleskills.abyssal_lapis_ore": "Minerai de lapis-lazuli abyssal",
+  "block.simpleskills.abyssal_diamond_ore": "Minerai de diamant abyssal",
+  "block.simpleskills.abyssal_emerald_ore": "Minerai d’émeraude abyssal",
+  "block.simpleskills.abyssal_rune_ore": "Minerai de runes abyssal",
+  "block.simpleskills.transcendent_ore": "Minerai transcendant",
+  "block.simpleskills.abyssal_pointed_stalactite": "Stalactite pointue abyssale"
 }

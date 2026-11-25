@@ -1,0 +1,8 @@
+{
+  "replace": false,
+  "values": [
+    "simpleskills:abyssal_copper_ore",
+    "simpleskills:abyssal_iron_ore",
+    "simpleskills:abyssal_lapis_ore"
+  ]
+}

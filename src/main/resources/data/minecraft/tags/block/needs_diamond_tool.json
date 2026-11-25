@@ -1,6 +1,11 @@
 {
   "replace": false,
   "values": [
-    "simpleskills:celestial_altar"
+    "simpleskills:celestial_altar",
+    "simpleskills:abyssal_stone",
+    "simpleskills:cracked_abyssal_stone",
+    "simpleskills:amethyst_corrupted_stone",
+    "simpleskills:abyssal_pillar",
+    "simpleskills:transcendent_ore"
   ]
 }

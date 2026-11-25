@@ -643,5 +643,20 @@
   "message.simpleskills.celestial_altar.stat_rerolled": "The selected attribute has been rerolled.",
   "item.simpleskills.crafting_stat.mobility_walk": "Mobility (Walking Speed)",
   "item.simpleskills.crafting_stat.mobility_jump": "Mobility (Jump Strength)",
-  "item.simpleskills.crafting_stat.mobility_water": "Mobility (Water Movement)"
+  "item.simpleskills.crafting_stat.mobility_water": "Mobility (Water Movement)",
+  "block.simpleskills.abyssal_stone": "Abyssal Stone",
+  "block.simpleskills.cracked_abyssal_stone": "Cracked Abyssal Stone",
+  "block.simpleskills.amethyst_corrupted_stone": "Amethyst-Corrupted Stone",
+  "block.simpleskills.abyssal_pillar": "Abyssal Pillar",
+  "block.simpleskills.abyssal_coal_ore": "Abyssal Coal Ore",
+  "block.simpleskills.abyssal_copper_ore": "Abyssal Copper Ore",
+  "block.simpleskills.abyssal_iron_ore": "Abyssal Iron Ore",
+  "block.simpleskills.abyssal_gold_ore": "Abyssal Gold Ore",
+  "block.simpleskills.abyssal_redstone_ore": "Abyssal Redstone Ore",
+  "block.simpleskills.abyssal_lapis_ore": "Abyssal Lapis Ore",
+  "block.simpleskills.abyssal_diamond_ore": "Abyssal Diamond Ore",
+  "block.simpleskills.abyssal_emerald_ore": "Abyssal Emerald Ore",
+  "block.simpleskills.abyssal_rune_ore": "Abyssal Rune Ore",
+  "block.simpleskills.transcendent_ore": "Transcendent Ore",
+  "block.simpleskills.abyssal_pointed_stalactite": "Abyssal Pointed Stalactite"
 }

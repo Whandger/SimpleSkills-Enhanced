@@ -37,6 +37,10 @@ public abstract class BlockDropMixin {
                     Identifier.fromNamespaceAndPath("c", "ores")
             );
 
+    private static final TagKey<Block> NON_DUPLICABLE_ORES =
+            TagKey.create(Registries.BLOCK,
+                    Identifier.fromNamespaceAndPath("simpleskills", "non_duplicable_ores"));
+
     private static final float BONUS_PER_TEN_LEVELS = 0.05f;
     private static final float MAX_DUPLICATION_CHANCE = 0.45f;
 
@@ -58,6 +62,9 @@ public abstract class BlockDropMixin {
 
         List<ItemStack> originalDrops = cir.getReturnValue();
         if (originalDrops == null || originalDrops.isEmpty()) return;
+
+        // The Transcendent Ore is a one-per-node discovery: no profession or equipment drop perk may multiply it.
+        if (state.is(NON_DUPLICABLE_ORES)) return;
 
         Skills skill = BlockSkillClassifier.classify(state);
         ItemStack heldTool = player.getMainHandItem();

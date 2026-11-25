@@ -1,0 +1,31 @@
+{
+  "feature": "simpleskills:amethyst_corruption",
+  "placement": [
+    {
+      "type": "minecraft:rarity_filter",
+      "chance": 5
+    },
+    {
+      "type": "minecraft:count",
+      "count": 3
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:uniform",
+        "min_inclusive": {
+          "absolute": -245
+        },
+        "max_inclusive": {
+          "absolute": -85
+        }
+      }
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

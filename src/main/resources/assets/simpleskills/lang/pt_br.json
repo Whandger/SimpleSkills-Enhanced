@@ -643,5 +643,20 @@
   "message.simpleskills.celestial_altar.stat_rerolled": "O atributo selecionado foi rerrolado.",
   "item.simpleskills.crafting_stat.mobility_walk": "Mobilidade (Velocidade de Caminhada)",
   "item.simpleskills.crafting_stat.mobility_jump": "Mobilidade (Força do Pulo)",
-  "item.simpleskills.crafting_stat.mobility_water": "Mobilidade (Movimento na Água)"
+  "item.simpleskills.crafting_stat.mobility_water": "Mobilidade (Movimento na Água)",
+  "block.simpleskills.abyssal_stone": "Pedra Abissal",
+  "block.simpleskills.cracked_abyssal_stone": "Pedra Abissal Rachada",
+  "block.simpleskills.amethyst_corrupted_stone": "Pedra Corrompida por Ametista",
+  "block.simpleskills.abyssal_pillar": "Pilar Abissal",
+  "block.simpleskills.abyssal_coal_ore": "Minério de Carvão Abissal",
+  "block.simpleskills.abyssal_copper_ore": "Minério de Cobre Abissal",
+  "block.simpleskills.abyssal_iron_ore": "Minério de Ferro Abissal",
+  "block.simpleskills.abyssal_gold_ore": "Minério de Ouro Abissal",
+  "block.simpleskills.abyssal_redstone_ore": "Minério de Redstone Abissal",
+  "block.simpleskills.abyssal_lapis_ore": "Minério de Lápis-Lazúli Abissal",
+  "block.simpleskills.abyssal_diamond_ore": "Minério de Diamante Abissal",
+  "block.simpleskills.abyssal_emerald_ore": "Minério de Esmeralda Abissal",
+  "block.simpleskills.abyssal_rune_ore": "Minério de Runa Abissal",
+  "block.simpleskills.transcendent_ore": "Minério Transcendente",
+  "block.simpleskills.abyssal_pointed_stalactite": "Estalactite Pontiaguda Abissal"
 }

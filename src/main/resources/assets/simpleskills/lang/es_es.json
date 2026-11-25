@@ -638,5 +638,20 @@
   "message.simpleskills.celestial_altar.stat_rerolled": "El atributo seleccionado se ha vuelto a sortear.",
   "item.simpleskills.crafting_stat.mobility_walk": "Movilidad (Velocidad al Caminar)",
   "item.simpleskills.crafting_stat.mobility_jump": "Movilidad (Impulso de Salto)",
-  "item.simpleskills.crafting_stat.mobility_water": "Movilidad (Movimiento Acuático)"
+  "item.simpleskills.crafting_stat.mobility_water": "Movilidad (Movimiento Acuático)",
+  "block.simpleskills.abyssal_stone": "Piedra Abisal",
+  "block.simpleskills.cracked_abyssal_stone": "Piedra Abisal Agrietada",
+  "block.simpleskills.amethyst_corrupted_stone": "Piedra Corrompida por Amatista",
+  "block.simpleskills.abyssal_pillar": "Pilar Abisal",
+  "block.simpleskills.abyssal_coal_ore": "Mena de Carbón Abisal",
+  "block.simpleskills.abyssal_copper_ore": "Mena de Cobre Abisal",
+  "block.simpleskills.abyssal_iron_ore": "Mena de Hierro Abisal",
+  "block.simpleskills.abyssal_gold_ore": "Mena de Oro Abisal",
+  "block.simpleskills.abyssal_redstone_ore": "Mena de Redstone Abisal",
+  "block.simpleskills.abyssal_lapis_ore": "Mena de Lapislázuli Abisal",
+  "block.simpleskills.abyssal_diamond_ore": "Mena de Diamante Abisal",
+  "block.simpleskills.abyssal_emerald_ore": "Mena de Esmeralda Abisal",
+  "block.simpleskills.abyssal_rune_ore": "Mena de Runas Abisal",
+  "block.simpleskills.transcendent_ore": "Mena Trascendente",
+  "block.simpleskills.abyssal_pointed_stalactite": "Estalactita Puntiaguda del Abismo"
 }

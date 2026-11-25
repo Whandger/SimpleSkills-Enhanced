@@ -51,6 +51,12 @@ public final class VeinMining {
      */
     private static final Set<UUID> ACTIVE_PLAYERS = ConcurrentHashMap.newKeySet();
 
+    private static final TagKey<Block> NON_VEIN_MINING_ORES = TagKey.create(
+            Registries.BLOCK,
+            Identifier.fromNamespaceAndPath("simpleskills", "non_vein_mining_ores")
+    );
+
+
     /**
      * Returns the maximum number of additional connected ore blocks unlocked
      * at the supplied Mining level. The manually broken starting block is not
@@ -230,6 +236,7 @@ public final class VeinMining {
 
     /** Shared ore classification used by Vein Mining and compatible area abilities. */
     public static boolean isOre(BlockState state) {
-        return state != null && (state.is(BlockTags.ORES) || state.is(COMMON_ORES));
+        return state != null && !state.is(NON_VEIN_MINING_ORES)
+                && (state.is(BlockTags.ORES) || state.is(COMMON_ORES));
     }
 }
