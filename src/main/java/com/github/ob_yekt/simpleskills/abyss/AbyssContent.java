@@ -11,6 +11,9 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.PointedDripstoneBlock;
+import net.minecraft.world.level.block.SlabBlock;
+import net.minecraft.world.level.block.StairBlock;
+import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
@@ -39,6 +42,22 @@ public final class AbyssContent {
     public static Block TRANSCENDENT_ORE;
     public static Block ABYSSAL_POINTED_STALACTITE;
 
+    // Gothic architectural blocks used by the monumental Abyssal Castle.
+    public static Block ABYSSAL_BRICKS;
+    public static Block CRACKED_ABYSSAL_BRICKS;
+    public static Block ABYSSAL_TILES;
+    public static Block CRACKED_ABYSSAL_TILES;
+    public static Block POLISHED_ABYSSAL_STONE;
+    public static Block CHISELED_ABYSSAL_STONE;
+    public static Block GILDED_ABYSSAL_BRICKS;
+    public static Block FROSTED_ABYSSAL_STONE;
+    public static Block ABYSSAL_BRAZIER;
+    public static Block ABYSSAL_BRICK_STAIRS;
+    public static Block ABYSSAL_BRICK_SLAB;
+    public static Block ABYSSAL_BRICK_WALL;
+    public static Block ABYSSAL_TILE_STAIRS;
+    public static Block ABYSSAL_TILE_SLAB;
+
     public static Item ABYSSAL_STONE_ITEM;
     public static Item CRACKED_ABYSSAL_STONE_ITEM;
     public static Item AMETHYST_CORRUPTED_STONE_ITEM;
@@ -54,6 +73,21 @@ public final class AbyssContent {
     public static Item ABYSSAL_RUNE_ORE_ITEM;
     public static Item TRANSCENDENT_ORE_ITEM;
     public static Item ABYSSAL_POINTED_STALACTITE_ITEM;
+
+    public static Item ABYSSAL_BRICKS_ITEM;
+    public static Item CRACKED_ABYSSAL_BRICKS_ITEM;
+    public static Item ABYSSAL_TILES_ITEM;
+    public static Item CRACKED_ABYSSAL_TILES_ITEM;
+    public static Item POLISHED_ABYSSAL_STONE_ITEM;
+    public static Item CHISELED_ABYSSAL_STONE_ITEM;
+    public static Item GILDED_ABYSSAL_BRICKS_ITEM;
+    public static Item FROSTED_ABYSSAL_STONE_ITEM;
+    public static Item ABYSSAL_BRAZIER_ITEM;
+    public static Item ABYSSAL_BRICK_STAIRS_ITEM;
+    public static Item ABYSSAL_BRICK_SLAB_ITEM;
+    public static Item ABYSSAL_BRICK_WALL_ITEM;
+    public static Item ABYSSAL_TILE_STAIRS_ITEM;
+    public static Item ABYSSAL_TILE_SLAB_ITEM;
 
     private static boolean registered;
 
@@ -113,6 +147,47 @@ public final class AbyssContent {
                         .lightLevel(state -> 15)
                         .setId(transcendentKey)));
 
+        // Monumental castle masonry and decoration blocks.
+        ABYSSAL_BRICKS = registerStone("abyssal_bricks", 8.5F, 12.0F);
+        CRACKED_ABYSSAL_BRICKS = registerStone("cracked_abyssal_bricks", 7.5F, 12.0F);
+        ABYSSAL_TILES = registerStone("abyssal_tiles", 8.5F, 12.0F);
+        CRACKED_ABYSSAL_TILES = registerStone("cracked_abyssal_tiles", 7.5F, 12.0F);
+        POLISHED_ABYSSAL_STONE = registerStone("polished_abyssal_stone", 9.0F, 12.0F);
+        CHISELED_ABYSSAL_STONE = registerStone("chiseled_abyssal_stone", 9.0F, 12.0F);
+        GILDED_ABYSSAL_BRICKS = registerStone("gilded_abyssal_bricks", 9.0F, 12.0F);
+        FROSTED_ABYSSAL_STONE = registerStone("frosted_abyssal_stone", 8.5F, 12.0F);
+
+        ResourceKey<Block> brazierKey = blockKey("abyssal_brazier");
+        ABYSSAL_BRAZIER = Registry.register(BuiltInRegistries.BLOCK, brazierKey,
+                new Block(BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.GOLD)
+                        .instrument(NoteBlockInstrument.BASEDRUM)
+                        .strength(8.0F, 12.0F)
+                        .sound(SoundType.DEEPSLATE)
+                        .requiresCorrectToolForDrops()
+                        .lightLevel(state -> 14)
+                        .setId(brazierKey)));
+
+        ResourceKey<Block> brickStairsKey = blockKey("abyssal_brick_stairs");
+        ABYSSAL_BRICK_STAIRS = Registry.register(BuiltInRegistries.BLOCK, brickStairsKey,
+                new StairBlock(ABYSSAL_BRICKS.defaultBlockState(), baseProperties(brickStairsKey, 8.5F, 12.0F)));
+
+        ResourceKey<Block> brickSlabKey = blockKey("abyssal_brick_slab");
+        ABYSSAL_BRICK_SLAB = Registry.register(BuiltInRegistries.BLOCK, brickSlabKey,
+                new SlabBlock(baseProperties(brickSlabKey, 8.5F, 12.0F)));
+
+        ResourceKey<Block> brickWallKey = blockKey("abyssal_brick_wall");
+        ABYSSAL_BRICK_WALL = Registry.register(BuiltInRegistries.BLOCK, brickWallKey,
+                new WallBlock(baseProperties(brickWallKey, 8.5F, 12.0F)));
+
+        ResourceKey<Block> tileStairsKey = blockKey("abyssal_tile_stairs");
+        ABYSSAL_TILE_STAIRS = Registry.register(BuiltInRegistries.BLOCK, tileStairsKey,
+                new StairBlock(ABYSSAL_TILES.defaultBlockState(), baseProperties(tileStairsKey, 8.5F, 12.0F)));
+
+        ResourceKey<Block> tileSlabKey = blockKey("abyssal_tile_slab");
+        ABYSSAL_TILE_SLAB = Registry.register(BuiltInRegistries.BLOCK, tileSlabKey,
+                new SlabBlock(baseProperties(tileSlabKey, 8.5F, 12.0F)));
+
         ABYSSAL_STONE_ITEM = registerBlockItem(ABYSSAL_STONE, "abyssal_stone");
         CRACKED_ABYSSAL_STONE_ITEM = registerBlockItem(CRACKED_ABYSSAL_STONE, "cracked_abyssal_stone");
         AMETHYST_CORRUPTED_STONE_ITEM = registerBlockItem(AMETHYST_CORRUPTED_STONE, "amethyst_corrupted_stone");
@@ -129,6 +204,21 @@ public final class AbyssContent {
         TRANSCENDENT_ORE_ITEM = registerBlockItem(TRANSCENDENT_ORE, "transcendent_ore");
         ABYSSAL_POINTED_STALACTITE_ITEM = registerBlockItem(
                 ABYSSAL_POINTED_STALACTITE, "abyssal_pointed_stalactite");
+
+        ABYSSAL_BRICKS_ITEM = registerBlockItem(ABYSSAL_BRICKS, "abyssal_bricks");
+        CRACKED_ABYSSAL_BRICKS_ITEM = registerBlockItem(CRACKED_ABYSSAL_BRICKS, "cracked_abyssal_bricks");
+        ABYSSAL_TILES_ITEM = registerBlockItem(ABYSSAL_TILES, "abyssal_tiles");
+        CRACKED_ABYSSAL_TILES_ITEM = registerBlockItem(CRACKED_ABYSSAL_TILES, "cracked_abyssal_tiles");
+        POLISHED_ABYSSAL_STONE_ITEM = registerBlockItem(POLISHED_ABYSSAL_STONE, "polished_abyssal_stone");
+        CHISELED_ABYSSAL_STONE_ITEM = registerBlockItem(CHISELED_ABYSSAL_STONE, "chiseled_abyssal_stone");
+        GILDED_ABYSSAL_BRICKS_ITEM = registerBlockItem(GILDED_ABYSSAL_BRICKS, "gilded_abyssal_bricks");
+        FROSTED_ABYSSAL_STONE_ITEM = registerBlockItem(FROSTED_ABYSSAL_STONE, "frosted_abyssal_stone");
+        ABYSSAL_BRAZIER_ITEM = registerBlockItem(ABYSSAL_BRAZIER, "abyssal_brazier");
+        ABYSSAL_BRICK_STAIRS_ITEM = registerBlockItem(ABYSSAL_BRICK_STAIRS, "abyssal_brick_stairs");
+        ABYSSAL_BRICK_SLAB_ITEM = registerBlockItem(ABYSSAL_BRICK_SLAB, "abyssal_brick_slab");
+        ABYSSAL_BRICK_WALL_ITEM = registerBlockItem(ABYSSAL_BRICK_WALL, "abyssal_brick_wall");
+        ABYSSAL_TILE_STAIRS_ITEM = registerBlockItem(ABYSSAL_TILE_STAIRS, "abyssal_tile_stairs");
+        ABYSSAL_TILE_SLAB_ITEM = registerBlockItem(ABYSSAL_TILE_SLAB, "abyssal_tile_slab");
 
         // Transcendent Ore drops CelestialAltarContent.TRANSCENDENCY_ESSENCE via loot table.
         // Do not register a duplicate essence item: the altar already owns this item.
@@ -183,7 +273,21 @@ public final class AbyssContent {
                 ABYSSAL_DIAMOND_ORE_ITEM,
                 ABYSSAL_EMERALD_ORE_ITEM,
                 ABYSSAL_RUNE_ORE_ITEM,
-                TRANSCENDENT_ORE_ITEM
+                TRANSCENDENT_ORE_ITEM,
+                ABYSSAL_BRICKS_ITEM,
+                CRACKED_ABYSSAL_BRICKS_ITEM,
+                ABYSSAL_TILES_ITEM,
+                CRACKED_ABYSSAL_TILES_ITEM,
+                POLISHED_ABYSSAL_STONE_ITEM,
+                CHISELED_ABYSSAL_STONE_ITEM,
+                GILDED_ABYSSAL_BRICKS_ITEM,
+                FROSTED_ABYSSAL_STONE_ITEM,
+                ABYSSAL_BRAZIER_ITEM,
+                ABYSSAL_BRICK_STAIRS_ITEM,
+                ABYSSAL_BRICK_SLAB_ITEM,
+                ABYSSAL_BRICK_WALL_ITEM,
+                ABYSSAL_TILE_STAIRS_ITEM,
+                ABYSSAL_TILE_SLAB_ITEM
         );
     }
 }

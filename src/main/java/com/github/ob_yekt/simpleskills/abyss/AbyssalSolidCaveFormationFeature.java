@@ -31,10 +31,10 @@ public record AbyssalSolidCaveFormationFeature(
 
     public static final MapCodec<AbyssalSolidCaveFormationFeature> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
             Codec.BOOL.fieldOf("hangs_from_ceiling").forGetter(AbyssalSolidCaveFormationFeature::hangsFromCeiling),
-            Codec.intRange(6, 24).fieldOf("min_length").forGetter(AbyssalSolidCaveFormationFeature::minLength),
-            Codec.intRange(6, 24).fieldOf("max_length").forGetter(AbyssalSolidCaveFormationFeature::maxLength),
-            Codec.intRange(2, 6).fieldOf("min_radius").forGetter(AbyssalSolidCaveFormationFeature::minRadius),
-            Codec.intRange(2, 6).fieldOf("max_radius").forGetter(AbyssalSolidCaveFormationFeature::maxRadius),
+            Codec.intRange(6, 44).fieldOf("min_length").forGetter(AbyssalSolidCaveFormationFeature::minLength),
+            Codec.intRange(6, 44).fieldOf("max_length").forGetter(AbyssalSolidCaveFormationFeature::maxLength),
+            Codec.intRange(2, 7).fieldOf("min_radius").forGetter(AbyssalSolidCaveFormationFeature::minRadius),
+            Codec.intRange(2, 7).fieldOf("max_radius").forGetter(AbyssalSolidCaveFormationFeature::maxRadius),
             Codec.intRange(0, 6).fieldOf("satellite_count").forGetter(AbyssalSolidCaveFormationFeature::satelliteCount)
     ).apply(instance, AbyssalSolidCaveFormationFeature::new));
 

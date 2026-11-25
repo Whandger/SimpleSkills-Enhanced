@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "simpleskills:block/gilded_abyssal_bricks"
+  }
+}

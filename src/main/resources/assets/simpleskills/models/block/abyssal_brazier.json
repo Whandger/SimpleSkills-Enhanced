@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/cube_bottom_top",
+  "textures": {
+    "top": "simpleskills:block/abyssal_brazier_top",
+    "bottom": "simpleskills:block/polished_abyssal_stone",
+    "side": "simpleskills:block/abyssal_brazier_side"
+  }
+}

@@ -658,5 +658,19 @@
   "block.simpleskills.abyssal_emerald_ore": "Minério de Esmeralda Abissal",
   "block.simpleskills.abyssal_rune_ore": "Minério de Runa Abissal",
   "block.simpleskills.transcendent_ore": "Minério Transcendente",
-  "block.simpleskills.abyssal_pointed_stalactite": "Estalactite Pontiaguda Abissal"
+  "block.simpleskills.abyssal_pointed_stalactite": "Estalactite Pontiaguda Abissal",
+  "block.simpleskills.abyssal_bricks": "Tijolos Abissais",
+  "block.simpleskills.cracked_abyssal_bricks": "Tijolos Abissais Rachados",
+  "block.simpleskills.abyssal_tiles": "Telhas Abissais",
+  "block.simpleskills.cracked_abyssal_tiles": "Telhas Abissais Rachadas",
+  "block.simpleskills.polished_abyssal_stone": "Pedra Abissal Polida",
+  "block.simpleskills.chiseled_abyssal_stone": "Pedra Abissal Cinzelada",
+  "block.simpleskills.gilded_abyssal_bricks": "Tijolos Abissais Dourados",
+  "block.simpleskills.frosted_abyssal_stone": "Pedra Abissal Geada",
+  "block.simpleskills.abyssal_brazier": "Braseiro Abissal",
+  "block.simpleskills.abyssal_brick_stairs": "Escadas de Tijolos Abissais",
+  "block.simpleskills.abyssal_brick_slab": "Laje de Tijolos Abissais",
+  "block.simpleskills.abyssal_brick_wall": "Muro de Tijolos Abissais",
+  "block.simpleskills.abyssal_tile_stairs": "Escadas de Telhas Abissais",
+  "block.simpleskills.abyssal_tile_slab": "Laje de Telhas Abissais"
 }

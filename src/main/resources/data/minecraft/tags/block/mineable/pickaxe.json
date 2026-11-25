@@ -19,6 +19,20 @@
     "simpleskills:abyssal_emerald_ore",
     "simpleskills:abyssal_rune_ore",
     "simpleskills:transcendent_ore",
-    "simpleskills:abyssal_pointed_stalactite"
+    "simpleskills:abyssal_pointed_stalactite",
+    "simpleskills:abyssal_bricks",
+    "simpleskills:cracked_abyssal_bricks",
+    "simpleskills:abyssal_tiles",
+    "simpleskills:cracked_abyssal_tiles",
+    "simpleskills:polished_abyssal_stone",
+    "simpleskills:chiseled_abyssal_stone",
+    "simpleskills:gilded_abyssal_bricks",
+    "simpleskills:frosted_abyssal_stone",
+    "simpleskills:abyssal_brazier",
+    "simpleskills:abyssal_brick_stairs",
+    "simpleskills:abyssal_brick_slab",
+    "simpleskills:abyssal_brick_wall",
+    "simpleskills:abyssal_tile_stairs",
+    "simpleskills:abyssal_tile_slab"
   ]
 }

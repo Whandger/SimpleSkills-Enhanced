@@ -21,7 +21,7 @@
                     "axis": "y",
                     "from_coordinate": -256,
                     "from_value": 0.0,
-                    "to_coordinate": -232,
+                    "to_coordinate": -246,
                     "to_value": 1.0
                   },
                   "first": 0.1171875,
@@ -144,9 +144,9 @@
     "input": {
       "type": "minecraft:gradient",
       "axis": "y",
-      "from_coordinate": -232,
+      "from_coordinate": -246,
       "from_value": -1.0,
-      "to_coordinate": -224,
+      "to_coordinate": -238,
       "to_value": 1.0
     },
     "min_inclusive": -1.0,

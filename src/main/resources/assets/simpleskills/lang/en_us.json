@@ -658,5 +658,19 @@
   "block.simpleskills.abyssal_emerald_ore": "Abyssal Emerald Ore",
   "block.simpleskills.abyssal_rune_ore": "Abyssal Rune Ore",
   "block.simpleskills.transcendent_ore": "Transcendent Ore",
-  "block.simpleskills.abyssal_pointed_stalactite": "Abyssal Pointed Stalactite"
+  "block.simpleskills.abyssal_pointed_stalactite": "Abyssal Pointed Stalactite",
+  "block.simpleskills.abyssal_bricks": "Abyssal Bricks",
+  "block.simpleskills.cracked_abyssal_bricks": "Cracked Abyssal Bricks",
+  "block.simpleskills.abyssal_tiles": "Abyssal Tiles",
+  "block.simpleskills.cracked_abyssal_tiles": "Cracked Abyssal Tiles",
+  "block.simpleskills.polished_abyssal_stone": "Polished Abyssal Stone",
+  "block.simpleskills.chiseled_abyssal_stone": "Chiseled Abyssal Stone",
+  "block.simpleskills.gilded_abyssal_bricks": "Gilded Abyssal Bricks",
+  "block.simpleskills.frosted_abyssal_stone": "Frosted Abyssal Stone",
+  "block.simpleskills.abyssal_brazier": "Abyssal Brazier",
+  "block.simpleskills.abyssal_brick_stairs": "Abyssal Brick Stairs",
+  "block.simpleskills.abyssal_brick_slab": "Abyssal Brick Slab",
+  "block.simpleskills.abyssal_brick_wall": "Abyssal Brick Wall",
+  "block.simpleskills.abyssal_tile_stairs": "Abyssal Tile Stairs",
+  "block.simpleskills.abyssal_tile_slab": "Abyssal Tile Slab"
 }

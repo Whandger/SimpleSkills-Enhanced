@@ -33,8 +33,8 @@ public class AbyssalCastleStructure extends Structure {
     public static final StructureType<AbyssalCastleStructure> TYPE = () -> CODEC;
 
     /**
-     * Ground courtyard Y bounds chosen so that the 24-block subterranean dungeon/foundation depth
-     * ({@code >= -252}) and 104-block Sovereign Spire ({@code <= -92}) stay cleanly inside The Abyss
+     * Ground courtyard Y bounds preserve the original lower castle placement
+     * while keeping the 107-block Sovereign Spire inside The Abyss
      * ({@code Y = -256 .. -80}).
      */
     private static final int FLOOR_MIN_Y = -228;
@@ -87,7 +87,7 @@ public class AbyssalCastleStructure extends Structure {
         int open = 0;
         int step = 21;
         for (int dx = -AbyssalCastlePiece.HALF; dx <= AbyssalCastlePiece.HALF; dx += step) {
-            for (int dz = -AbyssalCastlePiece.HALF; dz <= AbyssalCastlePiece.HALF; dz += step) {
+            for (int dz = AbyssalCastlePiece.MIN_OFFSET_Z; dz <= AbyssalCastlePiece.MAX_OFFSET_Z; dz += step) {
                 NoiseColumn column = context.chunkGenerator().getBaseColumn(
                         center.getX() + dx, center.getZ() + dz,
                         context.heightAccessor(), context.randomState());

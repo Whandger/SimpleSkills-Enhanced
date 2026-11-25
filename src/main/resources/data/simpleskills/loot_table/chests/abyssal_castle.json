@@ -5,81 +5,111 @@
       "rolls": {
         "type": "minecraft:uniform",
         "min": 3,
-        "max": 6
+        "max": 5
       },
       "entries": [
         {
           "type": "minecraft:item",
           "name": "minecraft:iron_ingot",
-          "weight": 10,
+          "weight": 18,
           "modifier": [
             {
+              "type": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 2,
-                "max": 6
-              },
-              "type": "minecraft:set_count"
+                "min": 3,
+                "max": 9
+              }
             }
           ]
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:gold_ingot",
-          "weight": 10,
+          "weight": 15,
           "modifier": [
             {
+              "type": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 2,
-                "max": 6
-              },
-              "type": "minecraft:set_count"
+                "max": 7
+              }
             }
           ]
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:lapis_lazuli",
-          "weight": 8,
+          "weight": 14,
           "modifier": [
             {
+              "type": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 4,
-                "max": 10
-              },
-              "type": "minecraft:set_count"
+                "max": 12
+              }
             }
           ]
         },
         {
           "type": "minecraft:item",
           "name": "minecraft:amethyst_shard",
-          "weight": 8,
+          "weight": 14,
           "modifier": [
             {
+              "type": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 2,
-                "max": 5
-              },
-              "type": "minecraft:set_count"
+                "min": 3,
+                "max": 10
+              }
             }
           ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:bone",
-          "weight": 6,
+          "name": "minecraft:diamond",
+          "weight": 8,
           "modifier": [
             {
+              "type": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 2,
-                "max": 8
-              },
-              "type": "minecraft:set_count"
+                "min": 1,
+                "max": 3
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:emerald",
+          "weight": 9,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 4
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_apple",
+          "weight": 7,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              }
             }
           ]
         }
@@ -94,105 +124,50 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:diamond",
-          "weight": 6,
+          "name": "minecraft:book",
+          "weight": 10,
           "modifier": [
             {
-              "count": {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
                 "type": "minecraft:uniform",
-                "min": 1,
-                "max": 3
-              },
-              "type": "minecraft:set_count"
+                "min": 18,
+                "max": 30
+              }
             }
           ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:emerald",
-          "weight": 6,
+          "name": "simpleskills:gilded_abyssal_bricks",
+          "weight": 12,
           "modifier": [
             {
+              "type": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 1,
-                "max": 4
-              },
-              "type": "minecraft:set_count"
+                "min": 2,
+                "max": 6
+              }
             }
           ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:netherite_scrap",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:golden_apple",
-          "weight": 5
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:enchanted_golden_apple",
-          "weight": 1
-        }
-      ]
-    },
-    {
-      "rolls": 1,
-      "entries": [
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:wither_skeleton_skull",
-          "weight": 6
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:totem_of_undying",
-          "weight": 4
-        },
-        {
-          "type": "minecraft:item",
-          "name": "simpleskills:transcendency_essence",
-          "weight": 3
         },
         {
           "type": "minecraft:item",
           "name": "simpleskills:abyssal_rune_ore",
-          "weight": 4,
+          "weight": 8,
           "modifier": [
             {
+              "type": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 1,
-                "max": 2
-              },
-              "type": "minecraft:set_count"
+                "max": 3
+              }
             }
           ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "simpleskills:transcendent_ore",
-          "weight": 1
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:nether_star",
-          "weight": 2
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:dragon_egg",
-          "weight": 1
         }
-      ],
-      "condition": {
-        "chance": 0.4,
-        "type": "minecraft:random_chance"
-      }
+      ]
     }
-  ],
-  "random_sequence": "simpleskills:chests/abyssal_castle"
+  ]
 }

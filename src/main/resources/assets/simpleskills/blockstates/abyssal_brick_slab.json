@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "type=bottom": {
+      "model": "simpleskills:block/abyssal_brick_slab"
+    },
+    "type=top": {
+      "model": "simpleskills:block/abyssal_brick_slab_top"
+    },
+    "type=double": {
+      "model": "simpleskills:block/abyssal_bricks"
+    }
+  }
+}
