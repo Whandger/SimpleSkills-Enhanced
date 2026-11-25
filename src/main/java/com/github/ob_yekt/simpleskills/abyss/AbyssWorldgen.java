@@ -6,12 +6,41 @@ import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.levelgen.GenerationStep;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 /** Adds only rare Abyss ores, crystal corruption, and solid-block speleothem formations to new Overworld chunks. */
 public final class AbyssWorldgen {
+    public static final int MIN_Y = -256;
+    public static final int MAX_Y = -80;
+
     private AbyssWorldgen() {}
+
+    public static boolean isAbyssY(int y) {
+        return y >= MIN_Y && y <= MAX_Y;
+    }
+
+    public static boolean intersectsAbyss(int minY, int maxY) {
+        return maxY >= MIN_Y && minY <= MAX_Y;
+    }
+
+    /** The Abyss is an Overworld layer, not a rule for other dimensions. */
+    public static boolean isOverworld(LevelAccessor level) {
+        if (level instanceof ServerLevel serverLevel) {
+            return Level.OVERWORLD.equals(serverLevel.dimension());
+        }
+        if (level instanceof ServerLevelAccessor serverLevelAccessor) {
+            return Level.OVERWORLD.equals(serverLevelAccessor.getLevel().dimension());
+        }
+        if (level instanceof Level world) {
+            return Level.OVERWORLD.equals(world.dimension());
+        }
+        return false;
+    }
 
     private static ResourceKey<PlacedFeature> placed(String path) {
         return ResourceKey.create(Registries.PLACED_FEATURE,

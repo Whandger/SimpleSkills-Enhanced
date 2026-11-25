@@ -1,0 +1,13 @@
+{
+  "replace": false,
+  "values": [
+    "simpleskills:abyssal_stone",
+    "simpleskills:cracked_abyssal_stone",
+    "simpleskills:amethyst_corrupted_stone",
+    "simpleskills:abyssal_pillar",
+    "simpleskills:abyssal_diamond_ore",
+    "simpleskills:abyssal_emerald_ore",
+    "simpleskills:abyssal_rune_ore",
+    "simpleskills:transcendent_ore"
+  ]
+}
