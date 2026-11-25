@@ -29,7 +29,12 @@ public class AbyssalFallenKingRenderer
     @Override
     public void extractRenderState(AbyssalFallenKingEntity entity, AbyssalFallenKingRenderState state, float partialTick) {
         super.extractRenderState(entity, state, partialTick);
+
+        // Suppress vanilla LivingEntityRenderer 90-degree sideways fall and red death tint
+        state.deathTime = 0.0F;
+
         state.kingState = entity.getKingState();
+        state.isDying = entity.isDeadOrDying();
         state.sittingIdleAnimationState.copyFrom(entity.sittingIdleAnimationState);
         state.awakeningAnimationState.copyFrom(entity.awakeningAnimationState);
         state.idleAnimationState.copyFrom(entity.idleAnimationState);
@@ -37,10 +42,20 @@ public class AbyssalFallenKingRenderer
         state.attackAnimationState.copyFrom(entity.attackAnimationState);
         state.deathAnimationState.copyFrom(entity.deathAnimationState);
 
-        if (state.kingState == AbyssalFallenKingEntity.STATE_SITTING) {
+        if (state.isDying) {
+            float totalMs = AbyssalFallenKingEntity.DEATH_DURATION_TICKS * 50.0F;
+            float animProgress = state.deathAnimationState.isStarted()
+                    ? Mth.clamp(state.deathAnimationState.getTimeInMillis(state.ageInTicks) / Math.max(1.0F, totalMs), 0.0F, 1.0F)
+                    : 0.0F;
+            state.deathProgress = Math.max(animProgress, entity.getDeathProgress(partialTick));
+            state.awakeningProgress = 1.0F;
+            state.suspensionHeight = 0.0F;
+        } else if (state.kingState == AbyssalFallenKingEntity.STATE_SITTING) {
+            state.deathProgress = 0.0F;
             state.awakeningProgress = 0.0F;
             state.suspensionHeight = BASE_SUSPENSION_HEIGHT + 0.07F * Mth.sin(state.ageInTicks * 0.055F);
         } else if (state.kingState == AbyssalFallenKingEntity.STATE_AWAKENING) {
+            state.deathProgress = 0.0F;
             float totalMs = AbyssalFallenKingEntity.AWAKENING_DURATION_TICKS * 50.0F;
             float elapsedMs = state.awakeningAnimationState.getTimeInMillis(state.ageInTicks);
             float progress = Mth.clamp(elapsedMs / Math.max(1.0F, totalMs), 0.0F, 1.0F);
@@ -50,6 +65,7 @@ public class AbyssalFallenKingRenderer
             double descend = PrayerVfxPrimitives.smooth(0.55, 1.0, progress);
             state.suspensionHeight = (float) (BASE_SUSPENSION_HEIGHT * (1.0 - descend));
         } else {
+            state.deathProgress = 0.0F;
             state.awakeningProgress = 1.0F;
             state.suspensionHeight = 0.0F;
         }
@@ -65,7 +81,13 @@ public class AbyssalFallenKingRenderer
 
         super.submit(state, poseStack, collector, camera);
 
-        if (state.kingState != AbyssalFallenKingEntity.STATE_ACTIVE) {
+        if (state.isDying) {
+            float age = state.ageInTicks;
+            float deathProgress = state.deathProgress;
+            float bodyYawDeg = state.bodyRot;
+            collector.submitCustomGeometry(poseStack, RenderTypes.lightning(), (matrix, vertices) ->
+                    AbyssalKingDeathVfx.draw(matrix.pose(), vertices, age, deathProgress, bodyYawDeg));
+        } else if (state.kingState != AbyssalFallenKingEntity.STATE_ACTIVE) {
             float age = state.ageInTicks;
             int kingState = state.kingState;
             float ruptureProgress = state.awakeningProgress;

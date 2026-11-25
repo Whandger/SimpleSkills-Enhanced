@@ -4,7 +4,7 @@ import java.util.Set;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.Vec3;
 
 /** Creates server-tracked carriers for client-side procedural Prayer spell renderers. */
@@ -29,7 +29,7 @@ public final class PrayerVisualEffects {
     public static void register() {}
 
     public static PrayerVfxEntity play(ServerLevel level, Vec3 hand, Vec3 impact, PrayerAbility ability,
-                                       int prayerLevel, ServerPlayer caster) {
+                                       int prayerLevel, LivingEntity caster) {
         int style = styleFor(ability);
         int duration = durationFor(ability);
         Vec3 start = switch (ability) {
