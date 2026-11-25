@@ -54,8 +54,19 @@ public class AbyssalCastlePiece extends StructurePiece {
     public static final int MIN_OFFSET_Z = -74;
     public static final int MAX_OFFSET_Z = 104;
 
-    private static final double FOUNDATION_RADIUS_X = 68.0;
-    private static final double FOUNDATION_RADIUS_Z = 68.0;
+    // The settlement extends beyond the castle footprint, while HALF / MIN_OFFSET_Z / MAX_OFFSET_Z
+    // remain dedicated to locating the actual castle inside the cavern.
+    // The settlement reaches roughly X = +/-179 and Z = -179..187. Keep an additional
+    // transition apron outside those limits so outer houses, road curbs, and the terrain
+    // fade are not clipped by the structure's chunk-generation bounds.
+    public static final int CITY_HALF_X = 220;
+    public static final int CITY_MIN_OFFSET_Z = -220;
+    public static final int CITY_MAX_OFFSET_Z = 230;
+
+    // Wider than the settlement itself: the massif continues below the outer streets and
+    // tapers into the surrounding worldgen terrain instead of ending at the last buildings.
+    private static final double FOUNDATION_RADIUS_X = 235.0;
+    private static final double FOUNDATION_RADIUS_Z = 245.0;
     private static final int PLATFORM_MIN_X = -42;
     private static final int PLATFORM_MAX_X = 42;
     private static final int PLATFORM_MIN_Z = -48;
@@ -107,8 +118,8 @@ public class AbyssalCastlePiece extends StructurePiece {
 
     private static BoundingBox createBoundingBox(BlockPos c) {
         return new BoundingBox(
-                c.getX() - HALF, Math.max(-254, c.getY() - BELOW_FLOOR_DEPTH), c.getZ() + MIN_OFFSET_Z,
-                c.getX() + HALF, c.getY() + MAX_HEIGHT, c.getZ() + MAX_OFFSET_Z
+                c.getX() - CITY_HALF_X, Math.max(-254, c.getY() - BELOW_FLOOR_DEPTH), c.getZ() + CITY_MIN_OFFSET_Z,
+                c.getX() + CITY_HALF_X, c.getY() + MAX_HEIGHT, c.getZ() + CITY_MAX_OFFSET_Z
         );
     }
 
@@ -151,6 +162,9 @@ public class AbyssalCastlePiece extends StructurePiece {
 
         // 9. Place & Seed All 44 Chests across 3 Loot Tables
         placeAllCastleChests(level, box);
+
+        // 10. The ruined royal settlement surrounding the castle.
+        AbyssalRuinedKingdom.generate(level, box, this);
     }
 
     // =========================================================================
@@ -161,10 +175,10 @@ public class AbyssalCastlePiece extends StructurePiece {
         int yMinLimit = Math.max(level.getMinY() + 2, -254);
 
         // Keep every terrain read inside the current structure chunk bounds.
-        int minDx = Math.max(-HALF, box.minX() - center.getX());
-        int maxDx = Math.min(HALF, box.maxX() - center.getX());
-        int minDz = Math.max(MIN_OFFSET_Z, box.minZ() - center.getZ());
-        int maxDz = Math.min(MAX_OFFSET_Z, box.maxZ() - center.getZ());
+        int minDx = Math.max(-CITY_HALF_X, box.minX() - center.getX());
+        int maxDx = Math.min(CITY_HALF_X, box.maxX() - center.getX());
+        int minDz = Math.max(CITY_MIN_OFFSET_Z, box.minZ() - center.getZ());
+        int maxDz = Math.min(CITY_MAX_OFFSET_Z, box.maxZ() - center.getZ());
 
         for (int dx = minDx; dx <= maxDx; dx++) {
             for (int dz = minDz; dz <= maxDz; dz++) {
@@ -1510,7 +1524,7 @@ public class AbyssalCastlePiece extends StructurePiece {
 
     /**
      * Picks a normalized horizontal unit vector {ux, uz} along which a fallen tower lies,
-     * preferring directions over the solid courtyard plateau so the fallen trunk rests on the ground.
+     * preferring directions over solid terrain without clipping into buildings or the city ring road.
      */
     private double[] getTowerFallVector(int cx, int cz) {
         double[][] candidates = {
@@ -1529,7 +1543,9 @@ public class AbyssalCastlePiece extends StructurePiece {
             for (int dist : new int[]{12, 20, 28}) {
                 int tx = cx + (int) Math.round(dir[0] * dist);
                 int tz = cz + (int) Math.round(dir[1] * dist);
-                if (!hasFoundationAtSurface(tx, tz) || isInsideProtectedBuilding(tx, tz)) {
+                if (!hasFoundationAtSurface(tx, tz)
+                        || isInsideProtectedBuilding(tx, tz)
+                        || isInsideCityRingOrSettlement(tx, tz)) {
                     ok = false;
                     break;
                 }
@@ -1537,7 +1553,6 @@ public class AbyssalCastlePiece extends StructurePiece {
             if (ok) valid.add(dir);
         }
         if (valid.isEmpty()) {
-            // Fallback pointing straight toward the castle center
             double vx = -cx;
             double vz = 6.0 - cz;
             double len = Math.max(1.0, Math.hypot(vx, vz));
@@ -1547,8 +1562,28 @@ public class AbyssalCastlePiece extends StructurePiece {
     }
 
     /**
+     * Computes how far a fallen tower travels along (ux, uz) before crashing against a major building,
+     * the inner city ring road, or the edge of the massif.
+     */
+    private double getTowerFallMaxReach(int cx, int cz, double ux, double uz, double totalFallenLen) {
+        double startDist = 7.0;
+        double maxReach = totalFallenLen;
+        for (double s = 0.0; s <= totalFallenLen; s += 0.5) {
+            int testX = cx + (int) Math.round(ux * (startDist + s));
+            int testZ = cz + (int) Math.round(uz * (startDist + s));
+            if (isInsideProtectedBuilding(testX, testZ)
+                    || isInsideCityRingOrSettlement(testX, testZ)
+                    || !hasFoundationAtSurface(testX, testZ)) {
+                maxReach = Math.max(6.0, s - 2.0);
+                break;
+            }
+        }
+        return maxReach;
+    }
+
+    /**
      * Builds a jagged snapped stump at (cx, cz) plus the fallen horizontal tower cylinder,
-     * cornice, spire, and crushed ground debris lying across the courtyard.
+     * cornice, spire, and crushed ground debris seated firmly on the local terrain surface.
      */
     private void buildFallenTower(WorldGenLevel level, BoundingBox box,
                                   int cx, int cz, int radius, int shaftHeight, int spireHeight, boolean ruined) {
@@ -1560,54 +1595,47 @@ public class AbyssalCastlePiece extends StructurePiece {
 
         int stumpHeight = 6 + coordMod(cx, 31, cz, 5); // 6..10 blocks tall
 
-        // 1. Standing Jagged Stump
-        for (int dy = 1; dy <= stumpHeight + 3; dy++) {
-            for (int dx = -radius; dx <= radius; dx++) {
-                for (int dz = -radius; dz <= radius; dz++) {
-                    int distSq = dx * dx + dz * dz;
-                    if (distSq > radius * radius + 2) continue;
+        // 1. Standing Jagged Stump anchored to the ground surface
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dz = -radius; dz <= radius; dz++) {
+                int distSq = dx * dx + dz * dz;
+                if (distSq > radius * radius + 2) continue;
 
-                    // Slanted tear plane: higher on the side opposite the fall direction
-                    double alongDir = dx * ux + dz * uz;
-                    int localMaxY = stumpHeight
-                            - (int) Math.round(alongDir * 0.45)
-                            + (coordMod(cx + dx, 33, cz + dz, 3) - 1);
-                    if (dy > localMaxY) continue;
+                int wx = cx + dx;
+                int wz = cz + dz;
+                int surfaceDy = -getFoundationSurfaceDrop(wx, wz);
 
-                    boolean outerRing = distSq >= (radius - 1) * (radius - 1);
-                    BlockPos pos = center.offset(cx + dx, dy, cz + dz);
+                double alongDir = dx * ux + dz * uz;
+                int localMaxH = stumpHeight
+                        - (int) Math.round(alongDir * 0.45)
+                        + (coordMod(wx, 33, wz, 3) - 1);
+
+                boolean outerRing = distSq >= (radius - 1) * (radius - 1);
+                for (int h = 1; h <= localMaxH; h++) {
+                    int dy = surfaceDy + h;
+                    BlockPos pos = center.offset(wx, dy, wz);
 
                     if (outerRing) {
                         boolean cardinal = (dx == 0 || dz == 0);
-                        if (dy >= 1 && dy <= 4 && cardinal) continue; // Keep ground doorway open
-                        setSafe(level, box, pos, pickWallMasonry(cx + dx, dy, cz + dz));
-                    } else if (dy == 1 && coordMod(cx + dx, 1, cz + dz, 100) < 35) {
-                        // Fallen stone debris inside the open stump
-                        setSafe(level, box, pos, pickRubbleBlock(cx + dx, 1, cz + dz, true));
+                        if (h >= 1 && h <= 4 && cardinal) continue; // Keep ground doorway open
+                        setSafe(level, box, pos, pickWallMasonry(wx, dy, wz));
+                    } else if (h == 1 && coordMod(wx, 1, wz, 100) < 35) {
+                        setSafe(level, box, pos, pickRubbleBlock(wx, dy, wz, true));
                     }
                 }
             }
-            if (dy <= stumpHeight - 1) {
-                setSafe(level, box, center.offset(cx, dy, cz), AbyssContent.ABYSSAL_PILLAR.defaultBlockState());
-            }
+        }
+        int centerSurfaceDy = -getFoundationSurfaceDrop(cx, cz);
+        for (int h = 1; h <= stumpHeight - 1; h++) {
+            setSafe(level, box, center.offset(cx, centerSurfaceDy + h, cz), AbyssContent.ABYSSAL_PILLAR.defaultBlockState());
         }
 
-        // 2. Horizontal Fallen Tower Trunk & Spire embedded in the courtyard ground
+        // 2. Horizontal Fallen Tower Trunk & Spire seated directly on the terrain slope
         double startDist = radius + 2.0;
         double fallenShaftLen = Math.max(14.0, shaftHeight - stumpHeight);
         double fallenSpireLen = (ruined || spireHeight <= 0) ? 0.0 : spireHeight;
         double totalFallenLen = fallenShaftLen + fallenSpireLen;
-
-        // Determine maximum travel distance before hitting a major building or cliff edge
-        double maxReach = totalFallenLen;
-        for (double s = 0.0; s <= totalFallenLen; s += 0.5) {
-            int testX = cx + (int) Math.round(ux * (startDist + s));
-            int testZ = cz + (int) Math.round(uz * (startDist + s));
-            if (isInsideProtectedBuilding(testX, testZ) || !hasFoundationAtSurface(testX, testZ)) {
-                maxReach = Math.max(6.0, s - 2.0);
-                break;
-            }
-        }
+        double maxReach = getTowerFallMaxReach(cx, cz, ux, uz, totalFallenLen);
 
         int reachRadius = (int) Math.ceil(startDist + maxReach + radius + 5);
         int minWx = cx - reachRadius;
@@ -1617,7 +1645,7 @@ public class AbyssalCastlePiece extends StructurePiece {
 
         for (int wx = minWx; wx <= maxWx; wx++) {
             for (int wz = minWz; wz <= maxWz; wz++) {
-                if (isInsideProtectedBuilding(wx, wz)) continue;
+                if (isInsideProtectedBuilding(wx, wz) || isInsideCityRingOrSettlement(wx, wz)) continue;
 
                 double relX = wx - cx;
                 double relZ = wz - cz;
@@ -1627,19 +1655,22 @@ public class AbyssalCastlePiece extends StructurePiece {
 
                 if (s < -1.5 || s > maxReach + 4.0) continue;
 
-                // Impact rubble heap if the tower crashed against a wing or cliff edge
+                int surfaceDy = -getFoundationSurfaceDrop(wx, wz);
+
+                // Impact rubble heap if the tower crashed against a wing, ring road, or cliff edge
                 if (s > maxReach) {
                     if (Math.abs(perp) <= radius + 2.5) {
                         double crashFactor = 1.0 - ((s - maxReach) / 4.0);
-                        int heapH = (int) Math.round(crashFactor * 4.0) + coordMod(wx, 34, wz, 2);
-                        for (int y = 1; y <= heapH; y++) {
-                            setSafe(level, box, center.offset(wx, y, wz), pickRubbleBlock(wx, y, wz, y == heapH));
+                        int heapH = Math.max(1, (int) Math.round(crashFactor * 4.0) + coordMod(wx, 34, wz, 2));
+                        for (int h = 1; h <= heapH; h++) {
+                            int dy = surfaceDy + h;
+                            setSafe(level, box, center.offset(wx, dy, wz), pickRubbleBlock(wx, dy, wz, h == heapH));
                         }
                     }
                     continue;
                 }
 
-                // Compute horizontal cylinder radius and vertical center height (sunken into ground)
+                // Compute horizontal cylinder radius and vertical center relative to local ground surfaceDy
                 double r;
                 double cy;
                 boolean isSpire = s > fallenShaftLen;
@@ -1647,28 +1678,36 @@ public class AbyssalCastlePiece extends StructurePiece {
 
                 if (!isSpire) {
                     r = (!ruined && s > setbackS) ? (radius - 1.0) : radius;
-                    cy = 3.0; // Bottom arc embedded at dy = 0..1; upper crown rises to dy = 7..8
+                    cy = surfaceDy + 3.0;
                 } else {
                     double progress = (s - fallenShaftLen) / Math.max(10.0, fallenSpireLen);
                     r = Math.max(0.0, (radius - 0.5) * Math.pow(1.0 - progress, 1.5));
-                    cy = 3.0 - (1.8 * progress); // Slopes down so needle tip rests on dy = 1
+                    // Keep the conical spire grounded all the way down to its narrow tip
+                    cy = surfaceDy + Math.max(1.0, Math.min(3.0, r * 0.75));
                 }
+
+                int lowestPlacedDy = Integer.MAX_VALUE;
 
                 // Cornice slab ring around the setback step
                 if (!ruined && Math.abs(s - setbackS) <= 0.75) {
-                    for (int dy = 1; dy <= 9; dy++) {
+                    int minCorniceDy = surfaceDy + 1;
+                    int maxCorniceDy = (int) Math.ceil(cy + radius + 1.5);
+                    for (int dy = minCorniceDy; dy <= maxCorniceDy; dy++) {
                         double dY = dy - cy;
                         double radialDist = Math.hypot(perp, dY);
                         if (radialDist > radius - 0.2 && radialDist <= radius + 1.35) {
                             if (dY > 1.5 && coordMod(wx, dy, wz, 100) < 45) continue;
                             setSafe(level, box, center.offset(wx, dy, wz), AbyssContent.ABYSSAL_BRICK_SLAB.defaultBlockState());
+                            lowestPlacedDy = Math.min(lowestPlacedDy, dy);
                         }
                     }
+                    fillFallenTowerGroundSupport(level, box, wx, wz, surfaceDy, lowestPlacedDy);
                     continue;
                 }
 
-                int maxDy = Math.max(3, (int) Math.ceil(cy + r + 1.0));
-                for (int dy = 1; dy <= maxDy; dy++) {
+                int minDy = surfaceDy + 1;
+                int maxDy = Math.max(surfaceDy + 3, (int) Math.ceil(cy + r + 1.0));
+                for (int dy = minDy; dy <= maxDy; dy++) {
                     double dY = dy - cy;
                     double radialDist = Math.hypot(perp, dY);
 
@@ -1696,34 +1735,57 @@ public class AbyssalCastlePiece extends StructurePiece {
                                     shellBlock = pickWallMasonry(wx, dy, wz);
                                 }
                                 setSafe(level, box, center.offset(wx, dy, wz), shellBlock);
+                                lowestPlacedDy = Math.min(lowestPlacedDy, dy);
                             } else if (centralSpine && (!ruined || s < fallenShaftLen - 6.0)) {
                                 setSafe(level, box, center.offset(wx, dy, wz), AbyssContent.ABYSSAL_PILLAR.defaultBlockState());
+                                lowestPlacedDy = Math.min(lowestPlacedDy, dy);
                             } else {
                                 setSafe(level, box, center.offset(wx, dy, wz), Blocks.AIR.defaultBlockState());
-                                if (dy == 1 && coordMod(wx, 35, wz, 100) < 30) {
-                                    setSafe(level, box, center.offset(wx, 1, wz), pickRubbleBlock(wx, 1, wz, true));
+                                if (dy == surfaceDy + 1 && coordMod(wx, 35, wz, 100) < 30) {
+                                    setSafe(level, box, center.offset(wx, dy, wz), pickRubbleBlock(wx, dy, wz, true));
+                                    lowestPlacedDy = Math.min(lowestPlacedDy, dy);
                                 }
                             }
                         } else {
                             // Fallen conical spire
                             double progress = (s - fallenShaftLen) / Math.max(10.0, fallenSpireLen);
-                            if (progress > 0.65 && coordMod(wx, dy, wz, 100) < 45) continue;
+                            if (progress > 0.65 && dy > surfaceDy + 1 && coordMod(wx, dy, wz, 100) < 45) continue;
                             BlockState spireBlock = ((int) Math.round(s) % 5 == 0)
                                     ? AbyssContent.GILDED_ABYSSAL_BRICKS.defaultBlockState()
                                     : AbyssContent.ABYSSAL_TILES.defaultBlockState();
                             setSafe(level, box, center.offset(wx, dy, wz), spireBlock);
+                            lowestPlacedDy = Math.min(lowestPlacedDy, dy);
                         }
-                    } else if (dy <= 3 && radialDist <= r + 3.2 && s >= 0.0) {
+                    } else if (dy <= surfaceDy + 3 && radialDist <= r + 3.2 && s >= 0.0) {
                         // Ground impact debris skirt flanking both sides of the fallen cylinder
                         double edgeDist = radialDist - r;
                         int skirtH = edgeDist <= 1.3 ? 2 : 1;
-                        if (dy <= skirtH && coordMod(wx, dy, wz, 100) < (edgeDist <= 1.3 ? 65 : 35)) {
-                            setSafe(level, box, center.offset(wx, dy, wz), pickRubbleBlock(wx, dy, wz, dy == skirtH));
+                        if (dy <= surfaceDy + skirtH && coordMod(wx, dy, wz, 100) < (edgeDist <= 1.3 ? 65 : 35)) {
+                            setSafe(level, box, center.offset(wx, dy, wz),
+                                    pickRubbleBlock(wx, dy, wz, dy == surfaceDy + skirtH));
+                            lowestPlacedDy = Math.min(lowestPlacedDy, dy);
                         }
                     }
                 }
+
+                // Cradle any overhanging curve or slope transition down to the ground surface
+                fillFallenTowerGroundSupport(level, box, wx, wz, surfaceDy, lowestPlacedDy);
             }
         }
+    }
+
+    /** Fills any air gap between the ground surface and the underside of a fallen tower section with crushed rubble. */
+    private void fillFallenTowerGroundSupport(WorldGenLevel level, BoundingBox box,
+                                              int wx, int wz, int surfaceDy, int lowestPlacedDy) {
+        if (lowestPlacedDy == Integer.MAX_VALUE || lowestPlacedDy <= surfaceDy + 1) return;
+        for (int fillDy = surfaceDy + 1; fillDy < lowestPlacedDy; fillDy++) {
+            setSafe(level, box, center.offset(wx, fillDy, wz), pickRubbleBlock(wx, fillDy, wz, false));
+        }
+    }
+
+    /** Protects the inner ring avenue and outer settlement lots from being blocked by fallen castle towers. */
+    private boolean isInsideCityRingOrSettlement(int dx, int dz) {
+        return Math.hypot(dx / 77.0, (dz - 6.0) / 89.0) >= 1.0;
     }
 
     /** Protects major interior wings, throne hall, stairwells, and fixed towers from fallen rubble clipping. */
@@ -1906,8 +1968,6 @@ public class AbyssalCastlePiece extends StructurePiece {
         }
     }
 
-
-
     // =========================================================================
     // 8. MONUMENTAL SOUTH VIADUCT (dz = 55..96)
     // =========================================================================
@@ -1987,9 +2047,11 @@ public class AbyssalCastlePiece extends StructurePiece {
             // If an upper-story perimeter tower chest belongs to a fallen tower, relocate it inside the fallen trunk
             if (cy == 15 && (Math.abs(cx) == 36) && isTowerFallen(cx, cz)) {
                 double[] fallVec = getTowerFallVector(cx, cz);
-                cx = cx + (int) Math.round(fallVec[0] * 14.0);
-                cz = cz + (int) Math.round(fallVec[1] * 14.0);
-                cy = 2;
+                double maxReach = getTowerFallMaxReach(cx, cz, fallVec[0], fallVec[1], 36.0);
+                double travel = Math.min(14.0, Math.max(4.0, maxReach - 2.0));
+                cx = cx + (int) Math.round(fallVec[0] * (7.0 + travel));
+                cz = cz + (int) Math.round(fallVec[1] * (7.0 + travel));
+                cy = 2 - getFoundationSurfaceDrop(cx, cz);
             }
             specs.add(new ChestSpec(cx, cy, cz, LOOT_CASTLE));
         }
@@ -2169,9 +2231,9 @@ public class AbyssalCastlePiece extends StructurePiece {
         double seedX = (seed & 0xFFFFL) * 0.0007;
         double seedZ = ((seed >>> 16) & 0xFFFFL) * 0.0007;
         double broad = Math.sin(x * 0.045 + z * 0.035 + seedX)
-                * Math.cos(z * 0.052 - x * 0.031 + seedZ);
+                - Math.cos(z * 0.052 - x * 0.031 + seedZ);
         double medium = Math.sin(x * 0.13 - z * 0.11 + seedZ)
-                * Math.cos(z * 0.12 + x * 0.08 + seedX);
+                - Math.cos(z * 0.12 + x * 0.08 + seedX);
         return broad * 0.65 + medium * 0.35;
     }
 
@@ -2187,11 +2249,15 @@ public class AbyssalCastlePiece extends StructurePiece {
         int outsideZ = Math.max(0, Math.max(PLATFORM_MIN_Z - dz, dz - PLATFORM_MAX_Z));
         double distance = Math.hypot(outsideX, outsideZ);
         double broadRidge = Math.sin(dx * 0.055 + dz * 0.041)
-                * Math.cos(dz * 0.047 - dx * 0.033);
+                - Math.cos(dz * 0.047 - dx * 0.033);
         double erosion = broadRidge * 1.9
                 + foundationDetailNoise(dx, dz) * 1.0
                 + (ridgeNoise(dx, dz - 8) - 0.5) * 1.0;
-        return Math.max(0, Math.min(9, (int) Math.round(distance * 0.18 + erosion)));
+        // Spread the 18-block height change over a longer run. The slope begins around
+        // the castle platform, stays gentle beneath the outer districts, and reaches its
+        // lower contour near the edge of the expanded massif. 18 also keeps the surface
+        // safely above the Abyss floor for the lowest allowed structure placement.
+        return Math.max(0, Math.min(18, (int) Math.round(distance * 0.105 + erosion)));
     }
 
     /** Same irregular radial profile used by the foundation writer and support checks. */
@@ -2199,7 +2265,16 @@ public class AbyssalCastlePiece extends StructurePiece {
         double ridge = ridgeNoise(dx, relativeDz);
         double detail = foundationDetailNoise(dx, relativeDz + 8);
         double factor = 1.10 + (depthProgress * 0.14) + ((ridge - 0.5) * 0.08) + (detail * 0.02);
-        return Math.min(1.30, factor);
+
+        // Fade the massif before the structure's rectangular generation bounds. This prevents
+        // a hard-cut perimeter while allowing the rock to broaden slightly at deeper layers.
+        // Start the fade beyond the outermost streets. The 50-60 block transition bands
+        // leave the whole settlement supported while progressively narrowing the massif.
+        double edgeX = Math.max(0.0, Math.min(1.0, (Math.abs(dx) - 180.0) / 55.0));
+        double edgeZ = Math.max(0.0, Math.min(1.0, (Math.abs(relativeDz) - 170.0) / 60.0));
+        double edgeLimitX = 1.20 - edgeX * (0.48 - depthProgress * 0.10);
+        double edgeLimitZ = 1.20 - edgeZ * (0.48 - depthProgress * 0.10);
+        return Math.max(0.72, Math.min(1.30, Math.min(factor, Math.min(edgeLimitX, edgeLimitZ))));
     }
 
     /**
@@ -2213,6 +2288,26 @@ public class AbyssalCastlePiece extends StructurePiece {
         double normDist = Math.hypot(dx / FOUNDATION_RADIUS_X, relativeDz / FOUNDATION_RADIUS_Z);
         double maxRadiusFactor = foundationRadiusFactor(dx, (int) relativeDz, 0.0);
         return normDist <= maxRadiusFactor;
+    }
+
+    int getCitySurfaceY(int dx, int dz) {
+        return center.getY() - getFoundationSurfaceDrop(dx, dz);
+    }
+
+    int getCastleFloorY() {
+        return center.getY();
+    }
+
+    int getCityWorldX(int dx) {
+        return center.getX() + dx;
+    }
+
+    int getCityWorldZ(int dz) {
+        return center.getZ() + dz;
+    }
+
+    int cityHash(int x, int y, int z, int mod) {
+        return coordMod(x, y, z, mod);
     }
 
     private int coordMod(int x, int y, int z, int mod) {
