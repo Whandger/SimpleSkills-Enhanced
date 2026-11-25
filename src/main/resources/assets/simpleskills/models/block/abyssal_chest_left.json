@@ -1,9 +1,11 @@
 {
   "textures": {
     "particle": "simpleskills:block/abyssal_chest_side",
-    "front": "simpleskills:block/abyssal_chest_double_right_front",
+    "front": "simpleskills:block/abyssal_chest_double_left_front",
+    "back": "simpleskills:block/abyssal_chest_double_left_back",
     "side": "simpleskills:block/abyssal_chest_side",
-    "top": "simpleskills:block/abyssal_chest_double_left_top"
+    "top": "simpleskills:block/abyssal_chest_double_left_top",
+    "bottom": "simpleskills:block/abyssal_chest_double_left_bottom"
   },
   "elements": [
     {
@@ -19,7 +21,13 @@
       ],
       "faces": {
         "down": {
-          "texture": "#side"
+          "texture": "#bottom",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         },
         "up": {
           "texture": "#top",
@@ -40,7 +48,13 @@
           ]
         },
         "south": {
-          "texture": "#side"
+          "texture": "#back",
+          "uv": [
+            0,
+            7,
+            16,
+            16
+          ]
         },
         "west": {
           "texture": "#side"
@@ -60,7 +74,13 @@
       ],
       "faces": {
         "down": {
-          "texture": "#side"
+          "texture": "#bottom",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
         },
         "up": {
           "texture": "#top",
@@ -81,7 +101,13 @@
           ]
         },
         "south": {
-          "texture": "#side"
+          "texture": "#back",
+          "uv": [
+            0,
+            2,
+            16,
+            7
+          ]
         },
         "west": {
           "texture": "#side"

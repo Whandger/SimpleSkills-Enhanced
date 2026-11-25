@@ -1,14 +1,18 @@
 package com.github.ob_yekt.simpleskills.abyss;
 
+import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Containers;
+import net.minecraft.world.entity.ContainerUser;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.Containers;
 
 /** Persistent six-row (54-slot) container with native loot-table support. */
 public final class AbyssalChestBlockEntity extends RandomizableContainerBlockEntity {
@@ -26,6 +30,28 @@ public final class AbyssalChestBlockEntity extends RandomizableContainerBlockEnt
     @Override
     public int getContainerSize() {
         return SLOT_COUNT;
+    }
+
+    /**
+     * Explicitly materialize the chest's loot table before applying its one-shot gear rarity markers.
+     * CompoundContainer delegates this call to both physical halves of a double chest.
+     */
+    @Override
+    public void startOpen(ContainerUser user) {
+        if (!(user instanceof Player player) || level == null || level.isClientSide()) {
+            return;
+        }
+
+        unpackLootTable(player);
+        if (player instanceof ServerPlayer serverPlayer) {
+            boolean changed = false;
+            for (int slot = 0; slot < getContainerSize(); slot++) {
+                if (CraftingEquipmentManager.applyAbyssalLootRarity(getItem(slot), serverPlayer)) {
+                    changed = true;
+                }
+            }
+            if (changed) setChanged();
+        }
     }
 
     @Override

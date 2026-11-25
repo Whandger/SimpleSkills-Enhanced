@@ -4,74 +4,44 @@
     {
       "rolls": {
         "type": "minecraft:uniform",
-        "min": 5,
-        "max": 9
+        "min": 1,
+        "max": 3
       },
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:coal",
-          "weight": 18,
+          "name": "minecraft:coal_block",
+          "weight": 28,
           "modifier": [
             {
               "type": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 2,
-                "max": 9
+                "min": 15,
+                "max": 20
               }
             }
           ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:charcoal",
-          "weight": 14,
-          "modifier": [
-            {
-              "type": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 2,
-                "max": 8
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:iron_nugget",
-          "weight": 14,
-          "modifier": [
-            {
-              "type": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 2,
-                "max": 9
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:bone",
-          "weight": 12,
+          "name": "minecraft:iron_block",
+          "weight": 9,
           "modifier": [
             {
               "type": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 1,
-                "max": 5
+                "max": 10
               }
             }
           ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:arrow",
-          "weight": 10,
+          "name": "simpleskills:abyssal_charred_timber",
+          "weight": 28,
           "modifier": [
             {
               "type": "minecraft:set_count",
@@ -85,68 +55,23 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:rotten_flesh",
-          "weight": 8,
-          "modifier": [
-            {
-              "type": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 2,
-                "max": 7
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "simpleskills:abyssal_charred_timber",
-          "weight": 10,
-          "modifier": [
-            {
-              "type": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 4
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
           "name": "simpleskills:abyssal_bricks",
-          "weight": 9,
+          "weight": 18,
           "modifier": [
             {
               "type": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 1,
-                "max": 5
+                "min": 4,
+                "max": 16
               }
             }
           ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:string",
-          "weight": 7,
-          "modifier": [
-            {
-              "type": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 5
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:leather",
-          "weight": 5,
+          "name": "simpleskills:gilded_abyssal_bricks",
+          "weight": 3,
           "modifier": [
             {
               "type": "minecraft:set_count",
@@ -160,8 +85,8 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:amethyst_shard",
-          "weight": 3,
+          "name": "minecraft:gold_block",
+          "weight": 2,
           "modifier": [
             {
               "type": "minecraft:set_count",
@@ -169,6 +94,21 @@
                 "type": "minecraft:uniform",
                 "min": 1,
                 "max": 2
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:amethyst_shard",
+          "weight": 5,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
               }
             }
           ]
@@ -184,23 +124,8 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:bread",
-          "weight": 10,
-          "modifier": [
-            {
-              "type": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 4
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:torch",
-          "weight": 10,
+          "name": "minecraft:carrot",
+          "weight": 18,
           "modifier": [
             {
               "type": "minecraft:set_count",
@@ -214,53 +139,37 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:glow_ink_sac",
-          "weight": 8,
+          "name": "minecraft:golden_carrot",
+          "weight": 12,
           "modifier": [
             {
               "type": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 1,
-                "max": 3
+                "max": 4
               }
             }
           ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:gold_nugget",
-          "weight": 7,
+          "name": "minecraft:dried_kelp",
+          "weight": 26,
           "modifier": [
             {
               "type": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 1,
-                "max": 5
+                "min": 4,
+                "max": 12
               }
             }
           ]
         },
         {
-          "type": "minecraft:item",
-          "name": "minecraft:iron_ingot",
-          "weight": 4,
-          "modifier": [
-            {
-              "type": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 2
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:golden_apple",
-          "weight": 1
+          "type": "minecraft:empty",
+          "weight": 13
         }
       ]
     }

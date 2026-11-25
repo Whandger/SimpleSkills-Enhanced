@@ -167,6 +167,9 @@ public class AbyssalCastlePiece extends StructurePiece {
 
         // 10. The ruined royal settlement surrounding the castle.
         AbyssalRuinedKingdom.generate(level, box, this);
+
+        // 11. A handful of exposed Transcendent Ore deposits are embedded in the sewer walls.
+        placeSewerTranscendentOres(level, box);
     }
 
     // =========================================================================
@@ -297,6 +300,74 @@ public class AbyssalCastlePiece extends StructurePiece {
         }
         setSafe(level, box, center.offset(-27, -14, 37), hangingLantern(true));
         setSafe(level, box, center.offset(-27, -5, 44), hangingLantern(true));
+    }
+
+    /**
+     * Places 1-4 rare Transcendent Ore blocks visibly embedded in the sewer masonry.
+     * Coordinates are selected from the complete sewer layout with the structure seed, then
+     * each chunk only writes the selected positions inside its current generation bounds.
+     * This keeps the total count stable even though postProcess runs once per intersecting chunk.
+     */
+    private void placeSewerTranscendentOres(WorldGenLevel level, BoundingBox box) {
+        List<BlockPos> candidates = new ArrayList<>();
+
+        // Main north-south collector: the two exposed side walls.
+        for (int z = -31; z <= 55; z++) {
+            // Cross canals cut through the collector's side walls; only choose intact wall spans.
+            boolean atCrossCanal = Math.abs(z + 16) <= 3
+                    || Math.abs(z - 8) <= 3
+                    || Math.abs(z - 32) <= 3;
+            if (atCrossCanal) continue;
+            for (int x : new int[]{-5, 5}) {
+                candidates.add(center.offset(x, -18, z));
+                candidates.add(center.offset(x, -17, z));
+            }
+        }
+
+        // East-west canals: exposed side walls, skipping overlaps with the smuggler vault
+        // and the service stairwell so ore never appears inside those rooms.
+        for (int canalZ : new int[]{-16, 8, 32}) {
+            for (int x = -29; x <= 29; x++) {
+                if (Math.abs(x) <= 5) continue;
+                if (canalZ == -16 && x >= -28 && x <= -20) continue;
+                if (canalZ == 32 && x >= -28 && x <= -25) continue;
+
+                for (int side : new int[]{-4, 4}) {
+                    candidates.add(center.offset(x, -18, canalZ + side));
+                    candidates.add(center.offset(x, -17, canalZ + side));
+                }
+            }
+        }
+
+        RandomSource oreRandom = RandomSource.create(seed ^ 0x4F1BBCDCBFA54001L);
+        // Shuffle deterministically so each generated castle has a different, stable layout.
+        for (int i = candidates.size() - 1; i > 0; i--) {
+            int swapIndex = oreRandom.nextInt(i + 1);
+            BlockPos current = candidates.get(i);
+            candidates.set(i, candidates.get(swapIndex));
+            candidates.set(swapIndex, current);
+        }
+
+        int targetCount = 1 + oreRandom.nextInt(4);
+        for (int i = 0; i < targetCount; i++) {
+            BlockPos pos = candidates.get(i);
+            if (!box.isInside(pos)) continue;
+
+            BlockState existing = level.getBlockState(pos);
+            if (!isSewerMasonry(existing)) continue;
+
+            setSafe(level, box, pos, AbyssContent.TRANSCENDENT_ORE.defaultBlockState());
+        }
+    }
+
+    private boolean isSewerMasonry(BlockState state) {
+        return state.is(AbyssContent.ABYSSAL_BRICKS)
+                || state.is(AbyssContent.ABYSSAL_PILLAR)
+                || state.is(AbyssContent.CRACKED_ABYSSAL_BRICKS)
+                || state.is(AbyssContent.CHISELED_ABYSSAL_STONE)
+                || state.is(AbyssContent.CRACKED_ABYSSAL_STONE)
+                || state.is(AbyssContent.POLISHED_ABYSSAL_STONE)
+                || state.is(AbyssContent.AMETHYST_CORRUPTED_STONE);
     }
 
     private void carveSewerTunnelZ(WorldGenLevel level, BoundingBox box, int cx, int zMin, int zMax) {
@@ -917,11 +988,15 @@ public class AbyssalCastlePiece extends StructurePiece {
             }
         }
 
-        // Hanging Royal Chandeliers at dz = -6, 10, 26 (or crashed on the floor if the roof above collapsed)
+        // Hanging Royal Chandeliers at dz = -6, 10, 26. Their chains now reach the actual ridge.
+        // If the roof has collapsed over a fixture, the rubble pass below places its remains on the floor.
         for (int cz : new int[]{-6, 10, 26}) {
             boolean roofAboveGone = inCollapse(8, cz) || (isSovereignSpireCollapsed() && Math.abs(cz - 6) <= 8);
             if (!roofAboveGone) {
-                for (int y = 21; y <= 30; y++) {
+                // The nave roof ridge is at dy=47. Reassert a small gilded anchor so random roof holes
+                // cannot leave the chandelier chain visibly disconnected from the ceiling.
+                setSafe(level, box, center.offset(0, 47, cz), AbyssContent.GILDED_ABYSSAL_BRICKS.defaultBlockState());
+                for (int y = 21; y <= 46; y++) {
                     setSafe(level, box, center.offset(0, y, cz), CHAIN);
                 }
                 setSafe(level, box, center.offset(0, 20, cz), AbyssContent.GILDED_ABYSSAL_BRICKS.defaultBlockState());
@@ -934,14 +1009,15 @@ public class AbyssalCastlePiece extends StructurePiece {
             }
         }
 
-        // Royal Carpet Aisle from Portal (dz = 34) to Throne Dais (dz = -13)
+        // Royal gold-block aisle from the portal (dz = 34) to the throne dais (dz = -13).
+        // The outer strips remain gilded Abyssal masonry as a border; all wool carpets are removed.
         for (int dz = -13; dz <= 34; dz++) {
             for (int dx = -2; dx <= 2; dx++) {
-                setSafe(level, box, center.offset(dx, 0, dz), AbyssContent.GILDED_ABYSSAL_BRICKS.defaultBlockState());
-                BlockState carpet = Math.abs(dx) <= 1
-                        ? Blocks.CARPET.pick(DyeColor.RED).defaultBlockState()
-                        : Blocks.CARPET.pick(DyeColor.PURPLE).defaultBlockState();
-                setSafe(level, box, center.offset(dx, 1, dz), carpet);
+                BlockState aisle = Math.abs(dx) <= 1
+                        ? Blocks.GOLD_BLOCK.defaultBlockState()
+                        : AbyssContent.GILDED_ABYSSAL_BRICKS.defaultBlockState();
+                setSafe(level, box, center.offset(dx, 0, dz), aisle);
+                setSafe(level, box, center.offset(dx, 1, dz), Blocks.AIR.defaultBlockState());
             }
         }
 
@@ -987,7 +1063,19 @@ public class AbyssalCastlePiece extends StructurePiece {
 
         // Secret Behind-Throne Treasury Passage (dz = -25..-23, dx = -5..5, accessible behind the throne)
         fillVolume(level, box, -5, 1, -25, 5, 4, -23, Blocks.AIR.defaultBlockState());
-        setSafe(level, box, center.offset(0, 4, -24), hangingLantern(true));
+        if (!inCollapse(8, -24)) {
+            // The hall ridge is also the ceiling above this passage; run a continuous chain to it.
+            setSafe(level, box, center.offset(0, 47, -24), AbyssContent.GILDED_ABYSSAL_BRICKS.defaultBlockState());
+            for (int y = 5; y <= 46; y++) {
+                setSafe(level, box, center.offset(0, y, -24), CHAIN);
+            }
+            setSafe(level, box, center.offset(0, 4, -24), hangingLantern(true));
+        } else {
+            // If the roof is missing here, the lantern has fallen and now rests on a gilded base.
+            setSafe(level, box, center.offset(0, 1, -24), AbyssContent.GILDED_ABYSSAL_BRICKS.defaultBlockState());
+            setSafe(level, box, center.offset(0, 2, -24), Blocks.SOUL_LANTERN.defaultBlockState()
+                    .setValue(BlockStateProperties.HANGING, false));
+        }
 
         // Fallen roof tiles, stairs, slabs, and crashed chandeliers on the Throne Hall floor
         buildNaveCollapseRubble(level, box);
@@ -1024,16 +1112,27 @@ public class AbyssalCastlePiece extends StructurePiece {
             }
         }
 
-        // Crashed chandelier remains on the floor for any chandelier whose roof above collapsed
+        // A collapsed chandelier is a recognizable cross-shaped wreck on the floor, not a floating fragment.
         for (int cz : new int[]{-6, 10, 26}) {
             boolean roofAboveGone = inCollapse(8, cz) || (isSovereignSpireCollapsed() && Math.abs(cz - 6) <= 8);
             if (!roofAboveGone) continue;
 
             setSafe(level, box, center.offset(0, 1, cz), AbyssContent.GILDED_ABYSSAL_BRICKS.defaultBlockState());
             setSafe(level, box, center.offset(0, 2, cz), CHAIN);
-            setSafe(level, box, center.offset(1, 1, cz), CHAIN);
-            setSafe(level, box, center.offset(-2, 1, cz), AbyssContent.GILDED_ABYSSAL_BRICKS.defaultBlockState());
-            setSafe(level, box, center.offset(2, 1, cz + 1), AbyssContent.ABYSSAL_BRAZIER.defaultBlockState());
+            setSafe(level, box, center.offset(0, 1, cz - 1), chainOnAxis(Direction.Axis.Z));
+            setSafe(level, box, center.offset(0, 1, cz + 1), chainOnAxis(Direction.Axis.Z));
+            setSafe(level, box, center.offset(-1, 1, cz), chainOnAxis(Direction.Axis.X));
+            setSafe(level, box, center.offset(1, 1, cz), chainOnAxis(Direction.Axis.X));
+
+            for (int[] arm : new int[][]{{-2, 0}, {2, 0}, {0, -2}, {0, 2}}) {
+                int ax = arm[0];
+                int az = arm[1];
+                setSafe(level, box, center.offset(ax, 1, cz + az), AbyssContent.GILDED_ABYSSAL_BRICKS.defaultBlockState());
+                setSafe(level, box, center.offset(ax, 2, cz + az), AbyssContent.ABYSSAL_BRAZIER.defaultBlockState());
+            }
+            // A few loose chain links and masonry chips sell the impact without blocking the aisle entirely.
+            setSafe(level, box, center.offset(2, 1, cz + 1), chainOnAxis(Direction.Axis.X));
+            setSafe(level, box, center.offset(-2, 1, cz - 1), chainOnAxis(Direction.Axis.Z));
         }
     }
 
@@ -2180,6 +2279,12 @@ public class AbyssalCastlePiece extends StructurePiece {
         return AbyssContent.ABYSSAL_TILE_STAIRS.defaultBlockState()
                 .setValue(BlockStateProperties.HORIZONTAL_FACING, facing)
                 .setValue(BlockStateProperties.HALF, Half.BOTTOM);
+    }
+
+    private static BlockState chainOnAxis(Direction.Axis axis) {
+        return CHAIN.hasProperty(BlockStateProperties.AXIS)
+                ? CHAIN.setValue(BlockStateProperties.AXIS, axis)
+                : CHAIN;
     }
 
     private static BlockState hangingLantern(boolean soul) {

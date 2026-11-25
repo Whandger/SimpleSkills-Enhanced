@@ -2,30 +2,41 @@
   "type": "minecraft:chest",
   "pools": [
     {
-      "rolls": {
-        "type": "minecraft:uniform",
-        "min": 5,
-        "max": 9
-      },
+      "rolls": 1,
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "minecraft:diamond",
-          "weight": 14,
+          "name": "minecraft:iron_block",
+          "weight": 12,
           "modifier": [
             {
               "type": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
                 "min": 1,
-                "max": 4
+                "max": 3
               }
             }
           ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:emerald",
+          "name": "minecraft:gold_block",
+          "weight": 12,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "simpleskills:gilded_abyssal_bricks",
           "weight": 12,
           "modifier": [
             {
@@ -40,8 +51,8 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:gold_ingot",
-          "weight": 12,
+          "name": "simpleskills:abyssal_charred_timber",
+          "weight": 10,
           "modifier": [
             {
               "type": "minecraft:set_count",
@@ -55,30 +66,15 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:enchanted_book",
-          "weight": 10,
-          "modifier": [
-            {
-              "type": "minecraft:enchant_with_levels",
-              "levels": {
-                "type": "minecraft:uniform",
-                "min": 22,
-                "max": 36
-              }
-            }
-          ]
-        },
-        {
-          "type": "minecraft:item",
-          "name": "minecraft:experience_bottle",
-          "weight": 10,
+          "name": "minecraft:golden_carrot",
+          "weight": 8,
           "modifier": [
             {
               "type": "minecraft:set_count",
               "count": {
                 "type": "minecraft:uniform",
-                "min": 3,
-                "max": 8
+                "min": 2,
+                "max": 5
               }
             }
           ]
@@ -86,6 +82,75 @@
         {
           "type": "minecraft:item",
           "name": "minecraft:amethyst_shard",
+          "weight": 6,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 5
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 2,
+        "max": 4
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_block",
+          "weight": 10,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 10
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:gold_block",
+          "weight": 12,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 5
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "simpleskills:gilded_abyssal_bricks",
+          "weight": 18,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 3,
+                "max": 12
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "simpleskills:abyssal_charred_timber",
           "weight": 10,
           "modifier": [
             {
@@ -100,8 +165,37 @@
         },
         {
           "type": "minecraft:item",
-          "name": "simpleskills:gilded_abyssal_bricks",
-          "weight": 10,
+          "name": "minecraft:golden_carrot",
+          "weight": 14,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 8
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:enchanted_golden_apple",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:netherite_scrap",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 8
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:amethyst_shard",
+          "weight": 6,
           "modifier": [
             {
               "type": "minecraft:set_count",
@@ -115,8 +209,121 @@
         },
         {
           "type": "minecraft:item",
-          "name": "simpleskills:abyssal_rune_ore",
+          "name": "minecraft:prismarine_shard",
+          "weight": 1,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 2,
+                "max": 4
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": {
+        "type": "minecraft:uniform",
+        "min": 1,
+        "max": 2
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "simpleskills:transcendency_essence",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:totem_of_undying",
+          "weight": 2
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:netherite_scrap",
+          "weight": 6,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:netherite_ingot",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:nether_star",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_apple",
           "weight": 8,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:end_rod",
+          "weight": 5,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 3
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 250
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:echo_shard",
+          "weight": 2,
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 1,
+                "max": 2
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:heart_of_the_sea",
+          "weight": 1
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:prismarine_crystals",
+          "weight": 1,
           "modifier": [
             {
               "type": "minecraft:set_count",
@@ -130,30 +337,90 @@
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:golden_apple",
-          "weight": 5,
+          "name": "minecraft:enchanted_book",
+          "weight": 1,
           "modifier": [
             {
-              "type": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 1,
-                "max": 2
+              "type": "minecraft:set_components",
+              "components": {
+                "minecraft:stored_enchantments": {
+                  "minecraft:sharpness": 5
+                }
               }
             }
           ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:glow_ink_sac",
-          "weight": 6,
+          "name": "minecraft:enchanted_book",
+          "weight": 1,
           "modifier": [
             {
-              "type": "minecraft:set_count",
-              "count": {
-                "type": "minecraft:uniform",
-                "min": 3,
-                "max": 8
+              "type": "minecraft:set_components",
+              "components": {
+                "minecraft:stored_enchantments": {
+                  "minecraft:protection": 4
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:enchanted_book",
+          "weight": 1,
+          "modifier": [
+            {
+              "type": "minecraft:set_components",
+              "components": {
+                "minecraft:stored_enchantments": {
+                  "minecraft:unbreaking": 3
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:enchanted_book",
+          "weight": 1,
+          "modifier": [
+            {
+              "type": "minecraft:set_components",
+              "components": {
+                "minecraft:stored_enchantments": {
+                  "minecraft:mending": 1
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:enchanted_book",
+          "weight": 1,
+          "modifier": [
+            {
+              "type": "minecraft:set_components",
+              "components": {
+                "minecraft:stored_enchantments": {
+                  "minecraft:looting": 3
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:enchanted_book",
+          "weight": 1,
+          "modifier": [
+            {
+              "type": "minecraft:set_components",
+              "components": {
+                "minecraft:stored_enchantments": {
+                  "minecraft:power": 5
+                }
               }
             }
           ]
@@ -163,44 +430,1168 @@
     {
       "rolls": {
         "type": "minecraft:uniform",
-        "min": 2,
-        "max": 5
+        "min": 1,
+        "max": 2
       },
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "simpleskills:transcendency_essence",
-          "weight": 3,
+          "name": "minecraft:iron_sword",
+          "weight": 60,
           "modifier": [
             {
-              "type": "minecraft:set_count",
-              "count": {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
                 "type": "minecraft:uniform",
-                "min": 1,
-                "max": 2
+                "min": 20,
+                "max": 34
               }
             }
           ]
         },
         {
           "type": "minecraft:item",
-          "name": "simpleskills:transcendent_ore",
-          "weight": 2
+          "name": "minecraft:iron_axe",
+          "weight": 48,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:netherite_scrap",
-          "weight": 2
+          "name": "minecraft:iron_pickaxe",
+          "weight": 36,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:totem_of_undying",
-          "weight": 1
+          "name": "minecraft:iron_shovel",
+          "weight": 24,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
         },
         {
           "type": "minecraft:item",
-          "name": "minecraft:nether_star",
-          "weight": 1
+          "name": "minecraft:iron_hoe",
+          "weight": 12,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_helmet",
+          "weight": 36,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_chestplate",
+          "weight": 48,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_leggings",
+          "weight": 36,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_boots",
+          "weight": 36,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_sword",
+          "weight": 40,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_axe",
+          "weight": 32,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_pickaxe",
+          "weight": 24,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_shovel",
+          "weight": 16,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_hoe",
+          "weight": 8,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_helmet",
+          "weight": 24,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_chestplate",
+          "weight": 32,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_leggings",
+          "weight": 24,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_boots",
+          "weight": 24,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond_sword",
+          "weight": 25,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond_axe",
+          "weight": 20,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond_pickaxe",
+          "weight": 15,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond_shovel",
+          "weight": 10,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond_hoe",
+          "weight": 5,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond_helmet",
+          "weight": 15,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond_chestplate",
+          "weight": 20,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond_leggings",
+          "weight": 15,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:diamond_boots",
+          "weight": 15,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "simpleskills:diamond_glowstone_shield",
+          "weight": 75,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bow",
+          "weight": 100,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:crossbow",
+          "weight": 75,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:trident",
+          "weight": 50,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:mace",
+          "weight": 25,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "mythic"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 20,
+                "max": 34
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_sword",
+          "weight": 5,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_axe",
+          "weight": 4,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_pickaxe",
+          "weight": 3,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_shovel",
+          "weight": 2,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_hoe",
+          "weight": 1,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_helmet",
+          "weight": 3,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_chestplate",
+          "weight": 4,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_leggings",
+          "weight": 3,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:iron_boots",
+          "weight": 3,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_sword",
+          "weight": 5,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_axe",
+          "weight": 4,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_pickaxe",
+          "weight": 3,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_shovel",
+          "weight": 2,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_hoe",
+          "weight": 1,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_helmet",
+          "weight": 3,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_chestplate",
+          "weight": 4,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_leggings",
+          "weight": 3,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:golden_boots",
+          "weight": 3,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "simpleskills:netherite_glowstone_shield",
+          "weight": 6,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:bow",
+          "weight": 8,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:crossbow",
+          "weight": 6,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:trident",
+          "weight": 4,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:mace",
+          "weight": 2,
+          "modifier": [
+            {
+              "type": "minecraft:set_custom_data",
+              "tag": {
+                "simpleskills_abyss_loot_rarity": "transcendent"
+              }
+            },
+            {
+              "type": "minecraft:enchant_with_levels",
+              "levels": {
+                "type": "minecraft:uniform",
+                "min": 28,
+                "max": 40
+              }
+            }
+          ]
+        },
+        {
+          "type": "minecraft:empty",
+          "weight": 3300
         }
       ]
     }
