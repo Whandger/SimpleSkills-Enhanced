@@ -1,6 +1,7 @@
 {
-  "parent": "minecraft:block/cube_all",
+  "parent": "minecraft:block/cube_column",
   "textures": {
-    "all": "simpleskills:block/abyssal_pillar"
+    "end": "simpleskills:block/abyssal_pillar_top",
+    "side": "simpleskills:block/abyssal_pillar"
   }
 }

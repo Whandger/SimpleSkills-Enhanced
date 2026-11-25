@@ -105,7 +105,7 @@ public final class AbyssContent {
         ResourceKey<Block> transcendentKey = blockKey("transcendent_ore");
         TRANSCENDENT_ORE = Registry.register(BuiltInRegistries.BLOCK, transcendentKey,
                 new Block(BlockBehaviour.Properties.of()
-                        .mapColor(MapColor.COLOR_PURPLE)
+                        .mapColor(MapColor.GOLD)
                         .instrument(NoteBlockInstrument.BASEDRUM)
                         .strength(9.0F, 12.0F)
                         .sound(SoundType.AMETHYST)
