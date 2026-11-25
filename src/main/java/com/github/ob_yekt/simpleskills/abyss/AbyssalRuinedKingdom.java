@@ -177,20 +177,20 @@ final class AbyssalRuinedKingdom {
 
             // --- Outer Ring Gate-Hamlets (Clustered Suburbs outside the Outer Ring Avenue) ---
             // North Gate Hamlet
-            {-26, -168, 4, 3, 5, 1, FACING_SOUTH},
-            {-38, -168, 4, 3, 5, 0, FACING_SOUTH},
-            {-26, -179, 4, 3, 5, 0, FACING_NORTH},
-            {26, -168, 4, 3, 5, 1, FACING_SOUTH},
-            {38, -168, 4, 3, 5, 0, FACING_SOUTH},
-            {26, -179, 4, 3, 5, 0, FACING_NORTH},
+            {-26, -164, 4, 3, 5, 1, FACING_SOUTH},
+            {-38, -164, 4, 3, 5, 0, FACING_SOUTH},
+            {-26, -175, 4, 3, 5, 0, FACING_NORTH},
+            {26, -164, 4, 3, 5, 1, FACING_SOUTH},
+            {38, -164, 4, 3, 5, 0, FACING_SOUTH},
+            {26, -175, 4, 3, 5, 0, FACING_NORTH},
 
             // South Gate Hamlet
-            {-26, 178, 4, 3, 5, 1, FACING_NORTH},
-            {-38, 178, 4, 3, 5, 0, FACING_NORTH},
-            {-26, 189, 4, 3, 5, 0, FACING_SOUTH},
-            {26, 178, 4, 3, 5, 1, FACING_NORTH},
-            {38, 178, 4, 3, 5, 0, FACING_NORTH},
-            {26, 189, 4, 3, 5, 0, FACING_SOUTH},
+            {-26, 174, 4, 3, 5, 1, FACING_NORTH},
+            {-38, 174, 4, 3, 5, 0, FACING_NORTH},
+            {-26, 185, 4, 3, 5, 0, FACING_SOUTH},
+            {26, 174, 4, 3, 5, 1, FACING_NORTH},
+            {38, 174, 4, 3, 5, 0, FACING_NORTH},
+            {26, 185, 4, 3, 5, 0, FACING_SOUTH},
 
             // West Gate Hamlet
             {-162, -12, 4, 4, 5, 1, FACING_EAST},
@@ -216,7 +216,7 @@ final class AbyssalRuinedKingdom {
     private static final int[][] ARTERIAL_ROADS = {
             // North Pilgrims' Way (connects Inner Ring -> Cathedral -> Outer Ring -> North Gate)
             {0, -88, 0, -104, 2, 401, 1},
-            {0, -128, 0, -184, 2, 402, 0},
+            {0, -128, 0, -180, 2, 402, 0},
 
             // West Trade Avenue (stepped terrace from Inner Ring to West Hamlet)
             {-82, 6, -114, 6, 2, 403, 1},
@@ -278,11 +278,11 @@ final class AbyssalRuinedKingdom {
             {36, 98, 36, 154, 1, 443, 0},
             {-62, 92, -62, 146, 1, 444, 0},
             {62, 92, 62, 146, 1, 445, 0},
-            {0, 143, 0, 192, 2, 446, 0},
+            {0, 143, 0, 188, 2, 446, 0},
 
             // Suburban Hamlet Access Lanes
-            {-44, -162, 44, -162, 1, 447, 0},
-            {-44, 172, 44, 172, 1, 448, 0},
+            {-44, -158, 44, -158, 1, 447, 0},
+            {-44, 168, 44, 168, 1, 448, 0},
             {-156, -34, -156, 46, 1, 449, 0},
             {156, -34, 156, 46, 1, 450, 0}
     };
@@ -323,10 +323,10 @@ final class AbyssalRuinedKingdom {
             {81, 118, 81, 136, 620},
 
             // Suburban Hamlet alleys
-            {-42, -173, -20, -173, 621},
-            {20, -173, 42, -173, 622},
-            {-42, 183, -20, 183, 623},
-            {20, 183, 42, 183, 624},
+            {-42, -169, -20, -169, 621},
+            {20, -169, 42, -169, 622},
+            {-42, 179, -20, 179, 623},
+            {20, 179, 42, 179, 624},
             {-168, -30, -168, -8, 625},
             {-168, 20, -168, 42, 626},
             {168, -30, 168, -8, 627},
@@ -387,7 +387,7 @@ final class AbyssalRuinedKingdom {
         buildNeighborhoodPlaza(level, box, castle, -114, -42, 7, true, 520);
         buildNeighborhoodPlaza(level, box, castle, 114, -42, 7, false, 540);
 
-        // 2. Dense residential, commercial, and noble districts (98 clustered buildings).
+        // 2. Dense residential, commercial, and noble districts (119 clustered buildings).
         for (int i = 0; i < HOUSE_LOTS.length; i++) {
             int[] lot = HOUSE_LOTS[i];
             buildHouse(level, box, castle, lot[0], lot[1], lot[2], lot[3], lot[4], lot[5], lot[6], i);
@@ -399,10 +399,10 @@ final class AbyssalRuinedKingdom {
         // Western inner watch post
         buildHouse(level, box, castle, -128, 72, 5, 5, 7, 6, FACING_EAST, 191);
         // North & South Outer Gatehouse Bastions
-        buildHouse(level, box, castle, -14, -172, 4, 4, 7, 6, FACING_SOUTH, 192);
-        buildHouse(level, box, castle, 14, -172, 4, 4, 7, 6, FACING_SOUTH, 193);
-        buildHouse(level, box, castle, -14, 178, 4, 4, 7, 6, FACING_NORTH, 194);
-        buildHouse(level, box, castle, 14, 178, 4, 4, 7, 6, FACING_NORTH, 195);
+        buildHouse(level, box, castle, -14, -168, 4, 4, 7, 6, FACING_SOUTH, 192);
+        buildHouse(level, box, castle, 14, -168, 4, 4, 7, 6, FACING_SOUTH, 193);
+        buildHouse(level, box, castle, -14, 174, 4, 4, 7, 6, FACING_NORTH, 194);
+        buildHouse(level, box, castle, 14, 174, 4, 4, 7, 6, FACING_NORTH, 195);
 
         // 4. Stepped ring avenues, district streets, narrow arched alleys, and south viaduct ramp.
         // Built after houses so curbs, stairs, and retaining walls stay clean and unobstructed.
@@ -1250,7 +1250,7 @@ final class AbyssalRuinedKingdom {
     private static void place(WorldGenLevel level, BoundingBox box, AbyssalCastlePiece castle,
                               int dx, int y, int dz, BlockState state) {
         BlockPos pos = new BlockPos(castle.getCityWorldX(dx), y, castle.getCityWorldZ(dz));
-        if (box.isInside(pos) && y > level.getMinY() + 1) {
+        if (box.isInside(pos) && y >= level.getMinY() + 1) {
             level.setBlock(pos, state, 2);
         }
     }

@@ -56,17 +56,19 @@ public class AbyssalCastlePiece extends StructurePiece {
 
     // The settlement extends beyond the castle footprint, while HALF / MIN_OFFSET_Z / MAX_OFFSET_Z
     // remain dedicated to locating the actual castle inside the cavern.
-    // The settlement reaches roughly X = +/-179 and Z = -179..187. Keep an additional
-    // transition apron outside those limits so outer houses, road curbs, and the terrain
-    // fade are not clipped by the structure's chunk-generation bounds.
-    public static final int CITY_HALF_X = 220;
-    public static final int CITY_MIN_OFFSET_Z = -220;
-    public static final int CITY_MAX_OFFSET_Z = 230;
+    // The current road network reaches roughly X/Z = +/-190. The 280-block box
+    // leaves a broad geological apron for the basal slope and fits inside the
+    // 18-chunk structure-reference radius.
+    public static final int CITY_HALF_X = 280;
+    public static final int CITY_MIN_OFFSET_Z = -280;
+    public static final int CITY_MAX_OFFSET_Z = 280;
 
-    // Wider than the settlement itself: the massif continues below the outer streets and
-    // tapers into the surrounding worldgen terrain instead of ending at the last buildings.
-    private static final double FOUNDATION_RADIUS_X = 235.0;
-    private static final double FOUNDATION_RADIUS_Z = 245.0;
+    // Upper footprint. The massif widens below this shoulder and reaches the natural
+    // cavern floor, creating a grounded mountain rather than an inverted island.
+    private static final double FOUNDATION_RADIUS_X = 190.0;
+    private static final double FOUNDATION_RADIUS_Z = 190.0;
+    private static final double FOUNDATION_SLOPE_RUN = 230.0;
+    private static final int FOUNDATION_MAX_SURFACE_DROP = 43;
     private static final int PLATFORM_MIN_X = -42;
     private static final int PLATFORM_MAX_X = 42;
     private static final int PLATFORM_MIN_Z = -48;
@@ -118,7 +120,7 @@ public class AbyssalCastlePiece extends StructurePiece {
 
     private static BoundingBox createBoundingBox(BlockPos c) {
         return new BoundingBox(
-                c.getX() - CITY_HALF_X, Math.max(-254, c.getY() - BELOW_FLOOR_DEPTH), c.getZ() + CITY_MIN_OFFSET_Z,
+                c.getX() - CITY_HALF_X, Math.max(-255, c.getY() - BELOW_FLOOR_DEPTH), c.getZ() + CITY_MIN_OFFSET_Z,
                 c.getX() + CITY_HALF_X, c.getY() + MAX_HEIGHT, c.getZ() + CITY_MAX_OFFSET_Z
         );
     }
@@ -172,7 +174,10 @@ public class AbyssalCastlePiece extends StructurePiece {
     // =========================================================================
 
     private void buildCraggyMountainFoundation(WorldGenLevel level, BoundingBox box) {
-        int yMinLimit = Math.max(level.getMinY() + 2, -254);
+        // Reach the block immediately above the world's bottom bedrock layer. This lets
+        // the massif physically meet the natural cavern floor instead of hovering above it.
+        int yMinLimit = Math.max(level.getMinY() + 1, -255);
+        int maxDepth = Math.min(BELOW_FLOOR_DEPTH, center.getY() - yMinLimit);
 
         // Keep every terrain read inside the current structure chunk bounds.
         int minDx = Math.max(-CITY_HALF_X, box.minX() - center.getX());
@@ -184,17 +189,20 @@ public class AbyssalCastlePiece extends StructurePiece {
             for (int dz = minDz; dz <= maxDz; dz++) {
                 int wx = center.getX() + dx;
                 int wz = center.getZ() + dz;
-                double relativeDz = dz - 8.0;
+                double relativeDz = dz;
                 double normDist = Math.hypot(dx / FOUNDATION_RADIUS_X, relativeDz / FOUNDATION_RADIUS_Z);
-                int surfaceDrop = getFoundationSurfaceDrop(dx, dz);
+                int surfaceDrop = Math.min(getFoundationSurfaceDrop(dx, dz), maxDepth);
+                int availableDepth = Math.max(1, maxDepth - surfaceDrop);
 
                 int solidDepth = 0;
-                for (int d = surfaceDrop; d <= BELOW_FLOOR_DEPTH; d++) {
+                for (int d = surfaceDrop; d <= maxDepth; d++) {
                     int wy = center.getY() - d;
                     if (wy < yMinLimit) break;
 
                     double depthBelowSurface = d - surfaceDrop;
-                    double depthProgress = depthBelowSurface / (double) Math.max(1, BELOW_FLOOR_DEPTH - surfaceDrop);
+                    // Normalize against the real remaining world height, not the nominal
+                    // 64-block budget, so the basal flare reaches its full profile at bedrock.
+                    double depthProgress = depthBelowSurface / (double) availableDepth;
                     double maxRadiusFactor = foundationRadiusFactor(dx, (int) relativeDz, depthProgress);
                     if (normDist > maxRadiusFactor) continue;
 
@@ -1973,7 +1981,7 @@ public class AbyssalCastlePiece extends StructurePiece {
     // =========================================================================
 
     private void buildSouthViaduct(WorldGenLevel level, BoundingBox box) {
-        int yMinLimit = Math.max(level.getMinY() + 2, -254);
+        int yMinLimit = Math.max(level.getMinY() + 1, -255);
 
         for (int dz = 55; dz <= 96; dz++) {
             boolean isPierZ = (dz == 56 || dz == 66 || dz == 76 || dz == 86 || dz == 95);
@@ -2248,33 +2256,36 @@ public class AbyssalCastlePiece extends StructurePiece {
         int outsideX = Math.max(0, Math.max(PLATFORM_MIN_X - dx, dx - PLATFORM_MAX_X));
         int outsideZ = Math.max(0, Math.max(PLATFORM_MIN_Z - dz, dz - PLATFORM_MAX_Z));
         double distance = Math.hypot(outsideX, outsideZ);
+
+        // Smoothstep creates a broad, continuous descent from the central castle terrace
+        // toward the outer apron. Low-amplitude deterministic erosion keeps it organic.
+        double t = Math.max(0.0, Math.min(1.0, distance / FOUNDATION_SLOPE_RUN));
+        double smooth = t * t * (3.0 - 2.0 * t);
         double broadRidge = Math.sin(dx * 0.055 + dz * 0.041)
                 - Math.cos(dz * 0.047 - dx * 0.033);
-        double erosion = broadRidge * 1.9
-                + foundationDetailNoise(dx, dz) * 1.0
-                + (ridgeNoise(dx, dz - 8) - 0.5) * 1.0;
-        // Spread the 18-block height change over a longer run. The slope begins around
-        // the castle platform, stays gentle beneath the outer districts, and reaches its
-        // lower contour near the edge of the expanded massif. 18 also keeps the surface
-        // safely above the Abyss floor for the lowest allowed structure placement.
-        return Math.max(0, Math.min(18, (int) Math.round(distance * 0.105 + erosion)));
+        double erosion = broadRidge * 1.0
+                + foundationDetailNoise(dx, dz) * 0.45
+                + (ridgeNoise(dx, dz) - 0.5) * 0.5;
+        return Math.max(0, Math.min(FOUNDATION_MAX_SURFACE_DROP,
+                (int) Math.round(smooth * FOUNDATION_MAX_SURFACE_DROP + erosion)));
     }
 
-    /** Same irregular radial profile used by the foundation writer and support checks. */
+    /**
+     * Radial envelope of the mountain. Unlike the old floating-island profile, the rock
+     * widens as it descends: the upper shoulder supports the settlement, while the basal
+     * talus spreads outward and merges into the natural floor of The Abyss.
+     */
     private double foundationRadiusFactor(int dx, int relativeDz, double depthProgress) {
+        double progress = Math.max(0.0, Math.min(1.0, depthProgress));
         double ridge = ridgeNoise(dx, relativeDz);
-        double detail = foundationDetailNoise(dx, relativeDz + 8);
-        double factor = 1.10 + (depthProgress * 0.14) + ((ridge - 0.5) * 0.08) + (detail * 0.02);
+        double detail = foundationDetailNoise(dx, relativeDz);
 
-        // Fade the massif before the structure's rectangular generation bounds. This prevents
-        // a hard-cut perimeter while allowing the rock to broaden slightly at deeper layers.
-        // Start the fade beyond the outermost streets. The 50-60 block transition bands
-        // leave the whole settlement supported while progressively narrowing the massif.
-        double edgeX = Math.max(0.0, Math.min(1.0, (Math.abs(dx) - 180.0) / 55.0));
-        double edgeZ = Math.max(0.0, Math.min(1.0, (Math.abs(relativeDz) - 170.0) / 60.0));
-        double edgeLimitX = 1.20 - edgeX * (0.48 - depthProgress * 0.10);
-        double edgeLimitZ = 1.20 - edgeZ * (0.48 - depthProgress * 0.10);
-        return Math.max(0.72, Math.min(1.30, Math.min(factor, Math.min(edgeLimitX, edgeLimitZ))));
+        // The top footprint is about 1.12x the 190-block radius (~213 blocks), enough
+        // for the outermost streets. The bottom flares to about 1.40x (~266 blocks),
+        // meeting the cavern floor beyond the houses instead of ending as an island.
+        double irregularity = ((ridge - 0.5) * 0.014) + (detail * 0.003);
+        double factor = 1.12 + (progress * 0.28) + irregularity;
+        return Math.max(1.09, Math.min(1.43, factor));
     }
 
     /**
@@ -2284,7 +2295,7 @@ public class AbyssalCastlePiece extends StructurePiece {
     private boolean hasFoundationAtSurface(int dx, int dz) {
         if (isCastlePlatform(dx, dz)) return true;
 
-        double relativeDz = dz - 8.0;
+        double relativeDz = dz;
         double normDist = Math.hypot(dx / FOUNDATION_RADIUS_X, relativeDz / FOUNDATION_RADIUS_Z);
         double maxRadiusFactor = foundationRadiusFactor(dx, (int) relativeDz, 0.0);
         return normDist <= maxRadiusFactor;
@@ -2370,7 +2381,7 @@ public class AbyssalCastlePiece extends StructurePiece {
     }
 
     private void setSafe(WorldGenLevel level, BoundingBox box, BlockPos pos, BlockState state) {
-        if (box.isInside(pos) && pos.getY() > level.getMinY() + 1) {
+        if (box.isInside(pos) && pos.getY() >= level.getMinY() + 1) {
             level.setBlock(pos, state, 2);
         }
     }

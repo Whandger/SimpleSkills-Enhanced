@@ -16,7 +16,18 @@ import java.util.Set;
 
 public class MixinPlugin implements IMixinConfigPlugin {
 
-    private boolean customLootEnabled = true;  // Default if config missing or invalid
+    private boolean customLootEnabled = true;
+
+    /**
+     * Enabled by default because the grounded Abyss massif reaches 18 chunks from its
+     * castle start. This changes the global structure-reference dependency radius,
+     * so it can be disabled in config/simpleskills/config.json if worldgen cost is too high.
+     */
+    private static volatile boolean abyssStructureReferencesExpanded = true;
+
+    public static int getAbyssStructureReferenceRadius() {
+        return abyssStructureReferencesExpanded ? 18 : 8;
+    }
 
     @Override
     public void onLoad(String mixinPackage) {
@@ -26,21 +37,35 @@ public class MixinPlugin implements IMixinConfigPlugin {
         if (Files.exists(configPath)) {
             try (FileReader reader = new FileReader(configPath.toFile())) {
                 JsonObject json = new Gson().fromJson(reader, JsonObject.class);
-                if (json.has("custom_fishing_loot_enabled")) {
-                    customLootEnabled = json.get("custom_fishing_loot_enabled").getAsBoolean();
-                } else if (json.has("features")) {  // Fallback to check "features" object if present
-                    JsonObject features = json.getAsJsonObject("features");
-                    if (features != null && features.has("custom_fishing_loot_enabled")) {
-                        customLootEnabled = features.get("custom_fishing_loot_enabled").getAsBoolean();
+                if (json != null) {
+                    if (json.has("custom_fishing_loot_enabled")) {
+                        customLootEnabled = json.get("custom_fishing_loot_enabled").getAsBoolean();
+                    } else if (json.has("features")) {
+                        JsonObject features = json.getAsJsonObject("features");
+                        if (features != null && features.has("custom_fishing_loot_enabled")) {
+                            customLootEnabled = features.get("custom_fishing_loot_enabled").getAsBoolean();
+                        }
+                    }
+
+                    if (json.has("abyss_city_extended_structure_references")) {
+                        abyssStructureReferencesExpanded = json
+                                .get("abyss_city_extended_structure_references")
+                                .getAsBoolean();
                     }
                 }
-                Simpleskills.LOGGER.info("Loaded custom_fishing_loot_enabled: {}", customLootEnabled);  // Early log for debug
+                Simpleskills.LOGGER.info("Loaded custom_fishing_loot_enabled: {}", customLootEnabled);
             } catch (Exception e) {
                 Simpleskills.LOGGER.error("Error reading config.json in mixin plugin: {}", e.getMessage());
             }
         } else {
-            Simpleskills.LOGGER.warn("config.json not found; defaulting custom_fishing_loot_enabled to true");
+            Simpleskills.LOGGER.warn("config.json not found; using default SimpleSkills mixin settings");
         }
+
+        Simpleskills.LOGGER.info(
+                "Abyss city/grounded massif extended structure references: {} (radius {} chunks)",
+                abyssStructureReferencesExpanded,
+                getAbyssStructureReferenceRadius()
+        );
     }
 
     @Override
@@ -48,10 +73,9 @@ public class MixinPlugin implements IMixinConfigPlugin {
         if (mixinClassName.equals("com.github.ob_yekt.simpleskills.mixin.FISHING.FishingBobberLootMixin")) {
             return customLootEnabled;
         }
-        return true;  // Apply all other mixins unconditionally
+        return true;
     }
 
-    // Other required methods (leave empty)
     @Override
     public String getRefMapperConfig() { return null; }
 

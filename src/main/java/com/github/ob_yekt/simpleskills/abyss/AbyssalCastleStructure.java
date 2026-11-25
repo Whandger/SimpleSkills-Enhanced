@@ -33,10 +33,14 @@ public class AbyssalCastleStructure extends Structure {
     public static final StructureType<AbyssalCastleStructure> TYPE = () -> CODEC;
 
     /**
-     * Keeps the 21-block subterranean sewers/dungeons above bedrock (-256)
-     * and the 122-block Sovereign Needle Spire below the Abyss ceiling (-80).
+     * Keeps the 21-block subterranean sewers/dungeons above bedrock (-256), reserves
+     * the maximum safe vertical run for the grounded foundation, and keeps the 122-block
+     * Sovereign Needle Spire two blocks below the Abyss ceiling (-80).
      */
-    private static final int FLOOR_MIN_Y = -232;
+    // Keep the castle at the highest safe placement. This reserves the maximum vertical
+    // run to the Abyss floor for a broad, grounded mountain foundation while the 122-block
+    // spire still remains two blocks below the -80 cavern ceiling.
+    private static final int FLOOR_MIN_Y = -204;
     private static final int FLOOR_MAX_Y = -204;
 
     /** Minimum share of the cavern footprint that must be open so the monumental silhouette is visible. */

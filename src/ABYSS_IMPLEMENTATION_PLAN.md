@@ -104,3 +104,13 @@ Still pending:
 - Regular, monumental, and colossal formations are larger and use `simpleskills:abyssal_pillar` as both the base and column block. Their surfaces are made from full solid blocks; the pointed-dripstone block is no longer used by new world generation.
 - The old `abyssal_pointed_stalactite` registry entry remains registered only for backward compatibility with chunks generated before this change. It is removed from the creative item list and is no longer referenced by the new configured features.
 - As with other worldgen changes, the updated behavior applies to newly generated chunks. Lava and formations already written into existing chunks are not retroactively rewritten.
+
+
+## Follow-up — grounded castle massif (November 2026)
+
+- Castle placement is fixed at Y=-204, leaving the 122-block spire at Y=-82 and about 51 blocks of vertical foundation run to Y=-255.
+- The city/foundation box extends to +/-280 X/Z. Structure-reference radius is 18 chunks (default enabled in `MixinPlugin` and configurable with `abyss_city_extended_structure_references`).
+- Surface terrain uses a 43-block smoothstep drop around the central platform. The foundation radial envelope widens with depth from about 1.12x to 1.40x, reaching the world floor above bottom bedrock.
+- Foundation writes are allowed at Y=-255; the existing solid-terrain check still stops the fill after four consecutive natural solid blocks.
+- Abismo Preview 4.0 uses the same castle/city Java sources and moves its display floor to Y=-255. The cave envelope remains an approximation, not a full NoiseRouter simulation.
+- The updated Java generator passed the local simulator compile and seed-7 generation. Full Fabric Gradle build and in-game chunk test remain required.
