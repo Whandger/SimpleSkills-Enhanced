@@ -52,7 +52,6 @@ public final class AbyssWorldgen {
     public static final ResourceKey<PlacedFeature> ABYSSAL_RUNE = placed("abyssal_rune_ore");
     public static final ResourceKey<PlacedFeature> TRANSCENDENT = placed("transcendent_ore");
     public static final ResourceKey<PlacedFeature> AMETHYST_CORRUPTION = placed("amethyst_corruption");
-    public static final ResourceKey<PlacedFeature> FROSTED_ABYSSAL_POCKET = placed("frosted_abyssal_pocket");
     public static final ResourceKey<PlacedFeature> ABYSSAL_SPELEOTHEMS = placed("abyssal_speleothem_clusters");
     public static final ResourceKey<PlacedFeature> ABYSSAL_MONUMENTAL_SPELEOTHEMS = placed("abyssal_monumental_speleothems");
     public static final ResourceKey<PlacedFeature> ABYSSAL_COLOSSAL_SPELEOTHEMS = placed("abyssal_colossal_speleothems");
@@ -72,7 +71,6 @@ public final class AbyssWorldgen {
         add(ABYSSAL_RUNE);
         add(TRANSCENDENT);
         add(AMETHYST_CORRUPTION);
-        addDecoration(FROSTED_ABYSSAL_POCKET);
         addDecoration(ABYSSAL_SPELEOTHEMS);
         addDecoration(ABYSSAL_MONUMENTAL_SPELEOTHEMS);
         addDecoration(ABYSSAL_COLOSSAL_SPELEOTHEMS);

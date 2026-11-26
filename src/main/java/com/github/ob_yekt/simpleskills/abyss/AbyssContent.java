@@ -56,7 +56,6 @@ public final class AbyssContent {
     public static Block POLISHED_ABYSSAL_STONE;
     public static Block CHISELED_ABYSSAL_STONE;
     public static Block GILDED_ABYSSAL_BRICKS;
-    public static Block FROSTED_ABYSSAL_STONE;
     public static Block ABYSSAL_BRAZIER;
     public static Block ABYSSAL_BRICK_STAIRS;
     public static Block ABYSSAL_BRICK_SLAB;
@@ -95,7 +94,6 @@ public final class AbyssContent {
     public static Item POLISHED_ABYSSAL_STONE_ITEM;
     public static Item CHISELED_ABYSSAL_STONE_ITEM;
     public static Item GILDED_ABYSSAL_BRICKS_ITEM;
-    public static Item FROSTED_ABYSSAL_STONE_ITEM;
     public static Item ABYSSAL_BRAZIER_ITEM;
     public static Item ABYSSAL_BRICK_STAIRS_ITEM;
     public static Item ABYSSAL_BRICK_SLAB_ITEM;
@@ -173,7 +171,6 @@ public final class AbyssContent {
         POLISHED_ABYSSAL_STONE = registerStone("polished_abyssal_stone", 9.0F, 12.0F);
         CHISELED_ABYSSAL_STONE = registerStone("chiseled_abyssal_stone", 9.0F, 12.0F);
         GILDED_ABYSSAL_BRICKS = registerStone("gilded_abyssal_bricks", 9.0F, 12.0F);
-        FROSTED_ABYSSAL_STONE = registerStone("frosted_abyssal_stone", 8.5F, 12.0F);
 
         ResourceKey<Block> brazierKey = blockKey("abyssal_brazier");
         ABYSSAL_BRAZIER = Registry.register(BuiltInRegistries.BLOCK, brazierKey,
@@ -275,7 +272,6 @@ public final class AbyssContent {
         POLISHED_ABYSSAL_STONE_ITEM = registerBlockItem(POLISHED_ABYSSAL_STONE, "polished_abyssal_stone");
         CHISELED_ABYSSAL_STONE_ITEM = registerBlockItem(CHISELED_ABYSSAL_STONE, "chiseled_abyssal_stone");
         GILDED_ABYSSAL_BRICKS_ITEM = registerBlockItem(GILDED_ABYSSAL_BRICKS, "gilded_abyssal_bricks");
-        FROSTED_ABYSSAL_STONE_ITEM = registerBlockItem(FROSTED_ABYSSAL_STONE, "frosted_abyssal_stone");
         ABYSSAL_BRAZIER_ITEM = registerBlockItem(ABYSSAL_BRAZIER, "abyssal_brazier");
         ABYSSAL_BRICK_STAIRS_ITEM = registerBlockItem(ABYSSAL_BRICK_STAIRS, "abyssal_brick_stairs");
         ABYSSAL_BRICK_SLAB_ITEM = registerBlockItem(ABYSSAL_BRICK_SLAB, "abyssal_brick_slab");
@@ -361,7 +357,6 @@ public final class AbyssContent {
                 POLISHED_ABYSSAL_STONE_ITEM,
                 CHISELED_ABYSSAL_STONE_ITEM,
                 GILDED_ABYSSAL_BRICKS_ITEM,
-                FROSTED_ABYSSAL_STONE_ITEM,
                 ABYSSAL_BRAZIER_ITEM,
                 ABYSSAL_BRICK_STAIRS_ITEM,
                 ABYSSAL_BRICK_SLAB_ITEM,
