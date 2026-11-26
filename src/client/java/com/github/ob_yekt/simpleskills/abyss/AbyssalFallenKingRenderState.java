@@ -5,6 +5,7 @@ import net.minecraft.world.entity.AnimationState;
 
 public class AbyssalFallenKingRenderState extends LivingEntityRenderState {
     public int kingState = AbyssalFallenKingEntity.STATE_ACTIVE;
+    public int combatPhase = 1;
     public float awakeningProgress = 0.0F;
     public float suspensionHeight = 0.0F;
     public boolean isDying = false;

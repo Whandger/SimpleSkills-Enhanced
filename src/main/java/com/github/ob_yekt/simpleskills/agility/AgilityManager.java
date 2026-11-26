@@ -180,6 +180,23 @@ public final class AgilityManager {
                 8, 0.25, 0.08, 0.25, 0.035);
     }
 
+    /**
+     * Config-aware horizontal impulse produced by the existing Dash at Agility level 99.
+     * The Abyssal Fallen King reuses this exact progression/config calculation for his phase III dash.
+     */
+    public static double dashImpulseAtLevel99() {
+        int unlockLevel = intValue("dash_unlocked_at", 15);
+        double progress = Math.max(0.0, Math.min(1.0, (99.0 - unlockLevel) / 84.0));
+        double strength = 0.35 + 0.65 * progress;
+        return doubleValue("dash_impulse", 1.2) * (1.0 + 99 * 0.005) * strength;
+    }
+
+    /** Config-aware Dash cooldown at Agility level 99, in ticks. */
+    public static int dashCooldownAtLevel99() {
+        return Math.max(1, (int) Math.round(intValue("dash_cooldown_ticks_base", 100)
+                - 99 * doubleValue("dash_cooldown_reduction_per_level", 0.5)));
+    }
+
     public static boolean hasDashIFrames(ServerPlayer player) {
         return DASH_IFRAMES_UNTIL.getOrDefault(player.getUUID(), 0L) > player.level().getGameTime();
     }

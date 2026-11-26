@@ -34,6 +34,7 @@ public class AbyssalFallenKingRenderer
         state.deathTime = 0.0F;
 
         state.kingState = entity.getKingState();
+        state.combatPhase = entity.getCombatPhase();
         state.isDying = entity.isDeadOrDying();
         state.sittingIdleAnimationState.copyFrom(entity.sittingIdleAnimationState);
         state.awakeningAnimationState.copyFrom(entity.awakeningAnimationState);
@@ -93,6 +94,16 @@ public class AbyssalFallenKingRenderer
             float ruptureProgress = state.awakeningProgress;
             collector.submitCustomGeometry(poseStack, RenderTypes.lightning(), (matrix, vertices) ->
                     AbyssalKingPrisonVfx.draw(matrix.pose(), vertices, age, kingState, ruptureProgress));
+        }
+
+        // Corrupted King and Abyssal Sovereign leave persistent-looking arcane fissures
+        // radiating across the floor around the boss while the arena phase is active.
+        if (!state.isDying && state.kingState == AbyssalFallenKingEntity.STATE_ACTIVE
+                && state.combatPhase >= 2) {
+            float age = state.ageInTicks;
+            int phase = state.combatPhase;
+            collector.submitCustomGeometry(poseStack, RenderTypes.lightning(), (matrix, vertices) ->
+                    AbyssalKingArenaCracksVfx.draw(matrix.pose(), vertices, age, phase));
         }
 
         poseStack.popPose();
