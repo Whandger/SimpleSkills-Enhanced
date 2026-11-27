@@ -14,15 +14,19 @@ import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.BossEvent;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.AnimationState;
@@ -39,7 +43,6 @@ import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
-import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.monster.Monster;
@@ -56,6 +59,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumSet;
+import java.util.UUID;
 
 public class AbyssalSamuraiEntity extends Monster {
     public static final EntityType<AbyssalSamuraiEntity> TYPE = registerType();
@@ -106,11 +110,20 @@ public class AbyssalSamuraiEntity extends Monster {
     public static final int STATE_PETRIFIED = 0;
     public static final int STATE_AWAKENING = 1;
     public static final int STATE_ACTIVE = 2;
+    /** The Samurai is returning to its spawn position after losing all nearby players. */
+    public static final int STATE_RETURNING = 3;
 
     public static final int AWAKENING_DURATION_TICKS = 40; // 2.0s @ 20 TPS
     private static final double AWAKEN_TRIGGER_RANGE = 8.0D;
     private static final double BASE_MOVEMENT_SPEED = 0.28D;
     private static final double BASE_ATTACK_DAMAGE = 12.0D;
+    /** Players within the Samurai's follow range count as maintaining contact. */
+    private static final double DEFAULT_PLAYER_CONTACT_RANGE = 28.0D;
+    /** Return to the initial position after 20 seconds without a nearby valid player. */
+    private static final int PLAYER_CONTACT_RESET_TICKS = 20 * 20;
+    private static final int RETURN_HOME_NAV_REFRESH_TICKS = 20;
+    /** A pathfinding fallback prevents the boss from remaining stuck away from its altar forever. */
+    private static final int RETURN_HOME_MAX_TICKS = 20 * 30;
 
     // The Samurai uses the same six-cut Lankai sequence as the player's katana special.
     private static final int LANKAI_COOLDOWN_TICKS = 20 * 10;
@@ -148,6 +161,14 @@ public class AbyssalSamuraiEntity extends Monster {
     public final AnimationState attackAnimationState = new AnimationState();
     public final AnimationState deathAnimationState = new AnimationState();
 
+    /** Gold boss bar shown to players tracking the Samurai after it awakens. */
+    private final ServerBossEvent bossEvent = new ServerBossEvent(
+            UUID.randomUUID(),
+            Component.translatable("entity.simpleskills.abyssal_samurai"),
+            BossEvent.BossBarColor.YELLOW,
+            BossEvent.BossBarOverlay.NOTCHED_10
+    );
+
     private int awakeningTicks = 0;
     private int lastClientAttackTick = -1;
     private int lastObservedPetrificationStage = 0;
@@ -165,9 +186,20 @@ public class AbyssalSamuraiEntity extends Monster {
     private boolean relicsDropped = false;
     private boolean katanaDropped = false;
 
+    /** Persistent spawn/altar position to which the Samurai returns after 20 seconds without players. */
+    private double homeX;
+    private double homeY;
+    private double homeZ;
+    private float homeYaw;
+    private boolean homePositionInitialized;
+    private int ticksWithoutPlayerContact;
+    private int returningTicks;
+    private int returnNavigationRefreshTicks;
+
     public AbyssalSamuraiEntity(EntityType<? extends Monster> entityType, Level level) {
         super(entityType, level);
         this.xpReward = 120;
+        this.bossEvent.setVisible(false);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -205,8 +237,8 @@ public class AbyssalSamuraiEntity extends Monster {
         this.goalSelector.addGoal(5, new LookAtPlayerGoal(this, Player.class, 10.0F));
         this.goalSelector.addGoal(6, new RandomLookAroundGoal(this));
 
-        this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
+        // Always prioritize the nearest eligible player instead of whoever last damaged the boss.
+        this.targetSelector.addGoal(1, new NearestAttackableTargetGoal<>(this, Player.class, true));
     }
 
     public int getSamuraiState() {
@@ -215,6 +247,10 @@ public class AbyssalSamuraiEntity extends Monster {
 
     public void setSamuraiState(int state) {
         this.entityData.set(DATA_SAMURAI_STATE, state);
+        if (!this.level().isClientSide()) {
+            this.bossEvent.setVisible(
+                    (state == STATE_AWAKENING || state == STATE_ACTIVE) && !this.isDeadOrDying());
+        }
     }
 
     /** Last katana combo animation selected by the server (1-3), synchronized for rendering. */
@@ -332,6 +368,7 @@ public class AbyssalSamuraiEntity extends Monster {
     public SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty,
                                         EntitySpawnReason reason, @Nullable SpawnGroupData spawnData) {
         SpawnGroupData data = super.finalizeSpawn(level, difficulty, reason, spawnData);
+        captureHomePosition();
         setSamuraiState(STATE_PETRIFIED);
         ensureKatanaEquipped();
         return data;
@@ -360,6 +397,10 @@ public class AbyssalSamuraiEntity extends Monster {
         if (!(this.level() instanceof ServerLevel serverLevel)) {
             return;
         }
+        if (!this.homePositionInitialized) {
+            // Compatibility for command-spawned entities and older saves without stored home data.
+            captureHomePosition();
+        }
         ensureKatanaEquipped();
         advanceKatanaAnimationClocks();
 
@@ -371,29 +412,184 @@ public class AbyssalSamuraiEntity extends Monster {
 
         int state = getSamuraiState();
         if (state == STATE_PETRIFIED) {
+            this.ticksWithoutPlayerContact = 0;
             this.setDeltaMovement(0.0D, this.getDeltaMovement().y, 0.0D);
-            Player nearest = serverLevel.getNearestPlayer(this, AWAKEN_TRIGGER_RANGE);
-            if (nearest != null && !nearest.isCreative() && !nearest.isSpectator() && this.hasLineOfSight(nearest)) {
+            Player nearest = findNearestValidPlayer(serverLevel, AWAKEN_TRIGGER_RANGE);
+            if (nearest != null && this.hasLineOfSight(nearest)) {
                 this.setTarget(nearest);
                 triggerAwakening();
             }
-        } else if (state == STATE_AWAKENING) {
-            this.awakeningTicks++;
-            this.getNavigation().stop();
-            if (this.awakeningTicks % 5 == 0) {
-                serverLevel.sendParticles(
-                        new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE.defaultBlockState()),
-                        this.getX(), this.getY() + 1.2D, this.getZ(),
-                        8, 0.45D, 0.65D, 0.45D, 0.04D);
+        } else if (state == STATE_AWAKENING || state == STATE_ACTIVE) {
+            Player nearest = findNearestValidPlayer(serverLevel, getPlayerContactRange());
+            if (nearest != null) {
+                this.ticksWithoutPlayerContact = 0;
+                if (this.getTarget() != nearest) {
+                    this.setTarget(nearest);
+                }
+            } else {
+                this.setTarget(null);
+                this.ticksWithoutPlayerContact++;
+                if (this.ticksWithoutPlayerContact >= PLAYER_CONTACT_RESET_TICKS) {
+                    beginReturnHome();
+                    state = STATE_RETURNING;
+                }
             }
-            if (this.awakeningTicks >= AWAKENING_DURATION_TICKS) {
+
+            if (state == STATE_AWAKENING && getSamuraiState() == STATE_AWAKENING) {
+                this.awakeningTicks++;
+                this.getNavigation().stop();
+                if (this.awakeningTicks % 5 == 0) {
+                    serverLevel.sendParticles(
+                            new BlockParticleOption(ParticleTypes.BLOCK, Blocks.DEEPSLATE.defaultBlockState()),
+                            this.getX(), this.getY() + 1.2D, this.getZ(),
+                            8, 0.45D, 0.65D, 0.45D, 0.04D);
+                }
+                if (this.awakeningTicks >= AWAKENING_DURATION_TICKS) {
+                    setSamuraiState(STATE_ACTIVE);
+                    // The Samurai visibly draws the same katana used by the player when it awakens.
+                    setKatanaStance(KatanaStanceManager.DRAWING);
+                }
+            } else if (state == STATE_ACTIVE && getSamuraiState() == STATE_ACTIVE) {
+                updateActiveCombat(serverLevel);
+            }
+        } else if (state == STATE_RETURNING) {
+            Player nearest = findNearestValidPlayer(serverLevel, getPlayerContactRange());
+            if (nearest != null) {
+                // A player who approaches during the retreat interrupts it; the Samurai resumes combat.
+                this.ticksWithoutPlayerContact = 0;
+                this.setTarget(nearest);
+                this.getNavigation().stop();
                 setSamuraiState(STATE_ACTIVE);
-                // The Samurai visibly draws the same katana used by the player when it awakens.
-                setKatanaStance(KatanaStanceManager.DRAWING);
+                updateActiveCombat(serverLevel);
+            } else {
+                updateReturningHome(serverLevel);
             }
-        } else if (state == STATE_ACTIVE) {
-            updateActiveCombat(serverLevel);
         }
+
+        this.bossEvent.setProgress(Math.max(0.0F,
+                Math.min(1.0F, this.getHealth() / this.getMaxHealth())));
+    }
+
+    private void captureHomePosition() {
+        this.homeX = this.getX();
+        this.homeY = this.getY();
+        this.homeZ = this.getZ();
+        this.homeYaw = this.getYRot();
+        this.homePositionInitialized = true;
+    }
+
+    private double getPlayerContactRange() {
+        var followRange = this.getAttribute(Attributes.FOLLOW_RANGE);
+        return followRange == null
+                ? DEFAULT_PLAYER_CONTACT_RANGE
+                : Math.max(DEFAULT_PLAYER_CONTACT_RANGE, followRange.getValue());
+    }
+
+    /** Finds the closest living, non-spectator, non-creative player within the requested radius. */
+    @Nullable
+    private Player findNearestValidPlayer(ServerLevel serverLevel, double range) {
+        AABB searchArea = this.getBoundingBox().inflate(range);
+        double maxDistanceSqr = range * range;
+        double nearestDistanceSqr = maxDistanceSqr;
+        Player nearest = null;
+
+        for (Player candidate : serverLevel.getEntitiesOfClass(Player.class, searchArea,
+                player -> player.isAlive() && !player.isCreative() && !player.isSpectator())) {
+            double distanceSqr = this.distanceToSqr(candidate);
+            if (distanceSqr <= nearestDistanceSqr) {
+                nearestDistanceSqr = distanceSqr;
+                nearest = candidate;
+            }
+        }
+        return nearest;
+    }
+
+    /** Starts the retreat after the 20-second no-contact window has expired. */
+    private void beginReturnHome() {
+        if (getSamuraiState() == STATE_RETURNING || getSamuraiState() == STATE_PETRIFIED) {
+            return;
+        }
+
+        this.setTarget(null);
+        this.getNavigation().stop();
+        this.lankaiPhase = LANKAI_PHASE_NONE;
+        this.lankaiTargetEntityId = -1;
+        this.lankaiSlashIndex = 0;
+        this.lankaiDamagePerSlash = 0.0F;
+        this.agilityDashTicksRemaining = 0;
+        this.entityData.set(DATA_KATANA_ATTACK_FAST, false);
+        setKatanaStance(KatanaStanceManager.SHEATHING);
+        this.stopHorizontalMovementPreservingFall();
+        this.returningTicks = 0;
+        this.returnNavigationRefreshTicks = 0;
+        this.ticksWithoutPlayerContact = 0;
+        setSamuraiState(STATE_RETURNING);
+    }
+
+    /** Pathfinds back to the original spawn point while the boss bar remains hidden. */
+    private void updateReturningHome(ServerLevel serverLevel) {
+        this.returningTicks++;
+        this.setTarget(null);
+        tickKatanaStance();
+
+        double distanceSqr = this.distanceToSqr(this.homeX, this.homeY, this.homeZ);
+        if (distanceSqr <= 2.25D) {
+            finishReturnHome();
+            return;
+        }
+
+        if (this.returnNavigationRefreshTicks <= 0 || this.getNavigation().isDone()) {
+            this.getNavigation().moveTo(this.homeX, this.homeY, this.homeZ, 1.15D);
+            this.returnNavigationRefreshTicks = RETURN_HOME_NAV_REFRESH_TICKS;
+        } else {
+            this.returnNavigationRefreshTicks--;
+        }
+
+        // If pathfinding cannot reach the original altar, use a collision-safe fallback after 30s.
+        if (this.returningTicks >= RETURN_HOME_MAX_TICKS) {
+            Vec3 home = new Vec3(this.homeX, this.homeY, this.homeZ);
+            AABB destinationBox = this.getBoundingBox().move(home.subtract(this.position()));
+            if (serverLevel.noCollision(this, destinationBox)) {
+                this.setPos(this.homeX, this.homeY, this.homeZ);
+                finishReturnHome();
+            }
+        }
+    }
+
+    /** Restores the boss to its original statue state, position, full health, and base attributes. */
+    private void finishReturnHome() {
+        this.getNavigation().stop();
+        this.setPos(this.homeX, this.homeY, this.homeZ);
+        this.setYRot(this.homeYaw);
+        this.setYHeadRot(this.homeYaw);
+        this.setDeltaMovement(Vec3.ZERO);
+        this.setTarget(null);
+
+        this.setHealth(this.getMaxHealth());
+        this.awakeningTicks = 0;
+        this.ticksWithoutPlayerContact = 0;
+        this.returningTicks = 0;
+        this.returnNavigationRefreshTicks = 0;
+        this.lankaiCooldownTicks = 0;
+        this.agilityDashCooldownTicks = 0;
+        this.agilityDashTicksRemaining = 0;
+        this.lankaiPhase = LANKAI_PHASE_NONE;
+        this.lankaiTargetEntityId = -1;
+        this.lankaiSlashIndex = 0;
+        this.lankaiDamagePerSlash = 0.0F;
+        this.entityData.set(DATA_ATTACK_TICK, 0);
+        this.entityData.set(DATA_KATANA_ATTACK_TYPE, 0);
+        this.entityData.set(DATA_KATANA_ATTACK_FAST, false);
+        setKatanaStance(KatanaStanceManager.SHEATHED);
+
+        var speedAttribute = this.getAttribute(Attributes.MOVEMENT_SPEED);
+        if (speedAttribute != null) speedAttribute.setBaseValue(BASE_MOVEMENT_SPEED);
+        var damageAttribute = this.getAttribute(Attributes.ATTACK_DAMAGE);
+        if (damageAttribute != null) damageAttribute.setBaseValue(BASE_ATTACK_DAMAGE);
+
+        this.lastObservedPetrificationStage = 0;
+        this.lastClientAttackTick = -1;
+        setSamuraiState(STATE_PETRIFIED);
     }
 
     /** Runs the Samurai's signature katana special and the existing Agility dash while in combat. */
@@ -412,7 +608,7 @@ public class AbyssalSamuraiEntity extends Monster {
         }
 
         Player target = this.getTarget() instanceof Player player && player.isAlive()
-                && !player.isCreative() && !player.isSpectator() && this.hasLineOfSight(player)
+                && !player.isCreative() && !player.isSpectator()
                 ? player : null;
 
         // Lankai has priority over ordinary drawing/sheathing transitions. It deliberately
@@ -422,6 +618,7 @@ public class AbyssalSamuraiEntity extends Monster {
             if (this.lankaiCooldownTicks <= 0
                     && distance >= LANKAI_MIN_TARGET_DISTANCE
                     && distance <= LANKAI_MAX_TARGET_DISTANCE
+                    && this.hasLineOfSight(target)
                     && startLankai(serverLevel, target)) {
                 return;
             }
@@ -532,6 +729,14 @@ public class AbyssalSamuraiEntity extends Monster {
     }
 
     private void tickLankai(ServerLevel serverLevel) {
+        Player nearestPlayer = findNearestValidPlayer(serverLevel, getPlayerContactRange());
+        if (nearestPlayer != null && nearestPlayer.getId() != this.lankaiTargetEntityId) {
+            // Do not finish a special sequence on a farther player if another player has become closer.
+            this.setTarget(nearestPlayer);
+            finishLankai();
+            return;
+        }
+
         Entity found = serverLevel.getEntity(this.lankaiTargetEntityId);
         if (!(found instanceof Player target) || !target.isAlive() || target.isSpectator()
                 || target.isCreative() || target.level() != this.level()) {
@@ -775,6 +980,11 @@ public class AbyssalSamuraiEntity extends Monster {
         ItemStack katanaDrop = ItemStack.EMPTY;
         ServerLevel serverLevel = this.level() instanceof ServerLevel level ? level : null;
 
+        if (serverLevel != null) {
+            this.bossEvent.setProgress(0.0F);
+            this.bossEvent.setVisible(false);
+        }
+
         if (serverLevel != null && !this.katanaDropped) {
             Item katanaItem = AbyssalKatanaItems.KATANA_ULTIMO_JURAMENTO;
             if (katanaItem != null) {
@@ -863,6 +1073,11 @@ public class AbyssalSamuraiEntity extends Monster {
             triggerAwakening();
             return super.hurtServer(level, source, amount * 0.50F);
         }
+        if (getSamuraiState() == STATE_RETURNING) {
+            this.getNavigation().stop();
+            this.ticksWithoutPlayerContact = 0;
+            setSamuraiState(STATE_ACTIVE);
+        }
         return super.hurtServer(level, source, amount);
     }
 
@@ -914,12 +1129,43 @@ public class AbyssalSamuraiEntity extends Monster {
     }
 
     @Override
+    public void startSeenByPlayer(ServerPlayer player) {
+        super.startSeenByPlayer(player);
+        // Add trackers even while petrified: the event is hidden then, but these players
+        // must receive the visibility packet when the Samurai awakens without re-tracking.
+        if (!this.isDeadOrDying()) {
+            this.bossEvent.addPlayer(player);
+        }
+    }
+
+    @Override
+    public void stopSeenByPlayer(ServerPlayer player) {
+        super.stopSeenByPlayer(player);
+        this.bossEvent.removePlayer(player);
+    }
+
+    @Override
+    public void setCustomName(@Nullable Component name) {
+        super.setCustomName(name);
+        this.bossEvent.setName(this.getDisplayName());
+    }
+
+    @Override
     protected void addAdditionalSaveData(ValueOutput output) {
         super.addAdditionalSaveData(output);
         output.putInt("SamuraiState", getSamuraiState());
         output.putInt("AwakeningTicks", this.awakeningTicks);
         output.putInt("LankaiCooldownTicks", this.lankaiCooldownTicks);
         output.putInt("AgilityDashCooldownTicks", this.agilityDashCooldownTicks);
+        output.putInt("TicksWithoutPlayerContact", this.ticksWithoutPlayerContact);
+        output.putInt("ReturningTicks", this.returningTicks);
+        output.putBoolean("HasHomePosition", this.homePositionInitialized);
+        if (this.homePositionInitialized) {
+            output.putDouble("HomeX", this.homeX);
+            output.putDouble("HomeY", this.homeY);
+            output.putDouble("HomeZ", this.homeZ);
+            output.putFloat("HomeYaw", this.homeYaw);
+        }
         output.putBoolean("RelicsDropped", this.relicsDropped);
         output.putBoolean("KatanaDropped", this.katanaDropped);
     }
@@ -928,11 +1174,24 @@ public class AbyssalSamuraiEntity extends Monster {
     protected void readAdditionalSaveData(ValueInput input) {
         super.readAdditionalSaveData(input);
         int savedState = input.getIntOr("SamuraiState", STATE_PETRIFIED);
-        setSamuraiState(Math.max(STATE_PETRIFIED, Math.min(STATE_ACTIVE, savedState)));
+        setSamuraiState(Math.max(STATE_PETRIFIED, Math.min(STATE_RETURNING, savedState)));
         this.awakeningTicks = Math.max(0, Math.min(AWAKENING_DURATION_TICKS,
                 input.getIntOr("AwakeningTicks", 0)));
         this.lankaiCooldownTicks = Math.max(0, input.getIntOr("LankaiCooldownTicks", 0));
         this.agilityDashCooldownTicks = Math.max(0, input.getIntOr("AgilityDashCooldownTicks", 0));
+        this.ticksWithoutPlayerContact = Math.max(0, Math.min(PLAYER_CONTACT_RESET_TICKS,
+                input.getIntOr("TicksWithoutPlayerContact", 0)));
+        this.returningTicks = Math.max(0, input.getIntOr("ReturningTicks", 0));
+        this.returnNavigationRefreshTicks = 0;
+        this.homePositionInitialized = input.getBooleanOr("HasHomePosition", false);
+        if (this.homePositionInitialized) {
+            this.homeX = input.getDoubleOr("HomeX", this.getX());
+            this.homeY = input.getDoubleOr("HomeY", this.getY());
+            this.homeZ = input.getDoubleOr("HomeZ", this.getZ());
+            this.homeYaw = input.getFloatOr("HomeYaw", this.getYRot());
+        } else {
+            captureHomePosition();
+        }
         this.agilityDashTicksRemaining = 0;
         this.lankaiPhase = LANKAI_PHASE_NONE;
         this.lankaiTargetEntityId = -1;
@@ -971,7 +1230,9 @@ public class AbyssalSamuraiEntity extends Monster {
 
         @Override
         public boolean canUse() {
-            return !this.samurai.isDeadOrDying() && this.samurai.getSamuraiState() != STATE_ACTIVE;
+            int state = this.samurai.getSamuraiState();
+            return !this.samurai.isDeadOrDying()
+                    && (state == STATE_PETRIFIED || state == STATE_AWAKENING);
         }
 
         @Override

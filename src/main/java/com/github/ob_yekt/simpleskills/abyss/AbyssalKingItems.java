@@ -48,8 +48,6 @@ public final class AbyssalKingItems {
 
     private static final ResourceKey<EquipmentAsset> SAMURAI_CHESTPLATE_ASSET_KEY =
             ResourceKey.create(EquipmentAssets.ROOT_ID, SAMURAI_CHESTPLATE_ID);
-    private static final ResourceKey<EquipmentAsset> SAMURAI_HELMET_ASSET_KEY =
-            ResourceKey.create(EquipmentAssets.ROOT_ID, SAMURAI_HELMET_ID);
     private static final ResourceKey<EquipmentAsset> SAMURAI_LEGGINGS_ASSET_KEY =
             ResourceKey.create(EquipmentAssets.ROOT_ID, SAMURAI_LEGGINGS_ID);
     private static final ResourceKey<EquipmentAsset> SAMURAI_BOOTS_ASSET_KEY =
@@ -100,27 +98,24 @@ public final class AbyssalKingItems {
                                 Equippable.builder(EquipmentSlot.CHEST)
                                         .setAsset(SAMURAI_CHESTPLATE_ASSET_KEY)
                                         .build())
-                        .durability(900)
-                        .enchantable(20)
+                        .durability(1400)
+                        .enchantable(24)
                         .repairable(Items.NETHERITE_INGOT)
                         .fireResistant()
                         .attributes(createSamuraiPieceAttributes(
-                                "abyssal_samurai_chestplate", 8.0D, 4.0D, EquipmentSlotGroup.CHEST))));
+                                "abyssal_samurai_chestplate", 9.0D, 4.0D, EquipmentSlotGroup.CHEST))));
 
+        // Legacy registry entry only: players no longer receive/equip this helmet.
+        // The Samurai's kasa remains part of AbyssalSamuraiModel and is unaffected.
+        // Keeping the identifier avoids breaking old saved ItemStacks.
         ABYSSAL_SAMURAI_HELMET = Registry.register(BuiltInRegistries.ITEM, SAMURAI_HELMET_KEY,
                 new Item(new Item.Properties()
                         .setId(SAMURAI_HELMET_KEY)
                         .modelId(SAMURAI_HELMET_ID)
-                        .component(DataComponents.EQUIPPABLE,
-                                Equippable.builder(EquipmentSlot.HEAD)
-                                        .setAsset(SAMURAI_HELMET_ASSET_KEY)
-                                        .build())
                         .durability(900)
                         .enchantable(20)
                         .repairable(Items.NETHERITE_INGOT)
-                        .fireResistant()
-                        .attributes(createSamuraiPieceAttributes(
-                                "abyssal_samurai_helmet", 3.0D, 3.0D, EquipmentSlotGroup.HEAD))));
+                        .fireResistant()));
 
         ABYSSAL_SAMURAI_LEGGINGS = Registry.register(BuiltInRegistries.ITEM, SAMURAI_LEGGINGS_KEY,
                 new Item(new Item.Properties()
@@ -130,12 +125,12 @@ public final class AbyssalKingItems {
                                 Equippable.builder(EquipmentSlot.LEGS)
                                         .setAsset(SAMURAI_LEGGINGS_ASSET_KEY)
                                         .build())
-                        .durability(900)
-                        .enchantable(20)
+                        .durability(1400)
+                        .enchantable(24)
                         .repairable(Items.NETHERITE_INGOT)
                         .fireResistant()
                         .attributes(createSamuraiPieceAttributes(
-                                "abyssal_samurai_leggings", 6.0D, 3.0D, EquipmentSlotGroup.LEGS))));
+                                "abyssal_samurai_leggings", 7.0D, 4.0D, EquipmentSlotGroup.LEGS))));
 
         ABYSSAL_SAMURAI_BOOTS = Registry.register(BuiltInRegistries.ITEM, SAMURAI_BOOTS_KEY,
                 new Item(new Item.Properties()
@@ -145,12 +140,12 @@ public final class AbyssalKingItems {
                                 Equippable.builder(EquipmentSlot.FEET)
                                         .setAsset(SAMURAI_BOOTS_ASSET_KEY)
                                         .build())
-                        .durability(900)
-                        .enchantable(20)
+                        .durability(1400)
+                        .enchantable(24)
                         .repairable(Items.NETHERITE_INGOT)
                         .fireResistant()
                         .attributes(createSamuraiPieceAttributes(
-                                "abyssal_samurai_boots", 3.0D, 3.0D, EquipmentSlotGroup.FEET))));
+                                "abyssal_samurai_boots", 4.0D, 4.0D, EquipmentSlotGroup.FEET))));
 
         Simpleskills.LOGGER.info("Registered Abyssal King relics and the Samurai armor set.");
     }
@@ -170,8 +165,9 @@ public final class AbyssalKingItems {
     }
 
     /**
-     * Armadura e dureza de cada peça do conjunto. Totais por peça: peitoral 8, elmo 3,
-     * perneiras 6 e botas 3, somando 20 de armadura (o mesmo total do Netherite completo).
+     * Samurai armor is deliberately stronger than Netherite per wearable slot:
+     * chestplate 9/4, leggings 7/4 and boots 4/4 (armor/toughness).
+     * The separate kasa is boss-only geometry, not a player armor item.
      */
     private static ItemAttributeModifiers createSamuraiPieceAttributes(
             String id, double armor, double toughness, EquipmentSlotGroup slot) {
@@ -197,7 +193,7 @@ public final class AbyssalKingItems {
     public static List<Item> creativeItems() {
         return List.of(
                 ABYSSAL_KING_SWORD, ABYSSAL_KING_CROWN,
-                ABYSSAL_SAMURAI_CHESTPLATE, ABYSSAL_SAMURAI_HELMET,
+                ABYSSAL_SAMURAI_CHESTPLATE,
                 ABYSSAL_SAMURAI_LEGGINGS, ABYSSAL_SAMURAI_BOOTS);
     }
 }

@@ -218,7 +218,8 @@ public class AbyssalSamuraiModel extends EntityModel<AbyssalSamuraiRenderState> 
         this.walkAnimation.apply(state.walkAnimationState, state.ageInTicks);
         this.deathAnimation.apply(state.deathAnimationState, state.ageInTicks);
 
-        if (state.samuraiState == AbyssalSamuraiEntity.STATE_ACTIVE && !state.isDying
+        if ((state.samuraiState == AbyssalSamuraiEntity.STATE_ACTIVE
+                || state.samuraiState == AbyssalSamuraiEntity.STATE_RETURNING) && !state.isDying
                 && state.katanaPose != null) {
             applyKatanaAnimation(state.katanaPose);
             this.head.yRot += state.yRot * Mth.DEG_TO_RAD * 0.70F;
