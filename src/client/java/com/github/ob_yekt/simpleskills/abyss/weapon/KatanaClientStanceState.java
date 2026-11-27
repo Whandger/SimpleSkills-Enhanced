@@ -366,8 +366,12 @@ public final class KatanaClientStanceState {
                 }
                 case KatanaStanceManager.SPECIAL_RECOVERY -> {
                     if (elapsed < SPECIAL_RECOVERY_NANOS) return;
+                    long boundary = entry.stateStartedNanos + SPECIAL_RECOVERY_NANOS;
+                    // Keep the same lowered two-hand Lakai pose and fade into its idle loop.
+                    entry.setBlend(KatanaAnimationLibrary.clipFor(KatanaStanceManager.SPECIAL_RECOVERY),
+                            SPECIAL_RECOVERY_NANOS / 1_000_000_000.0F, boundary, 80_000_000L);
                     entry.stance = KatanaStanceManager.LAKAI_READY;
-                    entry.stateStartedNanos += SPECIAL_RECOVERY_NANOS;
+                    entry.stateStartedNanos = boundary;
                     return;
                 }
                 case KatanaStanceManager.LAKAI_SHEATHING -> {

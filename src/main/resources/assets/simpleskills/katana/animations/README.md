@@ -35,10 +35,10 @@ Cada JSON contém um único clipe e ambos os manifestos apontam para os mesmos 1
 
 ## Técnica especial — Corte do Último Juramento
 
-- Ativação: `Shift + clique esquerdo` enquanto a katana está embainhada e um Mob válido está sob a mira.
+- Ativação: `clique esquerdo` enquanto a katana está embainhada e um Mob válido está sob a mira.
 - A técnica só começa em `SHEATHED`; não é permitido desembainhar a katana durante o especial.
 - O personagem mantém o modelo completo embainhado (`sheathed_model`) e as duas mãos seguram a bainha durante dash, travamento, cortes e recuperação.
-- O dash segue em linha reta por até 6 blocos e busca terminar atrás do alvo; colisões do cenário interrompem o movimento para evitar atravessar paredes.
+- O dash segue em linha reta por até 13,15 blocos de alcance ao alvo (dash máximo de 15,5 blocos incluindo a posição atrás do alvo) e busca terminar atrás do alvo; colisões do cenário interrompem o movimento para evitar atravessar paredes.
 - O Mob fica imobilizado por 1 s. Em seguida, recebe seis cortes, espaçados por 2 ticks.
 - O dano total do especial é 2× o atributo `ATTACK_DAMAGE`, dividido igualmente entre os seis hits. O cooldown de dano do alvo é zerado antes de cada corte para permitir todos os hits.
 - VFX usa partículas e sons já disponíveis no mod.

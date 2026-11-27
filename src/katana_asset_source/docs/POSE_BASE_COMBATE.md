@@ -23,7 +23,7 @@ A pose-base é `animation.katana_ultimo_juramento.idle_unsheathed`, no instante 
 - `walk` começa e fecha exatamente na guarda-base.
 - `lower_guard` começa na guarda-base.
 - `sheath_katana` termina na pose embainhada.
-- `special_sheathed_recovery` termina na pose embainhada. A entrada do especial é uma transição de duas mãos para a postura de saya; o cliente faz cross-fade a partir do idle embainhado.
+- `special_sheathed` e `special_sheathed_recovery` mantêm os braços na mesma postura baixa de `idle_lakai_sheathed`; a recuperação termina exatamente nessa pose e faz cross-fade para o idle Lakai. Nenhum clipe do especial deve levantar os braços.
 
 ## Ajuste vertical final
 

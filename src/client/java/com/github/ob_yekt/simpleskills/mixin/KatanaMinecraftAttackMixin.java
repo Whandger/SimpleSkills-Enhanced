@@ -29,23 +29,27 @@ public abstract class KatanaMinecraftAttackMixin {
                 || client.gui.screen() != null
                 || !AbyssalKatanaItems.isKatana(player.getMainHandItem().getItem())) return;
 
-        // Keep normal block mining/interactions. Only replace entity/miss attacks with the katana system.
-        if (client.hitResult instanceof BlockHitResult) return;
-
-        // Use the actual current hit result first. crosshairPickEntity can lag behind the
-        // rendered hit result for a frame, which previously sent NO_TARGET and caused the
-        // server to play an attack animation without finding anything to damage.
         int stance = KatanaClientStanceState.get(player.getUUID()).stance();
-        LivingEntity hitLiving = client.hitResult instanceof EntityHitResult entityHit
-                && entityHit.getEntity() instanceof LivingEntity living && living.isAlive()
-                ? living
-                : client.crosshairPickEntity instanceof LivingEntity fallback && fallback.isAlive()
-                    ? fallback : null;
+        boolean canDrawFromSheathedParry = stance == KatanaStanceManager.SHEATHED
+                || stance == KatanaStanceManager.SHEATHING;
 
-        // Vanilla's entity pick distance is shorter than Lakai's special range. While the
-        // player is in Lakai-ready stance, perform a client-side ray selection up to the same
-        // 9.15-block target limit accepted by the server. Normal Parry attacks keep vanilla reach.
-        if (hitLiving == null && stance == KatanaStanceManager.LAKAI_READY) {
+        // Keep normal block mining once the katana is already out. While sheathed in Parry,
+        // however, a left click on a block must still be sent to the stance controller so it
+        // can start DRAWING without requiring a mob target or the vanilla entity reach.
+        if (client.hitResult instanceof BlockHitResult && !canDrawFromSheathedParry) return;
+
+        // Do not trust a stale crosshair entity when the actual hit is a block: the first Parry
+        // click is a free draw command and must not accidentally become a special attack target.
+        LivingEntity hitLiving = client.hitResult instanceof BlockHitResult ? null
+                : client.hitResult instanceof EntityHitResult entityHit
+                    && entityHit.getEntity() instanceof LivingEntity living && living.isAlive()
+                    ? living
+                    : client.crosshairPickEntity instanceof LivingEntity fallback && fallback.isAlive()
+                        ? fallback : null;
+
+        // Lakai always uses a Mob-only ray cast at the full server-authoritative reach.
+        // Parry keeps its normal vanilla target reach for actual damaging attacks.
+        if (stance == KatanaStanceManager.LAKAI_READY) {
             hitLiving = simpleskills$findLakaiTarget(player);
         }
         int targetId = hitLiving != null ? hitLiving.getId() : KatanaStanceRequestPayload.NO_TARGET;

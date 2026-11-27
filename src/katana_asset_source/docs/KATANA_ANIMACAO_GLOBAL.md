@@ -29,7 +29,7 @@ A terceira pessoa é a fonte única dos keyframes. A primeira pessoa projeta o m
 
 ## Técnica especial — Corte do Último Juramento
 
-Ativar com `Shift + clique esquerdo`, somente quando a katana está embainhada e um Mob válido está sob a mira. O especial mantém o modelo `sheathed_model` e as duas mãos segurando a saya durante toda a técnica; não desembainha a lâmina. O jogador avança em linha reta por até 6 blocos para terminar atrás do alvo. O Mob fica atordoado por 1 s e depois recebe seis cortes, espaçados por 2 ticks, cuja soma equivale a 2× `ATTACK_DAMAGE`. O cooldown de dano é zerado antes de cada hit. VFX usa partículas e sons já disponíveis no mod.
+Ativar com `clique esquerdo`, com o modo Lakai ativo, a katana embainhada e um Mob válido sob a mira. O especial mantém o modelo `sheathed_model` e as duas mãos segurando a saya durante toda a técnica; não desembainha a lâmina. O jogador avança em linha reta por até 13,15 blocos de alcance ao alvo (dash máximo de 15,5 blocos incluindo a posição atrás do alvo) para terminar atrás do alvo. O Mob fica atordoado por 1 s e depois recebe seis cortes, espaçados por 2 ticks, cuja soma equivale a 2× `ATTACK_DAMAGE`. O cooldown de dano é zerado antes de cada hit. VFX usa partículas e sons já disponíveis no mod.
 
 ## Altura de repouso
 

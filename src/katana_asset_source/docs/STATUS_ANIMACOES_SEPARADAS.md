@@ -25,7 +25,7 @@ Há **11 clipes globais**, em JSONs separados por estado, espelhados byte a byte
 - Caminhada usa overlay aditivo global e peso suavizado pela velocidade horizontal.
 - Dano vanilla e indicadores vanilla de cooldown são desativados para a katana; dano customizado não usa o cooldown visual padrão.
 - A mão secundária fica bloqueada enquanto a katana está na mão principal. Item existente é movido para o inventário ou dropado com aviso se não houver espaço.
-- Especial `Shift + clique esquerdo`, somente embainhada e mirando um Mob: dash de até 6 blocos para trás do alvo, 1 s de stun, seis cortes com 2× o dano-base total distribuído entre eles, VFX do mod e a bainha segurada com as duas mãos.
+- Especial `clique esquerdo`, com o modo Lakai ativo, a katana embainhada e um Mob válido na mira: dash de até 13,15 blocos de alcance ao alvo (dash máximo de 15,5 blocos incluindo a posição atrás do alvo) para trás do alvo, 1 s de stun, seis cortes com 2× o dano-base total distribuído entre eles, VFX do mod e a bainha segurada com as duas mãos.
 
 ## Altura
 

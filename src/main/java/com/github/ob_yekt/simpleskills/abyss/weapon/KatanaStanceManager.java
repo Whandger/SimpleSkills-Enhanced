@@ -76,8 +76,8 @@ public final class KatanaStanceManager {
     public static final int SPECIAL_SLASH_PHASE_TICKS = SPECIAL_SLASH_COUNT * SPECIAL_SLASH_INTERVAL_TICKS;
     public static final int SPECIAL_TOTAL_TICKS = SPECIAL_DASH_TICKS + SPECIAL_LOCK_TICKS + SPECIAL_SLASH_PHASE_TICKS;
     public static final int SPECIAL_RECOVERY_TICKS = 6;
-    public static final double SPECIAL_MAX_DASH_DISTANCE = 10.0D; // +4 blocks
-    public static final double SPECIAL_MAX_TARGET_DISTANCE = 9.15D; // +4 blocks; behind offset is added to dash distance
+    public static final double SPECIAL_MAX_TARGET_DISTANCE = 13.15D; // 4 more blocks beyond the previous 9.15-block reach.
+    public static final double SPECIAL_MAX_DASH_DISTANCE = 15.5D; // Includes the final offset behind the target.
     private static final double SPECIAL_BEHIND_TARGET_OFFSET = 0.85D;
     private static final double NORMAL_ATTACK_REACH = 4.5D;
 
@@ -226,7 +226,9 @@ public final class KatanaStanceManager {
                 entry.combatReadyTick = now;
                 broadcast(server, id, entry, now);
             }
-            if (entry.stance == LAKAI_READY && isValidSpecialTarget(player, targetEntityId)) {
+            if (entry.stance == LAKAI_READY) {
+                // Always let startSpecial report whether the aim had no valid target or the
+                // requested target was outside the extended range; never fail silently.
                 startSpecial(player, entry, targetEntityId, server, now);
             }
             return;
@@ -313,7 +315,13 @@ public final class KatanaStanceManager {
         }
         LivingEntity target = findSpecialTarget(player, targetEntityId);
         if (target == null) {
-            player.sendSystemMessage(Component.translatable("message.simpleskills.katana.special_target_required"), true);
+            Entity requested = targetEntityId >= 0 ? player.level().getEntity(targetEntityId) : null;
+            if (requested instanceof Mob requestedMob && requestedMob.isAlive()
+                    && requestedMob.level() == player.level() && player.hasLineOfSight(requestedMob)) {
+                player.sendSystemMessage(Component.translatable("message.simpleskills.katana.special_target_too_far"), true);
+            } else {
+                player.sendSystemMessage(Component.translatable("message.simpleskills.katana.special_target_required"), true);
+            }
             return;
         }
 
@@ -363,19 +371,18 @@ public final class KatanaStanceManager {
         broadcast(server, player.getUUID(), entry, now);
     }
 
-    private static boolean isValidSpecialTarget(ServerPlayer player, int targetEntityId) {
-        return findSpecialTarget(player, targetEntityId) != null;
-    }
-
     private static Mob findSpecialTarget(ServerPlayer player, int targetEntityId) {
         if (targetEntityId < 0) return null;
         Entity entity = player.level().getEntity(targetEntityId);
-        // The current stun system immobilizes Mob/boss AI through its existing mixins. Restrict
-        // the special target to Mob so the promised one-second lock is real, not just a velocity reset.
+        // The stun implementation is Mob-based, so do not accept arbitrary living entities.
         if (entity == null || entity == player || !(entity instanceof Mob target) || !target.isAlive()
                 || target.level() != player.level() || !player.hasLineOfSight(target)) return null;
-        double distanceSqr = player.distanceToSqr(target);
-        if (distanceSqr > SPECIAL_MAX_TARGET_DISTANCE * SPECIAL_MAX_TARGET_DISTANCE) return null;
+
+        // Validate the same extended view ray used by the client instead of measuring only the
+        // mob center. This keeps wide mobs selectable at the edge of the 13.15-block reach.
+        Vec3 rayStart = player.getEyePosition();
+        Vec3 rayEnd = rayStart.add(player.getLookAngle().normalize().scale(SPECIAL_MAX_TARGET_DISTANCE));
+        if (target.getBoundingBox().inflate(0.18D).clip(rayStart, rayEnd).isEmpty()) return null;
         return target;
     }
 
