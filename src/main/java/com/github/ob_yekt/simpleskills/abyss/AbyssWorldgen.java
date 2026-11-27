@@ -65,6 +65,7 @@ public final class AbyssWorldgen {
         registered = true;
         // Structure and piece types must be registered before worldgen data is read.
         AbyssalCastleStructure.register();
+        AbyssalBridgeStructure.register();
         // The Abyss is an endgame layer: only diamond, emerald, rune, and Transcendent ores spawn here.
         add(ABYSSAL_DIAMOND);
         add(ABYSSAL_EMERALD);
@@ -76,7 +77,7 @@ public final class AbyssWorldgen {
         addDecoration(ABYSSAL_COLOSSAL_SPELEOTHEMS);
         addDecoration(ABYSSAL_DEAD_TREES);
         addDecoration(ABYSSAL_ANCIENT_DEAD_TREES);
-        Simpleskills.LOGGER.info("Registered The Abyss ores, cavern formations, rare leafless dead trees, and the ruined castle structure.");
+        Simpleskills.LOGGER.info("Registered The Abyss ores, cavern formations, rare leafless dead trees, the ruined castle, and monumental abyssal bridges.");
     }
 
     private static void add(ResourceKey<PlacedFeature> feature) {

@@ -1,0 +1,15 @@
+{
+  "structures": [
+    {
+      "structure": "simpleskills:abyssal_bridge",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 32,
+    "separation": 16,
+    "salt": 20261126,
+    "spread_type": "linear"
+  }
+}

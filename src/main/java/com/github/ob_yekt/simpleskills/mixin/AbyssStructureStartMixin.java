@@ -1,5 +1,6 @@
 package com.github.ob_yekt.simpleskills.mixin;
 
+import com.github.ob_yekt.simpleskills.abyss.AbyssalBridgeStructure;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalCastleStructure;
 import com.github.ob_yekt.simpleskills.abyss.AbyssWorldgen;
 import net.minecraft.world.level.WorldGenLevel;
@@ -41,8 +42,9 @@ public abstract class AbyssStructureStartMixin {
             return;
         }
 
-        // The castle is the one intentional structure allowed to occupy this Y range.
-        if (this.getStructure().type() == AbyssalCastleStructure.TYPE) {
+        // These are intentional structures allowed to occupy the Abyss Y range.
+        if (this.getStructure().type() == AbyssalCastleStructure.TYPE
+                || this.getStructure().type() == AbyssalBridgeStructure.TYPE) {
             return;
         }
 
