@@ -17,6 +17,9 @@ public final class AbyssalSamuraiClient {
                 AbyssalSamuraiModel.SHELL_LAYER_LOCATION,
                 AbyssalSamuraiModel::createStoneShellLayer
         );
+        for (AbyssalSamuraiArmorModel.Piece piece : AbyssalSamuraiArmorModel.Piece.values()) {
+            ModelLayerRegistry.registerModelLayer(piece.layerLocation(), piece::createLayer);
+        }
         EntityRendererRegistry.register(AbyssalSamuraiEntity.TYPE, AbyssalSamuraiRenderer::new);
     }
 }

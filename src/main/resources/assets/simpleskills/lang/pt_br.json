@@ -689,5 +689,8 @@
   "message.simpleskills.katana.special_target_required": "Mire em um inimigo para usar o Corte do Último Juramento.",
   "message.simpleskills.katana.special_target_too_far": "O inimigo está longe demais para o Corte do Abismo (alcance máximo de 13,15 blocos).",
   "entity.simpleskills.abyssal_samurai": "Samurai Abissal",
-  "item.simpleskills.abyssal_samurai_chestplate": "Peitoral do Samurai Abissal"
+  "item.simpleskills.abyssal_samurai_chestplate": "Peitoral do Samurai Abissal",
+  "item.simpleskills.abyssal_samurai_helmet": "Elmo do Samurai Abissal",
+  "item.simpleskills.abyssal_samurai_leggings": "Perneiras do Samurai Abissal",
+  "item.simpleskills.abyssal_samurai_boots": "Botas do Samurai Abissal"
 }

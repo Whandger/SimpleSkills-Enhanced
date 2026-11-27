@@ -689,5 +689,8 @@
   "message.simpleskills.katana.special_target_required": "Aim at an enemy to use the Last Oath Cut.",
   "message.simpleskills.katana.special_target_too_far": "That enemy is too far away for the Abyssal Cut (maximum target range: 13.15 blocks).",
   "entity.simpleskills.abyssal_samurai": "Abyssal Samurai",
-  "item.simpleskills.abyssal_samurai_chestplate": "Abyssal Samurai Chestplate"
+  "item.simpleskills.abyssal_samurai_chestplate": "Abyssal Samurai Chestplate",
+  "item.simpleskills.abyssal_samurai_helmet": "Abyssal Samurai Helmet",
+  "item.simpleskills.abyssal_samurai_leggings": "Abyssal Samurai Leggings",
+  "item.simpleskills.abyssal_samurai_boots": "Abyssal Samurai Boots"
 }

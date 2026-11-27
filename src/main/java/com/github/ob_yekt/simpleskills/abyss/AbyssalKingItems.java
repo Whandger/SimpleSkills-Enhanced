@@ -28,17 +28,39 @@ public final class AbyssalKingItems {
             Simpleskills.MOD_ID, "abyssal_king_crown");
     private static final Identifier SAMURAI_CHESTPLATE_ID = Identifier.fromNamespaceAndPath(
             Simpleskills.MOD_ID, "abyssal_samurai_chestplate");
+    private static final Identifier SAMURAI_HELMET_ID = Identifier.fromNamespaceAndPath(
+            Simpleskills.MOD_ID, "abyssal_samurai_helmet");
+    private static final Identifier SAMURAI_LEGGINGS_ID = Identifier.fromNamespaceAndPath(
+            Simpleskills.MOD_ID, "abyssal_samurai_leggings");
+    private static final Identifier SAMURAI_BOOTS_ID = Identifier.fromNamespaceAndPath(
+            Simpleskills.MOD_ID, "abyssal_samurai_boots");
 
     private static final ResourceKey<Item> SWORD_KEY = ResourceKey.create(Registries.ITEM, SWORD_ID);
     private static final ResourceKey<Item> CROWN_KEY = ResourceKey.create(Registries.ITEM, CROWN_ID);
     private static final ResourceKey<Item> SAMURAI_CHESTPLATE_KEY =
             ResourceKey.create(Registries.ITEM, SAMURAI_CHESTPLATE_ID);
+    private static final ResourceKey<Item> SAMURAI_HELMET_KEY =
+            ResourceKey.create(Registries.ITEM, SAMURAI_HELMET_ID);
+    private static final ResourceKey<Item> SAMURAI_LEGGINGS_KEY =
+            ResourceKey.create(Registries.ITEM, SAMURAI_LEGGINGS_ID);
+    private static final ResourceKey<Item> SAMURAI_BOOTS_KEY =
+            ResourceKey.create(Registries.ITEM, SAMURAI_BOOTS_ID);
+
     private static final ResourceKey<EquipmentAsset> SAMURAI_CHESTPLATE_ASSET_KEY =
             ResourceKey.create(EquipmentAssets.ROOT_ID, SAMURAI_CHESTPLATE_ID);
+    private static final ResourceKey<EquipmentAsset> SAMURAI_HELMET_ASSET_KEY =
+            ResourceKey.create(EquipmentAssets.ROOT_ID, SAMURAI_HELMET_ID);
+    private static final ResourceKey<EquipmentAsset> SAMURAI_LEGGINGS_ASSET_KEY =
+            ResourceKey.create(EquipmentAssets.ROOT_ID, SAMURAI_LEGGINGS_ID);
+    private static final ResourceKey<EquipmentAsset> SAMURAI_BOOTS_ASSET_KEY =
+            ResourceKey.create(EquipmentAssets.ROOT_ID, SAMURAI_BOOTS_ID);
 
     public static Item ABYSSAL_KING_SWORD;
     public static Item ABYSSAL_KING_CROWN;
     public static Item ABYSSAL_SAMURAI_CHESTPLATE;
+    public static Item ABYSSAL_SAMURAI_HELMET;
+    public static Item ABYSSAL_SAMURAI_LEGGINGS;
+    public static Item ABYSSAL_SAMURAI_BOOTS;
 
     private static boolean registered;
 
@@ -82,9 +104,55 @@ public final class AbyssalKingItems {
                         .enchantable(20)
                         .repairable(Items.NETHERITE_INGOT)
                         .fireResistant()
-                        .attributes(createSamuraiChestplateAttributes())));
+                        .attributes(createSamuraiPieceAttributes(
+                                "abyssal_samurai_chestplate", 8.0D, 4.0D, EquipmentSlotGroup.CHEST))));
 
-        Simpleskills.LOGGER.info("Registered Abyssal King relics and the Samurai Chestplate.");
+        ABYSSAL_SAMURAI_HELMET = Registry.register(BuiltInRegistries.ITEM, SAMURAI_HELMET_KEY,
+                new Item(new Item.Properties()
+                        .setId(SAMURAI_HELMET_KEY)
+                        .modelId(SAMURAI_HELMET_ID)
+                        .component(DataComponents.EQUIPPABLE,
+                                Equippable.builder(EquipmentSlot.HEAD)
+                                        .setAsset(SAMURAI_HELMET_ASSET_KEY)
+                                        .build())
+                        .durability(900)
+                        .enchantable(20)
+                        .repairable(Items.NETHERITE_INGOT)
+                        .fireResistant()
+                        .attributes(createSamuraiPieceAttributes(
+                                "abyssal_samurai_helmet", 3.0D, 3.0D, EquipmentSlotGroup.HEAD))));
+
+        ABYSSAL_SAMURAI_LEGGINGS = Registry.register(BuiltInRegistries.ITEM, SAMURAI_LEGGINGS_KEY,
+                new Item(new Item.Properties()
+                        .setId(SAMURAI_LEGGINGS_KEY)
+                        .modelId(SAMURAI_LEGGINGS_ID)
+                        .component(DataComponents.EQUIPPABLE,
+                                Equippable.builder(EquipmentSlot.LEGS)
+                                        .setAsset(SAMURAI_LEGGINGS_ASSET_KEY)
+                                        .build())
+                        .durability(900)
+                        .enchantable(20)
+                        .repairable(Items.NETHERITE_INGOT)
+                        .fireResistant()
+                        .attributes(createSamuraiPieceAttributes(
+                                "abyssal_samurai_leggings", 6.0D, 3.0D, EquipmentSlotGroup.LEGS))));
+
+        ABYSSAL_SAMURAI_BOOTS = Registry.register(BuiltInRegistries.ITEM, SAMURAI_BOOTS_KEY,
+                new Item(new Item.Properties()
+                        .setId(SAMURAI_BOOTS_KEY)
+                        .modelId(SAMURAI_BOOTS_ID)
+                        .component(DataComponents.EQUIPPABLE,
+                                Equippable.builder(EquipmentSlot.FEET)
+                                        .setAsset(SAMURAI_BOOTS_ASSET_KEY)
+                                        .build())
+                        .durability(900)
+                        .enchantable(20)
+                        .repairable(Items.NETHERITE_INGOT)
+                        .fireResistant()
+                        .attributes(createSamuraiPieceAttributes(
+                                "abyssal_samurai_boots", 3.0D, 3.0D, EquipmentSlotGroup.FEET))));
+
+        Simpleskills.LOGGER.info("Registered Abyssal King relics and the Samurai armor set.");
     }
 
     private static ItemAttributeModifiers createCrownAttributes() {
@@ -101,18 +169,23 @@ public final class AbyssalKingItems {
                         EquipmentSlotGroup.HEAD);
     }
 
-    private static ItemAttributeModifiers createSamuraiChestplateAttributes() {
+    /**
+     * Armadura e dureza de cada peça do conjunto. Totais por peça: peitoral 8, elmo 3,
+     * perneiras 6 e botas 3, somando 20 de armadura (o mesmo total do Netherite completo).
+     */
+    private static ItemAttributeModifiers createSamuraiPieceAttributes(
+            String id, double armor, double toughness, EquipmentSlotGroup slot) {
         return ItemAttributeModifiers.EMPTY
                 .withModifierAdded(Attributes.ARMOR,
                         new AttributeModifier(Identifier.fromNamespaceAndPath(
-                                Simpleskills.MOD_ID, "abyssal_samurai_chestplate_armor"),
-                                8.0D, AttributeModifier.Operation.ADD_VALUE),
-                        EquipmentSlotGroup.CHEST)
+                                Simpleskills.MOD_ID, id + "_armor"),
+                                armor, AttributeModifier.Operation.ADD_VALUE),
+                        slot)
                 .withModifierAdded(Attributes.ARMOR_TOUGHNESS,
                         new AttributeModifier(Identifier.fromNamespaceAndPath(
-                                Simpleskills.MOD_ID, "abyssal_samurai_chestplate_toughness"),
-                                4.0D, AttributeModifier.Operation.ADD_VALUE),
-                        EquipmentSlotGroup.CHEST);
+                                Simpleskills.MOD_ID, id + "_toughness"),
+                                toughness, AttributeModifier.Operation.ADD_VALUE),
+                        slot);
     }
 
     public static boolean isKingRelic(net.minecraft.world.item.ItemStack stack) {
@@ -122,6 +195,9 @@ public final class AbyssalKingItems {
     }
 
     public static List<Item> creativeItems() {
-        return List.of(ABYSSAL_KING_SWORD, ABYSSAL_KING_CROWN, ABYSSAL_SAMURAI_CHESTPLATE);
+        return List.of(
+                ABYSSAL_KING_SWORD, ABYSSAL_KING_CROWN,
+                ABYSSAL_SAMURAI_CHESTPLATE, ABYSSAL_SAMURAI_HELMET,
+                ABYSSAL_SAMURAI_LEGGINGS, ABYSSAL_SAMURAI_BOOTS);
     }
 }

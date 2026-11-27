@@ -101,6 +101,7 @@
     "ItemStackRenderStateAccessor",
     "ItemStackLayerRenderStateAccessor",
     "RuneEquipmentLayerRendererMixin",
+    "AbyssalSamuraiArmorRendererMixin",
     "RuneItemStackLayerVfxMixin",
     "TranscendentVisionOutlineMixin",
     "KatanaPlayerItemInHandLayerMixin",
