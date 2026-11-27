@@ -209,6 +209,17 @@ public final class DefenseCombat {
         return true;
     }
 
+    /** Adds or extends the same server-authoritative immobilization used by Defense parries. */
+    public static void applyStun(Entity entity, int durationTicks) {
+        if (entity == null || durationTicks <= 0 || entity.level().isClientSide()
+                || entity.isRemoved() || !entity.isAlive()) return;
+        long endsAt = entity.level().getGameTime() + durationTicks;
+        STUNS.merge(entity.getUUID(), new TimedEntity(entity, endsAt),
+                (old, fresh) -> old.endsAt() > fresh.endsAt() ? old : fresh);
+        entity.setDeltaMovement(Vec3.ZERO);
+        if (entity instanceof Mob mob) mob.getNavigation().stop();
+    }
+
     public static boolean isStunned(Entity entity) {
         TimedEntity stun = STUNS.get(entity.getUUID());
         return stun != null && stun.endsAt() > entity.level().getGameTime();

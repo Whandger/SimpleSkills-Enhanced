@@ -47,6 +47,10 @@ public final class KatanaAnimationLibrary {
             case KatanaStanceManager.ATTACK_1 -> "attack_1_horizontal";
             case KatanaStanceManager.ATTACK_2 -> "attack_2_rising_diagonal";
             case KatanaStanceManager.ATTACK_3 -> "attack_3_overhead_finisher";
+            case KatanaStanceManager.SPECIAL_DASH -> "special_sheathed";
+            case KatanaStanceManager.SPECIAL_RECOVERY -> "special_sheathed_recovery";
+            case KatanaStanceManager.LAKAI_READY -> "idle_lakai_sheathed";
+            case KatanaStanceManager.LAKAI_SHEATHING -> "sheath_katana";
             default -> "idle_sheathed";
         };
         return "animation.katana_ultimo_juramento." + suffix;

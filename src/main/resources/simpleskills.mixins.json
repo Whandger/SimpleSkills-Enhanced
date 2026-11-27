@@ -86,7 +86,8 @@
     "LORE.SimpleInventoryMixin",
     "SMITHING.AnvilScreenHandlerMixin",
     "SMITHING.ForgingScreenHandlerMixin",
-    "SMITHING.SmithingScreenHandlerMixin"
+    "SMITHING.SmithingScreenHandlerMixin",
+    "KatanaDisableVanillaAttackMixin"
   ],
   "plugin": "com.github.ob_yekt.simpleskills.mixin.MixinPlugin",
   "injectors": {
@@ -105,6 +106,7 @@
     "KatanaPlayerItemInHandLayerMixin",
     "KatanaPlayerModelMixin",
     "KatanaFirstPersonHandsAndItemsRendererMixin",
-    "KatanaMinecraftAttackMixin"
+    "KatanaMinecraftAttackMixin",
+    "KatanaAttackIndicatorHudMixin"
   ]
 }

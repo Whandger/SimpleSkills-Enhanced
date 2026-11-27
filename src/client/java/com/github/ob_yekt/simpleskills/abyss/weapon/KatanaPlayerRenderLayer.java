@@ -37,7 +37,8 @@ public final class KatanaPlayerRenderLayer extends RenderLayer<AvatarRenderState
         poseStack.translate(0.0F, FEET_BELOW_BODY_PIVOT / 16.0F, 0.0F);
         poseStack.rotateDegrees(Axis.XP, 180.0F);
 
-        if (pose.stance() == KatanaStanceManager.SHEATHED) {
+        if (pose.stance() == KatanaStanceManager.SHEATHED
+                || KatanaStanceManager.isSheathedGripStance(pose.stance())) {
             KatanaRenderUtil.submitSheathed(poseStack, collector, light, player, pose, state.outlineColor, true);
         } else {
             KatanaRenderUtil.submitSaya(poseStack, collector, light, player, pose, state.outlineColor, true);

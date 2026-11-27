@@ -1,9 +1,9 @@
-# Ajuste fino da altura de repouso da katana
+# Ajuste fino final da altura de repouso da katana
 
-A posição Y anterior da guarda de combate era 19.2 e ficou aproximadamente 2 px acima do desejado. A correção final usa **Y = 18.2**, deslocando a katana **1,0 unidade para baixo**.
+A guarda de combate estava aproximadamente 1 px acima da posição visual desejada. O ajuste final desloca **somente `katana.position` em -0.5 unidade no eixo Y**, de `18.2` para **17.7**.
 
-O ajuste foi aplicado somente ao canal `katana.position` dos clipes globais em que a arma está desembainhada: `idle_unsheathed`, `walk`, `lower_guard` e os três ataques. Os clipes de saque e embainhar recebem uma compensação gradual para chegar à nova guarda de combate e retornar à posição embainhada original sem salto.
+A alteração foi refletida em todos os keyframes da trilha `katana.position` dos 11 clipes globais, preservando as trajetórias, os tempos, as rotações, as escalas e a continuidade entre clipes. Os dois JSONs-fonte/runtime e os dois projetos `.bbmodel` foram sincronizados.
 
-`idle_sheathed`, `saya`, rotações, escalas, braços, corpo, geometria, locators, texturas e código Java não foram alterados. Os nove JSONs de fonte/runtime e os dois projetos Blockbench foram sincronizados.
+Não foram alterados os ossos `body`, `right_arm`, `left_arm` ou `saya`, nem as texturas, geometria, locators ou código Java por causa desse ajuste visual.
 
-O deslocamento em pixels depende da projeção e do renderer; confirme o ajuste final dentro do Minecraft 26.3.
+O deslocamento em pixels depende da projeção da câmera e do renderer. A confirmação final deve ser feita dentro do Minecraft 26.3.

@@ -1,6 +1,7 @@
 package com.github.ob_yekt.simpleskills.crafting;
 
 import com.github.ob_yekt.simpleskills.abyss.AbyssalKatanaItems;
+import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaStanceManager;
 
 import com.github.ob_yekt.simpleskills.VeinMining;
 import com.google.gson.JsonArray;
@@ -319,6 +320,7 @@ public final class TranscendentAbilities {
                 KATANA_LAKAI_ENABLED.add(player.getUUID());
                 enabled = true;
             }
+            KatanaStanceManager.onLakaiModeChanged(player, enabled);
             player.sendSystemMessage(Component.translatable(enabled
                     ? "message.simpleskills.katana.lakai_enabled"
                     : "message.simpleskills.katana.parry_enabled"));

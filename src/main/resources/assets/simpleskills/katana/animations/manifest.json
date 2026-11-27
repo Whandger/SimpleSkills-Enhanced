@@ -1,6 +1,6 @@
 {
   "format_version": "1.0.0",
-  "description": "Manifesto de clipes globais da Katana do \u00daltimo Juramento. Terceira pessoa \u00e9 a fonte de keyframes; primeira pessoa projeta o mesmo rig.",
+  "description": "Manifesto de clipes globais da Katana do Último Juramento. Terceira pessoa é a fonte de keyframes; primeira pessoa projeta o mesmo rig.",
   "clips": {
     "animation.katana_ultimo_juramento.idle_sheathed": "00_embainhada/idle_sheathed.animation.json",
     "animation.katana_ultimo_juramento.draw_katana": "01_saque/draw_katana.animation.json",
@@ -10,6 +10,9 @@
     "animation.katana_ultimo_juramento.attack_3_overhead_finisher": "03_ataques/attack_3_overhead_finisher.animation.json",
     "animation.katana_ultimo_juramento.sheath_katana": "04_embainhar/sheath_katana.animation.json",
     "animation.katana_ultimo_juramento.walk": "05_movimento/walk.animation.json",
-    "animation.katana_ultimo_juramento.lower_guard": "06_guarda_relaxada/lower_guard.animation.json"
+    "animation.katana_ultimo_juramento.lower_guard": "06_guarda_relaxada/lower_guard.animation.json",
+    "animation.katana_ultimo_juramento.special_sheathed": "07_especial/special_sheathed.animation.json",
+    "animation.katana_ultimo_juramento.special_sheathed_recovery": "07_especial/special_sheathed_recovery.animation.json",
+    "animation.katana_ultimo_juramento.idle_lakai_sheathed": "07_especial/idle_lakai_sheathed.animation.json"
   }
 }

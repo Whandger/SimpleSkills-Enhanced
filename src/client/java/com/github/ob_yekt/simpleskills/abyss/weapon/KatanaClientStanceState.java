@@ -20,6 +20,8 @@ public final class KatanaClientStanceState {
     private static final long LOWER_GUARD_TOTAL_NANOS =
             LOWER_GUARD_TRANSITION_NANOS + LOWER_GUARD_HOLD_NANOS;
     private static final long SHEATH_NANOS = 1_350_000_000L;
+    private static final long SPECIAL_TOTAL_NANOS = 1_850_000_000L;
+    private static final long SPECIAL_RECOVERY_NANOS = 300_000_000L;
 
     private static final long ATTACK_1_NANOS = 460_000_000L;
     private static final long ATTACK_2_NANOS = 500_000_000L;
@@ -70,6 +72,14 @@ public final class KatanaClientStanceState {
                 }
                 Entry created = new Entry(stance, incomingStart, now - sinceAttack, incomingStart);
                 created.comboStep = KatanaStanceManager.comboStepForStance(stance);
+                // The first special packet can arrive while the local client has no explicit
+                // stance entry (SHEATHED is represented by no entry). Blend from the sheathed
+                // idle so both hands and the scabbard move into the two-hand special pose smoothly.
+                if (KatanaStanceManager.isSheathedGripStance(stance)) {
+                    String sheathedClip = KatanaAnimationLibrary.clipFor(KatanaStanceManager.SHEATHED);
+                    float sheathedSeconds = (float) ((now / 1_000_000_000.0) % 3.2);
+                    created.setBlend(sheathedClip, sheathedSeconds, now, NETWORK_BLEND_NANOS);
+                }
                 return created;
             });
         } catch (IllegalArgumentException ignored) {
@@ -96,15 +106,19 @@ public final class KatanaClientStanceState {
                 return next;
             }
 
-            if (current.stance == KatanaStanceManager.DRAWING) {
-                long elapsed = now - current.stateStartedNanos;
-                current.lastAttackNanos = now;
-                if (elapsed >= DRAW_EARLY_ATTACK_NANOS) {
-                    startAttack(current, 1, now, prevClip, prevSec, ATTACK_REENGAGE_BLEND_NANOS);
-                } else {
-                    current.queuedAttack = true;
-                }
+            if (current.stance == KatanaStanceManager.DRAWING
+                    || current.stance == KatanaStanceManager.LAKAI_READY
+                    || current.stance == KatanaStanceManager.LAKAI_SHEATHING
+                    || KatanaStanceManager.isSpecialStance(current.stance)) {
+                // A click during draw is ignored: the player must reach the full combat guard first.
+                // The sheathed special also owns input until its recovery animation completes.
                 return current;
+            }
+
+            if (current.stance == KatanaStanceManager.LOWER_GUARD) {
+                Entry reengaging = new Entry(KatanaStanceManager.UNSHEATHED, now, now, now);
+                reengaging.setBlend(prevClip, prevSec, now, ATTACK_REENGAGE_BLEND_NANOS);
+                return reengaging;
             }
 
             if (KatanaStanceManager.isAttackStance(current.stance)) {
@@ -132,7 +146,7 @@ public final class KatanaClientStanceState {
                 return current;
             }
 
-            // UNSHEATHED or LOWER_GUARD: transition cleanly into the next combo attack.
+            // Only the complete UNSHEATHED combat guard may start a damaging attack.
             int nextStep = (current.stance == KatanaStanceManager.UNSHEATHED && current.comboStep > 0
                     && (now - current.lastAttackNanos) <= COMBO_WINDOW_NANOS)
                     ? ((current.comboStep % 3) + 1)
@@ -257,16 +271,11 @@ public final class KatanaClientStanceState {
                 case KatanaStanceManager.DRAWING -> {
                     if (elapsed < DRAW_NANOS) return;
                     long boundary = entry.stateStartedNanos + DRAW_NANOS;
-                    if (entry.queuedAttack) {
-                        startAttack(entry, 1, boundary,
-                                KatanaAnimationLibrary.clipFor(KatanaStanceManager.DRAWING),
-                                DRAW_NANOS / 1_000_000_000.0F, 60_000_000L);
-                    } else {
-                        entry.stance = KatanaStanceManager.UNSHEATHED;
-                        entry.stateStartedNanos = boundary;
-                        entry.combatReadyNanos = boundary;
-                        entry.comboStep = 0;
-                    }
+                    entry.stance = KatanaStanceManager.UNSHEATHED;
+                    entry.stateStartedNanos = boundary;
+                    entry.combatReadyNanos = boundary;
+                    entry.comboStep = 0;
+                    entry.queuedAttack = false;
                 }
                 case KatanaStanceManager.ATTACK_1 -> {
                     if (entry.queuedAttack && elapsed >= ATTACK_1_CHAIN_NANOS) {
@@ -347,6 +356,33 @@ public final class KatanaClientStanceState {
                     entry.stateStartedNanos += SHEATH_NANOS;
                     return;
                 }
+                case KatanaStanceManager.SPECIAL_DASH -> {
+                    if (elapsed < SPECIAL_TOTAL_NANOS) return;
+                    long boundary = entry.stateStartedNanos + SPECIAL_TOTAL_NANOS;
+                    entry.setBlend(KatanaAnimationLibrary.clipFor(KatanaStanceManager.SPECIAL_DASH),
+                            SPECIAL_TOTAL_NANOS / 1_000_000_000.0F, boundary, 80_000_000L);
+                    entry.stance = KatanaStanceManager.SPECIAL_RECOVERY;
+                    entry.stateStartedNanos = boundary;
+                }
+                case KatanaStanceManager.SPECIAL_RECOVERY -> {
+                    if (elapsed < SPECIAL_RECOVERY_NANOS) return;
+                    entry.stance = KatanaStanceManager.LAKAI_READY;
+                    entry.stateStartedNanos += SPECIAL_RECOVERY_NANOS;
+                    return;
+                }
+                case KatanaStanceManager.LAKAI_SHEATHING -> {
+                    if (elapsed < SHEATH_NANOS) return;
+                    long boundary = entry.stateStartedNanos + SHEATH_NANOS;
+                    entry.setBlend(KatanaAnimationLibrary.clipFor(KatanaStanceManager.LAKAI_SHEATHING),
+                            SHEATH_NANOS / 1_000_000_000.0F, boundary, SHEATH_BLEND_NANOS);
+                    entry.stance = KatanaStanceManager.LAKAI_READY;
+                    entry.stateStartedNanos = boundary;
+                    return;
+                }
+                case KatanaStanceManager.LAKAI_READY -> {
+                    // This is a persistent sheathed two-hand hold. It changes only on server input.
+                    return;
+                }
                 default -> {
                     entry.stance = KatanaStanceManager.SHEATHED;
                     return;
@@ -356,7 +392,7 @@ public final class KatanaClientStanceState {
     }
 
     private static int validStance(int stance) {
-        return stance >= KatanaStanceManager.SHEATHED && stance <= KatanaStanceManager.ATTACK_3
+        return stance >= KatanaStanceManager.SHEATHED && stance <= KatanaStanceManager.LAKAI_SHEATHING
                 ? stance : KatanaStanceManager.SHEATHED;
     }
 

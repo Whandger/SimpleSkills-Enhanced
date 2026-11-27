@@ -73,21 +73,29 @@ public abstract class KatanaFirstPersonHandsAndItemsRendererMixin {
         if (mainHand) {
             float growth = KatanaGrip.mainHandGrowth(state, seconds);
             if (growth > 0.0F) {
-                float[] grip = KatanaGrip.point(pose, KatanaGrip.MAIN_HAND_ALONG_TSUKA);
+                float[] grip = KatanaStanceManager.isSheathedGripStance(state)
+                        ? KatanaGrip.sayaPoint(pose, KatanaGrip.SPECIAL_MAIN_HAND_SAYA_ALONG)
+                        : KatanaGrip.point(pose, KatanaGrip.MAIN_HAND_ALONG_TSUKA);
                 simpleskills$renderGrippingHand(poseStack, collector, lightCoords, playerState, avatar,
                         handArm, inverseArmHeight, grip, growth);
             }
 
-            if (state == KatanaStanceManager.SHEATHED) {
+            if (state == KatanaStanceManager.SHEATHED || KatanaStanceManager.isSheathedGripStance(state)) {
+                // The special technique never unsheathes the blade: render the complete saya+tsuka model.
                 KatanaRenderUtil.submitSheathed(poseStack, collector, lightCoords, player, pose, 0, false);
             } else {
                 KatanaRenderUtil.submitSaya(poseStack, collector, lightCoords, player, pose, 0, false);
                 KatanaRenderUtil.submitBlade(poseStack, collector, lightCoords, player, pose, 0, false);
             }
         } else {
-            float[] sayaGrip = KatanaGrip.sayaPoint(pose, KatanaGrip.SAYA_GRIP_ALONG);
-            float[] tsukaGrip = KatanaGrip.point(pose, KatanaGrip.OFF_HAND_ALONG_TSUKA);
-            float[] grip = KatanaGrip.lerp(sayaGrip, tsukaGrip, KatanaGrip.tsukaWeight(pose));
+            float[] grip;
+            if (KatanaStanceManager.isSheathedGripStance(state)) {
+                grip = KatanaGrip.sayaPoint(pose, KatanaGrip.SPECIAL_OFF_HAND_SAYA_ALONG);
+            } else {
+                float[] sayaGrip = KatanaGrip.sayaPoint(pose, KatanaGrip.SAYA_GRIP_ALONG);
+                float[] tsukaGrip = KatanaGrip.point(pose, KatanaGrip.OFF_HAND_ALONG_TSUKA);
+                grip = KatanaGrip.lerp(sayaGrip, tsukaGrip, KatanaGrip.tsukaWeight(pose));
+            }
             simpleskills$renderGrippingHand(poseStack, collector, lightCoords, playerState, avatar,
                     handArm, inverseArmHeight, grip, 1.0F);
         }

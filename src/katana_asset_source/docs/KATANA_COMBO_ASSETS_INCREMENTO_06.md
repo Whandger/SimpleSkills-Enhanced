@@ -1,6 +1,6 @@
 # Combo de 3 ataques — integração dos assets (incremento 06)
 
-> **Registro histórico:** este documento descreve a etapa anterior à consolidação do rig global. Na fonte atual, os clipes `firstperson.*` foram removidos do runtime e dos dois projetos `.bbmodel`; os nove clipes globais (incluindo `walk` e `lower_guard`) são a única fonte de animação. Consulte `KATANA_ANIMACAO_GLOBAL.md`.
+> **Registro histórico:** este documento descreve a etapa anterior à consolidação do rig global. Na fonte atual, os clipes `firstperson.*` foram removidos do runtime e dos dois projetos `.bbmodel`; os onze clipes globais (incluindo caminhada, guarda relaxada e técnica especial) são a única fonte de animação. Consulte `KATANA_ANIMACAO_GLOBAL.md`.
 
 
 Esta atualização incorpora os seis clipes fornecidos no material Gemini de 27/11/2026.

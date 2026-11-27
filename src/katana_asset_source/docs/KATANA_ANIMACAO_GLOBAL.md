@@ -1,41 +1,40 @@
-# Katana do Último Juramento — animações separadas e máquina de combate
+# Katana do Último Juramento — rig global, estados e combate
 
-Esta entrega integra os nove clipes globais do Gemini, separados por estado e espelhados entre fonte e runtime. A terceira pessoa é a fonte de keyframes; a primeira pessoa projeta o mesmo rig, sem tracks `firstperson.*`.
+A terceira pessoa é a fonte única dos keyframes. A primeira pessoa projeta o mesmo rig global; não existem tracks `firstperson.*` independentes. Os clipes estão separados em arquivos individuais e são carregados por `animations/manifest.json`.
 
-## Clipes ativos
+## Onze clipes ativos
 
-- `00_embainhada/idle_sheathed.animation.json` — katana embainhada (loop).
-- `01_saque/draw_katana.animation.json` — desembainhar (1,25 s).
-- `02_guarda_combate/idle_unsheathed.animation.json` — guarda/postura de batalha (loop, pose-base).
-- `03_ataques/attack_1_horizontal.animation.json` — golpe horizontal (0,46 s).
-- `03_ataques/attack_2_rising_diagonal.animation.json` — golpe diagonal ascendente (0,50 s).
-- `03_ataques/attack_3_overhead_finisher.animation.json` — finalizador descendente (0,66 s).
-- `04_embainhar/sheath_katana.animation.json` — embainhar (1,35 s).
-- `05_movimento/walk.animation.json` — ciclo de caminhada (0,80 s, loop).
-- `06_guarda_relaxada/lower_guard.animation.json` — transição para guarda relaxada, espada ainda na mão (0,35 s, hold).
+- `00_embainhada/idle_sheathed.animation.json` — repouso embainhado.
+- `01_saque/draw_katana.animation.json` — saque.
+- `02_guarda_combate/idle_unsheathed.animation.json` — guarda de batalha e pose-base.
+- `03_ataques/attack_1_horizontal.animation.json` — golpe horizontal.
+- `03_ataques/attack_2_rising_diagonal.animation.json` — golpe diagonal ascendente.
+- `03_ataques/attack_3_overhead_finisher.animation.json` — finalizador descendente.
+- `04_embainhar/sheath_katana.animation.json` — embainhar.
+- `05_movimento/walk.animation.json` — caminhada aditiva e contínua.
+- `06_guarda_relaxada/lower_guard.animation.json` — relaxamento mantendo a katana na mão.
+- `07_especial/special_sheathed.animation.json` — dash e seis cortes mantendo a katana embainhada e segurada com as duas mãos.
+- `07_especial/special_sheathed_recovery.animation.json` — retorno à posição embainhada.
 
-`manifest.json` é a lista explícita usada pelo carregador Java. Cada JSON contém exatamente um clipe. Os diretórios `katana_asset_source/animations/` e `main/resources/assets/simpleskills/katana/animations/` devem permanecer idênticos.
+## Regras de combate
 
-## Máquina de estados
+- Primeiro clique esquerdo com a katana embainhada apenas inicia o saque (25 ticks / 1,25 s). Não causa dano.
+- Cliques durante o saque são ignorados. É necessário terminar o saque e ficar na guarda de batalha; somente um novo clique causa o primeiro golpe.
+- Os ataques normais encadeiam os três clipes com buffer de entrada e janelas curtas de combo.
+- Em `LOWER_GUARD`, o primeiro clique apenas retorna à guarda de batalha; o seguinte inicia um ataque.
+- O dano normal usa o atributo de ataque e não depende da força/cooldown vanilla; o dano vanilla e os indicadores vanilla são desativados para a katana.
+- Após 2 s sem atacar na guarda de batalha, começa `lower_guard` (0,35 s). Depois de mais 5 s nessa postura, começa `sheath_katana`.
+- A caminhada aplica o delta do ciclo `walk` sobre a guarda ativa e suaviza o peso conforme a velocidade horizontal.
+- A mão secundária deve permanecer vazia enquanto a katana está na mão principal. O item é transferido ao inventário ou dropado com aviso quando não há espaço.
 
-- Primeiro clique com a katana embainhada: `DRAWING` (25 ticks / 1,25 s).
-- Depois do saque: `UNSHEATHED` na guarda de combate.
-- Ataques: combo `ATTACK_1` → `ATTACK_2` → `ATTACK_3`, com buffer e janela de encadeamento.
-- Após 2 s sem atacar: `LOWER_GUARD` (0,35 s de transição), mantendo a espada desembainhada.
-- Na guarda relaxada, pode continuar caminhando com a katana em mãos.
-- Após mais 5 s nessa postura: `SHEATHING` (1,35 s), depois `SHEATHED`.
+## Técnica especial — Corte do Último Juramento
 
-## Altura da katana
+Ativar com `Shift + clique esquerdo`, somente quando a katana está embainhada e um Mob válido está sob a mira. O especial mantém o modelo `sheathed_model` e as duas mãos segurando a saya durante toda a técnica; não desembainha a lâmina. O jogador avança em linha reta por até 6 blocos para terminar atrás do alvo. O Mob fica atordoado por 1 s e depois recebe seis cortes, espaçados por 2 ticks, cuja soma equivale a 2× `ATTACK_DAMAGE`. O cooldown de dano é zerado antes de cada hit. VFX usa partículas e sons já disponíveis no mod.
 
-O Y-base da katana está em **18.2** após uma correção fina de 1,0 unidade para baixo em relação a 19.2. Consulte `AJUSTE_ALTURA_KATANA.md`. A transição de `lower_guard` para `sheath_katana` foi alinhada para que o primeiro frame de embainhar parta da guarda relaxada final, sem salto.
+## Altura de repouso
 
-## Fonte, runtime e Blockbench
+O valor atual de `katana.position` na pose-base é Y=**17.7**. Isso representa mais 0,5 unidade para baixo em relação à versão Y=18.2 (aproximadamente 1 px na referência de calibração). JSONs de fonte/runtime e os dois projetos Blockbench estão sincronizados.
 
-- Fonte JSON: `katana_asset_source/animations/`.
-- JSON carregado pelo jogo: `main/resources/assets/simpleskills/katana/animations/`.
-- Projeto Blockbench editável e atualizado com os nove clipes: `katana_asset_source/models/katana_ultimo_juramento.bbmodel`.
-- Cópia de runtime do projeto Blockbench: `main/resources/assets/simpleskills/katana/models/katana_ultimo_juramento.bbmodel`.
+## Validação
 
-## Limites da validação
-
-JSON, manifestos, espelhamento source/runtime, continuidade numérica e estrutura `.bbmodel` foram verificados neste pacote. A compilação Gradle e a execução dentro do Minecraft 26.3 ainda precisam ser feitas no workspace completo, pois o material de entrada contém somente `src/`, sem `gradlew`/`build.gradle` na raiz.
+Os 11 clipes, manifestos, espelhamento fonte/runtime e os dois projetos Blockbench foram validados estruturalmente. O build Gradle e o teste visual em Minecraft 26.3 precisam ser executados na raiz completa do repositório; este pacote contém somente `src/`.

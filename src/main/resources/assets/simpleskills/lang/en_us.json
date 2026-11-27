@@ -683,5 +683,9 @@
   "message.simpleskills.abyssal_king_relic_collected": "Collected %s",
   "item.simpleskills.katana_ultimo_juramento": "Katana of the Last Oath",
   "message.simpleskills.katana.lakai_enabled": "Lakai mode enabled. The Abyssal Cut is ready.",
-  "message.simpleskills.katana.parry_enabled": "Parry mode enabled."
+  "message.simpleskills.katana.parry_enabled": "Parry mode enabled.",
+  "message.simpleskills.katana.offhand_dropped": "%s was dropped because the katana requires both hands.",
+  "message.simpleskills.katana.special_requires_sheathed": "The Last Oath Cut can only be used while the katana is sheathed.",
+  "message.simpleskills.katana.special_target_required": "Aim at an enemy to use the Last Oath Cut.",
+  "message.simpleskills.katana.special_target_too_far": "That enemy is too far away for the katana dash (maximum 6 blocks)."
 }

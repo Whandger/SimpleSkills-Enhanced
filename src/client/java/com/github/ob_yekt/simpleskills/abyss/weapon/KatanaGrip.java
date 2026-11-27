@@ -18,6 +18,9 @@ public final class KatanaGrip {
      * Negative values go toward the tip, which is the -Y direction of the saya bone.
      */
     public static final float SAYA_GRIP_ALONG = -0.15F;
+    /** Both hands hold separate points along the saya during the sheathed special technique. */
+    public static final float SPECIAL_MAIN_HAND_SAYA_ALONG = -0.02F;
+    public static final float SPECIAL_OFF_HAND_SAYA_ALONG = -0.43F;
 
     public static final float WRIST_OUT = 0.44F;
     public static final float WRIST_UP = 0.67F;
@@ -89,6 +92,10 @@ public final class KatanaGrip {
             case KatanaStanceManager.LOWER_GUARD:
                 return 1.0F - smooth(seconds / GRIP_BLEND_SECONDS);
             case KatanaStanceManager.SHEATHING:
+            case KatanaStanceManager.LAKAI_SHEATHING:
+            case KatanaStanceManager.SPECIAL_DASH:
+            case KatanaStanceManager.SPECIAL_RECOVERY:
+            case KatanaStanceManager.LAKAI_READY:
                 return 0.0F;
             default:
                 return 0.0F;
@@ -102,8 +109,8 @@ public final class KatanaGrip {
     }
 
     /**
-     * Growth factor of the main hand, from 0 (hidden) to 1 (fully shown). Remains 1.0 throughout
-     * {@code UNSHEATHED}, {@code ATTACK_1..3}, and {@code LOWER_GUARD} because the katana stays in hand.
+     * Growth factor of the main hand, from 0 (hidden) to 1 (fully shown). Remains fully visible
+     * through combat and the Lakai two-hand sheathed hold; only fades during sheathing transitions.
      */
     public static float mainHandGrowth(int stance, float seconds) {
         switch (stance) {
@@ -114,8 +121,12 @@ public final class KatanaGrip {
             case KatanaStanceManager.ATTACK_1:
             case KatanaStanceManager.ATTACK_2:
             case KatanaStanceManager.ATTACK_3:
+            case KatanaStanceManager.SPECIAL_DASH:
+            case KatanaStanceManager.SPECIAL_RECOVERY:
+            case KatanaStanceManager.LAKAI_READY:
                 return 1.0F;
             case KatanaStanceManager.SHEATHING:
+            case KatanaStanceManager.LAKAI_SHEATHING:
                 return 1.0F - smooth((seconds - (SHEATH_SECONDS - HAND_GROW_SECONDS)) / HAND_GROW_SECONDS);
             default:
                 return 0.0F;

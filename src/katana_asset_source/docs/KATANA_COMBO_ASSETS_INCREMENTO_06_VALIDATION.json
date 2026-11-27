@@ -25,7 +25,7 @@
   "render_gifs_received": false,
   "first_person_runtime_pose_alignment": "Attack 1 entry and Attack 3 exit aligned to existing runtime firstperson.idle_unsheathed for saya and katana; internal paths preserved.",
   "status": "historical_pre_global_rig_consolidation",
-  "note": "Historical validation of the former dual-perspective asset set. Current source/runtime and both Blockbench projects contain nine shared global clips; firstperson.* clips are not active. See KATANA_ANIMACAO_GLOBAL.md and STATUS_ANIMACOES_SEPARADAS.md.",
+  "note": "Validação histórica da antiga separação de perspectivas. O runtime atual contém onze clipes globais, incluindo caminhada, guarda relaxada e técnica especial embainhada; não há tracks firstperson.* ativas. Consulte KATANA_ANIMACAO_GLOBAL.md e STATUS_ANIMACOES_SEPARADAS.md.",
   "current_global_clip_count": 9,
   "current_global_clips": [
     "idle_sheathed",
