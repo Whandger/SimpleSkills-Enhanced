@@ -1,0 +1,35 @@
+{
+  "loaded_clips": [
+    "animation.katana_ultimo_juramento.idle_sheathed",
+    "animation.katana_ultimo_juramento.draw_katana",
+    "animation.katana_ultimo_juramento.idle_unsheathed",
+    "animation.katana_ultimo_juramento.attack_1_horizontal",
+    "animation.katana_ultimo_juramento.attack_2_rising_diagonal",
+    "animation.katana_ultimo_juramento.attack_3_overhead_finisher",
+    "animation.katana_ultimo_juramento.sheath_katana",
+    "animation.katana_ultimo_juramento.walk",
+    "animation.katana_ultimo_juramento.lower_guard"
+  ],
+  "loaded_clip_count": 9,
+  "source_runtime_identical": true,
+  "firstperson_separate_clips": false,
+  "combo_sequence": [
+    "attack_1_horizontal",
+    "attack_2_rising_diagonal",
+    "attack_3_overhead_finisher"
+  ],
+  "stance_timers_ticks_20tps": {
+    "draw_katana": 25,
+    "combat_guard_before_lower_guard": 40,
+    "lower_guard_transition": 7,
+    "lower_guard_hold_after_transition": 100,
+    "lower_guard_total_before_sheath": 107,
+    "sheath_katana": 27
+  },
+  "notes": [
+    "All 9 global animation clips are present in both katana_asset_source/animations and main/resources/assets/simpleskills/katana/animations.",
+    "Numerical continuity verified across draw, combat guard, 3-hit combo, walk loop, lower_guard transition, and sheath.",
+    "Java state machine and renderers implement 3-hit combo progression, smooth cross-fades, walk blending, and 2s + (0.35s transition + 5s) timers.",
+    "Build check: Gradle root was not included in the provided src-only context; compilation and in-game runtime must be validated in the full workspace."
+  ]
+}

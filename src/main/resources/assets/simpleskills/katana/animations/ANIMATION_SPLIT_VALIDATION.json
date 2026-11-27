@@ -1,0 +1,33 @@
+{
+  "loaded_clips": [
+    "animation.katana_ultimo_juramento.idle_sheathed",
+    "animation.katana_ultimo_juramento.draw_katana",
+    "animation.katana_ultimo_juramento.idle_unsheathed",
+    "animation.katana_ultimo_juramento.attack_1_horizontal",
+    "animation.katana_ultimo_juramento.attack_2_rising_diagonal",
+    "animation.katana_ultimo_juramento.attack_3_overhead_finisher",
+    "animation.katana_ultimo_juramento.sheath_katana"
+  ],
+  "loaded_clip_count": 7,
+  "future_templates": [
+    "walk",
+    "lower_guard"
+  ],
+  "source_runtime_identical": true,
+  "total_valid_json_files_under_src": 522,
+  "bbmodel_animation_names": [
+    "idle_sheathed",
+    "draw_katana",
+    "idle_unsheathed",
+    "sheath_katana",
+    "attack_1_horizontal",
+    "attack_2_rising_diagonal",
+    "attack_3_overhead_finisher"
+  ],
+  "notes": [
+    "The Java loader now reads animations/manifest.json and then one JSON resource per clip.",
+    "Walk and lower_guard are templates only and are not loaded by runtime.",
+    "Stance manager/attack behavior was not changed in this file-organization task.",
+    "Source ZIP provided by the user contained src only, not the Gradle project root; full Gradle build was unavailable."
+  ]
+}

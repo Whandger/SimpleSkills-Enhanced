@@ -13,6 +13,7 @@ import com.github.ob_yekt.simpleskills.ui.SkillOverviewRequestPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerActionPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerClientState;
 import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager;
+import com.github.ob_yekt.simpleskills.abyss.AbyssalKatanaItems;
 import com.github.ob_yekt.simpleskills.crafting.TranscendentToolTogglePayload;
 import net.minecraft.world.phys.Vec3;
 import java.util.UUID;
@@ -117,7 +118,8 @@ public class Keybinds {
             if (TOGGLE_TRANSCENDENT_AREA_KEY.consumeClick() && client.gui.screen() == null
                     && ClientPlayNetworking.canSend(TranscendentToolTogglePayload.TYPE)) {
                 var held = client.player.getMainHandItem();
-                if (CraftingEquipmentManager.stackHasPerk(held, "worldbreaker")
+                if (AbyssalKatanaItems.isKatana(held.getItem())
+                        || CraftingEquipmentManager.stackHasPerk(held, "worldbreaker")
                         || CraftingEquipmentManager.stackHasPerk(held, "buried_truth")
                         || CraftingEquipmentManager.stackHasPerk(held, "edens_dominion")) {
                     ClientPlayNetworking.send(new TranscendentToolTogglePayload(

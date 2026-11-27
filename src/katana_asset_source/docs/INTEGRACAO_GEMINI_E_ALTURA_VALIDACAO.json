@@ -1,0 +1,50 @@
+{
+  "base": "src(20261127-154251).zip",
+  "gemini_patch": "SimpleSkills_Katana_Caminhada_Combate_src (1).zip",
+  "active_clip_count": 9,
+  "active_clips": [
+    "animation.katana_ultimo_juramento.idle_sheathed",
+    "animation.katana_ultimo_juramento.draw_katana",
+    "animation.katana_ultimo_juramento.idle_unsheathed",
+    "animation.katana_ultimo_juramento.attack_1_horizontal",
+    "animation.katana_ultimo_juramento.attack_2_rising_diagonal",
+    "animation.katana_ultimo_juramento.attack_3_overhead_finisher",
+    "animation.katana_ultimo_juramento.sheath_katana",
+    "animation.katana_ultimo_juramento.walk",
+    "animation.katana_ultimo_juramento.lower_guard"
+  ],
+  "combat_guard_katana_y": 18.2,
+  "height_adjustment": "-1.0 unidade Y (~2 px para baixo) em relação à versão anterior Y=19.2",
+  "source_runtime_json_identical": true,
+  "source_runtime_manifest_identical": true,
+  "source_runtime_bbmodel_identical": true,
+  "bbmodel_clip_count": 9,
+  "removed_old_monolithic_animation_json": true,
+  "firstperson_tracks_in_manifest": false,
+  "continuity_checks": [
+    "draw_katana -> idle_unsheathed",
+    "idle_unsheathed -> walk loop start/end",
+    "attack_1 -> attack_2",
+    "attack_2 -> attack_3",
+    "attack_3 -> idle_unsheathed",
+    "idle_unsheathed -> lower_guard",
+    "lower_guard -> sheath_katana",
+    "sheath_katana -> idle_sheathed"
+  ],
+  "gradle_build": "not run: input contained src/ only; Gradle root not present",
+  "minecraft_26_3_runtime": "not run in this environment",
+  "sheath_transition_start": "lower_guard(0.35)",
+  "pose_base_katana_position": [
+    -1.2,
+    18.2,
+    8.2
+  ],
+  "notes": [
+    "Merged Gemini combat/walk implementation files over the full user-provided src tree.",
+    "Selected Y=19.2, midpoint between original 13.2 and prior too-high 25.2.",
+    "Aligned sheath_katana first pose to lower_guard final pose to avoid a pop after the 5-second relaxed hold.",
+    "Both Blockbench projects rebuilt from all nine global JSON clips while preserving geometry, textures, locators, and bone UUIDs.",
+    "Live Sync patch/server not included.",
+    "Correção fina aplicada: katana baixada 1.0 unidade Y (~2 px), com transições graduais no saque/embainhar; idle_sheathed, saya, rotações, escalas, braços, corpo, modelos geométricos e Java preservados."
+  ]
+}

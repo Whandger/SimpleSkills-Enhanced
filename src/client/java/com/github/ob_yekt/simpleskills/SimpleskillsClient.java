@@ -8,6 +8,9 @@ import com.github.ob_yekt.simpleskills.celestial.CelestialAltarContent;
 import com.github.ob_yekt.simpleskills.abyss.AbyssContent;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalChestScreen;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalFallenKingClient;
+import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaClientStanceState;
+import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaClientRendering;
+import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaStancePayload;
 import com.github.ob_yekt.simpleskills.celestial.CelestialAltarScreen;
 import com.github.ob_yekt.simpleskills.celestial.CelestialAltarVisualPayload;
 import com.github.ob_yekt.simpleskills.grinder.OreGrinderContent;
@@ -78,6 +81,7 @@ public class SimpleskillsClient implements ClientModInitializer {
         BlockEntityRenderers.register(OreGrinderContent.BLOCK_ENTITY_TYPE, OreGrinderRenderer::new);
         EntityRendererRegistry.register(PrayerVfxEntity.TYPE, PrayerVfxRenderer::new);
         Keybinds.register();
+        KatanaClientRendering.register();
         SkillHudRenderer.register();
         ClientConfig.load();
         InvestigationHud.register();
@@ -86,6 +90,9 @@ public class SimpleskillsClient implements ClientModInitializer {
         AgilityDashHud.register();
         PrayerCooldownHud.register();
         PrayerImpactFeedback.registerClientHooks();
+
+        ClientPlayNetworking.registerGlobalReceiver(KatanaStancePayload.TYPE, (payload, context) ->
+                context.client().execute(() -> KatanaClientStanceState.accept(payload)));
 
         ClientPlayNetworking.registerGlobalReceiver(CelestialAltarVisualPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> CelestialAltarAnimationController.onServerConfirmed(payload)));
@@ -200,6 +207,7 @@ public class SimpleskillsClient implements ClientModInitializer {
         );
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            KatanaClientStanceState.clear();
             CelestialAltarAnimationController.reset();
             GatheringSpeed.resetClientLevels();
             AgilityClientState.reset();

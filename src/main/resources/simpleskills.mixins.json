@@ -101,6 +101,10 @@
     "ItemStackLayerRenderStateAccessor",
     "RuneEquipmentLayerRendererMixin",
     "RuneItemStackLayerVfxMixin",
-    "TranscendentVisionOutlineMixin"
+    "TranscendentVisionOutlineMixin",
+    "KatanaPlayerItemInHandLayerMixin",
+    "KatanaPlayerModelMixin",
+    "KatanaFirstPersonHandsAndItemsRendererMixin",
+    "KatanaMinecraftAttackMixin"
   ]
 }

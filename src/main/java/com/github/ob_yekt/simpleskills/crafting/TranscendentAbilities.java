@@ -1,5 +1,7 @@
 package com.github.ob_yekt.simpleskills.crafting;
 
+import com.github.ob_yekt.simpleskills.abyss.AbyssalKatanaItems;
+
 import com.github.ob_yekt.simpleskills.VeinMining;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -62,6 +64,8 @@ public final class TranscendentAbilities {
     private static final Set<UUID> WORLDBREAKER_DISABLED = ConcurrentHashMap.newKeySet();
     private static final Set<UUID> BURIED_TRUTH_DISABLED = ConcurrentHashMap.newKeySet();
     private static final Set<UUID> EDEN_DOMINION_DISABLED = ConcurrentHashMap.newKeySet();
+    /** Players with Lakai mode enabled on the unique Abyssal Katana; absent means Parry mode. */
+    private static final Set<UUID> KATANA_LAKAI_ENABLED = ConcurrentHashMap.newKeySet();
     private static final Map<UUID, Boolean> WORLDBREAKER_PREVIEW_ACTIVE = new ConcurrentHashMap<>();
     private static final Map<UUID, String> WORLDBREAKER_PREVIEW_CACHE = new ConcurrentHashMap<>();
     private static final Map<UUID, HomingData> HOMING_ARROWS = new ConcurrentHashMap<>();
@@ -277,6 +281,16 @@ public final class TranscendentAbilities {
                 SoundSource.PLAYERS, 1.2F, 0.7F);
     }
 
+    /** True while the unique Abyssal Katana is configured for its active Lakai ability. */
+    public static boolean isKatanaLakaiEnabled(ServerPlayer player) {
+        return player != null && KATANA_LAKAI_ENABLED.contains(player.getUUID());
+    }
+
+    /** Parry is the katana's default mode; Lakai replaces it while the weapon mode is enabled. */
+    public static boolean isKatanaParryEnabled(ServerPlayer player) {
+        return player != null && !KATANA_LAKAI_ENABLED.contains(player.getUUID());
+    }
+
     /** Area effects for the pickaxe, shovel and hoe have independent toggles and start enabled. */
     public static boolean isWorldbreakerAreaEnabled(ServerPlayer player) {
         return player != null && !WORLDBREAKER_DISABLED.contains(player.getUUID());
@@ -294,6 +308,22 @@ public final class TranscendentAbilities {
     public static void toggleToolAreaEffect(ServerPlayer player) {
         if (player == null) return;
         ItemStack held = player.getMainHandItem();
+
+        // The existing L key is shared: the katana switches between defensive Parry
+        // mode (default) and offensive Lakai mode without changing tool behavior.
+        if (AbyssalKatanaItems.isKatana(held.getItem())) {
+            boolean enabled;
+            if (KATANA_LAKAI_ENABLED.remove(player.getUUID())) {
+                enabled = false;
+            } else {
+                KATANA_LAKAI_ENABLED.add(player.getUUID());
+                enabled = true;
+            }
+            player.sendSystemMessage(Component.translatable(enabled
+                    ? "message.simpleskills.katana.lakai_enabled"
+                    : "message.simpleskills.katana.parry_enabled"));
+            return;
+        }
         UUID playerId = player.getUUID();
         if (held.is(ItemTags.PICKAXES) && CraftingEquipmentManager.stackHasPerk(held, "worldbreaker")) {
             boolean enabled;
@@ -593,6 +623,7 @@ public final class TranscendentAbilities {
         WORLDBREAKER_DISABLED.remove(playerId);
         BURIED_TRUTH_DISABLED.remove(playerId);
         EDEN_DOMINION_DISABLED.remove(playerId);
+        KATANA_LAKAI_ENABLED.remove(playerId);
         HOMING_ARROWS.entrySet().removeIf(e -> e.getValue().owner().equals(playerId));
         SINGULARITY_PROJECTILES.entrySet().removeIf(e -> e.getValue().owner().equals(playerId));
         SINGULARITIES.removeIf(field -> field.owner.equals(playerId));

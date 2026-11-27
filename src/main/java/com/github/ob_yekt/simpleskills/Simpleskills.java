@@ -6,6 +6,8 @@ import com.github.ob_yekt.simpleskills.abyss.AbyssalDeadTreeFeature;
 import com.github.ob_yekt.simpleskills.abyss.AbyssContent;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalFallenKingEntity;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalKingItems;
+import com.github.ob_yekt.simpleskills.abyss.AbyssalKatanaItems;
+import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaStanceManager;
 import com.github.ob_yekt.simpleskills.abyss.AbyssWorldgen;
 import com.github.ob_yekt.simpleskills.managers.*;
 import com.github.ob_yekt.simpleskills.events.EventHandlers;
@@ -68,6 +70,7 @@ public class Simpleskills implements ModInitializer {
 		RuneContent.register();
 		AbyssContent.register();
 		AbyssalKingItems.register();
+		AbyssalKatanaItems.register();
 		AbyssalSolidCaveFormationFeature.registerType();
 		AbyssalDeadTreeFeature.registerType();
 		RuneMiningManager.register();
@@ -89,6 +92,7 @@ public class Simpleskills implements ModInitializer {
 		AgilityManager.registerPayloads();
 		RankTitleManager.registerPayloads();
 		CraftingEquipmentManager.registerPayloads();
+		KatanaStanceManager.registerPayloads();
 		SkillOverviewManager.registerPayloads();
 		PrayerManager.registerPayloads();
 		PrayerVfxEntity.register();
@@ -102,6 +106,7 @@ public class Simpleskills implements ModInitializer {
 		DefenseCombat.register();
 		AgilityManager.register();
 		CraftingEquipmentManager.register();
+		KatanaStanceManager.register();
 		CelestialAltarManager.register();
 		RankTitleManager.registerReceivers();
 		SkillOverviewManager.registerReceivers();

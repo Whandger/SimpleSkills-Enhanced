@@ -569,7 +569,7 @@
   "message.simpleskills.crafting.rarity_already_applied": "This item already has a crafting rarity.",
   "message.simpleskills.crafting.rarity_not_supported": "This item cannot receive a crafting rarity.",
   "message.simpleskills.crafting.rarity_forced": "Applied %s rarity to the held item.",
-  "key.simpleskills.toggle_transcendent_area": "Toggle Transcendent Tool Area Effect",
+  "key.simpleskills.toggle_transcendent_area": "Toggle special weapon/tool ability mode",
   "message.simpleskills.transcendent_area.requires_tool": "Hold a Transcendent pickaxe, shovel or hoe to toggle its area effect.",
   "message.simpleskills.transcendent_area.buried_truth_enabled": "Buried Truth 3x3 effect enabled.",
   "message.simpleskills.transcendent_area.buried_truth_disabled": "Buried Truth 3x3 effect disabled.",
@@ -680,5 +680,8 @@
   "item.simpleskills.abyssal_king_sword": "Abyssal King's Sword",
   "item.simpleskills.abyssal_king_crown": "Abyssal King's Crown",
   "message.simpleskills.abyssal_king_relic_inventory_full": "Your inventory is full. The relic remains here.",
-  "message.simpleskills.abyssal_king_relic_collected": "Collected %s"
+  "message.simpleskills.abyssal_king_relic_collected": "Collected %s",
+  "item.simpleskills.katana_ultimo_juramento": "Katana of the Last Oath",
+  "message.simpleskills.katana.lakai_enabled": "Lakai mode enabled. The Abyssal Cut is ready.",
+  "message.simpleskills.katana.parry_enabled": "Parry mode enabled."
 }

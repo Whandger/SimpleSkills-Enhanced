@@ -569,7 +569,7 @@
   "message.simpleskills.crafting.rarity_already_applied": "Este item já possui uma raridade de Crafting.",
   "message.simpleskills.crafting.rarity_not_supported": "Este item não pode receber uma raridade de Crafting.",
   "message.simpleskills.crafting.rarity_forced": "Raridade %s aplicada ao item na mão.",
-  "key.simpleskills.toggle_transcendent_area": "Alternar efeito de área da ferramenta transcendente",
+  "key.simpleskills.toggle_transcendent_area": "Alternar modo de habilidade especial da arma/ferramenta",
   "message.simpleskills.transcendent_area.requires_tool": "Segure uma picareta, pá ou enxada transcendente para alternar o efeito de área.",
   "message.simpleskills.transcendent_area.buried_truth_enabled": "Efeito 3×3 da Verdade Enterrada ativado.",
   "message.simpleskills.transcendent_area.buried_truth_disabled": "Efeito 3×3 da Verdade Enterrada desativado.",
@@ -680,5 +680,8 @@
   "item.simpleskills.abyssal_king_sword": "Espada do Rei Abissal",
   "item.simpleskills.abyssal_king_crown": "Coroa do Rei Abissal",
   "message.simpleskills.abyssal_king_relic_inventory_full": "Seu inventário está cheio. A relíquia continuará aqui.",
-  "message.simpleskills.abyssal_king_relic_collected": "Você coletou %s"
+  "message.simpleskills.abyssal_king_relic_collected": "Você coletou %s",
+  "item.simpleskills.katana_ultimo_juramento": "Katana do Último Juramento",
+  "message.simpleskills.katana.lakai_enabled": "Modo Lakai ativado. O Corte do Abismo está disponível.",
+  "message.simpleskills.katana.parry_enabled": "Modo Aparar ativado."
 }
