@@ -170,10 +170,18 @@ public class AbyssalSamuraiModel extends EntityModel<AbyssalSamuraiRenderState> 
         PartDefinition leftArm = leftShoulder.addOrReplaceChild("left_arm", CubeListBuilder.create()
                 .texOffs(82, 69).addBox("kote_upper_l", -1.0F, -2.0F, -1.5F, 3.0F, 5.0F, 3.0F, deform),
                 PartPose.ZERO);
-        leftArm.addOrReplaceChild("left_forearm", CubeListBuilder.create()
+        PartDefinition leftForearm = leftArm.addOrReplaceChild("left_forearm", CubeListBuilder.create()
                 .texOffs(94, 69).addBox("kote_forearm_l", -1.0F, 0.0F, -1.5F, 3.0F, 5.0F, 3.0F, deform)
                 .texOffs(106, 69).addBox("tekko_handguard_l", -1.2F, 4.2F, -2.0F, 4.0F, 2.0F, 4.0F, deform),
                 PartPose.offset(0.0F, 3.0F, 0.0F));
+        // The previous rig stopped at the Tekko wrist guard. Add a separate armored fist
+        // below it so the left hand remains visible and follows the arm/forearm animations.
+        leftForearm.addOrReplaceChild("left_hand", CubeListBuilder.create()
+                .texOffs(61, 77).addBox("left_palm", -1.0F, 5.65F, -1.5F,
+                        3.0F, 2.5F, 3.0F, new CubeDeformation(0.035F))
+                .texOffs(61, 77).addBox("left_thumb", -1.45F, 6.0F, -0.75F,
+                        0.9F, 1.75F, 1.55F, new CubeDeformation(0.025F)),
+                PartPose.ZERO);
 
         PartDefinition rightShoulder = chest.addOrReplaceChild("right_shoulder", CubeListBuilder.create()
                 .texOffs(58, 77).addBox("osode_r_top", -3.5F, -2.5F, -3.5F, 4.0F, 2.0F, 7.0F, deform)
@@ -187,6 +195,13 @@ public class AbyssalSamuraiModel extends EntityModel<AbyssalSamuraiRenderState> 
                 .texOffs(70, 77).addBox("kote_forearm_r", -2.0F, 0.0F, -1.5F, 3.0F, 5.0F, 3.0F, deform)
                 .texOffs(82, 77).addBox("tekko_handguard_r", -2.8F, 4.2F, -2.0F, 4.0F, 2.0F, 4.0F, deform),
                 PartPose.offset(0.0F, 3.0F, 0.0F));
+        // Matching right fist: parented to the forearm so it follows the katana grip pose.
+        rightForearm.addOrReplaceChild("right_hand", CubeListBuilder.create()
+                .texOffs(61, 77).addBox("right_palm", -2.0F, 5.65F, -1.5F,
+                        3.0F, 2.5F, 3.0F, new CubeDeformation(0.035F))
+                .texOffs(61, 77).addBox("right_thumb", 0.55F, 6.0F, -0.75F,
+                        0.9F, 1.75F, 1.55F, new CubeDeformation(0.025F)),
+                PartPose.ZERO);
         PartDefinition leftThigh = pelvis.addOrReplaceChild("left_thigh", CubeListBuilder.create()
                 .texOffs(36, 87).addBox("haidate_thigh_l", -1.5F, 0.0F, -2.0F, 3.0F, 6.0F, 4.0F, deform),
                 PartPose.offset(2.2F, 0.0F, 0.0F));
