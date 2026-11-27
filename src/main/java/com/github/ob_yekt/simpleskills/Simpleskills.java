@@ -5,6 +5,7 @@ import com.github.ob_yekt.simpleskills.abyss.AbyssalSolidCaveFormationFeature;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalDeadTreeFeature;
 import com.github.ob_yekt.simpleskills.abyss.AbyssContent;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalFallenKingEntity;
+import com.github.ob_yekt.simpleskills.abyss.AbyssalSamuraiEntity;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalKingItems;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalKatanaItems;
 import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaStanceManager;
@@ -62,6 +63,7 @@ public class Simpleskills implements ModInitializer {
 		// Register aquatic content before FishingConfig reads the registered species list.
 		FishingEntities.register();
 		AbyssalFallenKingEntity.register();
+		AbyssalSamuraiEntity.register();
 		FishingItems.register();
 		FishingSpeciesRegistration.register();
 

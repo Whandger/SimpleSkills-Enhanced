@@ -32,6 +32,10 @@ public final class AbyssalBridgePiece extends StructurePiece {
     private static final int MAX_FALLEN_LATERAL_PROBE = MAX_FALLEN_LATERAL_REACH + 6;
     // Headroom above the deck that the piece carves itself. Matches the structure's clearance check.
     private static final int HEADROOM_HEIGHT = 10;
+    // Keep a stable central platform for the petrified Samurai statue.
+    private static final int SAMURAI_SAFE_RADIUS = 8;
+    // Extra room accounts for collapse-lane jitter and the rib/fracture edge margins.
+    private static final int SAMURAI_COLLAPSE_BUFFER = SAMURAI_SAFE_RADIUS + 8;
 
     public static final StructurePieceType TYPE = (context, tag) -> new AbyssalBridgePiece(tag);
 
@@ -128,7 +132,7 @@ public final class AbyssalBridgePiece extends StructurePiece {
 
             buildDeckCrossSection(level, box, x, z, deckY, distance, length, pierPositions, damage);
             if (distance % 10 == 0 && !isInsideCollapseRibZone(distance, damage)) {
-                buildUndersideRib(level, box, x, z, deckY, distance, damage);
+                buildUndersideRib(level, box, x, z, deckY, distance, length, damage);
             }
         }
 
@@ -139,6 +143,7 @@ public final class AbyssalBridgePiece extends StructurePiece {
             }
         }
         buildEndAnchors(level, box, damage);
+        placeAbyssalSamurai(level, box, length);
     }
 
     private void buildDeckCrossSection(WorldGenLevel level, BoundingBox box,
@@ -153,13 +158,14 @@ public final class AbyssalBridgePiece extends StructurePiece {
             int px = x + (alongX ? 0 : offset);
             int pz = z + (alongX ? offset : 0);
             int absOffset = Math.abs(offset);
+            boolean protectedCenter = isSamuraiSafeDistance(distance, length);
             int fractureProximity = distanceToCollapseEdge(distance, offset, damage);
-            boolean nearFracture = fractureProximity >= 0 && fractureProximity <= 3;
+            boolean nearFracture = !protectedCenter && fractureProximity >= 0 && fractureProximity <= 3;
 
-            boolean missingTile = damage.wear >= 2
+            boolean missingTile = !protectedCenter && damage.wear >= 2
                     && !nearFracture
                     && damageRoll(distance, offset, 11) < damage.missingTileChance;
-            boolean missingUpperFoundation = damage.wear >= 3
+            boolean missingUpperFoundation = !protectedCenter && damage.wear >= 3
                     && !missingTile
                     && !nearFracture
                     && absOffset < HALF_WIDTH - 2
@@ -169,7 +175,8 @@ public final class AbyssalBridgePiece extends StructurePiece {
             int bottomDrop = 3 + haunchDepth;
             for (int drop = 3; drop <= bottomDrop; drop++) {
                 if (drop > 3 && absOffset == HALF_WIDTH && (distance % 2 == 1)) continue;
-                if (damage.wear >= 3 && drop == bottomDrop && damageRoll(distance, offset + drop, 21) < 16) {
+                if (!protectedCenter && damage.wear >= 3 && drop == bottomDrop
+                        && damageRoll(distance, offset + drop, 21) < 16) {
                     continue;
                 }
                 BlockState structural;
@@ -201,10 +208,11 @@ public final class AbyssalBridgePiece extends StructurePiece {
             // 3. Roadway surface (deckY): 21 blocks wide with outer cornices, side walkways, twin carriageways & royal spine.
             BlockState surface;
             if (absOffset >= HALF_WIDTH - 2 || absOffset == 7 || absOffset == 1) {
-                surface = (nearFracture || (damage.wear >= 2 && damageRoll(distance, offset, 23) < 30))
+                surface = (!protectedCenter && (nearFracture
+                        || (damage.wear >= 2 && damageRoll(distance, offset, 23) < 30)))
                         ? AbyssContent.CRACKED_ABYSSAL_TILES.defaultBlockState()
                         : AbyssContent.POLISHED_ABYSSAL_STONE.defaultBlockState();
-            } else if (nearFracture || isCracked(distance, offset, 7 + damage.wear * 13)) {
+            } else if (!protectedCenter && (nearFracture || isCracked(distance, offset, 7 + damage.wear * 13))) {
                 surface = AbyssContent.CRACKED_ABYSSAL_TILES.defaultBlockState();
             } else if (offset == 0) {
                 if (distance % 32 == 16 && damage.wear < 3) {
@@ -223,26 +231,25 @@ public final class AbyssalBridgePiece extends StructurePiece {
             // 4. Monumental parapets and bastion towers along the outer edges (±HALF_WIDTH).
             if (absOffset == HALF_WIDTH) {
                 boolean strippedByCollapse = fractureProximity >= 0 && fractureProximity <= 2;
-                boolean missingParapet = strippedByCollapse
-                        || (damage.wear >= 1 && damageRoll(distance, offset, 31) < damage.missingParapetChance);
+                boolean missingParapet = !protectedCenter && (strippedByCollapse
+                        || (damage.wear >= 1 && damageRoll(distance, offset, 31) < damage.missingParapetChance));
                 if (!missingParapet) {
                     boolean isPylon = (distance % 10 == 0);
                     BlockState wall;
                     if (isPylon) {
-                        wall = (nearFracture || (damage.wear >= 3 && damageRoll(distance, offset, 37) < 25))
+                        wall = (!protectedCenter && (nearFracture || (damage.wear >= 3 && damageRoll(distance, offset, 37) < 25)))
                                 ? AbyssContent.CRACKED_ABYSSAL_TILES.defaultBlockState()
                                 : AbyssContent.ABYSSAL_PILLAR.defaultBlockState();
                     } else {
-                        wall = (nearFracture || (damage.wear >= 3 && damageRoll(distance, offset, 37) < 22))
+                        wall = (!protectedCenter && (nearFracture || (damage.wear >= 3 && damageRoll(distance, offset, 37) < 22)))
                                 ? AbyssContent.CRACKED_ABYSSAL_TILES.defaultBlockState()
                                 : AbyssContent.ABYSSAL_BRICK_WALL.defaultBlockState();
                     }
                     place(level, box, px, deckY + 1, pz, wall);
                     hasParapetWall[offset + HALF_WIDTH] = true;
 
-                    if (!nearFracture
-                            && isPylon
-                            && damageRoll(distance, offset, 41) >= damage.missingParapetChance) {
+                    if (isPylon && (protectedCenter || (!nearFracture
+                            && damageRoll(distance, offset, 41) >= damage.missingParapetChance))) {
                         place(level, box, px, deckY + 2, pz,
                                 AbyssContent.ABYSSAL_BRICKS.defaultBlockState());
                         if (distance % 30 == 0 && damage.wear < 3) {
@@ -292,11 +299,12 @@ public final class AbyssalBridgePiece extends StructurePiece {
 
     /** Deep transverse arched ribs make the underside look like a monumental stone viaduct. */
     private void buildUndersideRib(WorldGenLevel level, BoundingBox box,
-                                   int x, int z, int deckY, int distance, DamageProfile damage) {
-        if (damage.wear >= 2 && damageRoll(distance, 0, 53) < 12 + damage.wear * 9) return;
+                                   int x, int z, int deckY, int distance, int length, DamageProfile damage) {
+        boolean protectedCenter = isSamuraiSafeDistance(distance, length);
+        if (!protectedCenter && damage.wear >= 2 && damageRoll(distance, 0, 53) < 12 + damage.wear * 9) return;
         for (int offset = -HALF_WIDTH; offset <= HALF_WIDTH; offset++) {
             if (isCollapsedDeckBlock(distance, offset, damage)) continue;
-            if (damage.wear >= 3 && damageRoll(distance, offset, 59) < 15) continue;
+            if (!protectedCenter && damage.wear >= 3 && damageRoll(distance, offset, 59) < 15) continue;
             int drop = 4 + (int) Math.round(5.0D * (1.0D - Math.abs(offset) / (double) HALF_WIDTH));
             int px = x + (alongX ? 0 : offset);
             int pz = z + (alongX ? offset : 0);
@@ -312,7 +320,7 @@ public final class AbyssalBridgePiece extends StructurePiece {
             int px = x + (alongX ? 0 : side);
             int pz = z + (alongX ? side : 0);
             int maxDrop = 3 + (int) Math.round(5.0D * (1.0D - Math.abs(side) / (double) HALF_WIDTH));
-            if (damage.wear >= 3 && damageRoll(distance, side, 61) < 22) continue;
+            if (!protectedCenter && damage.wear >= 3 && damageRoll(distance, side, 61) < 22) continue;
             for (int down = 4; down <= maxDrop; down++) {
                 place(level, box, px, deckY - down, pz,
                         AbyssContent.ABYSSAL_PILLAR.defaultBlockState());
@@ -328,7 +336,7 @@ public final class AbyssalBridgePiece extends StructurePiece {
                             int[] positions, DamageProfile damage) {
         int fallenIndex = -1;
         if (damage.fallenPier && positions.length > 0) {
-            fallenIndex = selectFallenPierIndex(positions, damage);
+            fallenIndex = selectFallenPierIndex(positions, damage, length);
         }
 
         for (int index = 0; index < positions.length; index++) {
@@ -356,17 +364,20 @@ public final class AbyssalBridgePiece extends StructurePiece {
             }
 
             if (!standingPierTouchesBox(box, x, z, deckY)) continue;
-            buildStandingPier(level, box, x, z, deckY, damage);
+            DamageProfile pierDamage = isSamuraiSafeDistance(distance, length)
+                    ? intactDamageProfile() : damage;
+            buildStandingPier(level, box, x, z, deckY, pierDamage);
         }
     }
 
     /** Prefers toppling a pier inside or bordering a collapsed span so cause and effect align. */
-    private int selectFallenPierIndex(int[] positions, DamageProfile damage) {
+    private int selectFallenPierIndex(int[] positions, DamageProfile damage, int length) {
         if (damage.hasCollapse()) {
             List<Integer> failedCandidates = new ArrayList<>();
             List<Integer> borderCandidates = new ArrayList<>();
             for (int i = 0; i < positions.length; i++) {
                 int dist = positions[i];
+                if (isSamuraiSafeDistance(dist, length)) continue;
                 if (isInsideCollapseRibZone(dist, damage)) {
                     failedCandidates.add(i);
                 } else {
@@ -385,7 +396,14 @@ public final class AbyssalBridgePiece extends StructurePiece {
                 return borderCandidates.get(Math.floorMod((int) mix(seed ^ 0x4F1BBCDCBFA54001L), borderCandidates.size()));
             }
         }
-        return Math.floorMod((int) mix(seed ^ 0x4F1BBCDCBFA54001L), positions.length);
+        // A short bridge can have a single, central support pier. Never topple that support.
+        List<Integer> safeCandidates = new ArrayList<>();
+        for (int i = 0; i < positions.length; i++) {
+            if (!isSamuraiSafeDistance(positions[i], length)) safeCandidates.add(i);
+        }
+        if (safeCandidates.isEmpty()) return -1;
+        return safeCandidates.get(Math.floorMod(
+                (int) mix(seed ^ 0x4F1BBCDCBFA54001L), safeCandidates.size()));
     }
 
     /** Scales pier count with span length (~1 colossal pier every 110 blocks). */
@@ -974,11 +992,12 @@ public final class AbyssalBridgePiece extends StructurePiece {
             else mode = "TOTAL_RUIN";
         }
 
-        List<CollapseZone> zones = switch (mode) {
+        List<CollapseZone> generatedZones = switch (mode) {
             case "CENTER_COLLAPSE" -> buildPierAwareCollapseZones(length, pierPositions, false);
             case "TOTAL_RUIN" -> buildPierAwareCollapseZones(length, pierPositions, true);
             default -> List.of();
         };
+        List<CollapseZone> zones = protectSamuraiCenter(length, generatedZones);
 
         return switch (mode) {
             case "INTACT" -> new DamageProfile(mode, "Quase intacta · desgaste mínimo",
@@ -990,17 +1009,82 @@ public final class AbyssalBridgePiece extends StructurePiece {
             case "RUINED" -> new DamageProfile(mode, "Em ruínas · piso e sustentação danificados",
                     3, false, 25, 16, 19, zones);
             case "CENTER_COLLAPSE" -> new DamageProfile(mode,
-                    "Colapso central · vãos entre pilares desabados e destroços no chão",
+                    "Colapsos nos vãos laterais · plataforma central preservada para o Samurai",
                     2, false, 15, 8, 11, zones);
             case "FALLEN_PIER" -> new DamageProfile(mode,
                     "Alicerce tombado · coluna colossal partida e caída em ângulo no chão do Abismo",
                     2, true, 17, 9, 10, zones);
             case "TOTAL_RUIN" -> new DamageProfile(mode,
-                    "Ruína severa · múltiplos vãos centrais desabados e alicerce tombado no chão",
+                    "Ruína severa · vãos externos desabados e plataforma central preservada",
                     3, true, 26, 17, 20, zones);
             default -> new DamageProfile("INTACT", "Quase intacta · desgaste mínimo",
                     0, false, 3, 0, 0, List.of());
         };
+    }
+
+    /** The Samurai stands on a fully repaired section at the midpoint of the viaduct. */
+    private static boolean isSamuraiSafeDistance(int distance, int length) {
+        return Math.abs(distance - length / 2) <= SAMURAI_SAFE_RADIUS;
+    }
+
+    /**
+     * Remove only the part of each collapse zone that could affect the Samurai's central platform.
+     * The outer fragments remain damaged, preserving the bridge's ruined appearance on both sides.
+     */
+    private List<CollapseZone> protectSamuraiCenter(int length, List<CollapseZone> source) {
+        if (source.isEmpty()) return source;
+
+        int center = length / 2;
+        int protectedStart = Math.max(0, center - SAMURAI_COLLAPSE_BUFFER);
+        int protectedEnd = Math.min(length, center + SAMURAI_COLLAPSE_BUFFER);
+        List<CollapseZone> result = new ArrayList<>();
+
+        for (CollapseZone zone : source) {
+            if (zone.endDist < protectedStart || zone.startDist > protectedEnd) {
+                result.add(zone);
+                continue;
+            }
+
+            int leftEnd = Math.min(zone.endDist, protectedStart - 1);
+            if (leftEnd - zone.startDist >= 10) {
+                result.add(new CollapseZone(zone.startDist, leftEnd, zone.zoneSalt));
+            }
+
+            int rightStart = Math.max(zone.startDist, protectedEnd + 1);
+            if (zone.endDist - rightStart >= 10) {
+                result.add(new CollapseZone(rightStart, zone.endDist, zone.zoneSalt + 17));
+            }
+        }
+        return result;
+    }
+
+    private static DamageProfile intactDamageProfile() {
+        return new DamageProfile("INTACT", "Suporte central protegido", 0,
+                false, 0, 0, 0, List.of());
+    }
+
+    /** Adds exactly one persistent Samurai to the chunk that owns the bridge midpoint. */
+    private void placeAbyssalSamurai(WorldGenLevel level, BoundingBox box, int length) {
+        int centerDistance = length / 2;
+        int x = startX + (endX - startX) * centerDistance / length;
+        int z = startZ + (endZ - startZ) * centerDistance / length;
+        int deckY = getDeckY(centerDistance / (double) length);
+        BlockPos spawnPos = new BlockPos(x, deckY + 1, z);
+
+        // The structure is processed once per intersecting chunk; only the chunk containing
+        // this exact block is allowed to create the entity, preventing duplicate Samurai.
+        if (!box.isInside(spawnPos)) return;
+
+        AbyssalSamuraiEntity samurai = new AbyssalSamuraiEntity(AbyssalSamuraiEntity.TYPE, level.getLevel());
+        float yaw;
+        if (alongX) {
+            yaw = endX >= startX ? -90.0F : 90.0F;
+        } else {
+            yaw = endZ >= startZ ? 0.0F : 180.0F;
+        }
+        samurai.snapTo(x + 0.5D, deckY + 1.0D, z + 0.5D, yaw, 0.0F);
+        samurai.setPersistenceRequired();
+        level.addFreshEntity(samurai);
     }
 
     /**

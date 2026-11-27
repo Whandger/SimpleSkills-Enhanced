@@ -680,5 +680,7 @@
   "item.simpleskills.abyssal_king_sword": "Espada del Rey Abisal",
   "item.simpleskills.abyssal_king_crown": "Corona del Rey Abisal",
   "message.simpleskills.abyssal_king_relic_inventory_full": "Tu inventario está lleno. La reliquia permanece aquí.",
-  "message.simpleskills.abyssal_king_relic_collected": "Recogiste %s"
+  "message.simpleskills.abyssal_king_relic_collected": "Recogiste %s",
+  "entity.simpleskills.abyssal_samurai": "Samurái abisal",
+  "item.simpleskills.abyssal_samurai_chestplate": "Peto del samurái abisal"
 }

@@ -680,5 +680,7 @@
   "item.simpleskills.abyssal_king_sword": "سيف ملك الهاوية",
   "item.simpleskills.abyssal_king_crown": "تاج ملك الهاوية",
   "message.simpleskills.abyssal_king_relic_inventory_full": "حقيبتك ممتلئة. ستبقى القطعة الأثرية هنا.",
-  "message.simpleskills.abyssal_king_relic_collected": "تم جمع %s"
+  "message.simpleskills.abyssal_king_relic_collected": "تم جمع %s",
+  "entity.simpleskills.abyssal_samurai": "الساموراي الهاوي",
+  "item.simpleskills.abyssal_samurai_chestplate": "درع صدر الساموراي الهاوي"
 }
