@@ -1,8 +1,10 @@
 package com.github.ob_yekt.simpleskills.abyss.weapon;
 
 import com.github.ob_yekt.simpleskills.DefenseCombat;
+import com.github.ob_yekt.simpleskills.Slaying;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalKatanaItems;
 import com.github.ob_yekt.simpleskills.crafting.TranscendentAbilities;
+import com.github.ob_yekt.simpleskills.crafting.CraftingEquipmentManager;
 import com.github.ob_yekt.simpleskills.prayer.PrayerAbility;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVisualEffects;
 import java.util.Map;
@@ -13,6 +15,7 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
@@ -28,6 +31,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.component.AttackRange;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Prediction;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -352,6 +357,7 @@ public final class KatanaStanceManager {
         entry.specialPhaseStartedTick = now;
         entry.specialSlashIndex = 0;
         entry.specialLastSlashTick = now;
+        entry.specialDamagePerHit = 0.0F;
         entry.queuedAttack = false;
         entry.attackTargetEntityId = KatanaStanceRequestPayload.NO_TARGET;
         player.setDeltaMovement(Vec3.ZERO);
@@ -539,7 +545,7 @@ public final class KatanaStanceManager {
         LivingEntity target = findNormalAttackTarget(player, entry.attackTargetEntityId);
         if (target == null) return;
 
-        float damage = currentAttackDamage(player);
+        float damage = currentAttackDamage(player, target);
         if (damage <= 0.0F) return;
         ServerLevel level = (ServerLevel) player.level();
         target.damageCooldownTime = 0;
@@ -562,8 +568,9 @@ public final class KatanaStanceManager {
             return living;
         }
 
+        double reach = getNormalAttackReach(player);
         Vec3 start = player.getEyePosition();
-        Vec3 end = start.add(player.getLookAngle().normalize().scale(NORMAL_ATTACK_REACH));
+        Vec3 end = start.add(player.getLookAngle().normalize().scale(reach));
         AABB search = player.getBoundingBox()
                 .expandTowards(end.subtract(start))
                 .inflate(0.75D);
@@ -584,14 +591,56 @@ public final class KatanaStanceManager {
     }
 
     private static boolean isValidNormalTarget(ServerPlayer player, LivingEntity target) {
+        double reach = getNormalAttackReach(player);
         return target != player && target.isAlive() && target.level() == player.level()
-                && player.distanceToSqr(target) <= NORMAL_ATTACK_REACH * NORMAL_ATTACK_REACH
+                && player.distanceToSqr(target) <= reach * reach
                 && player.hasLineOfSight(target);
     }
 
-    private static float currentAttackDamage(ServerPlayer player) {
+    /**
+     * The stance system has a 4.5-block baseline reach. Preserve that baseline while
+     * adding only the bonus stored in the native 26.3 ATTACK_RANGE component, including
+     * the Transcendent sword signature (Celestial Range).
+     */
+    private static double getNormalAttackReach(ServerPlayer player) {
+        AttackRange base = AttackRange.defaultFor(player);
+        AttackRange current = player.getMainHandItem().getOrDefault(DataComponents.ATTACK_RANGE, base);
+        return NORMAL_ATTACK_REACH + Math.max(0.0D, current.maxReach() - base.maxReach());
+    }
+
+    /**
+     * Reproduces the sword-specific parts of the vanilla/CraftingEquipment damage pipeline
+     * for stance attacks, which call hurtServer directly instead of Player.attack().
+     * The item attribute already contains rolled rarity damage; the manager avoids applying
+     * that bonus twice and adds only independent perks/target multipliers here.
+     */
+    private static float currentAttackDamage(ServerPlayer player, LivingEntity target) {
+        ItemStack weapon = player.getMainHandItem();
         AttributeInstance attackDamage = player.getAttribute(Attributes.ATTACK_DAMAGE);
-        return attackDamage == null ? 6.0F : (float) Math.max(1.0D, attackDamage.getValue());
+        float baseDamage = attackDamage == null
+                ? 6.0F
+                : (float) Math.max(1.0D, attackDamage.getValue());
+
+        float itemBonus = weapon.getItem().getAttackDamageBonus(
+                target, baseDamage, player.damageSources().playerAttack(player));
+        float damage = baseDamage + itemBonus;
+
+        // SlayingMixin normally adds this to Player.attack() for ItemTags.SWORDS.
+        // Katana stance attacks bypass that path, so apply the same sword-only bonus here.
+        if (weapon.is(ItemTags.SWORDS)) {
+            damage += (baseDamage + itemBonus)
+                    * (Slaying.getDamageMultiplier(player.getUUID()) - 1.0F);
+        }
+
+        // Mirror SlayingMixin's counter, equipment damage and single critical roll.
+        if (DefenseCombat.hasCounterMastery(player)) {
+            damage *= DefenseCombat.COUNTER_DAMAGE_MULTIPLIER;
+        }
+        damage *= (float) CraftingEquipmentManager.getDamageMultiplier(weapon, target);
+        damage *= CraftingEquipmentManager.getCriticalMultiplier(
+                weapon, player, player.getRandom(), true);
+
+        return Math.max(0.0F, damage);
     }
 
     private static void tickSpecial(ServerPlayer player, Entry entry, MinecraftServer server, long now) {
@@ -650,7 +699,7 @@ public final class KatanaStanceManager {
                 entry.specialPhaseStartedTick = now;
                 entry.specialSlashIndex = 0;
                 entry.specialLastSlashTick = now;
-                applySpecialSlash(player, target, level, entry.specialSlashIndex++);
+                applySpecialSlash(player, target, level, entry, entry.specialSlashIndex++);
                 broadcast(server, player.getUUID(), entry, now);
             }
             return;
@@ -660,7 +709,7 @@ public final class KatanaStanceManager {
             long slashElapsed = now - entry.specialPhaseStartedTick;
             if (entry.specialSlashIndex < SPECIAL_SLASH_COUNT
                     && now - entry.specialLastSlashTick >= SPECIAL_SLASH_INTERVAL_TICKS) {
-                applySpecialSlash(player, target, level, entry.specialSlashIndex++);
+                applySpecialSlash(player, target, level, entry, entry.specialSlashIndex++);
                 entry.specialLastSlashTick = now;
             }
             if (entry.specialSlashIndex >= SPECIAL_SLASH_COUNT && slashElapsed >= SPECIAL_SLASH_PHASE_TICKS) {
@@ -690,9 +739,15 @@ public final class KatanaStanceManager {
         return best;
     }
 
-    private static void applySpecialSlash(ServerPlayer player, LivingEntity target, ServerLevel level, int slashIndex) {
-        float totalSpecialDamage = currentAttackDamage(player) * 2.0F;
-        float perHitDamage = totalSpecialDamage / SPECIAL_SLASH_COUNT;
+    private static void applySpecialSlash(ServerPlayer player, LivingEntity target, ServerLevel level,
+                                          Entry entry, int slashIndex) {
+        // Roll sword damage/perks/critical once for the full special, then split the doubled
+        // total across all cuts. This avoids rolling a fresh critical independently six times.
+        if (entry.specialDamagePerHit <= 0.0F) {
+            float totalSpecialDamage = currentAttackDamage(player, target) * 2.0F;
+            entry.specialDamagePerHit = totalSpecialDamage / SPECIAL_SLASH_COUNT;
+        }
+        float perHitDamage = entry.specialDamagePerHit;
         target.damageCooldownTime = 0;
         boolean hit = target.hurtServer(level, player.damageSources().playerAttack(player), perHitDamage);
 
@@ -785,6 +840,7 @@ public final class KatanaStanceManager {
         private long specialPhaseStartedTick;
         private long specialLastSlashTick;
         private int specialSlashIndex;
+        private float specialDamagePerHit;
 
         private Entry(int stance, long stateStartedTick, long lastAttackTick, long combatReadyTick) {
             this.stance = stance;
