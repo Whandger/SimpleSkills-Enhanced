@@ -406,18 +406,40 @@ public final class AbyssalBridgePiece extends StructurePiece {
                 (int) mix(seed ^ 0x4F1BBCDCBFA54001L), safeCandidates.size()));
     }
 
-    /** Scales pier count with span length (~1 colossal pier every 110 blocks). */
+    /**
+     * Scales pier count with span length (~1 colossal pier every 110 blocks), while always
+     * keeping one permanent support directly beneath the Samurai's central platform.
+     *
+     * <p>The side bays may collapse independently, but the midpoint pier is deliberately
+     * included even on long spans where evenly spaced supports would otherwise land on
+     * either side of the exact centre. It is protected by {@link #isSamuraiSafeDistance}
+     * and therefore cannot be selected as the fallen pier.
+     */
     private int[] supportPositions(int length) {
+        int center = length / 2;
         if (length < 140) {
-            return new int[]{length / 2};
+            return new int[]{center};
         }
+
         int intervals = Math.max(3, (int) Math.round(length / 110.0D));
         int count = intervals - 1;
-        int[] positions = new int[count];
+        List<Integer> positions = new ArrayList<>(count + 1);
         for (int i = 0; i < count; i++) {
-            positions[i] = (int) Math.round((length * (i + 1.0D)) / intervals);
+            positions.add((int) Math.round((length * (i + 1.0D)) / intervals));
         }
-        return positions;
+
+        // The bridge deck around the Samurai is preserved; give that surviving island a
+        // real load-bearing column all the way down to the cavern floor as well.
+        if (!positions.contains(center)) {
+            positions.add(center);
+        }
+        positions.sort(Integer::compareTo);
+
+        int[] result = new int[positions.size()];
+        for (int i = 0; i < positions.size(); i++) {
+            result[i] = positions.get(i);
+        }
+        return result;
     }
 
     private void buildStandingPier(WorldGenLevel level, BoundingBox box, int x, int z,
