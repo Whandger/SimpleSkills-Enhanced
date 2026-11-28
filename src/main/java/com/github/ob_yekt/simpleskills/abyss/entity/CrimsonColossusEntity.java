@@ -1,5 +1,6 @@
 package com.github.ob_yekt.simpleskills.abyss.entity;
 
+import com.github.ob_yekt.simpleskills.SimpleSkillsSounds;
 import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.github.ob_yekt.simpleskills.abyss.AbyssContent;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
@@ -20,7 +21,6 @@ import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
-import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.Mth;
 import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
@@ -44,6 +44,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -361,17 +362,15 @@ public class CrimsonColossusEntity extends Monster {
         this.lastAttack = type;
 
         switch (type) {
-            case CRYSTAL_LASER -> this.playSound(SoundEvents.BEACON_ACTIVATE, 1.6F, 0.55F);
-            case SEISMIC_SLAM -> this.playSound(SoundEvents.WARDEN_ROAR, 1.5F, 0.65F);
-            case CRYSTAL_BARRAGE -> this.playSound(SoundEvents.AMETHYST_BLOCK_CHIME, 1.8F, 0.50F);
-            case COLOSSUS_LEAP -> this.playSound(SoundEvents.RAVAGER_ROAR, 1.5F, 0.60F);
-            case SWIPE -> this.playSound(SoundEvents.IRON_GOLEM_ATTACK, 1.0F, 0.80F);
+            case CRYSTAL_LASER -> this.playSound(SimpleSkillsSounds.COLOSSUS_LASER_CHARGE, 1.6F, 1.0F);
+            case SEISMIC_SLAM -> this.playSound(SimpleSkillsSounds.COLOSSUS_AMBIENT, 1.4F, 0.6F);
             default -> {
             }
         }
     }
 
     private void finishAttack(AttackType finished, boolean enraged) {
+        CrimsonColossusLighting.release(this.getUUID());
         this.entityData.set(DATA_ATTACK_TYPE, AttackType.NONE.id);
         this.entityData.set(DATA_ATTACK_TICK, 0);
         this.entityData.set(DATA_IMPACT_TICK, -1);
@@ -400,6 +399,7 @@ public class CrimsonColossusEntity extends Monster {
 
     private void tickActiveAttack(ServerLevel level, AttackType type, int tick) {
         LivingEntity target = this.getTarget();
+        updateAttackLight(level, type, tick);
         switch (type) {
             case CRYSTAL_LASER -> tickCrystalLaser(level, target, tick);
             case SEISMIC_SLAM -> tickSeismicSlam(level, target, tick);
@@ -435,31 +435,31 @@ public class CrimsonColossusEntity extends Monster {
             syncTargetPos(this.lockedTargetPos);
         }
 
-        if (tick < LASER_CHARGE_END && tick % 6 == 0) {
-            this.playSound(SoundEvents.RESPAWN_ANCHOR_CHARGE, 1.1F, 0.70F + tick * 0.02F);
-        }
         if (tick == LASER_CHARGE_END) {
-            this.playSound(SoundEvents.WARDEN_SONIC_BOOM, 1.35F, 0.72F);
+            this.playSound(SimpleSkillsSounds.COLOSSUS_LASER_FIRE, 1.6F, 1.0F);
         }
 
         if (tick >= LASER_CHARGE_END && tick < LASER_FIRE_END) {
-            if (tick % 8 == 0) {
-                this.playSound(SoundEvents.BEACON_AMBIENT, 1.5F, 0.55F);
-            }
             if ((tick - LASER_CHARGE_END) % 6 == 0) {
                 fireLaserSegment(level);
             }
         }
     }
 
-    private void fireLaserSegment(ServerLevel level) {
-        Vec3 mouth = getMouthWorldPosition();
+    /** Ponta do feixe: a partir da boca, na direção da mira, com alcance máximo de LASER_REACH. */
+    private Vec3 laserBeamEnd(Vec3 mouth) {
         Vec3 toAim = this.lockedTargetPos.subtract(mouth);
         double len = Mth.clamp(toAim.length(), 0.5D, LASER_REACH);
         Vec3 dir = toAim.lengthSqr() > 1.0E-6D
                 ? toAim.normalize()
                 : Vec3.directionFromRotation(0.0F, this.yBodyRot);
-        Vec3 beamEnd = mouth.add(dir.scale(len));
+        return mouth.add(dir.scale(len));
+    }
+
+    private void fireLaserSegment(ServerLevel level) {
+        Vec3 mouth = getMouthWorldPosition();
+        Vec3 beamEnd = laserBeamEnd(mouth);
+        Vec3 dir = beamEnd.subtract(mouth).normalize();
 
         AABB searchBox = new AABB(mouth, beamEnd).inflate(1.5D);
         List<LivingEntity> hitEntities = level.getEntitiesOfClass(LivingEntity.class, searchBox,
@@ -484,8 +484,7 @@ public class CrimsonColossusEntity extends Monster {
             return;
         }
 
-        this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 1.4F, 0.65F);
-        this.playSound(SoundEvents.ANVIL_LAND, 1.3F, 0.55F);
+        this.playSound(SimpleSkillsSounds.COLOSSUS_SLAM, 1.6F, 1.0F);
 
         Vec3 forward = Vec3.directionFromRotation(0.0F, this.yBodyRot);
         Vec3 slamCenter = this.position().add(forward.scale(SLAM_REACH));
@@ -514,8 +513,7 @@ public class CrimsonColossusEntity extends Monster {
         }
 
         if (tick == BARRAGE_WAVE_START) {
-            this.playSound(SoundEvents.AMETHYST_CLUSTER_BREAK, 1.8F, 0.55F);
-            this.playSound(SoundEvents.TRIDENT_THUNDER.value(), 1.1F, 0.75F);
+            this.playSound(SimpleSkillsSounds.COLOSSUS_BARRAGE, 1.5F, 1.0F);
         }
 
         if (tick >= BARRAGE_WAVE_START && tick <= BARRAGE_WAVE_END && (tick - BARRAGE_WAVE_START) % 3 == 0) {
@@ -545,7 +543,7 @@ public class CrimsonColossusEntity extends Monster {
         if (!this.leapLaunched) {
             this.leapLaunched = true;
             this.setDeltaMovement(0.0D, LEAP_LAUNCH_VY, 0.0D);
-            this.playSound(SoundEvents.IRON_GOLEM_ATTACK, 1.6F, 0.50F);
+            this.playSound(SimpleSkillsSounds.COLOSSUS_LEAP_LAUNCH, 1.6F, 1.0F);
         }
 
         if (!this.leapLanded) {
@@ -588,8 +586,7 @@ public class CrimsonColossusEntity extends Monster {
         syncTargetPos(this.position());
         this.setDeltaMovement(0.0D, Math.min(0.0D, this.getDeltaMovement().y), 0.0D);
 
-        this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 1.8F, 0.55F);
-        this.playSound(SoundEvents.WARDEN_SONIC_BOOM, 1.5F, 0.60F);
+        this.playSound(SimpleSkillsSounds.COLOSSUS_LEAP_LAND, 1.8F, 1.0F);
     }
 
     /**
@@ -640,7 +637,7 @@ public class CrimsonColossusEntity extends Monster {
             return;
         }
 
-        this.playSound(SoundEvents.IRON_GOLEM_ATTACK, 1.1F, 0.7F);
+        this.playSound(SimpleSkillsSounds.COLOSSUS_SWIPE, 1.1F, 1.0F);
         Vec3 forward = Vec3.directionFromRotation(0.0F, this.yBodyRot);
         AABB box = new AABB(this.position(), this.position()).inflate(3.4D, 2.0D, 3.4D);
         for (LivingEntity hit : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != this && e.isAlive())) {
@@ -717,24 +714,34 @@ public class CrimsonColossusEntity extends Monster {
     }
 
     @Override
+    public void remove(Entity.RemovalReason reason) {
+        CrimsonColossusLighting.release(this.getUUID());
+        super.remove(reason);
+    }
+
+    @Override
     protected void playStepSound(BlockPos pos, BlockState state) {
-        this.playSound(SoundEvents.IRON_GOLEM_STEP, 1.15F, 0.62F);
-        this.playSound(SoundEvents.DEEPSLATE_STEP, 0.90F, 0.70F);
+        this.playSound(SimpleSkillsSounds.COLOSSUS_STEP, 1.2F, 0.9F + this.random.nextFloat() * 0.2F);
+    }
+
+    @Override
+    public int getAmbientSoundInterval() {
+        return 200;
     }
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return SoundEvents.WARDEN_AMBIENT;
+        return SimpleSkillsSounds.COLOSSUS_AMBIENT;
     }
 
     @Override
     protected SoundEvent getHurtSound(DamageSource source) {
-        return SoundEvents.IRON_GOLEM_HURT;
+        return SimpleSkillsSounds.COLOSSUS_HURT;
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.IRON_GOLEM_DEATH;
+        return SimpleSkillsSounds.COLOSSUS_DEATH;
     }
 
     public float getCrystalGlowPulse(float partialTick) {
@@ -762,6 +769,117 @@ public class CrimsonColossusEntity extends Monster {
         double t = Mth.clamp(p.subtract(a).dot(ab) / lenSq, 0.0D, 1.0D);
         Vec3 closest = a.add(ab.scale(t));
         return p.distanceToSqr(closest);
+    }
+
+    // ------------------------------------------------------------------------------------------
+    // Luz dos ataques. Cada ataque manda pontos para CrimsonColossusLighting, que os transforma em
+    // blocos de luz reais. A cada 2 ticks, só para não recalcular a luz do mundo a cada tick.
+    // ------------------------------------------------------------------------------------------
+
+    /** Espaçamento entre os blocos de luz ao longo do feixe. Com nível alto, cobre o caminho inteiro. */
+    private static final double LIGHT_SPACING = 3.0D;
+
+    private void updateAttackLight(ServerLevel level, AttackType type, int tick) {
+        if (tick % 2 != 0) return;
+        List<CrimsonColossusLighting.Glow> glows = new ArrayList<>();
+        switch (type) {
+            case CRYSTAL_LASER -> laserGlows(glows, tick);
+            case SEISMIC_SLAM -> slamGlows(glows, tick);
+            case CRYSTAL_BARRAGE -> barrageGlows(glows, tick);
+            case COLOSSUS_LEAP -> leapGlows(glows, tick);
+            case SWIPE -> swipeGlows(glows, tick);
+            default -> {
+            }
+        }
+        CrimsonColossusLighting.update(this.getUUID(), level, glows);
+    }
+
+    /** Carregamento: sobe até o máximo no disparo. Disparo: brilho cheio com leve oscilação. Fim: apaga. */
+    private void laserGlows(List<CrimsonColossusLighting.Glow> out, int tick) {
+        int lv;
+        if (tick < LASER_CHARGE_END) {
+            lv = (int) Math.round(1.0D + 14.0D * (tick + 1) / (double) LASER_CHARGE_END);
+        } else if (tick < LASER_FIRE_END) {
+            lv = (tick / 6) % 2 == 0 ? 15 : 13;
+        } else {
+            double left = (LASER_DURATION - tick) / (double) (LASER_DURATION - LASER_FIRE_END);
+            lv = (int) Math.round(15.0D * Mth.clamp(left, 0.0D, 1.0D));
+        }
+        if (lv < 1) return;
+        Vec3 mouth = getMouthWorldPosition();
+        addAlongSegment(out, mouth, laserBeamEnd(mouth), lv);
+    }
+
+    /** Antes do golpe: a luz do punho cresce. Depois: estouro no centro que se apaga, com um anel em volta. */
+    private void slamGlows(List<CrimsonColossusLighting.Glow> out, int tick) {
+        Vec3 forward = Vec3.directionFromRotation(0.0F, this.yBodyRot);
+        Vec3 center = this.position().add(forward.scale(SLAM_REACH)).add(0.0D, 0.5D, 0.0D);
+        if (tick < SLAM_IMPACT_TICK) {
+            int lv = (int) Math.round(1.0D + 9.0D * tick / (double) SLAM_IMPACT_TICK);
+            out.add(new CrimsonColossusLighting.Glow(center, lv));
+            return;
+        }
+        int lv = (int) Math.round(15.0D * Mth.clamp(1.0D - (tick - SLAM_IMPACT_TICK) / 14.0D, 0.0D, 1.0D));
+        if (lv < 1) return;
+        out.add(new CrimsonColossusLighting.Glow(center, lv));
+        for (int k = 0; k < 4; k++) {
+            double a = k * Math.PI * 0.5D;
+            out.add(new CrimsonColossusLighting.Glow(
+                    center.add(Math.cos(a) * 3.5D, 0.0D, Math.sin(a) * 3.5D), Math.max(1, lv - 4)));
+        }
+    }
+
+    /** Uma luz forte viaja com a onda de cristais, da frente do chefe até o alvo, e se apaga depois. */
+    private void barrageGlows(List<CrimsonColossusLighting.Glow> out, int tick) {
+        Vec3 base = this.position().add(0.0D, 1.2D, 0.0D);
+        Vec3 goal = this.lockedTargetPos.add(0.0D, 1.2D, 0.0D);
+        if (tick >= BARRAGE_WAVE_START && tick <= BARRAGE_WAVE_END) {
+            double progress = Mth.clamp((tick - BARRAGE_WAVE_START)
+                    / (double) (BARRAGE_WAVE_END - BARRAGE_WAVE_START), 0.0D, 1.0D);
+            out.add(new CrimsonColossusLighting.Glow(base.lerp(goal, progress), 14));
+            out.add(new CrimsonColossusLighting.Glow(base.lerp(goal, Math.max(0.0D, progress - 0.25D)), 8));
+        } else if (tick > BARRAGE_WAVE_END) {
+            int lv = (int) Math.round(10.0D * Mth.clamp(1.0D - (tick - BARRAGE_WAVE_END) / 8.0D, 0.0D, 1.0D));
+            if (lv >= 1) out.add(new CrimsonColossusLighting.Glow(goal, lv));
+        }
+    }
+
+    /** No ar, o corpo brilha. Ao pousar, um flash forte no ponto de impacto que se apaga com a onda de choque. */
+    private void leapGlows(List<CrimsonColossusLighting.Glow> out, int tick) {
+        if (!this.leapLanded) {
+            if (this.leapLaunched) {
+                out.add(new CrimsonColossusLighting.Glow(this.position().add(0.0D, 2.0D, 0.0D), 11));
+            }
+            return;
+        }
+        int since = tick - this.leapLandedTick;
+        int lv = (int) Math.round(15.0D * Mth.clamp(1.0D - since / (double) (LEAP_SPREAD_TICKS + 6), 0.0D, 1.0D));
+        if (lv < 1) return;
+        Vec3 c = this.position().add(0.0D, 0.5D, 0.0D);
+        out.add(new CrimsonColossusLighting.Glow(c, lv));
+        for (int k = 0; k < 4; k++) {
+            double a = k * Math.PI * 0.5D;
+            out.add(new CrimsonColossusLighting.Glow(
+                    c.add(Math.cos(a) * 4.0D, 0.0D, Math.sin(a) * 4.0D), Math.max(1, lv - 3)));
+        }
+    }
+
+    /** Um clarão curto na frente do chefe, no impacto da garra. */
+    private void swipeGlows(List<CrimsonColossusLighting.Glow> out, int tick) {
+        if (tick < SWIPE_IMPACT_TICK) return;
+        int lv = Math.max(0, 12 - (tick - SWIPE_IMPACT_TICK) * 2);
+        if (lv < 1) return;
+        Vec3 forward = Vec3.directionFromRotation(0.0F, this.yBodyRot);
+        out.add(new CrimsonColossusLighting.Glow(
+                this.position().add(forward.scale(2.5D)).add(0.0D, 1.6D, 0.0D), lv));
+    }
+
+    /** Pontos de luz espaçados ao longo do segmento a-b, incluindo as duas pontas. */
+    private static void addAlongSegment(List<CrimsonColossusLighting.Glow> out, Vec3 a, Vec3 b, int lv) {
+        int steps = Math.max(1, (int) Math.ceil(a.distanceTo(b) / LIGHT_SPACING));
+        for (int i = 0; i <= steps; i++) {
+            out.add(new CrimsonColossusLighting.Glow(a.lerp(b, i / (double) steps), lv));
+        }
     }
 
     /**

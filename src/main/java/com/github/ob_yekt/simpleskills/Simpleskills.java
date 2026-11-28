@@ -13,6 +13,7 @@ import com.github.ob_yekt.simpleskills.abyss.CrimsonCrystalCombat;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalFallenKingEntity;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalSamuraiEntity;
 import com.github.ob_yekt.simpleskills.abyss.entity.CrimsonColossusEntity;
+import com.github.ob_yekt.simpleskills.abyss.entity.CrimsonColossusLighting;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalKingItems;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalKatanaItems;
 import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaStanceManager;
@@ -152,6 +153,7 @@ public class Simpleskills implements ModInitializer {
 
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			PrayerLighting.clearAll();
+			CrimsonColossusLighting.clearAll();
 			GlowstoneShieldLight.clearAll();
 		});
 
