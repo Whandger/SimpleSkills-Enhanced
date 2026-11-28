@@ -744,5 +744,9 @@
   "item.simpleskills.crimson_crystal_leggings": "Crimson Crystal Leggings",
   "item.simpleskills.crimson_crystal_boots": "Crimson Crystal Boots",
   "item.simpleskills.abyssal_wood_stick": "Abyssal Wood Stick",
-  "effect.simpleskills.crimson_blight": "Crimson Blight"
+  "effect.simpleskills.crimson_blight": "Crimson Blight",
+  "entity.simpleskills.crimson_colossus": "Crimson Colossus",
+  "item.simpleskills.crimson_rune": "Crimson Runestone",
+  "item.simpleskills.crimson_rune.desc": "+20% Prayer spell damage. Stacks additively with the Prayer profession damage bonus.",
+  "item.simpleskills.crimson_rune.use": "Right-click to cast your currently selected Prayer ability."
 }

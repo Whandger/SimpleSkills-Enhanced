@@ -12,6 +12,7 @@ import com.github.ob_yekt.simpleskills.abyss.CrimsonBlightEffect;
 import com.github.ob_yekt.simpleskills.abyss.CrimsonCrystalCombat;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalFallenKingEntity;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalSamuraiEntity;
+import com.github.ob_yekt.simpleskills.abyss.entity.CrimsonColossusEntity;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalKingItems;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalKatanaItems;
 import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaStanceManager;
@@ -71,6 +72,7 @@ public class Simpleskills implements ModInitializer {
 		FishingEntities.register();
 		AbyssalFallenKingEntity.register();
 		AbyssalSamuraiEntity.register();
+		CrimsonColossusEntity.register();
 		FishingItems.register();
 		FishingSpeciesRegistration.register();
 

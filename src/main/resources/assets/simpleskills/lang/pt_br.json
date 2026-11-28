@@ -744,5 +744,9 @@
   "item.simpleskills.crimson_crystal_leggings": "Calças de Cristal Carmesim",
   "item.simpleskills.crimson_crystal_boots": "Botas de Cristal Carmesim",
   "item.simpleskills.abyssal_wood_stick": "Graveto de Madeira Abissal",
-  "effect.simpleskills.crimson_blight": "Praga Carmesim"
+  "effect.simpleskills.crimson_blight": "Praga Carmesim",
+  "entity.simpleskills.crimson_colossus": "Colosso Carmesim",
+  "item.simpleskills.crimson_rune": "Pedra Rúnica Carmesim",
+  "item.simpleskills.crimson_rune.desc": "+20% de dano nas magias de Prayer. Soma-se ao bônus de dano da profissão Prayer.",
+  "item.simpleskills.crimson_rune.use": "Clique com o botão direito para lançar a magia de Prayer selecionada."
 }

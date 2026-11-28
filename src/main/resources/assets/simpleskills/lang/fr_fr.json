@@ -734,5 +734,9 @@
   "item.simpleskills.crimson_crystal_chestplate": "Plastron en cristal cramoisi",
   "item.simpleskills.crimson_crystal_leggings": "Jambières en cristal cramoisi",
   "item.simpleskills.crimson_crystal_boots": "Bottes en cristal cramoisi",
-  "effect.simpleskills.crimson_blight": "Fléau cramoisi"
+  "effect.simpleskills.crimson_blight": "Fléau cramoisi",
+  "entity.simpleskills.crimson_colossus": "Colosse cramoisi",
+  "item.simpleskills.crimson_rune": "Pierre runique cramoisie",
+  "item.simpleskills.crimson_rune.desc": "+20 % de dégâts des sorts de Prière. S’additionne au bonus de dégâts de la profession Prière.",
+  "item.simpleskills.crimson_rune.use": "Clic droit pour lancer la capacité de Prière sélectionnée."
 }

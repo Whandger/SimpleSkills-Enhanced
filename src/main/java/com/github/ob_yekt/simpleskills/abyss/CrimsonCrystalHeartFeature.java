@@ -1,6 +1,7 @@
 package com.github.ob_yekt.simpleskills.abyss;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
+import com.github.ob_yekt.simpleskills.abyss.entity.CrimsonColossusEntity;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -93,7 +94,30 @@ public record CrimsonCrystalHeartFeature() implements Feature {
 
         // 7. Spread organic branching corruption veins outward from the outer crystal ring.
         CrimsonCorruptionVeins.generate(level, bounds, base, random, 14, 30, 11);
+
+        // 8. The Colossus is spawned once on the central arena dais, facing the monumental entrance.
+        spawnCrimsonColossus(level, base, entranceDir);
         return true;
+    }
+
+    /**
+     * Places one persistent Crimson Colossus in the center of the hollow crystal arena.
+     * The feature's center-chunk guard in place() guarantees this method runs once per heart.
+     */
+    private static void spawnCrimsonColossus(WorldGenLevel level, BlockPos base, Direction entranceDir) {
+        BlockPos feet = base.above();
+        if (!level.getBlockState(feet).isAir()
+                || !level.getBlockState(feet.above()).isAir()
+                || !level.getBlockState(feet.above(3)).isAir()) {
+            return;
+        }
+
+        CrimsonColossusEntity colossus = new CrimsonColossusEntity(
+                CrimsonColossusEntity.TYPE, level.getLevel());
+        float yaw = (float) Math.toDegrees(Math.atan2(-entranceDir.getStepX(), entranceDir.getStepZ()));
+        colossus.snapTo(feet.getX() + 0.5D, feet.getY(), feet.getZ() + 0.5D, yaw, 0.0F);
+        colossus.setPersistenceRequired();
+        level.addFreshEntity(colossus);
     }
 
     private static GroundAnchor findGroundAnchor(WorldGenLevel level, int centerX, int centerZ) {

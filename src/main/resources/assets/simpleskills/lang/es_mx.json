@@ -734,5 +734,9 @@
   "item.simpleskills.crimson_crystal_chestplate": "Peto de cristal carmesí",
   "item.simpleskills.crimson_crystal_leggings": "Grebas de cristal carmesí",
   "item.simpleskills.crimson_crystal_boots": "Botas de cristal carmesí",
-  "effect.simpleskills.crimson_blight": "Plaga carmesí"
+  "effect.simpleskills.crimson_blight": "Plaga carmesí",
+  "entity.simpleskills.crimson_colossus": "Coloso Carmesí",
+  "item.simpleskills.crimson_rune": "Piedra rúnica carmesí",
+  "item.simpleskills.crimson_rune.desc": "+20% de daño de hechizos de Oración. Se acumula con la bonificación de daño de la profesión Oración.",
+  "item.simpleskills.crimson_rune.use": "Haz clic derecho para lanzar la habilidad de Oración seleccionada."
 }

@@ -1,6 +1,7 @@
 package com.github.ob_yekt.simpleskills.prayer;
 
 import com.github.ob_yekt.simpleskills.Skills;
+import com.github.ob_yekt.simpleskills.abyss.item.CrimsonRuneItem;
 import com.github.ob_yekt.simpleskills.managers.DatabaseManager;
 import com.github.ob_yekt.simpleskills.managers.XPManager;
 import com.google.gson.JsonArray;
@@ -163,6 +164,31 @@ public final class PrayerManager {
         }
     }
 
+    /** Casts the Prayer ability in the active wheel slot when the Crimson Rune is used. */
+    public static boolean castWithCrimsonRune(ServerPlayer player) {
+        if (player == null || !player.isAlive() || !CrimsonRuneItem.isHeldBy(player)) {
+            return false;
+        }
+        // A non-rune main-hand item still blocks Prayer casting; an offhand rune works
+        // when the main hand is empty, while the normal Prayer keybind remains available.
+        if (!player.getMainHandItem().isEmpty()
+                && !(player.getMainHandItem().getItem() instanceof CrimsonRuneItem)) {
+            return false;
+        }
+
+        DatabaseManager db = DatabaseManager.getInstance();
+        String uuid = player.getStringUUID();
+        int activeSlot = db.getPrayerActiveSlot(uuid);
+        List<String> loadout = readLoadout(db.getPrayerLoadout(uuid));
+        String abilityId = loadout.get(activeSlot);
+        if (abilityId == null || abilityId.isBlank()) {
+            player.sendSystemMessage(Component.translatable("gui.simpleskills.prayer.empty"), true);
+            return true;
+        }
+        cast(player, abilityId);
+        return true;
+    }
+
     private static void cast(ServerPlayer player, String abilityId) {
         DatabaseManager db = DatabaseManager.getInstance();
         String uuid = player.getStringUUID();
@@ -177,7 +203,8 @@ public final class PrayerManager {
         long now = player.level().getGameTime();
         long readyAt = COOLDOWNS.computeIfAbsent(player.getUUID(), ignored -> new ConcurrentHashMap<>())
                 .getOrDefault(ability.id(), 0L);
-        if (now < readyAt || !player.getMainHandItem().isEmpty() || player.isBlocking())
+        boolean runeInMainHand = player.getMainHandItem().getItem() instanceof CrimsonRuneItem;
+        if (now < readyAt || (!player.getMainHandItem().isEmpty() && !runeInMainHand) || player.isBlocking())
             return;
 
         ServerLevel serverLevel = (ServerLevel) player.level();
@@ -318,7 +345,10 @@ public final class PrayerManager {
         if (!(casterEntity instanceof ServerPlayer player) || !player.isAlive())
             return;
 
-        float scaling = PrayerScaling.damageScale(level);
+        // The rune adds +20 percentage points to the Prayer profession damage scaling.
+        // This is additive with the profession bonus (not a replacement/multiplication).
+        float scaling = PrayerScaling.damageScale(level)
+                + (CrimsonRuneItem.isHeldBy(player) ? 0.20F : 0.0F);
         Vec3 particlePos = impactPos;
 
         if (ability == PrayerAbility.SHADOW_BOLT) {

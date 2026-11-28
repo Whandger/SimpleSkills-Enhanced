@@ -734,5 +734,9 @@
   "item.simpleskills.crimson_crystal_chestplate": "درع صدر البلورة القرمزية",
   "item.simpleskills.crimson_crystal_leggings": "سروال البلورة القرمزية",
   "item.simpleskills.crimson_crystal_boots": "حذاء البلورة القرمزية",
-  "effect.simpleskills.crimson_blight": "الآفة القرمزية"
+  "effect.simpleskills.crimson_blight": "الآفة القرمزية",
+  "entity.simpleskills.crimson_colossus": "العملاق القرمزي",
+  "item.simpleskills.crimson_rune": "حجر الرون القرمزي",
+  "item.simpleskills.crimson_rune.desc": "يزيد ضرر تعاويذ الصلاة بنسبة 20% إضافية، ويتراكم مع مكافأة ضرر مهنة الصلاة.",
+  "item.simpleskills.crimson_rune.use": "انقر بزر الفأرة الأيمن لإطلاق تعويذة الصلاة المجهزة."
 }

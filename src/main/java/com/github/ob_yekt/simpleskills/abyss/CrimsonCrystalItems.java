@@ -1,6 +1,7 @@
 package com.github.ob_yekt.simpleskills.abyss;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
+import com.github.ob_yekt.simpleskills.abyss.item.CrimsonRuneItem;
 import java.util.List;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -52,6 +53,7 @@ public final class CrimsonCrystalItems {
         return ResourceKey.create(EquipmentAssets.ROOT_ID, id(path));
     }
 
+    public static Item CRIMSON_RUNE;
     public static Item RED_CRYSTAL_SHARD;
     public static Item ABYSSAL_WOOD_STICK;
     public static Item CRIMSON_CRYSTAL_SWORD;
@@ -72,6 +74,7 @@ public final class CrimsonCrystalItems {
         if (registered) return;
         registered = true;
 
+        CRIMSON_RUNE = registerRune();
         RED_CRYSTAL_SHARD = registerSimple("red_crystal_shard", 64);
         ABYSSAL_WOOD_STICK = registerSimple("abyssal_wood_stick", 64);
 
@@ -95,7 +98,14 @@ public final class CrimsonCrystalItems {
         CRIMSON_CRYSTAL_BOOTS = registerArmor("crimson_crystal_boots", EquipmentSlot.FEET,
                 1_440, "crimson_crystal_boots", 3.5D, 3.25D, EquipmentSlotGroup.FEET);
 
-        Simpleskills.LOGGER.info("Registered Crimson Crystal shard, Abyssal timber stick and nine gear items.");
+        Simpleskills.LOGGER.info("Registered Crimson Runestone, Crimson Crystal shard, Abyssal timber stick and nine gear items.");
+    }
+
+    private static Item registerRune() {
+        ResourceKey<Item> key = itemKey("crimson_rune");
+        Identifier model = id("crimson_rune");
+        return Registry.register(BuiltInRegistries.ITEM, key,
+                new CrimsonRuneItem(new Item.Properties().setId(key).modelId(model)));
     }
 
     private static Item registerSimple(String path, int stackSize) {
@@ -153,7 +163,7 @@ public final class CrimsonCrystalItems {
     /** Items shown on the SimpleSkills creative tab. */
     public static List<Item> creativeItems() {
         return List.of(
-                RED_CRYSTAL_SHARD, ABYSSAL_WOOD_STICK,
+                CRIMSON_RUNE, RED_CRYSTAL_SHARD, ABYSSAL_WOOD_STICK,
                 CRIMSON_CRYSTAL_SWORD, CRIMSON_CRYSTAL_PICKAXE, CRIMSON_CRYSTAL_AXE,
                 CRIMSON_CRYSTAL_SHOVEL, CRIMSON_CRYSTAL_HOE,
                 CRIMSON_CRYSTAL_HELMET, CRIMSON_CRYSTAL_CHESTPLATE,

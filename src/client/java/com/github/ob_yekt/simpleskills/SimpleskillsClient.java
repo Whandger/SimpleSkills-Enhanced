@@ -10,6 +10,7 @@ import com.github.ob_yekt.simpleskills.abyss.AbyssalChestScreen;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalFallenKingClient;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalSamuraiClient;
 import com.github.ob_yekt.simpleskills.abyss.CrimsonBlightClient;
+import com.github.ob_yekt.simpleskills.abyss.CrimsonColossusClient;
 import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaClientStanceState;
 import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaClientRendering;
 import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaStancePayload;
@@ -78,6 +79,7 @@ public class SimpleskillsClient implements ClientModInitializer {
         FishingEntityClient.register();
         AbyssalFallenKingClient.register();
         AbyssalSamuraiClient.register();
+        CrimsonColossusClient.register();
         CrimsonBlightClient.register();
         MenuScreens.register(CelestialAltarContent.MENU_TYPE, CelestialAltarScreen::new);
         MenuScreens.register(OreGrinderContent.MENU_TYPE, OreGrinderScreen::new);
