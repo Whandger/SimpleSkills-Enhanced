@@ -738,5 +738,10 @@
   "entity.simpleskills.crimson_colossus": "العملاق القرمزي",
   "item.simpleskills.crimson_rune": "حجر الرون القرمزي",
   "item.simpleskills.crimson_rune.desc": "يزيد ضرر تعاويذ الصلاة بنسبة 20% إضافية، ويتراكم مع مكافأة ضرر مهنة الصلاة.",
-  "item.simpleskills.crimson_rune.use": "انقر بزر الفأرة الأيمن لإطلاق تعويذة الصلاة المجهزة."
+  "item.simpleskills.crimson_rune.use": "انقر بزر الفأرة الأيمن لإطلاق تعويذة الصلاة المجهزة.",
+  "gui.simpleskills.lore.coordinates_xz": "X %1$d   Z %2$d",
+  "gui.simpleskills.lore.colossus_depth": "العمق متغير: ابحث بين Y -256 و-80 بالقرب من أرضية الكهف.",
+  "gui.simpleskills.lore.page.8.title": "العملاق القرمزي",
+  "gui.simpleskills.lore.page.8.author": "سجل أحد حراس القاعة",
+  "gui.simpleskills.lore.page.8.body": "في قلب أعظم بلورة ترقد مخلوقة من حجر الهاوية، تعلوها أشواك قرمزية. تنبض البلورات على ظهرها عندما يعبر أحدهم القوس؛ عندها يستيقظ الحارس.\n\nيشير التكوين الهائل إلى مركز كهوف البلور القرمزي. اتبع الإحداثيات وابحث عن القوس البلوري العظيم. تقع الساحة في أعماق الهاوية، ويتغير ارتفاعها بحسب أرضية الكهف الطبيعية."
 }

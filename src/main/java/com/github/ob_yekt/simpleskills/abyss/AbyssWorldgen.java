@@ -125,39 +125,69 @@ public final class AbyssWorldgen {
         long bestDistanceSquared = Long.MAX_VALUE;
         for (int dz = -1; dz <= 1; dz++) {
             for (int dx = -1; dx <= 1; dx++) {
-                int regionCellX = cellX + dx;
-                int regionCellZ = cellZ + dz;
-                long cellHash = mix64(worldSeed
-                        ^ ((long) regionCellX * 0x9E3779B97F4A7C15L)
-                        ^ ((long) regionCellZ * 0xC2B2AE3D27D4EB4FL));
-
-                // About two in five grid cells contain a crimson region.
-                if (Long.remainderUnsigned(cellHash, 100L) >= 42L) {
-                    continue;
-                }
-
-                long xHash = mix64(cellHash + 0x165667B19E3779F9L);
-                long zHash = mix64(cellHash + 0x85EBCA77C2B2AE63L);
-                int jitterX = (int) Long.remainderUnsigned(xHash, CRIMSON_CENTER_JITTER * 2L + 1L)
-                        - CRIMSON_CENTER_JITTER;
-                int jitterZ = (int) Long.remainderUnsigned(zHash, CRIMSON_CENTER_JITTER * 2L + 1L)
-                        - CRIMSON_CENTER_JITTER;
-
-                int centerX = Math.floorDiv(regionCellX * CRIMSON_GRID_SIZE + jitterX, 16) * 16 + 8;
-                int centerZ = Math.floorDiv(regionCellZ * CRIMSON_GRID_SIZE + jitterZ, 16) * 16 + 8;
-                int radius = CRIMSON_RADIUS_MIN
-                        + (int) Long.remainderUnsigned(mix64(cellHash + 0x27D4EB2F165667C5L),
-                        CRIMSON_RADIUS_MAX - CRIMSON_RADIUS_MIN + 1L);
-                long offsetX = (long) x - centerX;
-                long offsetZ = (long) z - centerZ;
+                CrimsonCrystalRegion candidate = crimsonRegionForCell(cellX + dx, cellZ + dz, worldSeed);
+                if (candidate == null) continue;
+                long offsetX = (long) x - candidate.centerX();
+                long offsetZ = (long) z - candidate.centerZ();
                 long distanceSquared = offsetX * offsetX + offsetZ * offsetZ;
-                if (distanceSquared <= (long) radius * radius && distanceSquared < bestDistanceSquared) {
+                if (distanceSquared <= (long) candidate.radius() * candidate.radius()
+                        && distanceSquared < bestDistanceSquared) {
                     bestDistanceSquared = distanceSquared;
-                    best = new CrimsonCrystalRegion(centerX, centerZ, radius);
+                    best = candidate;
                 }
             }
         }
         return best;
+    }
+
+    /**
+     * Returns the nearest deterministic crimson region to an X/Z position, even when the
+     * position is outside the biome. The search is seed-stable and does not load or generate chunks.
+     */
+    public static CrimsonCrystalRegion nearestCrimsonCrystalRegion(int x, int z, long worldSeed) {
+        int cellX = Math.floorDiv(x, CRIMSON_GRID_SIZE);
+        int cellZ = Math.floorDiv(z, CRIMSON_GRID_SIZE);
+        CrimsonCrystalRegion best = null;
+        long bestDistanceSquared = Long.MAX_VALUE;
+
+        // A 13x13 cell window is wide enough to reliably find a region at the 42% cell density.
+        for (int dz = -6; dz <= 6; dz++) {
+            for (int dx = -6; dx <= 6; dx++) {
+                CrimsonCrystalRegion candidate = crimsonRegionForCell(cellX + dx, cellZ + dz, worldSeed);
+                if (candidate == null) continue;
+                long offsetX = (long) x - candidate.centerX();
+                long offsetZ = (long) z - candidate.centerZ();
+                long distanceSquared = offsetX * offsetX + offsetZ * offsetZ;
+                if (distanceSquared < bestDistanceSquared) {
+                    bestDistanceSquared = distanceSquared;
+                    best = candidate;
+                }
+            }
+        }
+        return best;
+    }
+
+    private static CrimsonCrystalRegion crimsonRegionForCell(int regionCellX, int regionCellZ, long worldSeed) {
+        long cellHash = mix64(worldSeed
+                ^ ((long) regionCellX * 0x9E3779B97F4A7C15L)
+                ^ ((long) regionCellZ * 0xC2B2AE3D27D4EB4FL));
+
+        // About two in five grid cells contain a crimson region.
+        if (Long.remainderUnsigned(cellHash, 100L) >= 42L) return null;
+
+        long xHash = mix64(cellHash + 0x165667B19E3779F9L);
+        long zHash = mix64(cellHash + 0x85EBCA77C2B2AE63L);
+        int jitterX = (int) Long.remainderUnsigned(xHash, CRIMSON_CENTER_JITTER * 2L + 1L)
+                - CRIMSON_CENTER_JITTER;
+        int jitterZ = (int) Long.remainderUnsigned(zHash, CRIMSON_CENTER_JITTER * 2L + 1L)
+                - CRIMSON_CENTER_JITTER;
+
+        int centerX = Math.floorDiv(regionCellX * CRIMSON_GRID_SIZE + jitterX, 16) * 16 + 8;
+        int centerZ = Math.floorDiv(regionCellZ * CRIMSON_GRID_SIZE + jitterZ, 16) * 16 + 8;
+        int radius = CRIMSON_RADIUS_MIN
+                + (int) Long.remainderUnsigned(mix64(cellHash + 0x27D4EB2F165667C5L),
+                CRIMSON_RADIUS_MAX - CRIMSON_RADIUS_MIN + 1L);
+        return new CrimsonCrystalRegion(centerX, centerZ, radius);
     }
 
     public static boolean isCrimsonCrystalBiome(int x, int z, long worldSeed) {

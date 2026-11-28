@@ -738,5 +738,10 @@
   "entity.simpleskills.crimson_colossus": "Colosse cramoisi",
   "item.simpleskills.crimson_rune": "Pierre runique cramoisie",
   "item.simpleskills.crimson_rune.desc": "+20 % de dégâts des sorts de Prière. S’additionne au bonus de dégâts de la profession Prière.",
-  "item.simpleskills.crimson_rune.use": "Clic droit pour lancer la capacité de Prière sélectionnée."
+  "item.simpleskills.crimson_rune.use": "Clic droit pour lancer la capacité de Prière sélectionnée.",
+  "gui.simpleskills.lore.coordinates_xz": "X %1$d   Z %2$d",
+  "gui.simpleskills.lore.colossus_depth": "Profondeur variable : cherchez entre Y -256 et -80, près du sol de la caverne.",
+  "gui.simpleskills.lore.page.8.title": "Le Colosse Cramoisi",
+  "gui.simpleskills.lore.page.8.author": "Note d’un veilleur de la chambre",
+  "gui.simpleskills.lore.page.8.body": "Au cœur du plus grand cristal repose une créature de pierre abyssale, couronnée de pointes cramoisies. Les cristaux de son dos palpitent lorsqu’un intrus franchit l’arche ; le gardien s’éveille alors.\n\nLa formation colossale marque le centre des Cavernes Cramoisies. Suivez les coordonnées et cherchez la grande arche de cristal. L’arène se trouve dans les profondeurs de l’Abîme ; sa hauteur dépend du sol naturel de la caverne."
 }

@@ -748,5 +748,10 @@
   "entity.simpleskills.crimson_colossus": "Crimson Colossus",
   "item.simpleskills.crimson_rune": "Crimson Runestone",
   "item.simpleskills.crimson_rune.desc": "+20% Prayer spell damage. Stacks additively with the Prayer profession damage bonus.",
-  "item.simpleskills.crimson_rune.use": "Right-click to cast your currently selected Prayer ability."
+  "item.simpleskills.crimson_rune.use": "Right-click to cast your currently selected Prayer ability.",
+  "gui.simpleskills.lore.coordinates_xz": "X %1$d   Z %2$d",
+  "gui.simpleskills.lore.colossus_depth": "Variable depth: search between Y -256 and -80, near the cavern floor.",
+  "gui.simpleskills.lore.page.8.title": "The Crimson Colossus",
+  "gui.simpleskills.lore.page.8.author": "Entry from a chamber sentinel",
+  "gui.simpleskills.lore.page.8.body": "At the heart of the greatest crystal rests a creature of Abyssal stone, crowned with crimson spires. The crystals along its back pulse when someone crosses the arch; then the guardian awakens.\n\nThe colossal formation marks the center of the Crimson Caverns. Follow the coordinates and seek the great crystal arch. The arena lies deep in the Abyss; its exact height follows the natural cavern floor."
 }

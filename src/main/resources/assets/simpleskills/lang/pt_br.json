@@ -748,5 +748,10 @@
   "entity.simpleskills.crimson_colossus": "Colosso Carmesim",
   "item.simpleskills.crimson_rune": "Pedra Rúnica Carmesim",
   "item.simpleskills.crimson_rune.desc": "+20% de dano nas magias de Prayer. Soma-se ao bônus de dano da profissão Prayer.",
-  "item.simpleskills.crimson_rune.use": "Clique com o botão direito para lançar a magia de Prayer selecionada."
+  "item.simpleskills.crimson_rune.use": "Clique com o botão direito para lançar a magia de Prayer selecionada.",
+  "gui.simpleskills.lore.coordinates_xz": "X %1$d   Z %2$d",
+  "gui.simpleskills.lore.colossus_depth": "Profundidade variável: procure entre Y -256 e -80, perto do piso da caverna.",
+  "gui.simpleskills.lore.page.8.title": "O Colosso Carmesim",
+  "gui.simpleskills.lore.page.8.author": "Registro de um vigia da câmara",
+  "gui.simpleskills.lore.page.8.body": "No coração do maior cristal repousa uma criatura de pedra abissal, coroada por espinhos carmesins. Os cristais em suas costas pulsam quando alguém atravessa o arco; então o guardião desperta.\n\nA formação colossal marca o centro das cavernas carmesins. Siga as coordenadas e procure o grande arco de cristal. A arena fica na camada profunda do Abismo; sua altura muda conforme o piso natural."
 }

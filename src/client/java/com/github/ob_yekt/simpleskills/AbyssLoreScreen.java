@@ -16,7 +16,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
-/** The seven-spread Vhal'Kareth chronicle, unlocked by the player's combined profession levels. */
+/** The eight-spread Vhal'Kareth chronicle, unlocked by the player's combined profession levels. */
 public final class AbyssLoreScreen extends Screen {
     private static final int WIDTH = 628;
     private static final int HEIGHT = 336;
@@ -33,11 +33,11 @@ public final class AbyssLoreScreen extends Screen {
     private static final int MUTED_INK = 0xFF756043;
     private static final int RIBBON = 0xFF8C1D24;
     private static final int RIBBON_SHADE = 0xFF561015;
-    private static final int PAGE_COUNT = 7;
-    private static final int[] UNLOCK_LEVELS = {15, 30, 45, 65, 85, 110, 140};
-    private static final String[] ROMAN_NUMERALS = {"I", "II", "III", "IV", "V", "VI", "VII"};
+    private static final int PAGE_COUNT = 8;
+    private static final int[] UNLOCK_LEVELS = {15, 30, 45, 65, 85, 110, 140, 170};
+    private static final String[] ROMAN_NUMERALS = {"I", "II", "III", "IV", "V", "VI", "VII", "VIII"};
     private static final String[] ILLUSTRATIONS = {
-            "discovery", "city", "crimson_gift", "rupture", "last_king", "bridge", "castle"
+            "discovery", "city", "crimson_gift", "rupture", "last_king", "bridge", "castle", "colossus"
     };
 
     private static AbyssLoreScreen active;
@@ -48,6 +48,8 @@ public final class AbyssLoreScreen extends Screen {
     private int castleX = AbyssLoreProgressDataPayload.UNKNOWN_COORDINATE;
     private int castleY = AbyssLoreProgressDataPayload.UNKNOWN_COORDINATE;
     private int castleZ = AbyssLoreProgressDataPayload.UNKNOWN_COORDINATE;
+    private int colossusX = AbyssLoreProgressDataPayload.UNKNOWN_COORDINATE;
+    private int colossusZ = AbyssLoreProgressDataPayload.UNKNOWN_COORDINATE;
     private int currentPage;
     private int refreshTicks;
     private int left;
@@ -91,6 +93,12 @@ public final class AbyssLoreScreen extends Screen {
         castleX = payload.castleX();
         castleY = payload.castleY();
         castleZ = payload.castleZ();
+        boolean colossusLocationKnown = !payload.colossusRegionCenter()
+                .equals(AbyssLoreProgressDataPayload.UNKNOWN_BLOCK_POS);
+        colossusX = colossusLocationKnown ? payload.colossusRegionCenter().getX()
+                : AbyssLoreProgressDataPayload.UNKNOWN_COORDINATE;
+        colossusZ = colossusLocationKnown ? payload.colossusRegionCenter().getZ()
+                : AbyssLoreProgressDataPayload.UNKNOWN_COORDINATE;
         currentPage = Math.min(currentPage, unlockedPageCount() - 1);
         currentPage = Math.max(0, currentPage);
     }
@@ -354,7 +362,43 @@ public final class AbyssLoreScreen extends Screen {
         } else if (page == 7) {
             textY += 6;
             drawCoordinateLine(g, x, textY, maxWidth, castleX, castleY, castleZ);
+        } else if (page == 8) {
+            textY += 6;
+            drawColossusCoordinateNote(g, x, textY, maxWidth);
         }
+    }
+
+    /** Writes the crimson-region X/Z marker and its variable underground depth as a pencil note. */
+    private void drawColossusCoordinateNote(GuiGraphicsExtractor g, int x, int y, int maxWidth) {
+        boolean known = colossusX != AbyssLoreProgressDataPayload.UNKNOWN_COORDINATE
+                && colossusZ != AbyssLoreProgressDataPayload.UNKNOWN_COORDINATE;
+        String coordinates = known
+                ? SkillOverviewText.format("gui.simpleskills.lore.coordinates_xz", colossusX, colossusZ)
+                : SkillOverviewText.get("gui.simpleskills.lore.coordinates_unknown");
+
+        if (known) {
+            int noteX = x + 10;
+            int noteY = y + 2;
+            g.fill(x + 5, noteY, x + 7, noteY + 2, 0xFF80786B);
+            g.fill(x + 3, noteY + 2, x + 5, noteY + 4, 0xFF80786B);
+            g.fill(x + 1, noteY + 4, x + 3, noteY + 6, 0xFF777064);
+            g.fill(x, noteY + 6, x + 2, noteY + 8, 0xFF8A8172);
+            g.fill(x + 5, noteY, x + 6, noteY + 1, 0xFFC2B59B);
+            Component note = Component.literal(coordinates).withStyle(style -> style.withItalic(true));
+            g.text(font, note, noteX + 1, noteY + 1, 0x22807869, false);
+            g.text(font, note, noteX, noteY, 0xFF7D7568, false);
+            int underline = Math.min(font.width(coordinates), maxWidth - 14);
+            if (underline > 12) {
+                g.fill(noteX + 2, noteY + 11, noteX + underline / 3, noteY + 12, 0x367D7466);
+                g.fill(noteX + underline / 2, noteY + 12, noteX + underline - 5, noteY + 13, 0x247D7466);
+            }
+        } else {
+            drawWrappedText(g, coordinates, x, y + 2, maxWidth, 0xFF827967, 1);
+        }
+
+        String depth = SkillOverviewText.get("gui.simpleskills.lore.colossus_depth");
+        int depthY = y + 17;
+        drawWrappedText(g, depth, x + 10, depthY, maxWidth - 10, 0xFF827967, 1);
     }
 
     /**

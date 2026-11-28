@@ -3,6 +3,7 @@ package com.github.ob_yekt.simpleskills.ui;
 import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalBridgePiece;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalCastlePiece;
+import com.github.ob_yekt.simpleskills.abyss.AbyssWorldgen;
 import com.github.ob_yekt.simpleskills.Skills;
 import com.github.ob_yekt.simpleskills.managers.DatabaseManager;
 import java.util.Map;
@@ -25,19 +26,20 @@ import net.minecraft.world.level.levelgen.structure.StructurePiece;
 import net.minecraft.world.level.levelgen.structure.StructureStart;
 
 /**
- * Supplies the lore screen with the real general skill level and the exact boss spawn positions
- * stored in the generated bridge and castle pieces. Positions are searched once per world and
- * cached for the lifetime of that ServerLevel.
+ * Supplies the lore screen with the real general skill level, exact boss positions stored in
+ * generated bridge/castle pieces, and the deterministic X/Z center of the nearest crimson region.
+ * Locations are searched once per world and cached for the lifetime of that ServerLevel.
  */
 public final class AbyssLoreManager {
     private static final int BRIDGE_UNLOCK_LEVEL = 110;
     private static final int CASTLE_UNLOCK_LEVEL = 140;
+    private static final int COLOSSUS_UNLOCK_LEVEL = 170;
     private static final int LOCATE_RADIUS_CHUNKS = 512;
     private static final Map<ServerLevel, WorldLocations> LOCATION_CACHE = new WeakHashMap<>();
 
     private AbyssLoreManager() {}
 
-    private record WorldLocations(BlockPos bridge, BlockPos castle) {}
+    private record WorldLocations(BlockPos bridge, BlockPos castle, BlockPos colossusRegionCenter) {}
 
     public static void registerPayloads() {
         PayloadTypeRegistry.serverboundPlay().register(
@@ -68,8 +70,10 @@ public final class AbyssLoreManager {
             int unknown = AbyssLoreProgressDataPayload.UNKNOWN_COORDINATE;
             int bridgeX = unknown, bridgeY = unknown, bridgeZ = unknown;
             int castleX = unknown, castleY = unknown, castleZ = unknown;
+            BlockPos colossusCenter = AbyssLoreProgressDataPayload.UNKNOWN_BLOCK_POS;
 
-            if (totalLevel >= BRIDGE_UNLOCK_LEVEL || totalLevel >= CASTLE_UNLOCK_LEVEL) {
+            if (totalLevel >= BRIDGE_UNLOCK_LEVEL || totalLevel >= CASTLE_UNLOCK_LEVEL
+                    || totalLevel >= COLOSSUS_UNLOCK_LEVEL) {
                 ServerLevel overworld = player.level().getServer().overworld();
                 WorldLocations locations = locationsFor(overworld);
                 if (totalLevel >= BRIDGE_UNLOCK_LEVEL && locations.bridge() != null) {
@@ -82,10 +86,13 @@ public final class AbyssLoreManager {
                     castleY = locations.castle().getY();
                     castleZ = locations.castle().getZ();
                 }
+                if (totalLevel >= COLOSSUS_UNLOCK_LEVEL && locations.colossusRegionCenter() != null) {
+                    colossusCenter = locations.colossusRegionCenter();
+                }
             }
 
             ServerPlayNetworking.send(player, new AbyssLoreProgressDataPayload(
-                    totalLevel, bridgeX, bridgeY, bridgeZ, castleX, castleY, castleZ));
+                    totalLevel, bridgeX, bridgeY, bridgeZ, castleX, castleY, castleZ, colossusCenter));
         } catch (Exception exception) {
             Simpleskills.LOGGER.error("Could not send Abyss lore progress to {}: {}",
                     player.getName().getString(), exception.getMessage(), exception);
@@ -104,7 +111,13 @@ public final class AbyssLoreManager {
             BlockPos castle = locateSpawnPosition(level, "abyssal_castle", origin, piece ->
                     piece instanceof AbyssalCastlePiece castlePiece
                             ? castlePiece.getFallenKingSpawnPosition() : null);
-            WorldLocations found = new WorldLocations(bridge, castle);
+            AbyssWorldgen.CrimsonCrystalRegion crimsonRegion = AbyssWorldgen.nearestCrimsonCrystalRegion(
+                    origin.getX(), origin.getZ(), level.getSeed());
+            // X/Z are the exact feature center checked by CrimsonCrystalHeartFeature. Y depends on
+            // the natural cavern floor and is therefore described as a depth range on the page.
+            BlockPos colossusCenter = crimsonRegion == null ? null
+                    : new BlockPos(crimsonRegion.centerX(), 0, crimsonRegion.centerZ());
+            WorldLocations found = new WorldLocations(bridge, castle, colossusCenter);
             LOCATION_CACHE.put(level, found);
             return found;
         }

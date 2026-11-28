@@ -738,5 +738,10 @@
   "entity.simpleskills.crimson_colossus": "Coloso Carmesí",
   "item.simpleskills.crimson_rune": "Piedra rúnica carmesí",
   "item.simpleskills.crimson_rune.desc": "+20% de daño de hechizos de Oración. Se acumula con la bonificación de daño de la profesión Oración.",
-  "item.simpleskills.crimson_rune.use": "Haz clic derecho para lanzar la habilidad de Oración seleccionada."
+  "item.simpleskills.crimson_rune.use": "Haz clic derecho para lanzar la habilidad de Oración seleccionada.",
+  "gui.simpleskills.lore.coordinates_xz": "X %1$d   Z %2$d",
+  "gui.simpleskills.lore.colossus_depth": "Profundidad variable: búscalo entre Y -256 y -80, cerca del piso de la caverna.",
+  "gui.simpleskills.lore.page.8.title": "El Coloso Carmesí",
+  "gui.simpleskills.lore.page.8.author": "Registro de un guardián de la cámara",
+  "gui.simpleskills.lore.page.8.body": "En el corazón del cristal más grande yace una criatura de piedra abisal, coronada por espinas carmesíes. Los cristales de su espalda palpitan cuando alguien cruza el arco; entonces despierta el guardián.\n\nLa formación colosal marca el centro de las Cavernas Carmesíes. Sigue las coordenadas y busca el gran arco de cristal. La arena está en las profundidades del Abismo; su altura depende del suelo natural de la caverna."
 }
