@@ -1,0 +1,8 @@
+{
+  "parent": "minecraft:block/slab_top",
+  "textures": {
+    "bottom": "simpleskills:block/abyssal_tiles",
+    "top": "simpleskills:block/abyssal_tiles",
+    "side": "simpleskills:block/abyssal_tiles"
+  }
+}

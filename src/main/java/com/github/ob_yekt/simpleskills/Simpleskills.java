@@ -1,6 +1,24 @@
 package com.github.ob_yekt.simpleskills;
 
 import com.github.ob_yekt.simpleskills.commands.SimpleskillsCommands;
+import com.github.ob_yekt.simpleskills.abyss.AbyssalSolidCaveFormationFeature;
+import com.github.ob_yekt.simpleskills.abyss.AbyssalDeadTreeFeature;
+import com.github.ob_yekt.simpleskills.abyss.CrimsonCrystalBiomePainterFeature;
+import com.github.ob_yekt.simpleskills.abyss.CrimsonCrystalSpireFeature;
+import com.github.ob_yekt.simpleskills.abyss.CrimsonCrystalHeartFeature;
+import com.github.ob_yekt.simpleskills.abyss.AbyssContent;
+import com.github.ob_yekt.simpleskills.abyss.CrimsonCrystalItems;
+import com.github.ob_yekt.simpleskills.abyss.CrimsonBlightEffect;
+import com.github.ob_yekt.simpleskills.abyss.CrimsonCrystalCombat;
+import com.github.ob_yekt.simpleskills.abyss.AbyssalFallenKingEntity;
+import com.github.ob_yekt.simpleskills.abyss.AbyssalSamuraiEntity;
+import com.github.ob_yekt.simpleskills.abyss.entity.CrimsonColossusEntity;
+import com.github.ob_yekt.simpleskills.abyss.entity.CrimsonColossusLighting;
+import com.github.ob_yekt.simpleskills.abyss.AbyssalKingItems;
+import com.github.ob_yekt.simpleskills.abyss.AbyssalKatanaItems;
+import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaStanceManager;
+import com.github.ob_yekt.simpleskills.abyss.AbyssWorldgen;
+import com.github.ob_yekt.simpleskills.abyss.AbyssEntryTracker;
 import com.github.ob_yekt.simpleskills.managers.*;
 import com.github.ob_yekt.simpleskills.events.EventHandlers;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingManager;
@@ -21,6 +39,7 @@ import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionStatePayload;
 import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionNetworking;
 import com.github.ob_yekt.simpleskills.ui.RankTitleManager;
 import com.github.ob_yekt.simpleskills.ui.SkillOverviewManager;
+import com.github.ob_yekt.simpleskills.ui.AbyssLoreManager;
 import com.github.ob_yekt.simpleskills.prayer.PrayerManager;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVisualEffects;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVfxEntity;
@@ -53,14 +72,28 @@ public class Simpleskills implements ModInitializer {
 
 		// Register aquatic content before FishingConfig reads the registered species list.
 		FishingEntities.register();
+		AbyssalFallenKingEntity.register();
+		AbyssalSamuraiEntity.register();
+		CrimsonColossusEntity.register();
 		FishingItems.register();
 		FishingSpeciesRegistration.register();
 
 		// Blocks must be registered during initialization, before the registries freeze.
 		ModBlocks.register();
 		RuneContent.register();
+		AbyssContent.register();
+		CrimsonCrystalItems.register();
+		CrimsonBlightEffect.register();
+		AbyssalKingItems.register();
+		AbyssalKatanaItems.register();
+		AbyssalSolidCaveFormationFeature.registerType();
+		AbyssalDeadTreeFeature.registerType();
+		CrimsonCrystalBiomePainterFeature.registerType();
+		CrimsonCrystalSpireFeature.registerType();
+		CrimsonCrystalHeartFeature.registerType();
 		RuneMiningManager.register();
 		RuneWorldgen.register();
+		AbyssWorldgen.register();
 
 		// Escudos de glowstone (itens); precisam existir antes do registro congelar.
 		GlowstoneShields.register();
@@ -77,7 +110,10 @@ public class Simpleskills implements ModInitializer {
 		AgilityManager.registerPayloads();
 		RankTitleManager.registerPayloads();
 		CraftingEquipmentManager.registerPayloads();
+		KatanaStanceManager.registerPayloads();
 		SkillOverviewManager.registerPayloads();
+		AbyssLoreManager.registerPayloads();
+		AbyssEntryTracker.registerPayloads();
 		PrayerManager.registerPayloads();
 		PrayerVfxEntity.register();
 		SimpleskillsCommands.registerCommands();
@@ -87,12 +123,16 @@ public class Simpleskills implements ModInitializer {
 		ConfigManager.initialize();
 		FishingNaturalSpawns.register();
 		EventHandlers.registerAll();
+		CrimsonCrystalCombat.register();
 		DefenseCombat.register();
 		AgilityManager.register();
 		CraftingEquipmentManager.register();
+		KatanaStanceManager.register();
 		CelestialAltarManager.register();
 		RankTitleManager.registerReceivers();
 		SkillOverviewManager.registerReceivers();
+		AbyssLoreManager.registerReceivers();
+		AbyssEntryTracker.register();
 		PrayerManager.registerReceivers();
 		PrayerVisualEffects.register();
 		GlowstoneShieldLight.register();
@@ -116,6 +156,7 @@ public class Simpleskills implements ModInitializer {
 
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> {
 			PrayerLighting.clearAll();
+			CrimsonColossusLighting.clearAll();
 			GlowstoneShieldLight.clearAll();
 		});
 

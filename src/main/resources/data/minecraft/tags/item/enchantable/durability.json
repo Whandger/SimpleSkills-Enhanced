@@ -1,8 +1,11 @@
 {
   "replace": false,
   "values": [
-    "simpleskills:glowstone_shield",
+    "simpleskills:abyssal_king_crown",
+    "simpleskills:abyssal_king_sword",
     "simpleskills:diamond_glowstone_shield",
+    "simpleskills:glowstone_shield",
+    "simpleskills:katana_ultimo_juramento",
     "simpleskills:netherite_glowstone_shield"
   ]
 }

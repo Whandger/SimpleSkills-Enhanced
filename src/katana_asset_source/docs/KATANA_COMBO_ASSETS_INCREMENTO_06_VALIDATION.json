@@ -1,0 +1,41 @@
+{
+  "animation_json_clips": 14,
+  "bbmodel_animation_count": 14,
+  "new_clips": [
+    "animation.katana_ultimo_juramento.attack_1_horizontal",
+    "animation.katana_ultimo_juramento.attack_2_rising_diagonal",
+    "animation.katana_ultimo_juramento.attack_3_overhead_finisher",
+    "animation.katana_ultimo_juramento.firstperson.attack_1_horizontal",
+    "animation.katana_ultimo_juramento.firstperson.attack_2_rising_diagonal",
+    "animation.katana_ultimo_juramento.firstperson.attack_3_overhead_finisher"
+  ],
+  "new_clip_lengths": {
+    "animation.katana_ultimo_juramento.attack_1_horizontal": 0.46,
+    "animation.katana_ultimo_juramento.attack_2_rising_diagonal": 0.5,
+    "animation.katana_ultimo_juramento.attack_3_overhead_finisher": 0.66,
+    "animation.katana_ultimo_juramento.firstperson.attack_1_horizontal": 0.46,
+    "animation.katana_ultimo_juramento.firstperson.attack_2_rising_diagonal": 0.5,
+    "animation.katana_ultimo_juramento.firstperson.attack_3_overhead_finisher": 0.66
+  },
+  "all_new_keyframes_catmullrom": true,
+  "third_person_arm_tracks_rotation_only": true,
+  "all_keyframes_within_duration": true,
+  "combo_transition_continuity": "attack1->attack2->attack3->idle: exact endpoint matches in both perspectives",
+  "java_files_modified": false,
+  "render_gifs_received": false,
+  "first_person_runtime_pose_alignment": "Attack 1 entry and Attack 3 exit aligned to existing runtime firstperson.idle_unsheathed for saya and katana; internal paths preserved.",
+  "status": "historical_pre_global_rig_consolidation",
+  "note": "Validação histórica da antiga separação de perspectivas. O runtime atual contém onze clipes globais, incluindo caminhada, guarda relaxada e técnica especial embainhada; não há tracks firstperson.* ativas. Consulte KATANA_ANIMACAO_GLOBAL.md e STATUS_ANIMACOES_SEPARADAS.md.",
+  "current_global_clip_count": 9,
+  "current_global_clips": [
+    "idle_sheathed",
+    "draw_katana",
+    "idle_unsheathed",
+    "attack_1_horizontal",
+    "attack_2_rising_diagonal",
+    "attack_3_overhead_finisher",
+    "sheath_katana",
+    "walk",
+    "lower_guard"
+  ]
+}

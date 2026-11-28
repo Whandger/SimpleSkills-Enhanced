@@ -5,6 +5,17 @@ import com.github.ob_yekt.simpleskills.crafting.CraftingRevealPayload;
 import com.github.ob_yekt.simpleskills.crafting.CraftingRevealScreen;
 import com.github.ob_yekt.simpleskills.celestial.CelestialAltarAnimationController;
 import com.github.ob_yekt.simpleskills.celestial.CelestialAltarContent;
+import com.github.ob_yekt.simpleskills.abyss.AbyssContent;
+import com.github.ob_yekt.simpleskills.abyss.AbyssalChestScreen;
+import com.github.ob_yekt.simpleskills.abyss.AbyssalFallenKingClient;
+import com.github.ob_yekt.simpleskills.abyss.AbyssalSamuraiClient;
+import com.github.ob_yekt.simpleskills.abyss.CrimsonBlightClient;
+import com.github.ob_yekt.simpleskills.abyss.CrimsonColossusClient;
+import com.github.ob_yekt.simpleskills.abyss.AbyssThemeMusic;
+import com.github.ob_yekt.simpleskills.abyss.AbyssAmbience;
+import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaClientStanceState;
+import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaClientRendering;
+import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaStancePayload;
 import com.github.ob_yekt.simpleskills.celestial.CelestialAltarScreen;
 import com.github.ob_yekt.simpleskills.celestial.CelestialAltarVisualPayload;
 import com.github.ob_yekt.simpleskills.grinder.OreGrinderContent;
@@ -29,6 +40,7 @@ import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionResultPayload;
 import com.github.ob_yekt.simpleskills.runes.RuneMiningClient;
 import com.github.ob_yekt.simpleskills.ui.RankTitleMenuDataPayload;
 import com.github.ob_yekt.simpleskills.ui.SkillOverviewDataPayload;
+import com.github.ob_yekt.simpleskills.ui.AbyssLoreProgressDataPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerMenuDataPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerClientState;
 import com.github.ob_yekt.simpleskills.prayer.PrayerCooldownPayload;
@@ -67,11 +79,20 @@ public class SimpleskillsClient implements ClientModInitializer {
         );
 
         FishingEntityClient.register();
+        AbyssalFallenKingClient.register();
+        AbyssalSamuraiClient.register();
+        CrimsonColossusClient.register();
+        AbyssThemeMusic.register();
+        AbyssAmbience.register();
+        CrimsonBlightClient.register();
         MenuScreens.register(CelestialAltarContent.MENU_TYPE, CelestialAltarScreen::new);
         MenuScreens.register(OreGrinderContent.MENU_TYPE, OreGrinderScreen::new);
+        MenuScreens.register(AbyssContent.ABYSSAL_CHEST_MENU_TYPE, AbyssalChestScreen::new);
+        MenuScreens.register(AbyssContent.ABYSSAL_DOUBLE_CHEST_MENU_TYPE, AbyssalChestScreen::new);
         BlockEntityRenderers.register(OreGrinderContent.BLOCK_ENTITY_TYPE, OreGrinderRenderer::new);
         EntityRendererRegistry.register(PrayerVfxEntity.TYPE, PrayerVfxRenderer::new);
         Keybinds.register();
+        KatanaClientRendering.register();
         SkillHudRenderer.register();
         ClientConfig.load();
         InvestigationHud.register();
@@ -80,6 +101,9 @@ public class SimpleskillsClient implements ClientModInitializer {
         AgilityDashHud.register();
         PrayerCooldownHud.register();
         PrayerImpactFeedback.registerClientHooks();
+
+        ClientPlayNetworking.registerGlobalReceiver(KatanaStancePayload.TYPE, (payload, context) ->
+                context.client().execute(() -> KatanaClientStanceState.accept(payload)));
 
         ClientPlayNetworking.registerGlobalReceiver(CelestialAltarVisualPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> CelestialAltarAnimationController.onServerConfirmed(payload)));
@@ -100,6 +124,8 @@ public class SimpleskillsClient implements ClientModInitializer {
                 context.client().execute(() -> RankTitleMenuScreen.showOrUpdate(payload)));
         ClientPlayNetworking.registerGlobalReceiver(SkillOverviewDataPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> SkillOverviewScreen.showOrUpdate(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(AbyssLoreProgressDataPayload.TYPE, (payload, context) ->
+                context.client().execute(() -> AbyssLoreScreen.show(payload)));
         ClientPlayNetworking.registerGlobalReceiver(PrayerMenuDataPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> PrayerClientState.accept(payload)));
         ClientPlayNetworking.registerGlobalReceiver(PrayerCooldownPayload.TYPE, (payload, context) ->
@@ -194,6 +220,7 @@ public class SimpleskillsClient implements ClientModInitializer {
         );
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            KatanaClientStanceState.clear();
             CelestialAltarAnimationController.reset();
             GatheringSpeed.resetClientLevels();
             AgilityClientState.reset();

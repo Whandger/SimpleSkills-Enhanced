@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "TTT",
+    "T T",
+    "TTT"
+  ],
+  "key": {
+    "T": "simpleskills:abyssal_charred_timber"
+  },
+  "result": {
+    "id": "simpleskills:abyssal_chest",
+    "count": 1
+  }
+}

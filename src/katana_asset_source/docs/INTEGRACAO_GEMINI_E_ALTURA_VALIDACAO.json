@@ -1,0 +1,36 @@
+{
+  "status": "updated_by_local_integration",
+  "animation_clips": 11,
+  "single_global_rig": true,
+  "firstperson_specific_tracks": false,
+  "height_adjustment": {
+    "previous_y": 18.2,
+    "current_y": 17.7,
+    "delta_y": -0.5,
+    "approximate_pixels": 1.0,
+    "applied_to": "katana.position keyframes in the global animation clips and both Blockbench projects"
+  },
+  "source_runtime_jsons_byte_equal": true,
+  "source_runtime_blockbench_byte_equal": true,
+  "special_attack": {
+    "only_when_sheathed": true,
+    "two_hands_hold_saya": true,
+    "dash_max_blocks": 6,
+    "target_stun_ticks": 20,
+    "slash_hits": 6,
+    "total_damage_multiplier": 2.0
+  },
+  "normal_combat": {
+    "draw_click_deals_damage": false,
+    "requires_unsheathed_combat_guard": true,
+    "three_hit_combo": true,
+    "vanilla_attack_indicator_hidden": true,
+    "vanilla_player_attack_cancelled": true
+  },
+  "offhand": {
+    "blocked_while_katana_mainhand": true,
+    "moves_to_inventory": true,
+    "drops_remainder_if_full": true
+  },
+  "build_validation": "JSON, manifests, animation mirrors and Blockbench structure validated; full Gradle and in-game validation require the project root and Minecraft 26.3."
+}

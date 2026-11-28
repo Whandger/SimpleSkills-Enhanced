@@ -1,6 +1,19 @@
 {
   "replace": false,
   "values": [
-    "simpleskills:celestial_altar"
+    "simpleskills:celestial_altar",
+    "simpleskills:abyssal_stone",
+    "simpleskills:cracked_abyssal_stone",
+    "simpleskills:amethyst_corrupted_stone",
+    "simpleskills:abyssal_pillar",
+    "simpleskills:transcendent_ore",
+    "simpleskills:abyssal_charred_timber",
+    "simpleskills:abyssal_black_bookshelf",
+    "simpleskills:abyssal_chest",
+    "simpleskills:abyssal_furnace",
+    "simpleskills:crimson_corrupted_stone",
+    "simpleskills:heavy_crimson_corrupted_stone",
+    "simpleskills:red_crystal_block",
+    "simpleskills:budding_red_crystal_block"
   ]
 }

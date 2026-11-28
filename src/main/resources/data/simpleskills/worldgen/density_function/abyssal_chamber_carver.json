@@ -1,0 +1,67 @@
+{
+  "type": "minecraft:range_choice",
+  "input": {
+    "type": "minecraft:gradient",
+    "axis": "y",
+    "from_coordinate": -246,
+    "from_value": -1.0,
+    "to_coordinate": -80,
+    "to_value": 1.0
+  },
+  "min_inclusive": -0.999,
+  "max_exclusive": 0.999,
+  "when_in_range": {
+    "type": "minecraft:range_choice",
+    "input": {
+      "type": "minecraft:add",
+      "left": {
+        "type": "minecraft:gradient",
+        "axis": "y",
+        "from_coordinate": -246,
+        "from_value": -1.0,
+        "to_coordinate": -80,
+        "to_value": 1.0
+      },
+      "right": {
+        "type": "minecraft:mul",
+        "left": {
+          "type": "minecraft:noise",
+          "noise": "simpleskills:abyssal_chamber_envelope",
+          "xz_scale": 0.58,
+          "y_scale": 0.035
+        },
+        "right": 0.58
+      }
+    },
+    "min_inclusive": -0.92,
+    "max_exclusive": 0.92,
+    "when_in_range": {
+      "type": "minecraft:range_choice",
+      "input": {
+        "type": "minecraft:add",
+        "left": {
+          "type": "minecraft:noise",
+          "noise": "simpleskills:abyssal_chambers",
+          "xz_scale": 0.52,
+          "y_scale": 0.14
+        },
+        "right": {
+          "type": "minecraft:mul",
+          "left": {
+            "type": "minecraft:noise",
+            "noise": "simpleskills:abyssal_chamber_detail",
+            "xz_scale": 1.72,
+            "y_scale": 0.62
+          },
+          "right": 0.26
+        }
+      },
+      "min_inclusive": -1000000.0,
+      "max_exclusive": 0.14,
+      "when_in_range": -1.0,
+      "when_out_of_range": 1000000.0
+    },
+    "when_out_of_range": 1000000.0
+  },
+  "when_out_of_range": 1000000.0
+}

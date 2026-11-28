@@ -1,6 +1,7 @@
 package com.github.ob_yekt.simpleskills.prayer;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
+import com.github.ob_yekt.simpleskills.abyss.AbyssalFallenKingEntity;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.Registry;
@@ -53,6 +54,8 @@ public final class PrayerVfxEntity extends Entity {
     private int prayerLevel;
     private int impactTick = -1;
     private boolean impactFired = false;
+    /** True when this carrier is resolving a Prayer spell cast by the Abyssal Fallen King. */
+    private boolean kingSpellPayload = false;
     private int[] impactTicks = new int[0];
     private int nextImpact = 0;
     private boolean lightEnabled = true;
@@ -102,6 +105,14 @@ public final class PrayerVfxEntity extends Entity {
                 if (caster != null) entityData.set(OWNER, caster.getId());
             }
         }
+    }
+
+    /** Configures the existing Prayer VFX carrier to apply the same spell against player targets for the boss. */
+    public void setKingSpellPayload(UUID casterUuid, UUID targetUuid, Vec3 impactPos,
+                                    PrayerAbility ability, int prayerLevel) {
+        setSpellPayload(casterUuid, targetUuid, impactPos, ability, prayerLevel,
+                ability != null ? ability.impactTick() : -1);
+        this.kingSpellPayload = true;
     }
 
     public void setTargetId(int targetId) {
@@ -197,8 +208,13 @@ public final class PrayerVfxEntity extends Entity {
                 // Cada golpe dispara no seu tick com a sua fração do dano (1 golpe = dano inteiro)
                 while (nextImpact < impactTicks.length && life >= impactTicks[nextImpact]) {
                     nextImpact++;
-                    PrayerManager.executeDelayedImpact(server, casterUuid, targetUuid, impactPos,
-                            payloadAbility, prayerLevel, 1.0f / impactTicks.length);
+                    if (kingSpellPayload) {
+                        AbyssalFallenKingEntity.executeBossSpellImpact(server, casterUuid, targetUuid,
+                                impactPos, payloadAbility, prayerLevel, 1.0f / impactTicks.length);
+                    } else {
+                        PrayerManager.executeDelayedImpact(server, casterUuid, targetUuid, impactPos,
+                                payloadAbility, prayerLevel, 1.0f / impactTicks.length);
+                    }
                 }
                 if (nextImpact >= impactTicks.length) impactFired = true;
             }

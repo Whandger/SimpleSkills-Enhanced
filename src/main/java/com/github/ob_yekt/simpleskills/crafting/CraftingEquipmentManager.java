@@ -71,6 +71,7 @@ public final class CraftingEquipmentManager {
     private static final TagKey<Block> COMMON_ORE_BLOCKS = TagKey.create(
             Registries.BLOCK, Identifier.fromNamespaceAndPath("c", "ores"));
     private static final String DATA_RARITY = "simpleskills_crafting_rarity";
+    private static final String DATA_ABYSSAL_LOOT_RARITY = "simpleskills_abyss_loot_rarity";
     private static final String DATA_DAMAGE = "simpleskills_crafting_damage_bonus";
     private static final String DATA_DAMAGE_AS_ATTRIBUTE = "simpleskills_crafting_damage_as_attribute";
     private static final String DATA_DAMAGE_ATTRIBUTE_INCLUDES_AFFIXES =
@@ -1373,6 +1374,11 @@ public final class CraftingEquipmentManager {
     }
 
     private static void applyEquipmentRarity(ItemStack stack, ServerPlayer player, CraftingRarity rarity, int level) {
+        applyEquipmentRarity(stack, player, rarity, level, true);
+    }
+
+    private static void applyEquipmentRarity(ItemStack stack, ServerPlayer player, CraftingRarity rarity,
+            int level, boolean announceAndUnlock) {
         CompoundTag previousTag = getTag(stack);
         String baseName = previousTag.getStringOr(DATA_BASE_NAME, "");
         if (baseName.isBlank()) baseName = getUnprefixedItemName(stack);
@@ -1577,11 +1583,16 @@ public final class CraftingEquipmentManager {
         appendTooltip(stack, rarity, totalDamageBonus, durabilityBonus, breakSpeedBonus,
                 excavationTimeReduction, displayedCriticalChance, attackSpeedBonus, armorBonus, toughnessBonus);
 
-        if (weapon) unlockWeaponTitle(player, rarity);
-        announceHighRarityCraft(player, stack, rarity);
-        sendReveal(player, stack, originalName.getString(), rarity, totalDamageBonus, durabilityBonus,
-                breakSpeedBonus, excavationTimeReduction, displayedCriticalChance,
-                attackSpeedBonus, armorBonus, toughnessBonus, encodedPerks);
+        // Equipment found in an Abyssal chest receives the full affix pipeline, but it was
+        // discovered rather than crafted: do not unlock crafting titles, broadcast a craft
+        // announcement, or open the crafting reveal UI for loot items.
+        if (announceAndUnlock) {
+            if (weapon) unlockWeaponTitle(player, rarity);
+            announceHighRarityCraft(player, stack, rarity);
+            sendReveal(player, stack, originalName.getString(), rarity, totalDamageBonus, durabilityBonus,
+                    breakSpeedBonus, excavationTimeReduction, displayedCriticalChance,
+                    attackSpeedBonus, armorBonus, toughnessBonus, encodedPerks);
+        }
     }
 
     /** Announces Legendary, Mythic and Transcendent equipment to the entire server. */
@@ -3151,6 +3162,53 @@ public final class CraftingEquipmentManager {
     public static String getRarityId(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return "";
         return getTag(stack).getStringOr(DATA_RARITY, "");
+    }
+
+    /**
+     * Marks durable equipment for the existing Abyssal-loot rarity pipeline.
+     * The actual stats, perks, name and lore are generated server-side when a player claims it.
+     */
+    public static boolean markAbyssalLootRarity(ItemStack stack, CraftingRarity rarity) {
+        if (stack == null || stack.isEmpty() || stack.get(DataComponents.MAX_DAMAGE) == null
+                || hasRarity(stack)
+                || (rarity != CraftingRarity.MYTHIC && rarity != CraftingRarity.TRANSCENDENT)) {
+            return false;
+        }
+        CustomData.update(DataComponents.CUSTOM_DATA, stack,
+                tag -> tag.putString(DATA_ABYSSAL_LOOT_RARITY, rarity.id()));
+        return true;
+    }
+
+    /** True while an Abyssal loot item still has a tier marker waiting to be materialized. */
+    public static boolean hasPendingAbyssalLootRarity(ItemStack stack) {
+        if (stack == null || stack.isEmpty()) return false;
+        CraftingRarity rarity = CraftingRarity.byId(
+                getTag(stack).getStringOr(DATA_ABYSSAL_LOOT_RARITY, ""));
+        return rarity == CraftingRarity.MYTHIC || rarity == CraftingRarity.TRANSCENDENT;
+    }
+
+    /**
+     * Applies a fixed high-tier rarity to Abyssal chest loot and Abyssal Fallen King relics.
+     * The producer only supplies the requested tier marker; all real stats, perks, durability,
+     * name and lore are rolled by the same pipeline as crafted equipment.
+     */
+    public static boolean applyAbyssalLootRarity(ItemStack stack, ServerPlayer player) {
+        if (stack == null || stack.isEmpty() || player == null
+                || stack.get(DataComponents.MAX_DAMAGE) == null || hasRarity(stack)) {
+            return false;
+        }
+
+        CompoundTag data = getTag(stack);
+        CraftingRarity rarity = CraftingRarity.byId(data.getStringOr(DATA_ABYSSAL_LOOT_RARITY, ""));
+        if (rarity != CraftingRarity.MYTHIC && rarity != CraftingRarity.TRANSCENDENT) {
+            return false;
+        }
+
+        // Consume the one-shot marker before the normal pipeline writes the final rarity data.
+        CustomData.update(DataComponents.CUSTOM_DATA, stack,
+                tag -> tag.remove(DATA_ABYSSAL_LOOT_RARITY));
+        applyEquipmentRarity(stack, player, rarity, getCraftingLevel(player), false);
+        return true;
     }
 
     /** Returns the Indestructible perk chance without rolling it. */

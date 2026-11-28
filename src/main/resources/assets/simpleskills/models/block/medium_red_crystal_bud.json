@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "simpleskills:block/medium_red_crystal_bud"
+  }
+}

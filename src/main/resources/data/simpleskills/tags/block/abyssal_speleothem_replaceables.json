@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "simpleskills:abyssal_stone",
+    "simpleskills:cracked_abyssal_stone",
+    "simpleskills:amethyst_corrupted_stone",
+    "simpleskills:abyssal_pillar",
+    "simpleskills:crimson_corrupted_stone",
+    "simpleskills:heavy_crimson_corrupted_stone"
+  ]
+}

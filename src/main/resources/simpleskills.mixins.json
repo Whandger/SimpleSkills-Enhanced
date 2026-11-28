@@ -28,6 +28,22 @@
     "TreeFellerFallingBlockMixin",
     "EnchantingScreenHandlerMixin",
     "ServerPlayerEntityMixin",
+    "AbyssLavaBlockMixin",
+    "AbyssAquiferMixin",
+    "AbyssMineshaftMixin",
+    "AbyssAncientCityMixin",
+    "AbyssRuinedPortalMixin",
+    "AbyssStructureStartMixin",
+    "AbyssStrongholdMixin",
+    "AbyssStructureReferenceChunkStepMixin",
+    "AbyssStructureReferenceChunkGeneratorMixin",
+    "AbyssBaseSpawnerMixin",
+    "AbyssMonsterRoomMixin",
+    "AbyssWardenSummonMixin",
+    "AbyssSculkSpreadCursorMixin",
+    "AbyssSculkVeinMixin",
+    "AbyssSculkPatchMixin",
+    "AbyssNaturalMobSpawnMixin",
     "SpearCancelMixin",
     "ToolMaterialMixin",
     "CRAFTING.AbstractCraftingScreenHandlerAccessor",
@@ -70,7 +86,8 @@
     "LORE.SimpleInventoryMixin",
     "SMITHING.AnvilScreenHandlerMixin",
     "SMITHING.ForgingScreenHandlerMixin",
-    "SMITHING.SmithingScreenHandlerMixin"
+    "SMITHING.SmithingScreenHandlerMixin",
+    "KatanaDisableVanillaAttackMixin"
   ],
   "plugin": "com.github.ob_yekt.simpleskills.mixin.MixinPlugin",
   "injectors": {
@@ -84,7 +101,15 @@
     "ItemStackRenderStateAccessor",
     "ItemStackLayerRenderStateAccessor",
     "RuneEquipmentLayerRendererMixin",
+    "AbyssalSamuraiArmorRendererMixin",
     "RuneItemStackLayerVfxMixin",
-    "TranscendentVisionOutlineMixin"
+    "TranscendentVisionOutlineMixin",
+    "KatanaPlayerItemInHandLayerMixin",
+    "KatanaPlayerModelMixin",
+    "KatanaFirstPersonHandsAndItemsRendererMixin",
+    "KatanaMinecraftAttackMixin",
+    "KatanaAttackIndicatorHudMixin",
+    "CrimsonBlightRenderStateMixin",
+    "CrimsonBlightRendererMixin"
   ]
 }

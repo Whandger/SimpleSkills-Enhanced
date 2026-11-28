@@ -1,0 +1,9 @@
+{
+  "type": "simpleskills:crimson_crystal_spire",
+  "mode": "floor",
+  "min_length": 18,
+  "max_length": 28,
+  "min_radius": 2,
+  "max_radius": 4,
+  "cluster_count": 6
+}

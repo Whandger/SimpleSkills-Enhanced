@@ -1,0 +1,29 @@
+{
+  "feature": {
+    "type": "minecraft:stepped_column_cluster",
+    "column_reach": 2,
+    "column_count": {
+      "type": "minecraft:uniform",
+      "min_inclusive": 18,
+      "max_inclusive": 36
+    },
+    "height": 6,
+    "cluster_reach": 8,
+    "block": {
+      "id": "simpleskills:abyssal_pillar"
+    },
+    "can_replace": {
+      "type": "minecraft:matching_blocks",
+      "blocks": [
+        "minecraft:air",
+        "minecraft:cave_air"
+      ]
+    },
+    "continue_through": {
+      "type": "minecraft:matching_blocks",
+      "blocks": "simpleskills:abyssal_pillar"
+    },
+    "cannot_place_on": "minecraft:lava"
+  },
+  "placement": []
+}

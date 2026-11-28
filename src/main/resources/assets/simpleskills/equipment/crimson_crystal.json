@@ -1,0 +1,14 @@
+{
+  "layers": {
+    "humanoid": [
+      {
+        "texture": "simpleskills:crimson_crystal"
+      }
+    ],
+    "humanoid_leggings": [
+      {
+        "texture": "simpleskills:crimson_crystal"
+      }
+    ]
+  }
+}

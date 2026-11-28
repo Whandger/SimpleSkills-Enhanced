@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "simpleskills:amethyst_corrupted_stone"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "simpleskills:blocks/amethyst_corrupted_stone"
+}

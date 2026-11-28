@@ -11,7 +11,10 @@
   },
   "projectile_reflection": {
     "sounds": [
-      "minecraft:item.shield.block"
+      {
+        "name": "minecraft:item.shield.block",
+        "type": "event"
+      }
     ]
   },
   "prayer_light_orb": {
@@ -361,6 +364,150 @@
         "type": "event",
         "volume": 1.0,
         "pitch": 0.8
+      }
+    ]
+  },
+  "colossus_step": {
+    "sounds": [
+      {
+        "name": "simpleskills:colossus_step",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "colossus_swipe": {
+    "sounds": [
+      {
+        "name": "simpleskills:colossus_swipe",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "colossus_laser_charge": {
+    "sounds": [
+      {
+        "name": "simpleskills:colossus_laser_charge",
+        "attenuation_distance": 56
+      }
+    ]
+  },
+  "colossus_laser_fire": {
+    "sounds": [
+      {
+        "name": "simpleskills:colossus_laser_fire",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "colossus_slam": {
+    "sounds": [
+      {
+        "name": "simpleskills:colossus_slam",
+        "attenuation_distance": 80
+      }
+    ]
+  },
+  "colossus_leap_launch": {
+    "sounds": [
+      {
+        "name": "simpleskills:colossus_leap_launch",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "colossus_leap_land": {
+    "sounds": [
+      {
+        "name": "simpleskills:colossus_leap_land",
+        "attenuation_distance": 80
+      }
+    ]
+  },
+  "colossus_barrage": {
+    "sounds": [
+      {
+        "name": "simpleskills:colossus_barrage",
+        "attenuation_distance": 56
+      }
+    ]
+  },
+  "colossus_ambient": {
+    "sounds": [
+      {
+        "name": "simpleskills:colossus_ambient",
+        "attenuation_distance": 48
+      }
+    ]
+  },
+  "colossus_hurt": {
+    "sounds": [
+      {
+        "name": "simpleskills:colossus_hurt",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "colossus_death": {
+    "sounds": [
+      {
+        "name": "simpleskills:colossus_death",
+        "attenuation_distance": 80
+      }
+    ]
+  },
+  "abyss_theme": {
+    "sounds": [
+      {
+        "name": "simpleskills:music/abyss_theme",
+        "stream": true
+      }
+    ]
+  },
+  "abyss_theme_calm": {
+    "sounds": [
+      {
+        "name": "simpleskills:music/abyss_theme_calm",
+        "stream": true
+      }
+    ]
+  },
+  "abyss_crystal": {
+    "sounds": [
+      {
+        "name": "simpleskills:abyss/crystal_1",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "simpleskills:abyss/crystal_2",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "simpleskills:abyss/crystal_3",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "abyss_crack": {
+    "sounds": [
+      {
+        "name": "simpleskills:abyss/crack_1",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "simpleskills:abyss/crack_2",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "abyss_pebbles": {
+    "sounds": [
+      {
+        "name": "simpleskills:abyss/pebbles_1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "simpleskills:abyss/pebbles_2",
+        "attenuation_distance": 24
       }
     ]
   }

@@ -1,0 +1,12 @@
+{
+  "format_version": "1.8.0",
+  "template_only": true,
+  "instructions": "Template ainda não implementado. Criar ciclo global de caminhada que parte e fecha na pose de guarda de combate; adicionar ao manifest somente quando validado.",
+  "animations": {
+    "animation.katana_ultimo_juramento.walk": {
+      "loop": true,
+      "animation_length": 0.8,
+      "bones": {}
+    }
+  }
+}

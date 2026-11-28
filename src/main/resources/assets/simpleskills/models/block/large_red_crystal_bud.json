@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "simpleskills:block/large_red_crystal_bud"
+  }
+}

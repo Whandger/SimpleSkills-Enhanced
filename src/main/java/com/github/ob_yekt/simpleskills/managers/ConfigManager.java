@@ -1543,6 +1543,12 @@ private static JsonObject getDefaultToolRequirements() {
             new ToolRequirement("minecraft:netherite_shovel", "EXCAVATING", 35),
             new ToolRequirement("minecraft:netherite_hoe", "FARMING", 35),
 
+            // Crimson Crystal tools: five levels above Netherite.
+            new ToolRequirement("simpleskills:crimson_crystal_pickaxe", "MINING", 40),
+            new ToolRequirement("simpleskills:crimson_crystal_axe", "WOODCUTTING", 40),
+            new ToolRequirement("simpleskills:crimson_crystal_shovel", "EXCAVATING", 40),
+            new ToolRequirement("simpleskills:crimson_crystal_hoe", "FARMING", 40),
+
             // Shield
             new ToolRequirement("minecraft:shield", "DEFENSE", 5)
     };
@@ -1610,6 +1616,12 @@ private static JsonObject getDefaultArmorRequirements() {
             new ArmorRequirement("minecraft:netherite_leggings", "DEFENSE", 30),
             new ArmorRequirement("minecraft:netherite_boots", "DEFENSE", 30),
 
+            // Crimson Crystal armor: five levels above Netherite.
+            new ArmorRequirement("simpleskills:crimson_crystal_helmet", "DEFENSE", 35),
+            new ArmorRequirement("simpleskills:crimson_crystal_chestplate", "DEFENSE", 35),
+            new ArmorRequirement("simpleskills:crimson_crystal_leggings", "DEFENSE", 35),
+            new ArmorRequirement("simpleskills:crimson_crystal_boots", "DEFENSE", 35),
+
             // Elytra
             new ArmorRequirement("minecraft:elytra", "PRAYER", 25)
     };
@@ -1665,6 +1677,10 @@ private static JsonObject getDefaultArmorRequirements() {
                 new WeaponRequirement("minecraft:netherite_sword", "SLAYING", 35),
                 new WeaponRequirement("minecraft:netherite_axe", "SLAYING", 35),
                 new WeaponRequirement("minecraft:netherite_spear", "SLAYING", 35),
+
+                // Crimson Crystal weapons: five levels above Netherite.
+                new WeaponRequirement("simpleskills:crimson_crystal_sword", "SLAYING", 40),
+                new WeaponRequirement("simpleskills:crimson_crystal_axe", "SLAYING", 40),
 
                 // Unique / Misc Weapons
                 new WeaponRequirement("minecraft:mace", "SLAYING", 35),
@@ -1978,21 +1994,45 @@ private static JsonObject getDefaultArmorRequirements() {
      * Gets the requirement for a tool.
      */
     public static SkillRequirement getToolRequirement(String id) {
-        return TOOL_REQUIREMENTS.get(id);
+        SkillRequirement configured = TOOL_REQUIREMENTS.get(id);
+        if (configured != null) return configured;
+        return switch (id) {
+            case "simpleskills:crimson_crystal_pickaxe" -> new SkillRequirement(Skills.MINING, 40, null, 0);
+            case "simpleskills:crimson_crystal_axe" -> new SkillRequirement(Skills.WOODCUTTING, 40, null, 0);
+            case "simpleskills:crimson_crystal_shovel" -> new SkillRequirement(Skills.EXCAVATING, 40, null, 0);
+            case "simpleskills:crimson_crystal_hoe" -> new SkillRequirement(Skills.FARMING, 40, null, 0);
+            default -> null;
+        };
     }
 
     /**
      * Gets the requirement for an armor piece.
      */
     public static SkillRequirement getArmorRequirement(String id) {
-        return ARMOR_REQUIREMENTS.get(id);
+        SkillRequirement configured = ARMOR_REQUIREMENTS.get(id);
+        if (configured != null) return configured;
+        return switch (id) {
+            case "simpleskills:crimson_crystal_helmet",
+                 "simpleskills:crimson_crystal_chestplate",
+                 "simpleskills:crimson_crystal_leggings",
+                 "simpleskills:crimson_crystal_boots" ->
+                    new SkillRequirement(Skills.DEFENSE, 35, null, 0);
+            default -> null;
+        };
     }
 
     /**
      * Gets the requirement for a weapon.
      */
     public static SkillRequirement getWeaponRequirement(String id) {
-        return WEAPON_REQUIREMENTS.get(id);
+        SkillRequirement configured = WEAPON_REQUIREMENTS.get(id);
+        if (configured != null) return configured;
+        return switch (id) {
+            case "simpleskills:crimson_crystal_sword",
+                 "simpleskills:crimson_crystal_axe" ->
+                    new SkillRequirement(Skills.SLAYING, 40, null, 0);
+            default -> null;
+        };
     }
 
     /**

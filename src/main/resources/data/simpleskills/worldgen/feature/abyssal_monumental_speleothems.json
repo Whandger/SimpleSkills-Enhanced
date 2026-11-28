@@ -1,0 +1,9 @@
+{
+  "type": "simpleskills:solid_cave_formation",
+  "hangs_from_ceiling": true,
+  "min_length": 14,
+  "max_length": 30,
+  "min_radius": 4,
+  "max_radius": 7,
+  "satellite_count": 4
+}

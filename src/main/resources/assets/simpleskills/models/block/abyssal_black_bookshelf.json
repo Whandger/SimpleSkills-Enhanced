@@ -1,0 +1,41 @@
+{
+  "textures": {
+    "particle": "simpleskills:block/abyssal_black_bookshelf",
+    "front": "simpleskills:block/abyssal_black_bookshelf",
+    "back": "simpleskills:block/abyssal_black_bookshelf_back"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "down": {
+          "texture": "#back"
+        },
+        "up": {
+          "texture": "#back"
+        },
+        "north": {
+          "texture": "#front"
+        },
+        "south": {
+          "texture": "#back"
+        },
+        "west": {
+          "texture": "#back"
+        },
+        "east": {
+          "texture": "#back"
+        }
+      }
+    }
+  ]
+}

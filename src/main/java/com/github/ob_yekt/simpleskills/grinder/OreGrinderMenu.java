@@ -39,7 +39,7 @@ public final class OreGrinderMenu extends AbstractContainerMenu {
         // Left control column: Equipment input (top) & Fuel input (bottom)
         addSlot(new Slot(container, OreGrinderBlockEntity.INPUT_SLOT, 23, 42) {
             @Override public boolean mayPlace(ItemStack stack) { return OreGrinderSalvage.canRecover(stack); }
-            @Override public int getMaxStackSize() { return 1; }
+            @Override public int getMaxStackSize() { return 64; }
         });
         addSlot(new Slot(container, OreGrinderBlockEntity.FUEL_SLOT, 23, 82) {
             @Override public boolean mayPlace(ItemStack stack) {
@@ -92,10 +92,12 @@ public final class OreGrinderMenu extends AbstractContainerMenu {
             slot.onQuickCraft(source, original);
         } else if (index >= 3) {
             boolean moved = false;
-            if (OreGrinderSalvage.canRecover(source) && !slots.get(OreGrinderBlockEntity.INPUT_SLOT).hasItem()) {
+            // Try the input even when occupied: matching Abyssal timber stacks can merge up to 64.
+            if (OreGrinderSalvage.canRecover(source)) {
                 moved = moveItemStackTo(source, 0, 1, false);
             }
-            if (!moved && isFuel(source) && !slots.get(OreGrinderBlockEntity.FUEL_SLOT).hasItem()) {
+            // Fuel stacks (including 64 Crimson Crystal Shards) also merge into an occupied fuel slot.
+            if (!moved && isFuel(source)) {
                 moved = moveItemStackTo(source, 1, 2, false);
             }
             if (!moved) {

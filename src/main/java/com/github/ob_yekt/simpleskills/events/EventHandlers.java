@@ -1,6 +1,7 @@
 package com.github.ob_yekt.simpleskills.events;
 
 import com.github.ob_yekt.simpleskills.Defense;
+import com.github.ob_yekt.simpleskills.abyss.item.CrimsonRuneItem;
 import com.github.ob_yekt.simpleskills.GatheringSpeed;
 import com.github.ob_yekt.simpleskills.Ranged;
 import com.github.ob_yekt.simpleskills.Simpleskills;
@@ -413,6 +414,12 @@ public class EventHandlers {
             }
 
             ItemStack stack = player.getItemInHand(hand);
+
+            if (stack.getItem() instanceof CrimsonRuneItem) {
+                return PrayerManager.castWithCrimsonRune(serverPlayer)
+                        ? InteractionResult.SUCCESS
+                        : InteractionResult.PASS;
+            }
 
             if (stack.isEmpty()) {
                 return InteractionResult.PASS;

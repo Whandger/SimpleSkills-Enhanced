@@ -12,6 +12,22 @@ import java.util.Map;
 public final class SimpleSkillsSounds {
     public static final SoundEvent PERFECT_PARRY = register("perfect_parry");
     public static final SoundEvent MASTER_DEFENDER_PARRY = register("master_defender_parry");
+    public static final SoundEvent ABYSS_THEME = register("abyss_theme");
+    public static final SoundEvent ABYSS_THEME_CALM = register("abyss_theme_calm");
+    public static final SoundEvent ABYSS_CRYSTAL = register("abyss_crystal");
+    public static final SoundEvent ABYSS_CRACK = register("abyss_crack");
+    public static final SoundEvent ABYSS_PEBBLES = register("abyss_pebbles");
+    public static final SoundEvent COLOSSUS_STEP = register("colossus_step");
+    public static final SoundEvent COLOSSUS_SWIPE = register("colossus_swipe");
+    public static final SoundEvent COLOSSUS_LASER_CHARGE = register("colossus_laser_charge");
+    public static final SoundEvent COLOSSUS_LASER_FIRE = register("colossus_laser_fire");
+    public static final SoundEvent COLOSSUS_SLAM = register("colossus_slam");
+    public static final SoundEvent COLOSSUS_LEAP_LAUNCH = register("colossus_leap_launch");
+    public static final SoundEvent COLOSSUS_LEAP_LAND = register("colossus_leap_land");
+    public static final SoundEvent COLOSSUS_BARRAGE = register("colossus_barrage");
+    public static final SoundEvent COLOSSUS_AMBIENT = register("colossus_ambient");
+    public static final SoundEvent COLOSSUS_HURT = register("colossus_hurt");
+    public static final SoundEvent COLOSSUS_DEATH = register("colossus_death");
     public static final SoundEvent PROJECTILE_REFLECTION = register("projectile_reflection");
     private static final Map<PrayerAbility, SoundEvent> PRAYER_SPELLS = registerPrayerSounds();
 

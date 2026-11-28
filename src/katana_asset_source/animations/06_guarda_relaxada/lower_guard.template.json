@@ -1,0 +1,12 @@
+{
+  "format_version": "1.8.0",
+  "template_only": true,
+  "instructions": "Template ainda não implementado. Transição suave da guarda de combate para uma guarda relaxada mantendo a katana desembainhada na mão; não deve guardar a espada.",
+  "animations": {
+    "animation.katana_ultimo_juramento.lower_guard": {
+      "loop": false,
+      "animation_length": 0.35,
+      "bones": {}
+    }
+  }
+}

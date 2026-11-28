@@ -1,5 +1,7 @@
 package com.github.ob_yekt.simpleskills.grinder;
 
+import com.github.ob_yekt.simpleskills.abyss.AbyssContent;
+import com.github.ob_yekt.simpleskills.abyss.CrimsonCrystalItems;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
@@ -30,6 +32,9 @@ public final class OreGrinderSalvage {
      * to check whether the output slot has enough room before starting a cycle.
      */
     public static ItemStack getResult(ItemStack equipment) {
+        if (isAbyssalTimber(equipment)) {
+            return new ItemStack(CrimsonCrystalItems.ABYSSAL_WOOD_STICK, 1);
+        }
         SalvageData data = getSalvageData(equipment);
         if (data == null) return ItemStack.EMPTY;
 
@@ -39,6 +44,9 @@ public final class OreGrinderSalvage {
 
     /** Rolls the actual output for one completed grinding cycle. */
     public static ItemStack rollResult(ItemStack equipment, RandomSource random) {
+        if (isAbyssalTimber(equipment)) {
+            return new ItemStack(CrimsonCrystalItems.ABYSSAL_WOOD_STICK, 1);
+        }
         SalvageData data = getSalvageData(equipment);
         if (data == null || random == null) return ItemStack.EMPTY;
 
@@ -54,6 +62,12 @@ public final class OreGrinderSalvage {
 
     public static boolean canRecover(ItemStack equipment) {
         return !getResult(equipment).isEmpty();
+    }
+
+
+    private static boolean isAbyssalTimber(ItemStack stack) {
+        return stack != null && !stack.isEmpty()
+                && stack.is(AbyssContent.ABYSSAL_CHARRED_TIMBER_ITEM);
     }
 
     private static SalvageData getSalvageData(ItemStack equipment) {

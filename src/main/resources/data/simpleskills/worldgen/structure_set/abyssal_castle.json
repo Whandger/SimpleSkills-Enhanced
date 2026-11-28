@@ -1,0 +1,15 @@
+{
+  "structures": [
+    {
+      "structure": "simpleskills:abyssal_castle",
+      "weight": 1
+    }
+  ],
+  "placement": {
+    "type": "minecraft:random_spread",
+    "spacing": 128,
+    "separation": 96,
+    "salt": 918273645,
+    "spread_type": "linear"
+  }
+}

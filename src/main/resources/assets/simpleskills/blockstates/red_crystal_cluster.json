@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "simpleskills:block/red_crystal_cluster",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "simpleskills:block/red_crystal_cluster",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "simpleskills:block/red_crystal_cluster",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "simpleskills:block/red_crystal_cluster",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "simpleskills:block/red_crystal_cluster"
+    },
+    "facing=west": {
+      "model": "simpleskills:block/red_crystal_cluster",
+      "x": 90,
+      "y": 270
+    }
+  }
+}
