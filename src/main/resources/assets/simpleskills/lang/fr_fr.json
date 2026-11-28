@@ -745,5 +745,5 @@
   "gui.simpleskills.lore.page.8.author": "Note d’un veilleur de la chambre",
   "gui.simpleskills.lore.page.8.body": "Au cœur du plus grand cristal repose une créature de pierre abyssale, couronnée de pointes cramoisies. Les cristaux de son dos palpitent lorsqu’un intrus franchit l’arche ; le gardien s’éveille alors.\n\nLa formation colossale marque le centre des Cavernes Cramoisies. Suivez les coordonnées et cherchez la grande arche de cristal. L’arène se trouve dans les profondeurs de l’Abîme ; sa hauteur dépend du sol naturel de la caverne.",
   "item.simpleskills.red_crystal_shard.desc": "Peut servir de combustible dans les fours, hauts fourneaux, fumoirs et le broyeur de minerais. Chaque éclat brûle aussi longtemps qu’un seau de lave.",
-  "block.simpleskills.abyssal_charred_timber.desc": "Peut être placé dans le broyeur de minerais pour produire des bâtons de bois abyssal. Plusieurs blocs peuvent être traités à la suite."
+  "block.simpleskills.abyssal_charred_timber.desc": "Peut être placé dans le broyeur de minerais pour produire des bâtons de bois abyssal."
 }

@@ -755,5 +755,5 @@
   "gui.simpleskills.lore.page.8.author": "Registro de um vigia da câmara",
   "gui.simpleskills.lore.page.8.body": "No coração do maior cristal repousa uma criatura de pedra abissal, coroada por espinhos carmesins. Os cristais em suas costas pulsam quando alguém atravessa o arco; então o guardião desperta.\n\nA formação colossal marca o centro das cavernas carmesins. Siga as coordenadas e procure o grande arco de cristal. A arena fica na camada profunda do Abismo; sua altura muda conforme o piso natural.",
   "item.simpleskills.red_crystal_shard.desc": "Pode ser usado como combustível em fornalhas, defumadores, altos-fornos e no Ore Grinder. Cada fragmento queima pelo mesmo tempo que um balde de lava.",
-  "block.simpleskills.abyssal_charred_timber.desc": "Pode ser colocado no Ore Grinder para produzir gravetos de madeira abissal. Várias unidades podem ser processadas em sequência."
+  "block.simpleskills.abyssal_charred_timber.desc": "Pode ser colocado no Ore Grinder para produzir gravetos de madeira abissal."
 }

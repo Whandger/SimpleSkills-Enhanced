@@ -745,5 +745,5 @@
   "gui.simpleskills.lore.page.8.author": "Registro de un centinela de la cámara",
   "gui.simpleskills.lore.page.8.body": "En el corazón del mayor cristal yace una criatura de piedra abisal, coronada por espinas carmesíes. Los cristales de su lomo palpitan cuando alguien cruza el arco; entonces despierta el guardián.\n\nLa formación colosal señala el centro de las Cavernas Carmesíes. Sigue las coordenadas y busca el gran arco de cristal. La arena está en las profundidades del Abismo; su altura depende del suelo natural de la caverna.",
   "item.simpleskills.red_crystal_shard.desc": "Puede usarse como combustible en hornos, altos hornos, ahumadores y en el Ore Grinder. Cada fragmento arde tanto tiempo como un cubo de lava.",
-  "block.simpleskills.abyssal_charred_timber.desc": "Se puede colocar en el Ore Grinder para producir palos de madera abisal. Se pueden procesar varias unidades en secuencia."
+  "block.simpleskills.abyssal_charred_timber.desc": "Se puede colocar en el Ore Grinder para producir palos de madera abisal."
 }
