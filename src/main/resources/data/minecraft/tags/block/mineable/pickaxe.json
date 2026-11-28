@@ -34,6 +34,14 @@
     "simpleskills:abyssal_tile_stairs",
     "simpleskills:abyssal_tile_slab",
     "simpleskills:abyssal_black_bookshelf",
-    "simpleskills:abyssal_furnace"
+    "simpleskills:abyssal_furnace",
+    "simpleskills:crimson_corrupted_stone",
+    "simpleskills:heavy_crimson_corrupted_stone",
+    "simpleskills:red_crystal_block",
+    "simpleskills:budding_red_crystal_block",
+    "simpleskills:red_crystal_cluster",
+    "simpleskills:large_red_crystal_bud",
+    "simpleskills:medium_red_crystal_bud",
+    "simpleskills:small_red_crystal_bud"
   ]
 }

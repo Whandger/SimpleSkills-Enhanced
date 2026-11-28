@@ -272,7 +272,7 @@ public record AbyssalDeadTreeFeature(int minHeight, int maxHeight, int branchCha
     private static boolean isNaturalAbyssStone(BlockState state) {
         return state.is(AbyssContent.ABYSSAL_STONE)
                 || state.is(AbyssContent.CRACKED_ABYSSAL_STONE)
-                || state.is(AbyssContent.AMETHYST_CORRUPTED_STONE)
+                || (state.is(AbyssContent.CRIMSON_CORRUPTED_STONE) || state.is(AbyssContent.HEAVY_CRIMSON_CORRUPTED_STONE) || state.is(AbyssContent.AMETHYST_CORRUPTED_STONE))
                 || state.is(Blocks.DEEPSLATE)
                 || state.is(Blocks.COBBLED_DEEPSLATE)
                 || state.is(Blocks.STONE)

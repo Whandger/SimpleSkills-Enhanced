@@ -108,6 +108,8 @@
     "KatanaPlayerModelMixin",
     "KatanaFirstPersonHandsAndItemsRendererMixin",
     "KatanaMinecraftAttackMixin",
-    "KatanaAttackIndicatorHudMixin"
+    "KatanaAttackIndicatorHudMixin",
+    "CrimsonBlightRenderStateMixin",
+    "CrimsonBlightRendererMixin"
   ]
 }

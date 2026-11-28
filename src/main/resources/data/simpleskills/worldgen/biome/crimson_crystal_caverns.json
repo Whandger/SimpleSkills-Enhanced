@@ -1,0 +1,12 @@
+{
+  "has_precipitation": false,
+  "temperature": 0.8,
+  "downfall": 0.0,
+  "effects": {
+    "water_color": 4849684,
+    "grass_color": 5128244,
+    "foliage_color": 6501396
+  },
+  "carvers": [],
+  "features": []
+}

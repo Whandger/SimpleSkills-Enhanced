@@ -8,6 +8,10 @@
     "simpleskills:abyssal_diamond_ore",
     "simpleskills:abyssal_emerald_ore",
     "simpleskills:abyssal_rune_ore",
-    "simpleskills:transcendent_ore"
+    "simpleskills:transcendent_ore",
+    "simpleskills:crimson_corrupted_stone",
+    "simpleskills:heavy_crimson_corrupted_stone",
+    "simpleskills:red_crystal_block",
+    "simpleskills:budding_red_crystal_block"
   ]
 }

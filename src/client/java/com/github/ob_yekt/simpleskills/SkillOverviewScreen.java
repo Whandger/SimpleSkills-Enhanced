@@ -4,6 +4,7 @@ import com.github.ob_yekt.simpleskills.agility.AgilityRank;
 import com.github.ob_yekt.simpleskills.enchanting.EnchantingRank;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingRank;
 import com.github.ob_yekt.simpleskills.ui.SkillOverviewDataPayload;
+import com.github.ob_yekt.simpleskills.ui.AbyssLoreProgressRequestPayload;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Locale;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.MouseButtonEvent;
@@ -28,7 +30,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 
 /**
- * Skill Overview (key O). The server sends raw data only; this screen performs every calculation
+ * Skill Overview opened with K. The server sends raw data only; this screen performs every calculation
  * and builds every line of text itself. Palette: Rune Infusion (gold frame, dark panels).
  * Bars: Fishing HUD colours.
  */
@@ -691,6 +693,40 @@ public final class SkillOverviewScreen extends Screen {
 
         drawGrid(g, mouseX, mouseY);
         drawDetail(g);
+        drawNavigationTabs(g, mouseX, mouseY);
+    }
+
+    private void drawNavigationTabs(GuiGraphicsExtractor g, int mouseX, int mouseY) {
+        int x = navigationX();
+        int skillsY = top + 64;
+        int loreY = top + 104;
+        drawNavigationButton(g, x, skillsY, new ItemStack(Items.IRON_PICKAXE),
+                inside(mouseX, mouseY, x, skillsY, 28, 32), true);
+        drawNavigationButton(g, x, loreY, new ItemStack(Items.BOOK),
+                inside(mouseX, mouseY, x, loreY, 28, 32), false);
+        if (inside(mouseX, mouseY, x, skillsY, 28, 32)) {
+            drawNavigationTooltip(g, SkillOverviewText.get("gui.simpleskills.lore.nav_skills"), x - 116, skillsY + 6);
+        } else if (inside(mouseX, mouseY, x, loreY, 28, 32)) {
+            drawNavigationTooltip(g, SkillOverviewText.get("gui.simpleskills.lore.nav_book"), x - 116, loreY + 6);
+        }
+    }
+
+    private void drawNavigationButton(GuiGraphicsExtractor g, int x, int y, ItemStack icon,
+                                      boolean hovered, boolean selectedTab) {
+        g.fill(x - 1, y - 1, x + 29, y + 33, selectedTab ? GOLD : GOLD_DARK);
+        g.fill(x, y, x + 28, y + 32, selectedTab ? CARD_SELECTED : hovered ? CARD_HOVER : FRAME_BG);
+        g.item(icon, x + 6, y + 8);
+    }
+
+    private void drawNavigationTooltip(GuiGraphicsExtractor g, String text, int x, int y) {
+        int tooltipWidth = font.width(text) + 10;
+        g.fill(x, y, x + tooltipWidth, y + 18, 0xF20B0907);
+        g.fill(x, y, x + tooltipWidth, y + 1, GOLD_DARK);
+        g.text(font, Component.literal(text), x + 5, y + 5, GOLD, false);
+    }
+
+    private int navigationX() {
+        return Math.min(left + WIDTH + 8, width - 34);
     }
 
     private void drawCornerGems(GuiGraphicsExtractor g) {
@@ -795,6 +831,16 @@ public final class SkillOverviewScreen extends Screen {
 
     @Override
     public boolean mouseClicked(MouseButtonEvent event, boolean doubleClick) {
+        int navX = navigationX();
+        int skillsY = top + 64;
+        int loreY = top + 104;
+        if (inside(event.x(), event.y(), navX, skillsY, 28, 32)) return true;
+        if (inside(event.x(), event.y(), navX, loreY, 28, 32)) {
+            if (ClientPlayNetworking.canSend(AbyssLoreProgressRequestPayload.TYPE)) {
+                ClientPlayNetworking.send(new AbyssLoreProgressRequestPayload(AbyssLoreProgressRequestPayload.REFRESH));
+            }
+            return true;
+        }
         for (int i = 0; i < entries.size(); i++) {
             if (inside(event.x(), event.y(), cardX(i), cardY(i), CARD_W, CARD_H)) {
                 selected = i;

@@ -1,6 +1,7 @@
 {
   "textures": {
-    "all": "simpleskills:block/abyssal_pointed_stalactite"
+    "all": "simpleskills:block/abyssal_pointed_stalactite",
+    "particle": "#all"
   },
   "elements": [
     {

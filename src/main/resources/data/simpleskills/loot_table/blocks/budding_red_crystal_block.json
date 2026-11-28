@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "simpleskills:budding_red_crystal_block",
+          "condition": "minecraft:tool/can_silk_touch"
+        }
+      ]
+    }
+  ],
+  "random_sequence": "simpleskills:blocks/budding_red_crystal_block"
+}

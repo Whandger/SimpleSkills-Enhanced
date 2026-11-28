@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cross",
+  "textures": {
+    "cross": "simpleskills:block/red_crystal_cluster"
+  }
+}

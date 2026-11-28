@@ -10,6 +10,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.AbstractFurnaceBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -33,8 +34,19 @@ public final class AbyssContent {
 
     public static Block ABYSSAL_STONE;
     public static Block CRACKED_ABYSSAL_STONE;
+    /** Legacy block kept registered so old saves continue to load; no new worldgen uses it. */
     public static Block AMETHYST_CORRUPTED_STONE;
+    public static Block CRIMSON_CORRUPTED_STONE;
+    public static Block HEAVY_CRIMSON_CORRUPTED_STONE;
     public static Block ABYSSAL_PILLAR;
+
+    // Crimson crystal blocks used by the Crimson Crystal Caverns biome.
+    public static Block RED_CRYSTAL_BLOCK;
+    public static Block BUDDING_RED_CRYSTAL_BLOCK;
+    public static Block RED_CRYSTAL_CLUSTER;
+    public static Block LARGE_RED_CRYSTAL_BUD;
+    public static Block MEDIUM_RED_CRYSTAL_BUD;
+    public static Block SMALL_RED_CRYSTAL_BUD;
 
     public static Block ABYSSAL_COAL_ORE;
     public static Block ABYSSAL_COPPER_ORE;
@@ -73,8 +85,17 @@ public final class AbyssContent {
 
     public static Item ABYSSAL_STONE_ITEM;
     public static Item CRACKED_ABYSSAL_STONE_ITEM;
+    /** Legacy item is retained for existing inventories, but is hidden from the creative tab. */
     public static Item AMETHYST_CORRUPTED_STONE_ITEM;
+    public static Item CRIMSON_CORRUPTED_STONE_ITEM;
+    public static Item HEAVY_CRIMSON_CORRUPTED_STONE_ITEM;
     public static Item ABYSSAL_PILLAR_ITEM;
+    public static Item RED_CRYSTAL_BLOCK_ITEM;
+    public static Item BUDDING_RED_CRYSTAL_BLOCK_ITEM;
+    public static Item RED_CRYSTAL_CLUSTER_ITEM;
+    public static Item LARGE_RED_CRYSTAL_BUD_ITEM;
+    public static Item MEDIUM_RED_CRYSTAL_BUD_ITEM;
+    public static Item SMALL_RED_CRYSTAL_BUD_ITEM;
     public static Item ABYSSAL_COAL_ORE_ITEM;
     public static Item ABYSSAL_COPPER_ORE_ITEM;
     public static Item ABYSSAL_IRON_ORE_ITEM;
@@ -123,8 +144,18 @@ public final class AbyssContent {
 
         ABYSSAL_STONE = registerStone("abyssal_stone", 9.0F, 12.0F);
         CRACKED_ABYSSAL_STONE = registerStone("cracked_abyssal_stone", 8.0F, 12.0F);
-        AMETHYST_CORRUPTED_STONE = registerStone("amethyst_corrupted_stone", 8.0F, 12.0F);
+        AMETHYST_CORRUPTED_STONE = registerStone("amethyst_corrupted_stone", 8.0F, 12.0F); // legacy
+        // Crimson corruption is deliberately non-emissive: only the actual crystal blocks glow.
+        CRIMSON_CORRUPTED_STONE = registerStone("crimson_corrupted_stone", 8.0F, 12.0F);
+        HEAVY_CRIMSON_CORRUPTED_STONE = registerStone("heavy_crimson_corrupted_stone", 9.0F, 16.0F);
         ABYSSAL_PILLAR = registerStone("abyssal_pillar", 9.0F, 12.0F);
+
+        RED_CRYSTAL_BLOCK = registerCrimsonStone("red_crystal_block", 7.0F, 9.0F, 10);
+        BUDDING_RED_CRYSTAL_BLOCK = registerCrimsonStone("budding_red_crystal_block", 7.5F, 12.0F, 12);
+        RED_CRYSTAL_CLUSTER = registerCrimsonCluster("red_crystal_cluster", 7.0F, 3.0F, 15);
+        LARGE_RED_CRYSTAL_BUD = registerCrimsonCluster("large_red_crystal_bud", 5.0F, 3.0F, 13);
+        MEDIUM_RED_CRYSTAL_BUD = registerCrimsonCluster("medium_red_crystal_bud", 4.0F, 3.0F, 11);
+        SMALL_RED_CRYSTAL_BUD = registerCrimsonCluster("small_red_crystal_bud", 3.0F, 3.0F, 9);
 
         // Legacy registry entry kept so existing worlds that already generated this
         // block can still load. New Abyss formations use solid Abyssal Pillar blocks.
@@ -251,7 +282,16 @@ public final class AbyssContent {
         ABYSSAL_STONE_ITEM = registerBlockItem(ABYSSAL_STONE, "abyssal_stone");
         CRACKED_ABYSSAL_STONE_ITEM = registerBlockItem(CRACKED_ABYSSAL_STONE, "cracked_abyssal_stone");
         AMETHYST_CORRUPTED_STONE_ITEM = registerBlockItem(AMETHYST_CORRUPTED_STONE, "amethyst_corrupted_stone");
+        CRIMSON_CORRUPTED_STONE_ITEM = registerBlockItem(CRIMSON_CORRUPTED_STONE, "crimson_corrupted_stone");
+        HEAVY_CRIMSON_CORRUPTED_STONE_ITEM = registerBlockItem(
+                HEAVY_CRIMSON_CORRUPTED_STONE, "heavy_crimson_corrupted_stone");
         ABYSSAL_PILLAR_ITEM = registerBlockItem(ABYSSAL_PILLAR, "abyssal_pillar");
+        RED_CRYSTAL_BLOCK_ITEM = registerBlockItem(RED_CRYSTAL_BLOCK, "red_crystal_block");
+        BUDDING_RED_CRYSTAL_BLOCK_ITEM = registerBlockItem(BUDDING_RED_CRYSTAL_BLOCK, "budding_red_crystal_block");
+        RED_CRYSTAL_CLUSTER_ITEM = registerBlockItem(RED_CRYSTAL_CLUSTER, "red_crystal_cluster");
+        LARGE_RED_CRYSTAL_BUD_ITEM = registerBlockItem(LARGE_RED_CRYSTAL_BUD, "large_red_crystal_bud");
+        MEDIUM_RED_CRYSTAL_BUD_ITEM = registerBlockItem(MEDIUM_RED_CRYSTAL_BUD, "medium_red_crystal_bud");
+        SMALL_RED_CRYSTAL_BUD_ITEM = registerBlockItem(SMALL_RED_CRYSTAL_BUD, "small_red_crystal_bud");
         ABYSSAL_COAL_ORE_ITEM = registerBlockItem(ABYSSAL_COAL_ORE, "abyssal_coal_ore");
         ABYSSAL_COPPER_ORE_ITEM = registerBlockItem(ABYSSAL_COPPER_ORE, "abyssal_copper_ore");
         ABYSSAL_IRON_ORE_ITEM = registerBlockItem(ABYSSAL_IRON_ORE, "abyssal_iron_ore");
@@ -301,6 +341,32 @@ public final class AbyssContent {
         Simpleskills.LOGGER.info("Registered The Abyss blocks and ores.");
     }
 
+    private static Block registerCrimsonStone(String id, float hardness, float resistance, int light) {
+        ResourceKey<Block> key = blockKey(id);
+        return Registry.register(BuiltInRegistries.BLOCK, key,
+                new Block(BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.COLOR_RED)
+                        .instrument(NoteBlockInstrument.CHIME)
+                        .strength(hardness, resistance)
+                        .sound(SoundType.AMETHYST)
+                        .requiresCorrectToolForDrops()
+                        .lightLevel(state -> light)
+                        .setId(key)));
+    }
+
+    private static Block registerCrimsonCluster(String id, float height, float width, int light) {
+        ResourceKey<Block> key = blockKey(id);
+        return Registry.register(BuiltInRegistries.BLOCK, key,
+                new AmethystClusterBlock(height, width, BlockBehaviour.Properties.of()
+                        .mapColor(MapColor.COLOR_RED)
+                        .instrument(NoteBlockInstrument.CHIME)
+                        .strength(1.5F, 6.0F)
+                        .sound(SoundType.AMETHYST)
+                        .noOcclusion()
+                        .lightLevel(state -> light)
+                        .setId(key)));
+    }
+
     private static Block registerStone(String id, float hardness, float resistance) {
         ResourceKey<Block> key = blockKey(id);
         return Registry.register(BuiltInRegistries.BLOCK, key,
@@ -338,8 +404,15 @@ public final class AbyssContent {
         return List.of(
                 ABYSSAL_STONE_ITEM,
                 CRACKED_ABYSSAL_STONE_ITEM,
-                AMETHYST_CORRUPTED_STONE_ITEM,
+                CRIMSON_CORRUPTED_STONE_ITEM,
+                HEAVY_CRIMSON_CORRUPTED_STONE_ITEM,
                 ABYSSAL_PILLAR_ITEM,
+                RED_CRYSTAL_BLOCK_ITEM,
+                BUDDING_RED_CRYSTAL_BLOCK_ITEM,
+                RED_CRYSTAL_CLUSTER_ITEM,
+                LARGE_RED_CRYSTAL_BUD_ITEM,
+                MEDIUM_RED_CRYSTAL_BUD_ITEM,
+                SMALL_RED_CRYSTAL_BUD_ITEM,
                 ABYSSAL_COAL_ORE_ITEM,
                 ABYSSAL_COPPER_ORE_ITEM,
                 ABYSSAL_IRON_ORE_ITEM,

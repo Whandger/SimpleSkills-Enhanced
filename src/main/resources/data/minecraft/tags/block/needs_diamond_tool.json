@@ -10,6 +10,10 @@
     "simpleskills:abyssal_charred_timber",
     "simpleskills:abyssal_black_bookshelf",
     "simpleskills:abyssal_chest",
-    "simpleskills:abyssal_furnace"
+    "simpleskills:abyssal_furnace",
+    "simpleskills:crimson_corrupted_stone",
+    "simpleskills:heavy_crimson_corrupted_stone",
+    "simpleskills:red_crystal_block",
+    "simpleskills:budding_red_crystal_block"
   ]
 }

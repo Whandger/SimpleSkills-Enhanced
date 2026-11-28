@@ -9,6 +9,7 @@ import com.github.ob_yekt.simpleskills.abyss.AbyssContent;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalChestScreen;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalFallenKingClient;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalSamuraiClient;
+import com.github.ob_yekt.simpleskills.abyss.CrimsonBlightClient;
 import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaClientStanceState;
 import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaClientRendering;
 import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaStancePayload;
@@ -36,6 +37,7 @@ import com.github.ob_yekt.simpleskills.enchanting.RuneInfusionResultPayload;
 import com.github.ob_yekt.simpleskills.runes.RuneMiningClient;
 import com.github.ob_yekt.simpleskills.ui.RankTitleMenuDataPayload;
 import com.github.ob_yekt.simpleskills.ui.SkillOverviewDataPayload;
+import com.github.ob_yekt.simpleskills.ui.AbyssLoreProgressDataPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerMenuDataPayload;
 import com.github.ob_yekt.simpleskills.prayer.PrayerClientState;
 import com.github.ob_yekt.simpleskills.prayer.PrayerCooldownPayload;
@@ -76,6 +78,7 @@ public class SimpleskillsClient implements ClientModInitializer {
         FishingEntityClient.register();
         AbyssalFallenKingClient.register();
         AbyssalSamuraiClient.register();
+        CrimsonBlightClient.register();
         MenuScreens.register(CelestialAltarContent.MENU_TYPE, CelestialAltarScreen::new);
         MenuScreens.register(OreGrinderContent.MENU_TYPE, OreGrinderScreen::new);
         MenuScreens.register(AbyssContent.ABYSSAL_CHEST_MENU_TYPE, AbyssalChestScreen::new);
@@ -115,6 +118,8 @@ public class SimpleskillsClient implements ClientModInitializer {
                 context.client().execute(() -> RankTitleMenuScreen.showOrUpdate(payload)));
         ClientPlayNetworking.registerGlobalReceiver(SkillOverviewDataPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> SkillOverviewScreen.showOrUpdate(payload)));
+        ClientPlayNetworking.registerGlobalReceiver(AbyssLoreProgressDataPayload.TYPE, (payload, context) ->
+                context.client().execute(() -> AbyssLoreScreen.show(payload)));
         ClientPlayNetworking.registerGlobalReceiver(PrayerMenuDataPayload.TYPE, (payload, context) ->
                 context.client().execute(() -> PrayerClientState.accept(payload)));
         ClientPlayNetworking.registerGlobalReceiver(PrayerCooldownPayload.TYPE, (payload, context) ->

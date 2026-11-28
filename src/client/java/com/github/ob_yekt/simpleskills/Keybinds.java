@@ -108,7 +108,8 @@ public class Keybinds {
                 ClientPlayNetworking.send(new RankTitleMenuActionPayload(RankTitleMenuActionPayload.OPEN, ""));
             }
             if (OPEN_SKILL_OVERVIEW_KEY.consumeClick()) {
-                if (client.gui.screen() instanceof SkillOverviewScreen) {
+                if (client.gui.screen() instanceof SkillOverviewScreen
+                        || client.gui.screen() instanceof AbyssLoreScreen) {
                     client.gui.setScreen(null);
                 } else if (client.gui.screen() == null
                         && ClientPlayNetworking.canSend(SkillOverviewRequestPayload.TYPE)) {

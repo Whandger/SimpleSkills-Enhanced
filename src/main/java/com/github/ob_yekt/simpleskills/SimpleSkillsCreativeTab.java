@@ -4,6 +4,7 @@ import com.github.ob_yekt.simpleskills.runes.RuneContent;
 import com.github.ob_yekt.simpleskills.abyss.AbyssContent;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalKingItems;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalKatanaItems;
+import com.github.ob_yekt.simpleskills.abyss.CrimsonCrystalItems;
 import com.github.ob_yekt.simpleskills.celestial.CelestialAltarContent;
 import com.github.ob_yekt.simpleskills.grinder.OreGrinderContent;
 import com.github.ob_yekt.simpleskills.shields.GlowstoneShields;
@@ -44,6 +45,7 @@ public final class SimpleSkillsCreativeTab {
                     for (var abyssItem : AbyssContent.creativeItems()) output.accept(abyssItem);
                     for (var kingItem : AbyssalKingItems.creativeItems()) output.accept(kingItem);
                     for (var katana : AbyssalKatanaItems.creativeItems()) output.accept(katana);
+                    for (var crimsonItem : CrimsonCrystalItems.creativeItems()) output.accept(crimsonItem);
                 })
                 .build();
 

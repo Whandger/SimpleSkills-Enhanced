@@ -179,19 +179,25 @@ public class AbyssalCastlePiece extends StructurePiece {
     }
 
     /**
+     * Returns the exact block occupied by the Fallen King's feet on the throne dais.
+     * The lore book reads this same position instead of using the structure locate marker.
+     */
+    public BlockPos getFallenKingSpawnPosition() {
+        return new BlockPos(center.getX(), center.getY() + 4, center.getZ() - 19);
+    }
+
+    /**
      * Places the throne guardian once, in the one structure chunk that contains the throne seat.
      * The entity is created directly so the structure controls its exact throne position and initial pose.
      */
     private void placeFallenKing(WorldGenLevel level, BoundingBox box) {
-        BlockPos seat = center.offset(0, 4, -20);
-        if (!box.isInside(seat)) return;
+        BlockPos spawnPos = getFallenKingSpawnPosition();
+        if (!box.isInside(spawnPos)) return;
 
         AbyssalFallenKingEntity king = new AbyssalFallenKingEntity(AbyssalFallenKingEntity.TYPE, level.getLevel());
-        // Spawn one block forward of the raised cushion, on the lower dais floor.
-        // The front support block is at center Y+3, so its top face is Y+4.
-        // Entity position is its feet/base; using Y+5 here leaves it one block airborne.
+        // The king's feet are at center Y+4, one block forward of the raised cushion.
         // ThroneSlumberGoal prevents wandering while he is seated.
-        king.snapTo(center.getX() + 0.5D, center.getY() + 4.0D, center.getZ() - 18.5D, 0.0F, 0.0F);
+        king.snapTo(spawnPos.getX() + 0.5D, spawnPos.getY(), spawnPos.getZ() + 0.5D, 0.0F, 0.0F);
         king.setPersistenceRequired();
         king.setItemSlot(EquipmentSlot.MAINHAND, new ItemStack(Items.NETHERITE_SWORD));
         king.setDropChance(EquipmentSlot.MAINHAND, 0.0F);
@@ -393,6 +399,8 @@ public class AbyssalCastlePiece extends StructurePiece {
                 || state.is(AbyssContent.CHISELED_ABYSSAL_STONE)
                 || state.is(AbyssContent.CRACKED_ABYSSAL_STONE)
                 || state.is(AbyssContent.POLISHED_ABYSSAL_STONE)
+                || state.is(AbyssContent.CRIMSON_CORRUPTED_STONE)
+                || state.is(AbyssContent.HEAVY_CRIMSON_CORRUPTED_STONE)
                 || state.is(AbyssContent.AMETHYST_CORRUPTED_STONE);
     }
 
@@ -582,8 +590,8 @@ public class AbyssalCastlePiece extends StructurePiece {
             }
             setSafe(level, box, center.offset(sx, -10, -21), AbyssContent.ABYSSAL_BRAZIER.defaultBlockState());
         }
-        setSafe(level, box, center.offset(-9, -10, -32), AbyssContent.AMETHYST_CORRUPTED_STONE.defaultBlockState());
-        setSafe(level, box, center.offset(9, -10, -32), AbyssContent.AMETHYST_CORRUPTED_STONE.defaultBlockState());
+        setSafe(level, box, center.offset(-9, -10, -32), AbyssContent.CRIMSON_CORRUPTED_STONE.defaultBlockState());
+        setSafe(level, box, center.offset(9, -10, -32), AbyssContent.CRIMSON_CORRUPTED_STONE.defaultBlockState());
 
         // Grand Ascending Stairwell from Dungeon (dy = -10) up to SE Courtyard (dy = 1) at dx = 18..22, dz = 37..48
         carveChamber(level, box, 6, -10, 42, 22, -6, 48,
@@ -1200,7 +1208,7 @@ public class AbyssalCastlePiece extends StructurePiece {
         }
         setSafe(level, box, center.offset(-29, 1, -1), Blocks.BREWING_STAND.defaultBlockState());
         setSafe(level, box, center.offset(-28, 1, -1), Blocks.CAULDRON.defaultBlockState());
-        setSafe(level, box, center.offset(-29, 1, 13), AbyssContent.AMETHYST_CORRUPTED_STONE.defaultBlockState());
+        setSafe(level, box, center.offset(-29, 1, 13), AbyssContent.CRIMSON_CORRUPTED_STONE.defaultBlockState());
         setSafe(level, box, center.offset(-29, 2, 13), Blocks.AMETHYST_CLUSTER.defaultBlockState());
         setSafe(level, box, center.offset(-24, 13, 6), hangingLantern(true));
 
@@ -2502,7 +2510,7 @@ public class AbyssalCastlePiece extends StructurePiece {
             if (roll < 34) return AbyssContent.CRACKED_ABYSSAL_STONE.defaultBlockState();
             if (roll < 57) return AbyssContent.ABYSSAL_STONE.defaultBlockState();
             if (roll < 76) return AbyssContent.CRACKED_ABYSSAL_BRICKS.defaultBlockState();
-            if (roll < 91) return AbyssContent.AMETHYST_CORRUPTED_STONE.defaultBlockState();
+            if (roll < 91) return AbyssContent.CRIMSON_CORRUPTED_STONE.defaultBlockState();
             return AbyssContent.ABYSSAL_BRICKS.defaultBlockState();
         }
         if (roll < 46) return AbyssContent.ABYSSAL_STONE.defaultBlockState();
@@ -2510,7 +2518,7 @@ public class AbyssalCastlePiece extends StructurePiece {
         if (roll < 82) return AbyssContent.ABYSSAL_BRICKS.defaultBlockState();
         if (roll < 92) return AbyssContent.CRACKED_ABYSSAL_BRICKS.defaultBlockState();
         if (roll < 97) return AbyssContent.POLISHED_ABYSSAL_STONE.defaultBlockState();
-        return AbyssContent.AMETHYST_CORRUPTED_STONE.defaultBlockState();
+        return AbyssContent.CRIMSON_CORRUPTED_STONE.defaultBlockState();
     }
 
     private BlockState pickWallMasonry(int dx, int dy, int dz) {
@@ -2521,7 +2529,7 @@ public class AbyssalCastlePiece extends StructurePiece {
         if (roll < 12) return AbyssContent.CRACKED_ABYSSAL_BRICKS.defaultBlockState();
         if (roll < 18) return AbyssContent.CHISELED_ABYSSAL_STONE.defaultBlockState();
         if (roll < 26) return AbyssContent.CRACKED_ABYSSAL_STONE.defaultBlockState();
-        if (roll < 31) return AbyssContent.AMETHYST_CORRUPTED_STONE.defaultBlockState();
+        if (roll < 31) return AbyssContent.CRIMSON_CORRUPTED_STONE.defaultBlockState();
         return AbyssContent.ABYSSAL_BRICKS.defaultBlockState();
     }
 

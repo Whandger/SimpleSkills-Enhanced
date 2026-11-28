@@ -11,7 +11,10 @@
   },
   "projectile_reflection": {
     "sounds": [
-      "minecraft:item.shield.block"
+      {
+        "name": "minecraft:item.shield.block",
+        "type": "event"
+      }
     ]
   },
   "prayer_light_orb": {

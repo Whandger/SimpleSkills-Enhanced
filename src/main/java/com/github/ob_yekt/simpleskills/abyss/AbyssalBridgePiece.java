@@ -143,7 +143,7 @@ public final class AbyssalBridgePiece extends StructurePiece {
             }
         }
         buildEndAnchors(level, box, damage);
-        placeAbyssalSamurai(level, box, length);
+        placeAbyssalSamurai(level, box);
     }
 
     private void buildDeckCrossSection(WorldGenLevel level, BoundingBox box,
@@ -1085,18 +1085,33 @@ public final class AbyssalBridgePiece extends StructurePiece {
                 false, 0, 0, 0, List.of());
     }
 
-    /** Adds exactly one persistent Samurai to the chunk that owns the bridge midpoint. */
-    private void placeAbyssalSamurai(WorldGenLevel level, BoundingBox box, int length) {
+    /**
+     * Returns the exact block containing the Samurai's feet at the bridge midpoint.
+     * This is also used by the lore book, so its coordinates always match world generation.
+     */
+    public BlockPos getSamuraiSpawnPosition() {
+        int length = Math.abs(endX - startX) + Math.abs(endZ - startZ);
+        if (length <= 0) return null;
+
         int centerDistance = length / 2;
         int x = startX + (endX - startX) * centerDistance / length;
         int z = startZ + (endZ - startZ) * centerDistance / length;
         int deckY = getDeckY(centerDistance / (double) length);
-        BlockPos spawnPos = new BlockPos(x, deckY + 1, z);
+        return new BlockPos(x, deckY + 1, z);
+    }
+
+    /** Adds exactly one persistent Samurai to the chunk that owns the bridge midpoint. */
+    private void placeAbyssalSamurai(WorldGenLevel level, BoundingBox box) {
+        BlockPos spawnPos = getSamuraiSpawnPosition();
+        if (spawnPos == null) return;
 
         // The structure is processed once per intersecting chunk; only the chunk containing
         // this exact block is allowed to create the entity, preventing duplicate Samurai.
         if (!box.isInside(spawnPos)) return;
 
+        int x = spawnPos.getX();
+        int z = spawnPos.getZ();
+        int spawnY = spawnPos.getY();
         AbyssalSamuraiEntity samurai = new AbyssalSamuraiEntity(AbyssalSamuraiEntity.TYPE, level.getLevel());
         float yaw;
         if (alongX) {
@@ -1104,7 +1119,7 @@ public final class AbyssalBridgePiece extends StructurePiece {
         } else {
             yaw = endZ >= startZ ? 0.0F : 180.0F;
         }
-        samurai.snapTo(x + 0.5D, deckY + 1.0D, z + 0.5D, yaw, 0.0F);
+        samurai.snapTo(x + 0.5D, spawnY, z + 0.5D, yaw, 0.0F);
         samurai.setPersistenceRequired();
         level.addFreshEntity(samurai);
     }
