@@ -2,6 +2,7 @@ package com.github.ob_yekt.simpleskills.abyss;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.github.ob_yekt.simpleskills.abyss.item.CrimsonRuneItem;
+import com.github.ob_yekt.simpleskills.abyss.item.CrimsonCrystalShardItem;
 import java.util.List;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -21,6 +22,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.equipment.EquipmentAsset;
 import net.minecraft.world.item.equipment.EquipmentAssets;
 import net.minecraft.world.item.equipment.Equippable;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
 
 /**
  * Endgame Crimson Crystal gear. The set beats Netherite but deliberately stays
@@ -75,7 +77,7 @@ public final class CrimsonCrystalItems {
         registered = true;
 
         CRIMSON_RUNE = registerRune();
-        RED_CRYSTAL_SHARD = registerSimple("red_crystal_shard", 64);
+        RED_CRYSTAL_SHARD = registerCrystalShard();
         ABYSSAL_WOOD_STICK = registerSimple("abyssal_wood_stick", 64);
 
         CRIMSON_CRYSTAL_SWORD = registerTool("crimson_crystal_sword",
@@ -106,6 +108,19 @@ public final class CrimsonCrystalItems {
         Identifier model = id("crimson_rune");
         return Registry.register(BuiltInRegistries.ITEM, key,
                 new CrimsonRuneItem(new Item.Properties().setId(key).modelId(model)));
+    }
+
+    private static Item registerCrystalShard() {
+        ResourceKey<Item> key = itemKey("red_crystal_shard");
+        Identifier model = id("red_crystal_shard");
+        Item.Properties properties = new Item.Properties()
+                .setId(key)
+                .modelId(model)
+                .stacksTo(64)
+                // Same burn duration as a lava bucket (20,000 ticks) in furnaces and furnace-like blocks.
+                .cookingFuel(ContextIntProviders.COOKING_TIME_LAVA_BUCKET)
+                .fireResistant();
+        return Registry.register(BuiltInRegistries.ITEM, key, new CrimsonCrystalShardItem(properties));
     }
 
     private static Item registerSimple(String path, int stackSize) {

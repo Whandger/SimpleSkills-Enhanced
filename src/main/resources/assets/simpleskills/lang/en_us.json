@@ -753,5 +753,7 @@
   "gui.simpleskills.lore.colossus_depth": "Variable depth: search between Y -256 and -80, near the cavern floor.",
   "gui.simpleskills.lore.page.8.title": "The Crimson Colossus",
   "gui.simpleskills.lore.page.8.author": "Entry from a chamber sentinel",
-  "gui.simpleskills.lore.page.8.body": "At the heart of the greatest crystal rests a creature of Abyssal stone, crowned with crimson spires. The crystals along its back pulse when someone crosses the arch; then the guardian awakens.\n\nThe colossal formation marks the center of the Crimson Caverns. Follow the coordinates and seek the great crystal arch. The arena lies deep in the Abyss; its exact height follows the natural cavern floor."
+  "gui.simpleskills.lore.page.8.body": "At the heart of the greatest crystal rests a creature of Abyssal stone, crowned with crimson spires. The crystals along its back pulse when someone crosses the arch; then the guardian awakens.\n\nThe colossal formation marks the center of the Crimson Caverns. Follow the coordinates and seek the great crystal arch. The arena lies deep in the Abyss; its exact height follows the natural cavern floor.",
+  "item.simpleskills.red_crystal_shard.desc": "Can be used as fuel in furnaces, blast furnaces, smokers, and the Ore Grinder. Each shard burns for as long as a lava bucket.",
+  "block.simpleskills.abyssal_charred_timber.desc": "Can be placed in the Ore Grinder to produce Abyssal Wood Sticks. Multiple blocks can be processed in sequence."
 }

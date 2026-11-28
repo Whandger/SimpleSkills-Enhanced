@@ -96,6 +96,12 @@ public record CrimsonCrystalHeartFeature() implements Feature {
         CrimsonCorruptionVeins.generate(level, bounds, base, random, 14, 30, 11);
 
         // 8. The Colossus is spawned once on the central arena dais, facing the monumental entrance.
+        // A dedicated central dais makes the intended boss position unambiguous.
+        buildCentralBossDais(level, base, bounds);
+        // Carving the arena can expose new faces on surviving budding blocks. Restore their
+        // crystal growths after every structural edit so no exposed budding block is left bare.
+        CrimsonCrystalGeometry.ensureBuddingFaces(level, bounds, base, 24,
+                base.getY() - 3, base.getY() + monolithHeight + 4, random);
         spawnCrimsonColossus(level, base, entranceDir);
         return true;
     }
@@ -104,20 +110,57 @@ public record CrimsonCrystalHeartFeature() implements Feature {
      * Places one persistent Crimson Colossus in the center of the hollow crystal arena.
      * The feature's center-chunk guard in place() guarantees this method runs once per heart.
      */
+    private static void buildCentralBossDais(WorldGenLevel level, BlockPos base,
+                                             CrimsonCrystalGeometry.SafeBounds bounds) {
+        BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+        for (int dx = -2; dx <= 2; dx++) {
+            for (int dz = -2; dz <= 2; dz++) {
+                int x = base.getX() + dx;
+                int z = base.getZ() + dz;
+                if (!bounds.contains(x, z)) continue;
+                pos.set(x, base.getY(), z);
+                BlockState existing = level.getBlockState(pos);
+                if (!CrimsonCrystalGeometry.isReplaceableByCrystal(existing)
+                        && !CrimsonCrystalGeometry.isNaturalRock(existing)) {
+                    continue;
+                }
+                BlockState dais = Math.max(Math.abs(dx), Math.abs(dz)) <= 1
+                        ? AbyssContent.POLISHED_ABYSSAL_STONE.defaultBlockState()
+                        : AbyssContent.ABYSSAL_TILES.defaultBlockState();
+                level.setBlock(pos, dais, 2);
+                for (int dy = 1; dy <= 4; dy++) {
+                    pos.set(x, base.getY() + dy, z);
+                    if (AbyssWorldgen.isAbyssY(pos.getY())
+                            && CrimsonCrystalGeometry.isReplaceableByCrystal(level.getBlockState(pos))) {
+                        level.setBlock(pos, Blocks.CAVE_AIR.defaultBlockState(), 2);
+                    }
+                }
+            }
+        }
+    }
+
     private static void spawnCrimsonColossus(WorldGenLevel level, BlockPos base, Direction entranceDir) {
+        // The entity origin is the exact geometric center of the crystal arena, one block above its floor.
         BlockPos feet = base.above();
-        if (!level.getBlockState(feet).isAir()
+        if (!level.getBlockState(base).isFaceSturdy(level, base, Direction.UP)
+                || !level.getBlockState(feet).isAir()
                 || !level.getBlockState(feet.above()).isAir()
                 || !level.getBlockState(feet.above(3)).isAir()) {
+            Simpleskills.LOGGER.warn("Crimson Colossus could not be placed at arena center {}: floor/headroom check failed", base);
             return;
         }
 
         CrimsonColossusEntity colossus = new CrimsonColossusEntity(
                 CrimsonColossusEntity.TYPE, level.getLevel());
         float yaw = (float) Math.toDegrees(Math.atan2(-entranceDir.getStepX(), entranceDir.getStepZ()));
-        colossus.snapTo(feet.getX() + 0.5D, feet.getY(), feet.getZ() + 0.5D, yaw, 0.0F);
+        colossus.snapTo(base.getX() + 0.5D, feet.getY(), base.getZ() + 0.5D, yaw, 0.0F);
+        colossus.setHomeTo(base, 5);
         colossus.setPersistenceRequired();
-        level.addFreshEntity(colossus);
+        if (!level.addFreshEntity(colossus)) {
+            Simpleskills.LOGGER.warn("Crimson Colossus failed to enter the generated chunk at arena center {}", base);
+        } else {
+            Simpleskills.LOGGER.info("Spawned Crimson Colossus at crystal-heart center {}", feet);
+        }
     }
 
     private static GroundAnchor findGroundAnchor(WorldGenLevel level, int centerX, int centerZ) {

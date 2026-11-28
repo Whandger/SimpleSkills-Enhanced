@@ -9,6 +9,9 @@ import net.minecraft.world.level.block.AmethystClusterBlock;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Shared 3D hexagonal crystal prism rasterizer and chunk-safe bounds helper.
  * Produces faceted mineral blades with an authentic 6-sided shaft and sharp
@@ -208,25 +211,66 @@ final class CrimsonCrystalGeometry {
     }
 
     static void tryAttachExteriorBud(WorldGenLevel level, SafeBounds bounds, BlockPos support, RandomSource random) {
-        if (!isCrystalBlock(level.getBlockState(support))) return;
-        int start = random.nextInt(ALL_DIRECTIONS.length);
-        for (int i = 0; i < ALL_DIRECTIONS.length; i++) {
-            Direction face = ALL_DIRECTIONS[(start + i) % ALL_DIRECTIONS.length];
+        BlockState supportState = level.getBlockState(support);
+        if (!isCrystalBlock(supportState)) return;
+
+        // A budding block is a central socket: every unoccupied, safe face receives a visible crystal.
+        // Faces already touching any block are deliberately left bare.
+        List<Direction> exposedFaces = new ArrayList<>(ALL_DIRECTIONS.length);
+        for (Direction face : ALL_DIRECTIONS) {
             BlockPos target = support.relative(face);
-            if (!bounds.contains(target.getX(), target.getZ()) || !AbyssWorldgen.isAbyssY(target.getY())) continue;
+            if (!bounds.contains(target.getX(), target.getZ())
+                    || !AbyssWorldgen.isAbyssY(target.getY())
+                    || !level.getBlockState(target).isAir()) {
+                continue;
+            }
+            exposedFaces.add(face);
+        }
+        if (exposedFaces.isEmpty()) return;
+
+        if (!supportState.is(AbyssContent.BUDDING_RED_CRYSTAL_BLOCK)) {
+            level.setBlock(support, AbyssContent.BUDDING_RED_CRYSTAL_BLOCK.defaultBlockState(), 2);
+        }
+
+        for (Direction face : exposedFaces) {
+            BlockPos target = support.relative(face);
+            // Re-check because a prior placement or adjacent feature may have occupied this face.
             if (!level.getBlockState(target).isAir()) continue;
-            if (!AbyssWorldgen.isCrimsonCrystalBiome(target.getX(), target.getZ(), level.getSeed())) continue;
 
             float roll = random.nextFloat();
-            BlockState cluster;
-            if (roll < 0.18F) cluster = AbyssContent.RED_CRYSTAL_CLUSTER.defaultBlockState();
-            else if (roll < 0.48F) cluster = AbyssContent.LARGE_RED_CRYSTAL_BUD.defaultBlockState();
-            else if (roll < 0.78F) cluster = AbyssContent.MEDIUM_RED_CRYSTAL_BUD.defaultBlockState();
-            else cluster = AbyssContent.SMALL_RED_CRYSTAL_BUD.defaultBlockState();
+            BlockState crystal;
+            if (roll < 0.18F) crystal = AbyssContent.RED_CRYSTAL_CLUSTER.defaultBlockState();
+            else if (roll < 0.48F) crystal = AbyssContent.LARGE_RED_CRYSTAL_BUD.defaultBlockState();
+            else if (roll < 0.78F) crystal = AbyssContent.MEDIUM_RED_CRYSTAL_BUD.defaultBlockState();
+            else crystal = AbyssContent.SMALL_RED_CRYSTAL_BUD.defaultBlockState();
 
-            level.setBlock(support, AbyssContent.BUDDING_RED_CRYSTAL_BLOCK.defaultBlockState(), 2);
-            level.setBlock(target, cluster.setValue(AmethystClusterBlock.FACING, face), 2);
-            return;
+            level.setBlock(target, crystal.setValue(AmethystClusterBlock.FACING, face), 2);
+        }
+    }
+
+    /**
+     * Rechecks every budding block in a finished feature after carving is complete.
+     * This repairs faces whose attached bud was removed when the arena or entrance was carved.
+     */
+    static void ensureBuddingFaces(WorldGenLevel level, SafeBounds bounds, BlockPos center,
+                                   int horizontalRadius, int minY, int maxY, RandomSource random) {
+        int minX = Math.max(bounds.minX(), center.getX() - horizontalRadius);
+        int maxX = Math.min(bounds.maxX(), center.getX() + horizontalRadius);
+        int minZ = Math.max(bounds.minZ(), center.getZ() - horizontalRadius);
+        int maxZ = Math.min(bounds.maxZ(), center.getZ() + horizontalRadius);
+        minY = Math.max(AbyssWorldgen.MIN_Y + 1, minY);
+        maxY = Math.min(AbyssWorldgen.MAX_Y - 1, maxY);
+
+        BlockPos.MutableBlockPos cursor = new BlockPos.MutableBlockPos();
+        for (int x = minX; x <= maxX; x++) {
+            for (int y = minY; y <= maxY; y++) {
+                for (int z = minZ; z <= maxZ; z++) {
+                    cursor.set(x, y, z);
+                    if (level.getBlockState(cursor).is(AbyssContent.BUDDING_RED_CRYSTAL_BLOCK)) {
+                        tryAttachExteriorBud(level, bounds, cursor.immutable(), random);
+                    }
+                }
+            }
         }
     }
 

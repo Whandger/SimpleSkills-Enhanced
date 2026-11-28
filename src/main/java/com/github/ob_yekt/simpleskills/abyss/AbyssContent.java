@@ -2,6 +2,7 @@ package com.github.ob_yekt.simpleskills.abyss;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
 import com.github.ob_yekt.simpleskills.runes.RuneOreBlock;
+import com.github.ob_yekt.simpleskills.abyss.item.AbyssalCharredTimberBlockItem;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -318,7 +319,7 @@ public final class AbyssContent {
         ABYSSAL_BRICK_WALL_ITEM = registerBlockItem(ABYSSAL_BRICK_WALL, "abyssal_brick_wall");
         ABYSSAL_TILE_STAIRS_ITEM = registerBlockItem(ABYSSAL_TILE_STAIRS, "abyssal_tile_stairs");
         ABYSSAL_TILE_SLAB_ITEM = registerBlockItem(ABYSSAL_TILE_SLAB, "abyssal_tile_slab");
-        ABYSSAL_CHARRED_TIMBER_ITEM = registerBlockItem(ABYSSAL_CHARRED_TIMBER, "abyssal_charred_timber");
+        ABYSSAL_CHARRED_TIMBER_ITEM = registerAbyssalCharredTimberItem();
         ABYSSAL_BLACK_BOOKSHELF_ITEM = registerBlockItem(ABYSSAL_BLACK_BOOKSHELF, "abyssal_black_bookshelf");
         ABYSSAL_CHEST_ITEM = registerBlockItem(ABYSSAL_CHEST, "abyssal_chest");
         ABYSSAL_FURNACE_ITEM = registerBlockItem(ABYSSAL_FURNACE, "abyssal_furnace");
@@ -389,6 +390,15 @@ public final class AbyssContent {
                 .sound(SoundType.DEEPSLATE)
                 .requiresCorrectToolForDrops()
                 .setId(key);
+    }
+
+    private static Item registerAbyssalCharredTimberItem() {
+        ResourceKey<Item> key = itemKey("abyssal_charred_timber");
+        AbyssalCharredTimberBlockItem item = new AbyssalCharredTimberBlockItem(
+                ABYSSAL_CHARRED_TIMBER,
+                new Item.Properties().setId(key).useBlockDescriptionPrefix());
+        item.registerBlocks(Item.BY_BLOCK, item);
+        return Registry.register(BuiltInRegistries.ITEM, key, item);
     }
 
     private static Item registerBlockItem(Block block, String id) {

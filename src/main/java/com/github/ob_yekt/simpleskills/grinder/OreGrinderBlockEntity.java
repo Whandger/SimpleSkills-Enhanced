@@ -159,7 +159,7 @@ public final class OreGrinderBlockEntity extends AbstractFurnaceBlockEntity {
 
     private boolean canGrind() {
         ItemStack input = items.get(INPUT_SLOT);
-        if (input.isEmpty() || input.getCount() != 1) return false;
+        if (input.isEmpty()) return false;
         ItemStack result = OreGrinderSalvage.getResult(input);
         if (result.isEmpty()) return false;
         ItemStack output = items.get(OUTPUT_SLOT);
@@ -184,7 +184,10 @@ public final class OreGrinderBlockEntity extends AbstractFurnaceBlockEntity {
             grindProgress = 0;
             return;
         }
-        ItemStack result = OreGrinderSalvage.rollResult(items.get(INPUT_SLOT), level.getRandom());
+        ItemStack input = items.get(INPUT_SLOT);
+        ItemStack oneItem = input.copy();
+        oneItem.setCount(1);
+        ItemStack result = OreGrinderSalvage.rollResult(oneItem, level.getRandom());
         ItemStack output = items.get(OUTPUT_SLOT);
         if (!result.isEmpty()) {
             if (output.isEmpty()) {
@@ -193,7 +196,14 @@ public final class OreGrinderBlockEntity extends AbstractFurnaceBlockEntity {
                 output.grow(result.getCount());
             }
         }
-        items.set(INPUT_SLOT, ItemStack.EMPTY);
+
+        // Consume exactly one timber block per cycle. Stackable timber remains in the input slot.
+        input.shrink(1);
+        if (input.isEmpty()) {
+            items.set(INPUT_SLOT, ItemStack.EMPTY);
+        } else {
+            items.set(INPUT_SLOT, input);
+        }
         grindProgress = 0;
         if (level != null) {
             level.playSound(null, worldPosition, SoundEvents.GRINDSTONE_USE, SoundSource.BLOCKS, 0.85F, 0.85F);

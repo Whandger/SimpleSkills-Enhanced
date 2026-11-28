@@ -17,7 +17,7 @@ import java.util.function.Consumer;
  */
 public final class CrimsonRuneItem extends Item {
     public CrimsonRuneItem(Properties properties) {
-        super(properties.stacksTo(16).rarity(Rarity.EPIC).fireResistant());
+        super(properties.stacksTo(1).rarity(Rarity.EPIC).fireResistant());
     }
 
     @Override

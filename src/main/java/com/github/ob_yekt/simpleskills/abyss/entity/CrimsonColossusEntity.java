@@ -52,6 +52,8 @@ import java.util.Set;
 import java.util.UUID;
 
 public class CrimsonColossusEntity extends Monster {
+    private static final int ARENA_HOME_RADIUS = 5;
+
     public static final EntityType<CrimsonColossusEntity> TYPE = registerType();
 
     // ------------------------------------------------------------------------------------------
@@ -246,6 +248,11 @@ public class CrimsonColossusEntity extends Monster {
     @Override
     protected void customServerAiStep(ServerLevel level) {
         super.customServerAiStep(level);
+        // Older generated Colossi may still carry the former 12-block home radius in their NBT.
+        // Tighten it once so existing bosses also stay centered in the crystal heart.
+        if (this.hasHome() && this.getHomeRadius() > ARENA_HOME_RADIUS) {
+            this.setHomeTo(this.getHomePosition(), ARENA_HOME_RADIUS);
+        }
         this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
         tickCooldowns();
 
@@ -265,6 +272,19 @@ public class CrimsonColossusEntity extends Monster {
 
         LivingEntity target = this.getTarget();
         if (target == null || !target.isAlive()) {
+            // The Colossus guards the crystal heart. If a battle pulled it off-center,
+            // it calmly returns to its saved arena home instead of remaining at the entrance.
+            if (this.hasHome()) {
+                BlockPos home = this.getHomePosition();
+                double dx = this.getX() - (home.getX() + 0.5D);
+                double dz = this.getZ() - (home.getZ() + 0.5D);
+                if (dx * dx + dz * dz > 4.0D) {
+                    this.getNavigation().moveTo(home.getX() + 0.5D, home.getY() + 1.0D,
+                            home.getZ() + 0.5D, 0.9D);
+                } else if (!this.getNavigation().isDone()) {
+                    this.getNavigation().stop();
+                }
+            }
             return;
         }
         this.getLookControl().setLookAt(target, 30.0F, 30.0F);
@@ -534,7 +554,7 @@ public class CrimsonColossusEntity extends Monster {
             this.getNavigation().stop();
             if (target != null && target.isAlive()) {
                 this.getLookControl().setLookAt(target, 35.0F, 35.0F);
-                this.lockedTargetPos = target.position();
+                this.lockedTargetPos = clampToArenaHome(target.position());
                 syncTargetPos(this.lockedTargetPos);
             }
             return;
@@ -551,7 +571,7 @@ public class CrimsonColossusEntity extends Monster {
 
             // Homing: each airborne tick the jump re-aims at the player's live position.
             if (target != null && target.isAlive()) {
-                this.lockedTargetPos = target.position();
+                this.lockedTargetPos = clampToArenaHome(target.position());
                 syncTargetPos(this.lockedTargetPos);
             }
             steerLeap(air);
@@ -944,7 +964,22 @@ public class CrimsonColossusEntity extends Monster {
                 spot = t.position().add(away.scale(6.0D)).add(tangent.scale(2.5D));
                 speed = 0.85D;
             }
+            spot = clampToArenaHome(spot);
             CrimsonColossusEntity.this.getNavigation().moveTo(spot.x, spot.y, spot.z, speed);
         }
+    }
+
+    private Vec3 clampToArenaHome(Vec3 desired) {
+        if (!this.hasHome()) return desired;
+        BlockPos home = this.getHomePosition();
+        double homeX = home.getX() + 0.5D;
+        double homeZ = home.getZ() + 0.5D;
+        double dx = desired.x - homeX;
+        double dz = desired.z - homeZ;
+        double distance = Math.sqrt(dx * dx + dz * dz);
+        double maxDistance = Math.max(4.0D, this.getHomeRadius() - 1.5D);
+        if (distance <= maxDistance || distance < 1.0E-5D) return desired;
+        double scale = maxDistance / distance;
+        return new Vec3(homeX + dx * scale, desired.y, homeZ + dz * scale);
     }
 }
