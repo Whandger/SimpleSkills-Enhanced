@@ -1,6 +1,7 @@
 package com.github.ob_yekt.simpleskills.abyss.client;
 
 import com.github.ob_yekt.simpleskills.Simpleskills;
+import com.github.ob_yekt.simpleskills.abyss.entity.CrimsonColossusEntity;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.client.model.geom.ModelPart;
@@ -191,59 +192,96 @@ public class CrimsonColossusModel extends EntityModel<CrimsonColossusRenderState
         );
     }
 
+    /** Walk cycle frequency. Higher than the old stride so the hops come quickly. */
+    private static final float GAIT_RATE = 1.45F;
+
     @Override
     public void setupAnim(CrimsonColossusRenderState state) {
         super.setupAnim(state);
         resetBasePose();
 
-        float walkPos = state.walkAnimationPos;
-        float walkSpeed = Math.min(1.0F, state.walkAnimationSpeed);
+        boolean attacking = state.attackType != CrimsonColossusEntity.AttackType.NONE;
+        // The walk cycle is muted during attacks so the attack pose reads cleanly.
+        float speed = attacking ? 0.0F : Mth.clamp(state.walkAnimationSpeed, 0.0F, 1.0F);
         float age = state.ageInTicks;
+        float cadence = state.walkAnimationPos * GAIT_RATE;
 
-        float freq = 0.52F;
-        float amp = 0.48F * walkSpeed;
-        float phaseA = walkPos * freq;
-        float phaseB = phaseA + Mth.PI;
+        applyMonkeyGait(cadence, speed);
+        if (!attacking) {
+            applyIdleFidget(age, 1.0F - speed);
+        }
 
-        float swingA = Mth.cos(phaseA) * amp;
-        float swingB = Mth.cos(phaseB) * amp;
-        float liftA = Math.max(0.0F, -Mth.sin(phaseA)) * 0.36F * walkSpeed;
-        float liftB = Math.max(0.0F, -Mth.sin(phaseB)) * 0.36F * walkSpeed;
-
-        this.frontLeftLeg.xRot = -0.06F + swingA - liftA * 0.45F;
-        this.frontLeftKnee.xRot = 0.06F + liftA * 1.15F;
-        this.frontLeftFoot.xRot = -liftA * 0.55F;
-
-        this.backRightLeg.xRot = 0.08F + swingA * 0.92F - liftA * 0.40F;
-        this.backRightKnee.xRot = -0.08F + liftA * 1.05F;
-
-        this.frontRightLeg.xRot = -0.06F + swingB - liftB * 0.45F;
-        this.frontRightKnee.xRot = 0.06F + liftB * 1.15F;
-        this.frontRightFoot.xRot = -liftB * 0.55F;
-
-        this.backLeftLeg.xRot = 0.08F + swingB * 0.92F - liftB * 0.40F;
-        this.backLeftKnee.xRot = -0.08F + liftB * 1.05F;
-
-        float doubleStep = Math.abs(Mth.sin(phaseA));
-        this.torso.y = 4.0F - doubleStep * 1.35F * walkSpeed + Mth.sin(age * 0.08F) * 0.25F;
-        this.torso.zRot = Mth.sin(phaseA) * 0.055F * walkSpeed;
-        this.torso.xRot = 0.03F * walkSpeed + Mth.cos(phaseA * 2.0F) * 0.02F * walkSpeed;
-
-        this.head.yRot = (state.yRot * Mth.DEG_TO_RAD) * 0.45F + Mth.sin(phaseA) * 0.08F * walkSpeed;
-        this.head.xRot = 0.06F + (state.xRot * Mth.DEG_TO_RAD) * 0.40F
-                - Mth.cos(phaseA * 2.0F - 0.5F) * 0.06F * walkSpeed;
-
-        this.crystalCrown.xRot = -0.03F * walkSpeed + Mth.sin(phaseA * 2.0F - 0.7F) * 0.035F * walkSpeed;
-        this.crystalCrown.zRot = -Mth.sin(phaseA) * 0.04F * walkSpeed;
+        this.head.yRot = (state.yRot * Mth.DEG_TO_RAD) * 0.45F + Mth.sin(cadence) * 0.07F * speed;
+        this.head.xRot = 0.08F + (state.xRot * Mth.DEG_TO_RAD) * 0.40F
+                - Mth.cos(cadence * 2.0F) * 0.07F * speed;
 
         float t = state.attackTick + state.partialTick;
         switch (state.attackType) {
             case CRYSTAL_LASER -> applyLaserPose(t);
             case SEISMIC_SLAM -> applySeismicSlamPose(t);
             case CRYSTAL_BARRAGE -> applyCrystalBarragePose(t);
-            case COLOSSUS_LEAP -> applyColossusLeapPose(t);
-            default -> {}
+            case COLOSSUS_LEAP -> applyColossusLeapPose(t, state.impactTick);
+            case SWIPE -> applySwipePose(t);
+            default -> {
+            }
         }
+    }
+
+    /**
+     * Monkey gait: quick hops. Each cycle is one hop. The front hands tap down fast, the torso springs
+     * up at the top of every bounce, and the back legs push off on the opposite beat.
+     */
+    private void applyMonkeyGait(float cadence, float speed) {
+        float phaseA = cadence;
+        float phaseB = cadence + Mth.PI;
+
+        float liftA = snapLift(Mth.sin(phaseA)) * speed;
+        float liftB = snapLift(Mth.sin(phaseB)) * speed;
+        float swingA = Mth.cos(phaseA) * 0.78F * speed;
+        float swingB = Mth.cos(phaseB) * 0.78F * speed;
+        float hop = Math.abs(Mth.sin(cadence)) * speed;
+
+        // Front hands: short, snappy taps. Each one lifts, flicks forward and plants.
+        this.frontLeftLeg.xRot = -0.10F + swingA - liftA * 0.55F;
+        this.frontLeftKnee.xRot = 0.10F + liftA * 1.05F;
+        this.frontLeftFoot.xRot = -liftA * 0.45F;
+
+        this.frontRightLeg.xRot = -0.10F + swingB - liftB * 0.55F;
+        this.frontRightKnee.xRot = 0.10F + liftB * 1.05F;
+        this.frontRightFoot.xRot = -liftB * 0.45F;
+
+        // Back legs push off on the opposite beat, which is what turns each step into a hop.
+        this.backRightLeg.xRot = 0.10F + swingA * 0.45F - liftA * 0.30F;
+        this.backRightKnee.xRot = -0.10F + liftA * 0.90F;
+        this.backLeftLeg.xRot = 0.10F + swingB * 0.45F - liftB * 0.30F;
+        this.backLeftKnee.xRot = -0.10F + liftB * 0.90F;
+
+        // The body springs up on every hop and leans forward, hunched like a primate.
+        this.torso.y = 4.0F - hop * 2.6F;
+        this.torso.xRot = 0.14F * speed + Mth.cos(cadence * 2.0F) * 0.035F * speed;
+        this.torso.zRot = Mth.sin(cadence) * 0.05F * speed;
+
+        this.lowerJaw.xRot = hop * 0.05F;
+        this.crystalCrown.xRot = -0.03F * speed + Mth.sin(cadence * 2.0F - 0.7F) * 0.05F * speed;
+        this.crystalCrown.zRot = -Mth.sin(cadence) * 0.04F * speed;
+    }
+
+    /** Standing still, the Colossus fidgets: quick hand flicks and the occasional small hop. */
+    private void applyIdleFidget(float age, float idle) {
+        float flickA = (float) Math.pow(Math.max(0.0F, Mth.sin(age * 0.23F)), 6.0D) * idle;
+        float flickB = (float) Math.pow(Math.max(0.0F, Mth.sin(age * 0.31F + 1.3F)), 6.0D) * idle;
+        float hop = (float) Math.pow(Math.max(0.0F, Mth.sin(age * 0.07F)), 14.0D) * idle;
+
+        this.frontLeftLeg.xRot -= flickA * 0.35F;
+        this.frontLeftKnee.xRot += flickA * 0.30F;
+        this.frontRightLeg.xRot -= flickB * 0.30F;
+        this.frontRightKnee.xRot += flickB * 0.25F;
+        this.torso.y -= hop * 1.6F + Mth.sin(age * 0.08F) * 0.25F * idle;
+    }
+
+    /** Positive half of a wave, pushed toward 1: a fast lift that settles sharply. */
+    private static float snapLift(float wave) {
+        return (float) Math.pow(Math.max(0.0F, wave), 0.55D);
     }
 
     private void resetBasePose() {
@@ -264,9 +302,11 @@ public class CrimsonColossusModel extends EntityModel<CrimsonColossusRenderState
     }
 
     private void applyLaserPose(float t) {
-        float charge = smooth(0.0F, 22.0F, t);
-        float fire = smooth(25.0F, 30.0F, t) * (1.0F - smooth(78.0F, 90.0F, t));
-        float recover = 1.0F - smooth(78.0F, 90.0F, t);
+        float chargeEnd = CrimsonColossusEntity.LASER_CHARGE_END;
+        float fireEnd = CrimsonColossusEntity.LASER_FIRE_END;
+        float charge = smooth(0.0F, chargeEnd, t);
+        float fire = smooth(chargeEnd, chargeEnd + 5.0F, t) * (1.0F - smooth(fireEnd - 6.0F, fireEnd + 6.0F, t));
+        float recover = 1.0F - smooth(fireEnd, CrimsonColossusEntity.LASER_DURATION, t);
 
         this.torso.y = 4.0F + 1.4F * charge * recover;
         this.torso.xRot = 0.08F * charge * recover;
@@ -289,9 +329,10 @@ public class CrimsonColossusModel extends EntityModel<CrimsonColossusRenderState
     }
 
     private void applySeismicSlamPose(float t) {
-        float rearUp = smooth(0.0F, 18.0F, t);
-        float slamDown = smooth(19.0F, 24.5F, t);
-        float recover = 1.0F - smooth(40.0F, 54.0F, t);
+        float impact = CrimsonColossusEntity.SLAM_IMPACT_TICK;
+        float rearUp = smooth(0.0F, 12.0F, t);
+        float slamDown = smooth(13.0F, impact, t);
+        float recover = 1.0F - smooth(impact + 6.0F, CrimsonColossusEntity.SLAM_DURATION, t);
 
         float standFactor = rearUp * (1.0F - slamDown);
         float impactFactor = slamDown * recover;
@@ -318,9 +359,9 @@ public class CrimsonColossusModel extends EntityModel<CrimsonColossusRenderState
     }
 
     private void applyCrystalBarragePose(float t) {
-        float raiseHand = smooth(0.0F, 12.0F, t);
-        float castSweep = smooth(13.0F, 18.0F, t);
-        float recover = 1.0F - smooth(34.0F, 48.0F, t);
+        float raiseHand = smooth(0.0F, 7.0F, t);
+        float castSweep = smooth(CrimsonColossusEntity.BARRAGE_WAVE_START, CrimsonColossusEntity.BARRAGE_WAVE_START + 5.0F, t);
+        float recover = 1.0F - smooth(CrimsonColossusEntity.BARRAGE_WAVE_END, CrimsonColossusEntity.BARRAGE_DURATION, t);
 
         float active = raiseHand * recover;
         float cast = castSweep * recover;
@@ -340,10 +381,19 @@ public class CrimsonColossusModel extends EntityModel<CrimsonColossusRenderState
         this.lowerJaw.xRot = 0.25F * active;
     }
 
-    private void applyColossusLeapPose(float t) {
-        float crouch = smooth(0.0F, 11.0F, t) * (1.0F - smooth(11.0F, 14.0F, t));
-        float airborne = smooth(11.0F, 15.0F, t) * (1.0F - smooth(33.0F, 36.0F, t));
-        float landSlam = smooth(34.0F, 37.0F, t) * (1.0F - smooth(50.0F, 62.0F, t));
+    /**
+     * Leap: crouch, spring up, glide toward the player, then slam into the ground. The airborne pose
+     * holds until the impact tick is known, so the legs stay extended for the whole flight.
+     */
+    private void applyColossusLeapPose(float t, int impactTick) {
+        float launch = CrimsonColossusEntity.LEAP_LAUNCH_TICK;
+        float crouch = smooth(0.0F, launch - 1.0F, t) * (1.0F - smooth(launch - 1.0F, launch + 2.0F, t));
+        float airborne = impactTick < 0 ? smooth(launch, launch + 4.0F, t) : 0.0F;
+        float landSlam = 0.0F;
+        if (impactTick >= 0) {
+            float since = t - impactTick;
+            landSlam = smooth(0.0F, 4.0F, since) * (1.0F - smooth(10.0F, 20.0F, since));
+        }
 
         this.torso.y = 4.0F + 4.2F * crouch - 2.5F * airborne + 3.6F * landSlam;
         this.torso.xRot = 0.18F * crouch - 0.24F * airborne + 0.22F * landSlam;
@@ -360,6 +410,22 @@ public class CrimsonColossusModel extends EntityModel<CrimsonColossusRenderState
 
         this.head.xRot = -0.15F * airborne + 0.12F * landSlam;
         this.lowerJaw.xRot = 0.42F * airborne + 0.30F * landSlam;
+    }
+
+    /** Swipe: the right hand rears back, then sweeps across the front while the body turns into it. */
+    private void applySwipePose(float t) {
+        float impact = CrimsonColossusEntity.SWIPE_IMPACT_TICK;
+        float rear = smooth(0.0F, impact - 1.0F, t);
+        float strike = smooth(impact - 1.0F, impact + 1.0F, t);
+        float recover = 1.0F - smooth(impact + 2.0F, CrimsonColossusEntity.SWIPE_DURATION, t);
+        float armBack = rear * (1.0F - strike);
+
+        this.frontRightLeg.xRot = (-0.95F * armBack + 0.75F * strike) * recover;
+        this.frontRightKnee.xRot = (-0.55F * armBack + 0.45F * strike) * recover;
+        this.frontRightLeg.zRot = 0.07F + 0.25F * armBack * recover;
+        this.torso.yRot = (-0.30F * armBack + 0.55F * strike) * recover;
+        this.torso.xRot = 0.10F * strike * recover;
+        this.lowerJaw.xRot = 0.30F * strike * recover;
     }
 
     private static float smooth(float start, float end, float value) {

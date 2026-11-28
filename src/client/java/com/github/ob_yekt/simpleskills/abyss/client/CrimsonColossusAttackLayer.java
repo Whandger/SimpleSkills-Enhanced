@@ -16,6 +16,15 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 
+/**
+ * Draws the attack effects in a frame whose origin is the Colossus base (the feet) and whose units are
+ * model units, which are world blocks divided by the renderer's 1.65 scale.
+ *
+ * Every world-space quantity (mouth, aim point, landing point) is converted into that frame with the
+ * inverse of the layer's basis. The frame origin is the base itself: the renderer shifts the model down
+ * by 1.501 units so the feet touch the ground, and this layer shifts it back by the same amount. An earlier
+ * version subtracted an extra offset here, which pushed every beam and orb about 2.5 blocks above the boss.
+ */
 public final class CrimsonColossusAttackLayer
         extends RenderLayer<CrimsonColossusRenderState, CrimsonColossusModel> {
 
@@ -27,49 +36,39 @@ public final class CrimsonColossusAttackLayer
     @Override
     public void submit(PoseStack poseStack, SubmitNodeCollector collector, int packedLight,
                        CrimsonColossusRenderState state, float yRot, float xRot) {
-        CrimsonColossusEntity.AttackType type = state.attackType;
+        final CrimsonColossusEntity.AttackType type = state.attackType;
         if (type == CrimsonColossusEntity.AttackType.NONE) return;
 
         poseStack.pushPose();
-
-        // Keep the parent basis so the layer translation can be removed when
-        // converting the real world-space muzzle into this layer's local space.
-        Matrix3f parentBasis = new Matrix3f(poseStack.last().pose());
-        Vector3f layerTranslation = parentBasis.transform(new Vector3f(0.0F, 1.501F, 0.0F));
-
         poseStack.translate(0.0F, 1.501F, 0.0F);
         poseStack.scale(-1.0F, -1.0F, 1.0F);
         poseStack.mulPose(new Matrix4f().rotation(Axis.YP.rotationDegrees(-(180.0F - state.bodyRot))));
 
-        float age = state.attackTick + state.partialTick;
-        int duration = type.duration;
+        final float age = state.attackTick + state.partialTick;
+        final int duration = type.duration;
+        final int impactTick = state.impactTick;
+
+        Matrix3f toLayer = new Matrix3f(poseStack.last().pose()).invert();
         Vec3 worldForward = Vec3.directionFromRotation(0.0F, state.bodyRot);
+        Vec3 forwardLocal = transformDirection(toLayer, worldForward).normalize();
 
-        Matrix3f inverseRenderBasis = new Matrix3f(poseStack.last().pose()).invert();
-        Vec3 forwardLocal = transformDirection(inverseRenderBasis, worldForward);
-
-        // Match the server-side muzzle in CrimsonColossusEntity#getMouthWorldPosition.
-        Vec3 worldMouthOffset = worldForward.scale(1.85D).add(0.0D, 1.75D, 0.0D);
-        Vec3 mouthBeforeLayerTranslation = worldMouthOffset.subtract(
-                layerTranslation.x, layerTranslation.y, layerTranslation.z);
-        Vec3 mouthLocal = transformDirection(inverseRenderBasis, mouthBeforeLayerTranslation);
-
-        // Convert the actual muzzle-to-player vector, not the player's raw offset
-        // from the Colossus origin. This keeps the visible beam and server ray aligned.
-        Vec3 worldAimVector = state.targetOffset.subtract(worldMouthOffset);
-        Vec3 aimVectorLocal = transformDirection(inverseRenderBasis, worldAimVector);
+        Vec3 mouthWorld = CrimsonColossusEntity.mouthOffset(worldForward);
+        Vec3 mouthLocal = transformDirection(toLayer, mouthWorld);
+        Vec3 aimLocal = transformDirection(toLayer, state.targetOffset.subtract(mouthWorld));
+        Vec3 targetLocal = transformDirection(toLayer, state.targetOffset);
 
         collector.submitCustomGeometry(poseStack, RenderTypes.lightning(), (matrix, vertices) -> {
             switch (type) {
                 case CRYSTAL_LASER -> CrimsonColossusLaserVfx.draw(
-                        matrix.pose(), vertices, forwardLocal, mouthLocal, aimVectorLocal, age, duration);
+                        matrix.pose(), vertices, forwardLocal, mouthLocal, aimLocal, age, duration);
                 case SEISMIC_SLAM -> CrimsonColossusSlamVfx.draw(
-                        matrix.pose(), vertices, worldForward, age, duration);
+                        matrix.pose(), vertices, forwardLocal, age, duration);
                 case CRYSTAL_BARRAGE -> CrimsonColossusShardVfx.draw(
-                        matrix.pose(), vertices, worldForward, state.targetOffset, age, duration);
+                        matrix.pose(), vertices, forwardLocal, targetLocal, age, duration);
                 case COLOSSUS_LEAP -> CrimsonColossusLeapShockwaveVfx.draw(
-                        matrix.pose(), vertices, worldForward, age, duration);
-                default -> { }
+                        matrix.pose(), vertices, forwardLocal, targetLocal, impactTick, age, duration);
+                default -> {
+                }
             }
         });
 
@@ -84,5 +83,4 @@ public final class CrimsonColossusAttackLayer
         ));
         return new Vec3(transformed.x, transformed.y, transformed.z);
     }
-
 }

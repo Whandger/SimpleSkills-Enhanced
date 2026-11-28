@@ -7,6 +7,12 @@ import org.joml.Matrix4fc;
 public final class CrimsonColossusVfxPrimitives {
     private CrimsonColossusVfxPrimitives() {}
 
+    /**
+     * The model is drawn at 1.65x world scale (see CrimsonColossusRenderer). Multiply a world-block
+     * distance by this to get the same distance in layer units.
+     */
+    public static final double WORLD_TO_LAYER = 1.0D / 1.65D;
+
     public static void addDoubleQuad(Matrix4fc m, VertexConsumer out,
                                      Vec3 p0, Vec3 p1, Vec3 p2, Vec3 p3,
                                      float r, float g, float b, float a) {

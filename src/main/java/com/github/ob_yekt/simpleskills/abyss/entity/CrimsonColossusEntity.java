@@ -26,14 +26,14 @@ import net.minecraft.world.BossEvent;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
-import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -44,37 +44,60 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
+import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 public class CrimsonColossusEntity extends Monster {
     public static final EntityType<CrimsonColossusEntity> TYPE = registerType();
 
-    private static EntityType<CrimsonColossusEntity> registerType() {
-        Identifier id = Identifier.fromNamespaceAndPath(Simpleskills.MOD_ID, "crimson_colossus");
-        ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, id);
-        EntityType<CrimsonColossusEntity> type = Registry.register(
-                BuiltInRegistries.ENTITY_TYPE,
-                id,
-                EntityType.Builder.<CrimsonColossusEntity>of(CrimsonColossusEntity::new, MobCategory.MONSTER)
-                        .sized(3.0F, 3.1F)
-                        .clientTrackingRange(16)
-                        .updateInterval(2)
-                        .build(key)
-        );
-        FabricDefaultAttributeRegistry.register(type, createAttributes());
-        return type;
-    }
+    // ------------------------------------------------------------------------------------------
+    // Timeline in ticks (20 ticks = 1 second). The client poses and VFX read these same constants,
+    // so changing a number here keeps damage, animation and effects in sync.
+    // ------------------------------------------------------------------------------------------
+    public static final int SWIPE_IMPACT_TICK = 6;
+    public static final int SWIPE_DURATION = 14;
 
-    /** Forces the Colossus type and attributes to register before registries freeze. */
-    public static void register() {
-    }
+    public static final int LASER_CHARGE_END = 22;
+    public static final int LASER_FIRE_END = 60;
+    public static final int LASER_DURATION = 72;
+
+    public static final int SLAM_IMPACT_TICK = 16;
+    public static final int SLAM_DURATION = 36;
+    public static final double SLAM_REACH = 2.2D;
+
+    public static final int BARRAGE_WAVE_START = 9;
+    public static final int BARRAGE_WAVE_END = 24;
+    public static final int BARRAGE_DURATION = 32;
+
+    public static final int LEAP_LAUNCH_TICK = 10;
+    /** Airtime for LEAP_LAUNCH_VY = 1.0 under Minecraft gravity (0.08/tick) and drag (0.98/tick). */
+    public static final int LEAP_STEER_TICKS = 23;
+    public static final int LEAP_MAX_AIR_TICKS = 36;
+    public static final int LEAP_SPREAD_TICKS = 22;
+    public static final int LEAP_DURATION = 80;
+    public static final double LEAP_SPREAD_RADIUS = 8.0D;
+    public static final double LEAP_LAUNCH_VY = 1.0D;
+    public static final double LEAP_MAX_HSPEED = 1.25D;
+
+    /** Mouth position relative to the Colossus base. The client layer uses the same numbers. */
+    public static final double MOUTH_FORWARD = 2.2D;
+    public static final double MOUTH_HEIGHT = 1.75D;
+
+    /** How fast the beam can slide toward the chest, in blocks per tick. Slower than a sideways step. */
+    private static final double LASER_TRACK_SPEED = 0.14D;
+    private static final double LASER_REACH = 26.0D;
+    private static final float LASER_DAMAGE = 3.5F;
+
     public enum AttackType {
         NONE(0, 0),
-        CRYSTAL_LASER(1, 90),
-        SEISMIC_SLAM(2, 54),
-        CRYSTAL_BARRAGE(3, 48),
-        COLOSSUS_LEAP(4, 62);
+        CRYSTAL_LASER(1, LASER_DURATION),
+        SEISMIC_SLAM(2, SLAM_DURATION),
+        CRYSTAL_BARRAGE(3, BARRAGE_DURATION),
+        COLOSSUS_LEAP(4, LEAP_DURATION),
+        SWIPE(5, SWIPE_DURATION);
 
         public final int id;
         public final int duration;
@@ -102,6 +125,9 @@ public class CrimsonColossusEntity extends Monster {
             SynchedEntityData.defineId(CrimsonColossusEntity.class, EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Float> DATA_TARGET_Z =
             SynchedEntityData.defineId(CrimsonColossusEntity.class, EntityDataSerializers.FLOAT);
+    /** Attack tick at which the leap touched the ground, or -1 while still airborne. */
+    private static final EntityDataAccessor<Integer> DATA_IMPACT_TICK =
+            SynchedEntityData.defineId(CrimsonColossusEntity.class, EntityDataSerializers.INT);
 
     private static final DustParticleOptions CRIMSON_ENERGY =
             new DustParticleOptions(0xF6384C, 1.45F);
@@ -113,19 +139,44 @@ public class CrimsonColossusEntity extends Monster {
             BossEvent.BossBarOverlay.NOTCHED_10
     );
 
-    private int globalAttackCooldown = 45;
+    private int globalAttackCooldown = 30;
     private int laserCooldown = 0;
     private int slamCooldown = 0;
     private int barrageCooldown = 0;
     private int leapCooldown = 0;
+    private int swipeCooldown = 0;
 
+    private AttackType lastAttack = AttackType.NONE;
+    /** Entity ids already struck by the current leap shock, so each target is hit once per landing. */
+    private final Set<Integer> hitThisAttack = new HashSet<>();
     private boolean leapLaunched = false;
     private boolean leapLanded = false;
+    private int leapLandedTick = -1;
     private Vec3 lockedTargetPos = Vec3.ZERO;
 
     public CrimsonColossusEntity(EntityType<? extends Monster> entityType, Level level) {
         super(entityType, level);
         this.xpReward = 350;
+    }
+
+    private static EntityType<CrimsonColossusEntity> registerType() {
+        Identifier id = Identifier.fromNamespaceAndPath(Simpleskills.MOD_ID, "crimson_colossus");
+        ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, id);
+        EntityType<CrimsonColossusEntity> type = Registry.register(
+                BuiltInRegistries.ENTITY_TYPE,
+                id,
+                EntityType.Builder.<CrimsonColossusEntity>of(CrimsonColossusEntity::new, MobCategory.MONSTER)
+                        .sized(3.0F, 3.1F)
+                        .clientTrackingRange(16)
+                        .updateInterval(2)
+                        .build(key)
+        );
+        FabricDefaultAttributeRegistry.register(type, createAttributes());
+        return type;
+    }
+
+    /** Forces the Colossus type and attributes to register before registries freeze. */
+    public static void register() {
     }
 
     @Override
@@ -136,12 +187,13 @@ public class CrimsonColossusEntity extends Monster {
         builder.define(DATA_TARGET_X, 0.0F);
         builder.define(DATA_TARGET_Y, 0.0F);
         builder.define(DATA_TARGET_Z, 0.0F);
+        builder.define(DATA_IMPACT_TICK, -1);
     }
 
     public static AttributeSupplier.Builder createAttributes() {
         return Monster.createMonsterAttributes()
                 .add(Attributes.MAX_HEALTH, 500.0D)
-                .add(Attributes.MOVEMENT_SPEED, 0.22D)
+                .add(Attributes.MOVEMENT_SPEED, 0.26D)
                 .add(Attributes.KNOCKBACK_RESISTANCE, 1.0D)
                 .add(Attributes.ATTACK_DAMAGE, 18.0D)
                 .add(Attributes.ATTACK_KNOCKBACK, 2.2D)
@@ -153,20 +205,10 @@ public class CrimsonColossusEntity extends Monster {
     @Override
     protected void registerGoals() {
         this.goalSelector.addGoal(0, new FloatGoal(this));
-        this.goalSelector.addGoal(1, new MeleeAttackGoal(this, 1.15D, true) {
-            @Override
-            public boolean canUse() {
-                return getAttackType() == AttackType.NONE && super.canUse();
-            }
-
-            @Override
-            public boolean canContinueToUse() {
-                return getAttackType() == AttackType.NONE && super.canContinueToUse();
-            }
-        });
-        // Stay on the central arena dais while idle; the melee goal takes over once a player is found.
-        this.goalSelector.addGoal(2, new LookAtPlayerGoal(this, Player.class, 24.0F));
-        this.goalSelector.addGoal(3, new RandomLookAroundGoal(this));
+        // Stalking replaces the old melee chase: the boss keeps a range of about six blocks,
+        // circles the target and only closes in when it is too far away.
+        this.goalSelector.addGoal(1, new StalkGoal());
+        this.goalSelector.addGoal(2, new RandomLookAroundGoal(this));
 
         this.targetSelector.addGoal(1, new HurtByTargetGoal(this));
         this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, Player.class, true));
@@ -204,86 +246,156 @@ public class CrimsonColossusEntity extends Monster {
     protected void customServerAiStep(ServerLevel level) {
         super.customServerAiStep(level);
         this.bossEvent.setProgress(this.getHealth() / this.getMaxHealth());
+        tickCooldowns();
 
-        if (globalAttackCooldown > 0) globalAttackCooldown--;
-        if (laserCooldown > 0) laserCooldown--;
-        if (slamCooldown > 0) slamCooldown--;
-        if (barrageCooldown > 0) barrageCooldown--;
-        if (leapCooldown > 0) leapCooldown--;
+        // Below half health the boss recovers faster and attacks more often.
+        boolean enraged = this.getHealth() <= this.getMaxHealth() * 0.5F;
 
         AttackType current = getAttackType();
         if (current != AttackType.NONE) {
             int tick = getAttackTick() + 1;
             setAttackTick(tick);
             tickActiveAttack(level, current, tick);
-
-            if (tick >= current.duration) {
-                finishAttack();
+            if (isAttackOver(current, tick)) {
+                finishAttack(current, enraged);
             }
             return;
         }
 
         LivingEntity target = this.getTarget();
-        if (target != null && target.isAlive() && globalAttackCooldown <= 0) {
-            trySelectAttack(target);
+        if (target == null || !target.isAlive()) {
+            return;
+        }
+        this.getLookControl().setLookAt(target, 30.0F, 30.0F);
+
+        // Up close the boss swats first. Otherwise it reads the situation and picks a skill.
+        if (flatDistanceTo(target) <= 3.2D && swipeCooldown <= 0 && this.random.nextFloat() < 0.7F) {
+            startAttack(AttackType.SWIPE, target.position());
+            return;
+        }
+        if (globalAttackCooldown <= 0 && this.random.nextFloat() < (enraged ? 0.55F : 0.32F)) {
+            chooseAttack(target);
         }
     }
 
-    private void trySelectAttack(LivingEntity target) {
-        double dist = Math.sqrt(this.distanceToSqr(target));
+    private void tickCooldowns() {
+        if (globalAttackCooldown > 0) globalAttackCooldown--;
+        if (laserCooldown > 0) laserCooldown--;
+        if (slamCooldown > 0) slamCooldown--;
+        if (barrageCooldown > 0) barrageCooldown--;
+        if (leapCooldown > 0) leapCooldown--;
+        if (swipeCooldown > 0) swipeCooldown--;
+    }
 
-        if (dist <= 5.8D && slamCooldown <= 0 && this.random.nextFloat() < 0.45F) {
-            startAttack(AttackType.SEISMIC_SLAM, target.position());
-            return;
+    /**
+     * Weighs every skill that is usable right now against the current situation, then rolls among
+     * them. Weights reward the answer to what the player is doing: standing still gets lasered,
+     * sprinting gets leapt at or walled with the crystal barrage. Repeating the last skill is penalised
+     * and a little noise keeps the choice from looking scripted.
+     */
+    private void chooseAttack(LivingEntity target) {
+        double dist = flatDistanceTo(target);
+        Vec3 velocity = target.getDeltaMovement();
+        double speed = Math.sqrt(velocity.x * velocity.x + velocity.z * velocity.z);
+        boolean moving = speed > 0.12D;
+        boolean standingStill = speed < 0.05D;
+        boolean grounded = this.onGround();
+        boolean lineOfSight = this.hasLineOfSight(target);
+
+        AttackType[] options = {
+                AttackType.SEISMIC_SLAM, AttackType.COLOSSUS_LEAP,
+                AttackType.CRYSTAL_BARRAGE, AttackType.CRYSTAL_LASER
+        };
+        double[] score = new double[options.length];
+
+        // Slam: the close-range punisher. Hits hardest on targets that stand still.
+        if (dist <= 7.0D && slamCooldown <= 0 && grounded) {
+            score[0] = 3.0D + (dist <= 3.6D ? 1.4D : 0.0D) + (standingStill ? 1.0D : 0.0D);
+        }
+        // Leap: closes the gap and homes in, so it answers players who run away.
+        if (dist >= 5.5D && dist <= 22.0D && leapCooldown <= 0 && grounded) {
+            score[1] = 2.2D + (dist >= 9.0D ? 0.8D : 0.0D) + (moving ? 1.8D : 0.0D);
+        }
+        // Crystal barrage: a ground wave that works best against someone sprinting across the arena.
+        if (dist >= 4.5D && dist <= 24.0D && barrageCooldown <= 0 && grounded) {
+            score[2] = 1.9D + (moving ? 1.6D : 0.0D) + (dist >= 8.0D ? 0.5D : 0.0D);
+        }
+        // Laser: long range and needs line of sight. Punishes players who stop to fight.
+        if (dist >= 4.0D && dist <= 26.0D && laserCooldown <= 0 && lineOfSight) {
+            score[3] = 2.3D + (standingStill ? 1.8D : 0.0D) + (dist >= 10.0D ? 0.5D : 0.0D);
         }
 
-        if (dist >= 7.0D && dist <= 20.0D && leapCooldown <= 0 && this.onGround() && this.random.nextFloat() < 0.38F) {
-            startAttack(AttackType.COLOSSUS_LEAP, target.position());
-            return;
+        double total = 0.0D;
+        for (int i = 0; i < options.length; i++) {
+            if (score[i] <= 0.0D) continue;
+            if (options[i] == lastAttack) score[i] *= 0.2D;
+            score[i] *= 0.75D + this.random.nextDouble() * 0.5D;
+            total += score[i];
         }
+        if (total <= 0.0D) return;
 
-        if (dist >= 5.0D && dist <= 22.0D && barrageCooldown <= 0 && this.random.nextFloat() < 0.42F) {
-            startAttack(AttackType.CRYSTAL_BARRAGE, target.position());
-            return;
-        }
-
-        if (dist >= 4.0D && dist <= 24.0D && laserCooldown <= 0 && this.hasLineOfSight(target)) {
-            startAttack(AttackType.CRYSTAL_LASER, target.getEyePosition());
+        double roll = this.random.nextDouble() * total;
+        for (int i = 0; i < options.length; i++) {
+            if (score[i] <= 0.0D) continue;
+            roll -= score[i];
+            if (roll <= 0.0D) {
+                AttackType chosen = options[i];
+                startAttack(chosen, chosen == AttackType.CRYSTAL_LASER ? chestPosition(target) : target.position());
+                return;
+            }
         }
     }
 
-    private void startAttack(AttackType type, Vec3 targetPos) {
+    private void startAttack(AttackType type, Vec3 aimPos) {
         this.getNavigation().stop();
         this.entityData.set(DATA_ATTACK_TYPE, type.id);
         this.entityData.set(DATA_ATTACK_TICK, 0);
-        this.lockedTargetPos = targetPos;
-        syncTargetPos(targetPos);
+        this.entityData.set(DATA_IMPACT_TICK, -1);
+        this.lockedTargetPos = aimPos;
+        syncTargetPos(aimPos);
 
+        this.hitThisAttack.clear();
         this.leapLaunched = false;
         this.leapLanded = false;
+        this.leapLandedTick = -1;
+        this.lastAttack = type;
 
         switch (type) {
             case CRYSTAL_LASER -> this.playSound(SoundEvents.BEACON_ACTIVATE, 1.6F, 0.55F);
             case SEISMIC_SLAM -> this.playSound(SoundEvents.WARDEN_ROAR, 1.5F, 0.65F);
             case CRYSTAL_BARRAGE -> this.playSound(SoundEvents.AMETHYST_BLOCK_CHIME, 1.8F, 0.50F);
             case COLOSSUS_LEAP -> this.playSound(SoundEvents.RAVAGER_ROAR, 1.5F, 0.60F);
-            default -> {}
+            case SWIPE -> this.playSound(SoundEvents.IRON_GOLEM_ATTACK, 1.0F, 0.80F);
+            default -> {
+            }
         }
     }
 
-    private void finishAttack() {
-        AttackType finished = getAttackType();
+    private void finishAttack(AttackType finished, boolean enraged) {
         this.entityData.set(DATA_ATTACK_TYPE, AttackType.NONE.id);
         this.entityData.set(DATA_ATTACK_TICK, 0);
-        this.globalAttackCooldown = 36;
+        this.entityData.set(DATA_IMPACT_TICK, -1);
+        this.hitThisAttack.clear();
+
+        float k = enraged ? 0.7F : 1.0F;
+        this.globalAttackCooldown = enraged ? 8 : 14;
 
         switch (finished) {
-            case CRYSTAL_LASER -> this.laserCooldown = 160;
-            case SEISMIC_SLAM -> this.slamCooldown = 110;
-            case CRYSTAL_BARRAGE -> this.barrageCooldown = 95;
-            case COLOSSUS_LEAP -> this.leapCooldown = 150;
-            default -> {}
+            case CRYSTAL_LASER -> this.laserCooldown = (int) (110 * k);
+            case SEISMIC_SLAM -> this.slamCooldown = (int) (60 * k);
+            case CRYSTAL_BARRAGE -> this.barrageCooldown = (int) (70 * k);
+            case COLOSSUS_LEAP -> this.leapCooldown = (int) (90 * k);
+            case SWIPE -> this.swipeCooldown = enraged ? 16 : 22;
+            default -> {
+            }
         }
+    }
+
+    private boolean isAttackOver(AttackType type, int tick) {
+        if (type == AttackType.COLOSSUS_LEAP && this.leapLanded) {
+            return tick >= this.leapLandedTick + LEAP_SPREAD_TICKS + 6;
+        }
+        return tick >= type.duration;
     }
 
     private void tickActiveAttack(ServerLevel level, AttackType type, int tick) {
@@ -293,7 +405,9 @@ public class CrimsonColossusEntity extends Monster {
             case SEISMIC_SLAM -> tickSeismicSlam(level, target, tick);
             case CRYSTAL_BARRAGE -> tickCrystalBarrage(level, target, tick);
             case COLOSSUS_LEAP -> tickColossusLeap(level, target, tick);
-            default -> {}
+            case SWIPE -> tickSwipe(level, target, tick);
+            default -> {
+            }
         }
     }
 
@@ -302,98 +416,112 @@ public class CrimsonColossusEntity extends Monster {
         this.setDeltaMovement(0.0D, this.getDeltaMovement().y, 0.0D);
 
         if (target != null && target.isAlive()) {
-            // Track the target throughout the charge, then lock to its exact eye position
-            // every firing tick. This prevents the beam from trailing behind a moving player.
-            this.getLookControl().setLookAt(target, tick < 28 ? 24.0F : 40.0F, 24.0F);
-            Vec3 desired = target.getEyePosition();
-            if (tick < 28) {
-                this.lockedTargetPos = this.lockedTargetPos.lerp(desired, 0.30D);
-            } else {
-                this.lockedTargetPos = desired;
+            Vec3 chest = chestPosition(target);
+            if (tick < LASER_CHARGE_END) {
+                // Telegraph: the aim settles onto the chest slowly, so the player can see where it is heading.
+                this.getLookControl().setLookAt(target, 24.0F, 24.0F);
+                this.lockedTargetPos = this.lockedTargetPos.lerp(chest, 0.12D);
+            } else if (tick < LASER_FIRE_END) {
+                // Firing: the aim can only slide LASER_TRACK_SPEED blocks per tick. It chases the player,
+                // but a sideways step takes them out of the line.
+                this.getLookControl().setLookAt(target, 20.0F, 20.0F);
+                Vec3 step = chest.subtract(this.lockedTargetPos);
+                double len = step.length();
+                if (len > LASER_TRACK_SPEED) {
+                    step = step.scale(LASER_TRACK_SPEED / len);
+                }
+                this.lockedTargetPos = this.lockedTargetPos.add(step);
             }
             syncTargetPos(this.lockedTargetPos);
         }
 
-        if (tick < 28 && tick % 6 == 0) {
+        if (tick < LASER_CHARGE_END && tick % 6 == 0) {
             this.playSound(SoundEvents.RESPAWN_ANCHOR_CHARGE, 1.1F, 0.70F + tick * 0.02F);
         }
-        if (tick == 28) {
+        if (tick == LASER_CHARGE_END) {
             this.playSound(SoundEvents.WARDEN_SONIC_BOOM, 1.35F, 0.72F);
         }
 
-        if (tick >= 28 && tick <= 78) {
+        if (tick >= LASER_CHARGE_END && tick < LASER_FIRE_END) {
             if (tick % 8 == 0) {
                 this.playSound(SoundEvents.BEACON_AMBIENT, 1.5F, 0.55F);
             }
-            if ((tick - 28) % 5 == 0) {
-                Vec3 mouthOrigin = getMouthWorldPosition();
-                Vec3 toEnd = this.lockedTargetPos.subtract(mouthOrigin);
-                double len = Math.max(0.5D, Math.min(26.0D, toEnd.length()));
-                Vec3 dir = toEnd.normalize();
-                Vec3 beamEnd = mouthOrigin.add(dir.scale(len));
+            if ((tick - LASER_CHARGE_END) % 6 == 0) {
+                fireLaserSegment(level);
+            }
+        }
+    }
 
-                AABB searchBox = new AABB(mouthOrigin, beamEnd).inflate(1.35D);
-                List<LivingEntity> hitEntities = level.getEntitiesOfClass(LivingEntity.class, searchBox,
-                        e -> e != this && e.isAlive());
+    private void fireLaserSegment(ServerLevel level) {
+        Vec3 mouth = getMouthWorldPosition();
+        Vec3 toAim = this.lockedTargetPos.subtract(mouth);
+        double len = Mth.clamp(toAim.length(), 0.5D, LASER_REACH);
+        Vec3 dir = toAim.lengthSqr() > 1.0E-6D
+                ? toAim.normalize()
+                : Vec3.directionFromRotation(0.0F, this.yBodyRot);
+        Vec3 beamEnd = mouth.add(dir.scale(len));
 
-                for (LivingEntity hit : hitEntities) {
-                    if (distanceToSegmentSq(hit.getBoundingBox().getCenter(), mouthOrigin, beamEnd) <= 1.45D) {
-                        hit.hurtServer(level, this.damageSources().mobAttack(this), 5.5F);
-                        hit.setRemainingFireTicks(40);
-                        Vec3 push = new Vec3(dir.x, 0.08D, dir.z).normalize().scale(0.28D);
-                        hit.push(push.x, push.y, push.z);
-                    }
-                }
+        AABB searchBox = new AABB(mouth, beamEnd).inflate(1.5D);
+        List<LivingEntity> hitEntities = level.getEntitiesOfClass(LivingEntity.class, searchBox,
+                e -> e != this && e.isAlive());
+        for (LivingEntity hit : hitEntities) {
+            if (distanceToSegmentSq(chestPosition(hit), mouth, beamEnd) <= 1.25D * 1.25D) {
+                hit.hurtServer(level, this.damageSources().mobAttack(this), LASER_DAMAGE);
+                hit.setRemainingFireTicks(40);
+                Vec3 push = new Vec3(dir.x, 0.08D, dir.z);
+                push = push.lengthSqr() > 1.0E-6D ? push.normalize().scale(0.28D) : Vec3.ZERO;
+                hit.push(push.x, push.y, push.z);
             }
         }
     }
 
     private void tickSeismicSlam(ServerLevel level, LivingEntity target, int tick) {
         this.getNavigation().stop();
-        if (tick <= 22 && target != null && target.isAlive()) {
+        if (tick < SLAM_IMPACT_TICK && target != null && target.isAlive()) {
             this.getLookControl().setLookAt(target, 30.0F, 30.0F);
         }
+        if (tick != SLAM_IMPACT_TICK) {
+            return;
+        }
 
-        if (tick == 24) {
-            this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 1.4F, 0.65F);
-            this.playSound(SoundEvents.ANVIL_LAND, 1.3F, 0.55F);
+        this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 1.4F, 0.65F);
+        this.playSound(SoundEvents.ANVIL_LAND, 1.3F, 0.55F);
 
-            Vec3 forward = Vec3.directionFromRotation(0.0F, this.getYRot());
-            Vec3 slamCenter = this.position().add(forward.scale(2.2D));
-            syncTargetPos(slamCenter);
+        Vec3 forward = Vec3.directionFromRotation(0.0F, this.yBodyRot);
+        Vec3 slamCenter = this.position().add(forward.scale(SLAM_REACH));
+        syncTargetPos(slamCenter);
 
-            AABB area = new AABB(slamCenter, slamCenter).inflate(6.5D, 3.0D, 6.5D);
-            for (LivingEntity hit : level.getEntitiesOfClass(LivingEntity.class, area, e -> e != this && e.isAlive())) {
-                double d = Math.sqrt(hit.distanceToSqr(slamCenter));
-                if (d <= 6.5D) {
-                    float falloff = (float) Math.max(0.45D, 1.0D - (d / 7.5D));
-                    hit.hurtServer(level, this.damageSources().mobAttack(this), 22.0F * falloff);
-                    Vec3 away = hit.position().subtract(slamCenter);
-                    away = away.lengthSqr() > 1.0E-4D ? away.normalize() : forward;
-                    hit.setDeltaMovement(away.x * 1.15D, 0.62D, away.z * 1.15D);
-                    hit.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 1));
-                }
+        AABB area = new AABB(slamCenter, slamCenter).inflate(6.5D, 3.0D, 6.5D);
+        for (LivingEntity hit : level.getEntitiesOfClass(LivingEntity.class, area, e -> e != this && e.isAlive())) {
+            double d = Math.sqrt(hit.distanceToSqr(slamCenter));
+            if (d <= 6.5D) {
+                float falloff = (float) Math.max(0.45D, 1.0D - (d / 7.5D));
+                hit.hurtServer(level, this.damageSources().mobAttack(this), 22.0F * falloff);
+                Vec3 away = hit.position().subtract(slamCenter);
+                away = away.lengthSqr() > 1.0E-4D ? away.normalize() : forward;
+                hit.setDeltaMovement(away.x * 1.15D, 0.62D, away.z * 1.15D);
+                hit.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 60, 1));
             }
         }
     }
 
     private void tickCrystalBarrage(ServerLevel level, LivingEntity target, int tick) {
         this.getNavigation().stop();
-        if (tick <= 14 && target != null && target.isAlive()) {
+        if (tick < BARRAGE_WAVE_START && target != null && target.isAlive()) {
             this.getLookControl().setLookAt(target, 30.0F, 30.0F);
             this.lockedTargetPos = target.position();
             syncTargetPos(this.lockedTargetPos);
         }
 
-        if (tick == 15) {
+        if (tick == BARRAGE_WAVE_START) {
             this.playSound(SoundEvents.AMETHYST_CLUSTER_BREAK, 1.8F, 0.55F);
             this.playSound(SoundEvents.TRIDENT_THUNDER.value(), 1.1F, 0.75F);
         }
 
-        if (tick >= 15 && tick <= 32 && (tick - 15) % 3 == 0) {
-            double progress = (tick - 15) / 17.0D;
+        if (tick >= BARRAGE_WAVE_START && tick <= BARRAGE_WAVE_END && (tick - BARRAGE_WAVE_START) % 3 == 0) {
+            double progress = (tick - BARRAGE_WAVE_START) / (double) (BARRAGE_WAVE_END - BARRAGE_WAVE_START);
             Vec3 wavePoint = this.position().lerp(this.lockedTargetPos, progress);
-            double radius = progress > 0.85D ? 3.2D : 1.85D;
+            double radius = progress > 0.85D ? 3.0D : 1.9D;
 
             AABB box = new AABB(wavePoint, wavePoint).inflate(radius, 2.5D, radius);
             for (LivingEntity hit : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != this && e.isAlive())) {
@@ -404,7 +532,7 @@ public class CrimsonColossusEntity extends Monster {
     }
 
     private void tickColossusLeap(ServerLevel level, LivingEntity target, int tick) {
-        if (tick < 12) {
+        if (tick < LEAP_LAUNCH_TICK) {
             this.getNavigation().stop();
             if (target != null && target.isAlive()) {
                 this.getLookControl().setLookAt(target, 35.0F, 35.0F);
@@ -414,43 +542,115 @@ public class CrimsonColossusEntity extends Monster {
             return;
         }
 
-        if (tick == 12 && !leapLaunched) {
-            leapLaunched = true;
-            Vec3 toTarget = this.lockedTargetPos.subtract(this.position());
-            Vec3 horiz = new Vec3(toTarget.x, 0.0D, toTarget.z);
-            double dist = Math.min(20.0D, horiz.length());
-            Vec3 dir = dist > 0.01D ? horiz.normalize() : Vec3.directionFromRotation(0.0F, this.getYRot());
-
-            // vy = 1.38 atinge ~10.2 blocos de altura no ápice
-            double flightTicks = 22.0D;
-            double vHoriz = dist / flightTicks;
-            this.setDeltaMovement(dir.x * vHoriz, 1.38D, dir.z * vHoriz);
+        if (!this.leapLaunched) {
+            this.leapLaunched = true;
+            this.setDeltaMovement(0.0D, LEAP_LAUNCH_VY, 0.0D);
             this.playSound(SoundEvents.IRON_GOLEM_ATTACK, 1.6F, 0.50F);
         }
 
-        if (leapLaunched && !leapLanded && tick >= 20 && (this.onGround() || tick >= 35)) {
-            leapLanded = true;
-            setAttackTick(35);
-            syncTargetPos(this.position());
+        if (!this.leapLanded) {
+            int air = tick - LEAP_LAUNCH_TICK;
 
-            this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 1.8F, 0.55F);
-            this.playSound(SoundEvents.WARDEN_SONIC_BOOM, 1.5F, 0.60F);
-
-            double shockRadius = 8.0D;
-            AABB shockBox = this.getBoundingBox().inflate(shockRadius, 3.5D, shockRadius);
-            for (LivingEntity hit : level.getEntitiesOfClass(LivingEntity.class, shockBox, e -> e != this && e.isAlive())) {
-                double dist = Math.sqrt(hit.distanceToSqr(this.position()));
-                if (dist <= shockRadius) {
-                    float factor = (float) Math.max(0.35D, 1.0D - (dist / (shockRadius + 1.0D)));
-                    hit.hurtServer(level, this.damageSources().mobAttack(this), 26.0F * factor);
-
-                    Vec3 pushDir = hit.position().subtract(this.position());
-                    pushDir = pushDir.lengthSqr() > 1.0E-4D
-                            ? new Vec3(pushDir.x, 0.0D, pushDir.z).normalize()
-                            : Vec3.directionFromRotation(0.0F, this.getYRot());
-                    hit.setDeltaMovement(pushDir.x * (1.45D * factor), 0.72D * factor, pushDir.z * (1.45D * factor));
-                }
+            // Homing: each airborne tick the jump re-aims at the player's live position.
+            if (target != null && target.isAlive()) {
+                this.lockedTargetPos = target.position();
+                syncTargetPos(this.lockedTargetPos);
             }
+            steerLeap(air);
+
+            if ((air >= 4 && this.onGround()) || air >= LEAP_MAX_AIR_TICKS) {
+                landLeap(tick);
+            }
+        }
+
+        if (this.leapLanded) {
+            spreadLeapShock(level, tick);
+        }
+    }
+
+    /** Sets the horizontal velocity so the boss arrives over the target roughly when the jump ends. */
+    private void steerLeap(int air) {
+        int remaining = Math.max(4, LEAP_STEER_TICKS - air);
+        double vx = (this.lockedTargetPos.x - this.getX()) / remaining;
+        double vz = (this.lockedTargetPos.z - this.getZ()) / remaining;
+        double speed = Math.sqrt(vx * vx + vz * vz);
+        if (speed > LEAP_MAX_HSPEED) {
+            vx *= LEAP_MAX_HSPEED / speed;
+            vz *= LEAP_MAX_HSPEED / speed;
+        }
+        this.setDeltaMovement(vx, this.getDeltaMovement().y, vz);
+    }
+
+    private void landLeap(int tick) {
+        this.leapLanded = true;
+        this.leapLandedTick = tick;
+        this.entityData.set(DATA_IMPACT_TICK, tick);
+        syncTargetPos(this.position());
+        this.setDeltaMovement(0.0D, Math.min(0.0D, this.getDeltaMovement().y), 0.0D);
+
+        this.playSound(SoundEvents.GENERIC_EXPLODE.value(), 1.8F, 0.55F);
+        this.playSound(SoundEvents.WARDEN_SONIC_BOOM, 1.5F, 0.60F);
+    }
+
+    /**
+     * The shock front spreads outward from the exact point of landing. Anything the front passes is
+     * hit once, so a player standing near the landing has to get clear before the front reaches them.
+     */
+    private void spreadLeapShock(ServerLevel level, int tick) {
+        double front = leapFrontRadius(tick - this.leapLandedTick);
+        Vec3 center = this.position();
+        AABB box = new AABB(center, center).inflate(LEAP_SPREAD_RADIUS + 1.5D, 2.5D, LEAP_SPREAD_RADIUS + 1.5D);
+
+        for (LivingEntity hit : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != this && e.isAlive())) {
+            if (this.hitThisAttack.contains(hit.getId())) continue;
+
+            double dx = hit.getX() - center.x;
+            double dz = hit.getZ() - center.z;
+            double edge = Math.sqrt(dx * dx + dz * dz) - hit.getBbWidth() * 0.5D;
+            if (edge > front + 0.6D) continue;
+
+            this.hitThisAttack.add(hit.getId());
+            double falloff = Math.max(0.45D, 1.0D - edge / (LEAP_SPREAD_RADIUS + 1.0D));
+            hit.hurtServer(level, this.damageSources().mobAttack(this), (float) (22.0D * falloff));
+
+            Vec3 out = new Vec3(dx, 0.0D, dz);
+            out = out.lengthSqr() > 1.0E-4D ? out.normalize() : Vec3.directionFromRotation(0.0F, this.yBodyRot);
+            hit.setDeltaMovement(out.x * 1.1D * falloff, 0.55D * falloff, out.z * 1.1D * falloff);
+            hit.addEffect(new MobEffectInstance(MobEffects.SLOWNESS, 50, 1));
+        }
+    }
+
+    /**
+     * Radius of the leap shock front, in blocks, a given number of ticks after landing.
+     * Public so the client VFX grows its rings on exactly the same curve.
+     */
+    public static double leapFrontRadius(double sinceLandingTicks) {
+        if (sinceLandingTicks < 0.0D) return 0.0D;
+        double p = Mth.clamp(sinceLandingTicks / LEAP_SPREAD_TICKS, 0.0D, 1.0D);
+        return LEAP_SPREAD_RADIUS * (1.0D - (1.0D - p) * (1.0D - p));
+    }
+
+    private void tickSwipe(ServerLevel level, LivingEntity target, int tick) {
+        this.getNavigation().stop();
+        this.setDeltaMovement(0.0D, this.getDeltaMovement().y, 0.0D);
+        if (tick < SWIPE_IMPACT_TICK && target != null && target.isAlive()) {
+            this.getLookControl().setLookAt(target, 30.0F, 30.0F);
+        }
+        if (tick != SWIPE_IMPACT_TICK) {
+            return;
+        }
+
+        this.playSound(SoundEvents.IRON_GOLEM_ATTACK, 1.1F, 0.7F);
+        Vec3 forward = Vec3.directionFromRotation(0.0F, this.yBodyRot);
+        AABB box = new AABB(this.position(), this.position()).inflate(3.4D, 2.0D, 3.4D);
+        for (LivingEntity hit : level.getEntitiesOfClass(LivingEntity.class, box, e -> e != this && e.isAlive())) {
+            Vec3 toHit = new Vec3(hit.getX() - this.getX(), 0.0D, hit.getZ() - this.getZ());
+            if (toHit.lengthSqr() < 1.0E-4D) continue;
+            Vec3 dir = toHit.normalize();
+            if (dir.dot(forward) < 0.15D) continue;
+
+            hit.hurtServer(level, this.damageSources().mobAttack(this), 12.0F);
+            hit.push(dir.x * 0.8D, 0.35D, dir.z * 0.8D);
         }
     }
 
@@ -462,9 +662,15 @@ public class CrimsonColossusEntity extends Monster {
         return super.causeFallDamage(fallDistance, damageMultiplier, source);
     }
 
+    /** World position of the mouth, used by the server laser and mirrored by the client beam. */
     public Vec3 getMouthWorldPosition() {
         Vec3 forward = Vec3.directionFromRotation(0.0F, this.yBodyRot);
-        return this.position().add(forward.x * 1.85D, 1.75D, forward.z * 1.85D);
+        return this.position().add(mouthOffset(forward));
+    }
+
+    /** Mouth offset from the Colossus base for a given body-forward direction. */
+    public static Vec3 mouthOffset(Vec3 forward) {
+        return forward.scale(MOUTH_FORWARD).add(0.0D, MOUTH_HEIGHT, 0.0D);
     }
 
     private void syncTargetPos(Vec3 pos) {
@@ -485,21 +691,17 @@ public class CrimsonColossusEntity extends Monster {
         this.entityData.set(DATA_ATTACK_TICK, tick);
     }
 
+    /** Tick at which the current leap landed, or -1 while still airborne. */
+    public int getImpactTick() {
+        return this.entityData.get(DATA_IMPACT_TICK);
+    }
+
     public Vec3 getSyncedTargetPos() {
         return new Vec3(
                 this.entityData.get(DATA_TARGET_X),
                 this.entityData.get(DATA_TARGET_Y),
                 this.entityData.get(DATA_TARGET_Z)
         );
-    }
-
-    private static double distanceToSegmentSq(Vec3 p, Vec3 a, Vec3 b) {
-        Vec3 ab = b.subtract(a);
-        double lenSq = ab.lengthSqr();
-        if (lenSq < 1.0E-6D) return p.distanceToSqr(a);
-        double t = Mth.clamp(p.subtract(a).dot(ab) / lenSq, 0.0D, 1.0D);
-        Vec3 closest = a.add(ab.scale(t));
-        return p.distanceToSqr(closest);
     }
 
     @Override
@@ -541,5 +743,90 @@ public class CrimsonColossusEntity extends Monster {
             return 1.0F;
         }
         return 0.82F + 0.18F * Mth.sin(t);
+    }
+
+    private static Vec3 chestPosition(Entity entity) {
+        return new Vec3(entity.getX(), entity.getY() + entity.getBbHeight() * 0.62D, entity.getZ());
+    }
+
+    private double flatDistanceTo(Entity other) {
+        double dx = other.getX() - this.getX();
+        double dz = other.getZ() - this.getZ();
+        return Math.sqrt(dx * dx + dz * dz);
+    }
+
+    private static double distanceToSegmentSq(Vec3 p, Vec3 a, Vec3 b) {
+        Vec3 ab = b.subtract(a);
+        double lenSq = ab.lengthSqr();
+        if (lenSq < 1.0E-6D) return p.distanceToSqr(a);
+        double t = Mth.clamp(p.subtract(a).dot(ab) / lenSq, 0.0D, 1.0D);
+        Vec3 closest = a.add(ab.scale(t));
+        return p.distanceToSqr(closest);
+    }
+
+    /**
+     * Keeps the boss at a stalking distance of about six blocks. It closes in when the target is far,
+     * backs off when it is too close, and otherwise orbits, changing direction now and then.
+     */
+    private final class StalkGoal extends Goal {
+        private int repathTicks;
+        private int orbitTicks;
+        private double orbitSign = 1.0D;
+
+        StalkGoal() {
+            this.setFlags(EnumSet.of(Flag.MOVE));
+        }
+
+        @Override
+        public boolean canUse() {
+            LivingEntity t = CrimsonColossusEntity.this.getTarget();
+            return CrimsonColossusEntity.this.getAttackType() == AttackType.NONE && t != null && t.isAlive();
+        }
+
+        @Override
+        public boolean canContinueToUse() {
+            return this.canUse();
+        }
+
+        @Override
+        public void start() {
+            this.repathTicks = 0;
+        }
+
+        @Override
+        public void tick() {
+            LivingEntity t = CrimsonColossusEntity.this.getTarget();
+            if (t == null) return;
+            if (--this.repathTicks > 0) return;
+            this.repathTicks = 6;
+
+            if (--this.orbitTicks <= 0) {
+                this.orbitTicks = 50 + CrimsonColossusEntity.this.random.nextInt(40);
+                this.orbitSign = CrimsonColossusEntity.this.random.nextBoolean() ? 1.0D : -1.0D;
+            }
+
+            double dist = CrimsonColossusEntity.this.flatDistanceTo(t);
+            Vec3 away = new Vec3(
+                    CrimsonColossusEntity.this.getX() - t.getX(), 0.0D,
+                    CrimsonColossusEntity.this.getZ() - t.getZ());
+            away = away.lengthSqr() > 1.0E-4D
+                    ? away.normalize()
+                    : Vec3.directionFromRotation(0.0F, CrimsonColossusEntity.this.getYRot() + 180.0F);
+
+            Vec3 spot;
+            double speed;
+            if (dist > 8.0D) {
+                spot = t.position();
+                speed = 1.2D;
+            } else if (dist < 4.5D) {
+                spot = t.position().add(away.scale(6.0D));
+                speed = 1.0D;
+            } else {
+                Vec3 tangent = new Vec3(-away.z, 0.0D, away.x).scale(this.orbitSign);
+                spot = t.position().add(away.scale(6.0D)).add(tangent.scale(2.5D));
+                speed = 0.85D;
+            }
+            CrimsonColossusEntity.this.getNavigation().moveTo(spot.x, spot.y, spot.z, speed);
+        }
     }
 }

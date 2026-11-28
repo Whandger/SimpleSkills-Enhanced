@@ -30,6 +30,7 @@ public class CrimsonColossusRenderer
         state.crystalGlowPulse = entity.getCrystalGlowPulse(partialTick);
         state.attackType = entity.getAttackType();
         state.attackTick = entity.getAttackTick();
+        state.impactTick = entity.getImpactTick();
         state.partialTick = partialTick;
         state.targetOffset = entity.getSyncedTargetPos().subtract(entity.getPosition(partialTick));
     }

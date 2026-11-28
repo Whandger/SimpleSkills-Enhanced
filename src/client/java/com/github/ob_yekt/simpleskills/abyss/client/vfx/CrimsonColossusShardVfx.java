@@ -1,5 +1,6 @@
 package com.github.ob_yekt.simpleskills.abyss.client.vfx;
 
+import com.github.ob_yekt.simpleskills.abyss.entity.CrimsonColossusEntity;
 import com.github.ob_yekt.simpleskills.prayer.PrayerVfxPrimitives;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.world.phys.Vec3;
@@ -8,7 +9,7 @@ import org.joml.Matrix4fc;
 public final class CrimsonColossusShardVfx {
     private CrimsonColossusShardVfx() {}
 
-    private static final double CAST_START = 14.0D;
+    private static final double CAST_START = CrimsonColossusEntity.BARRAGE_WAVE_START;
     private static final double TRAVEL_END = 0.62D;
     private static final double SHATTER_START = 0.74D;
     private static final int PATH_PIECES = 3;
@@ -21,9 +22,9 @@ public final class CrimsonColossusShardVfx {
         float fade = PrayerVfxPrimitives.fade(age, duration, 2, 4);
         Vec3 right = new Vec3(-forward.z, 0.0D, forward.x);
 
-        if (age < 17.0F) {
-            double handCharge = PrayerVfxPrimitives.smooth(0.0D, 13.0D, age)
-                    * (1.0D - PrayerVfxPrimitives.smooth(14.0D, 17.0D, age));
+        if (age < 12.0F) {
+            double handCharge = PrayerVfxPrimitives.smooth(0.0D, 8.0D, age)
+                    * (1.0D - PrayerVfxPrimitives.smooth(9.0D, 12.0D, age));
             Vec3 raisedHand = forward.scale(1.45D).subtract(right.scale(1.25D)).add(0.0D, 3.15D, 0.0D);
             CrimsonColossusVfxPrimitives.drawEnergyOrb(
                     m, out, raisedHand, 0.58D * handCharge, 0.98F, 0.16F, 0.30F, (float) (0.90D * fade));
@@ -55,10 +56,10 @@ public final class CrimsonColossusShardVfx {
         float cg = tint(0.14F, flash);
         float cb = tint(0.28F, flash);
 
-        Vec3 pathStart = forward.scale(1.8D).add(0.0D, 0.05D, 0.0D);
+        Vec3 pathStart = forward.scale(1.2D).add(0.0D, 0.05D, 0.0D);
         Vec3 destination = targetOffset.lengthSqr() > 1.0D
                 ? new Vec3(targetOffset.x, Math.max(-1.0D, targetOffset.y), targetOffset.z)
-                : forward.scale(12.0D);
+                : forward.scale(12.0D * CrimsonColossusVfxPrimitives.WORLD_TO_LAYER);
 
         int totalSpikes = 24;
         int numSpikes = (int) (travel * totalSpikes);
