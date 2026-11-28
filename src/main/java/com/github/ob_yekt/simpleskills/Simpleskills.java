@@ -18,6 +18,7 @@ import com.github.ob_yekt.simpleskills.abyss.AbyssalKingItems;
 import com.github.ob_yekt.simpleskills.abyss.AbyssalKatanaItems;
 import com.github.ob_yekt.simpleskills.abyss.weapon.KatanaStanceManager;
 import com.github.ob_yekt.simpleskills.abyss.AbyssWorldgen;
+import com.github.ob_yekt.simpleskills.abyss.AbyssEntryTracker;
 import com.github.ob_yekt.simpleskills.managers.*;
 import com.github.ob_yekt.simpleskills.events.EventHandlers;
 import com.github.ob_yekt.simpleskills.excavating.ExcavatingManager;
@@ -112,6 +113,7 @@ public class Simpleskills implements ModInitializer {
 		KatanaStanceManager.registerPayloads();
 		SkillOverviewManager.registerPayloads();
 		AbyssLoreManager.registerPayloads();
+		AbyssEntryTracker.registerPayloads();
 		PrayerManager.registerPayloads();
 		PrayerVfxEntity.register();
 		SimpleskillsCommands.registerCommands();
@@ -130,6 +132,7 @@ public class Simpleskills implements ModInitializer {
 		RankTitleManager.registerReceivers();
 		SkillOverviewManager.registerReceivers();
 		AbyssLoreManager.registerReceivers();
+		AbyssEntryTracker.register();
 		PrayerManager.registerReceivers();
 		PrayerVisualEffects.register();
 		GlowstoneShieldLight.register();

@@ -12,6 +12,11 @@ import java.util.Map;
 public final class SimpleSkillsSounds {
     public static final SoundEvent PERFECT_PARRY = register("perfect_parry");
     public static final SoundEvent MASTER_DEFENDER_PARRY = register("master_defender_parry");
+    public static final SoundEvent ABYSS_THEME = register("abyss_theme");
+    public static final SoundEvent ABYSS_THEME_CALM = register("abyss_theme_calm");
+    public static final SoundEvent ABYSS_CRYSTAL = register("abyss_crystal");
+    public static final SoundEvent ABYSS_CRACK = register("abyss_crack");
+    public static final SoundEvent ABYSS_PEBBLES = register("abyss_pebbles");
     public static final SoundEvent COLOSSUS_STEP = register("colossus_step");
     public static final SoundEvent COLOSSUS_SWIPE = register("colossus_swipe");
     public static final SoundEvent COLOSSUS_LASER_CHARGE = register("colossus_laser_charge");

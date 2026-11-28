@@ -132,6 +132,12 @@ public class DatabaseManager {
             stmt.execute(createSkillsTable);
             stmt.execute(createPlayerNamesTable);
             stmt.execute(createIndex);
+            // Marca de primeira entrada no abismo (trilha da primeira vez)
+            try {
+                stmt.execute("ALTER TABLE players ADD COLUMN abyss_entered INTEGER DEFAULT 0");
+            } catch (SQLException ignored) {
+                // Column likely exists; ignore
+            }
             // Lightweight migration for older databases missing prestige column
             try {
                 stmt.execute("ALTER TABLE players ADD COLUMN prestige INTEGER DEFAULT 0");
@@ -429,6 +435,34 @@ public class DatabaseManager {
         } catch (SQLException e) {
             Simpleskills.LOGGER.error("Failed to set prestige for UUID {}: {}", playerUuid, e.getMessage());
             throw new DatabaseException("Failed to set prestige", e);
+        }
+    }
+
+    public boolean hasEnteredAbyss(String playerUuid) {
+        checkConnection();
+        String sql = "SELECT abyss_entered FROM players WHERE player_uuid = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, playerUuid);
+            try (ResultSet result = statement.executeQuery()) {
+                return result.next() && result.getInt("abyss_entered") == 1;
+            }
+        } catch (SQLException e) {
+            Simpleskills.LOGGER.error("Failed to read abyss entry for UUID {}: {}", playerUuid, e.getMessage());
+            throw new DatabaseException("Failed to read abyss entry", e);
+        }
+    }
+
+    public void markAbyssEntered(String playerUuid) {
+        checkConnection();
+        ensurePlayerInitialized(playerUuid);
+        String sql = "UPDATE players SET abyss_entered = 1 WHERE player_uuid = ?";
+        try (PreparedStatement statement = connection.prepareStatement(sql)) {
+            statement.setString(1, playerUuid);
+            statement.executeUpdate();
+            Simpleskills.LOGGER.debug("Marked first abyss entry for UUID: {}", playerUuid);
+        } catch (SQLException e) {
+            Simpleskills.LOGGER.error("Failed to mark abyss entry for UUID {}: {}", playerUuid, e.getMessage());
+            throw new DatabaseException("Failed to mark abyss entry", e);
         }
     }
 

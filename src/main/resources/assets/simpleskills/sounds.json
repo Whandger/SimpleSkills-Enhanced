@@ -454,5 +454,61 @@
         "attenuation_distance": 80
       }
     ]
+  },
+  "abyss_theme": {
+    "sounds": [
+      {
+        "name": "simpleskills:music/abyss_theme",
+        "stream": true
+      }
+    ]
+  },
+  "abyss_theme_calm": {
+    "sounds": [
+      {
+        "name": "simpleskills:music/abyss_theme_calm",
+        "stream": true
+      }
+    ]
+  },
+  "abyss_crystal": {
+    "sounds": [
+      {
+        "name": "simpleskills:abyss/crystal_1",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "simpleskills:abyss/crystal_2",
+        "attenuation_distance": 40
+      },
+      {
+        "name": "simpleskills:abyss/crystal_3",
+        "attenuation_distance": 40
+      }
+    ]
+  },
+  "abyss_crack": {
+    "sounds": [
+      {
+        "name": "simpleskills:abyss/crack_1",
+        "attenuation_distance": 32
+      },
+      {
+        "name": "simpleskills:abyss/crack_2",
+        "attenuation_distance": 32
+      }
+    ]
+  },
+  "abyss_pebbles": {
+    "sounds": [
+      {
+        "name": "simpleskills:abyss/pebbles_1",
+        "attenuation_distance": 24
+      },
+      {
+        "name": "simpleskills:abyss/pebbles_2",
+        "attenuation_distance": 24
+      }
+    ]
   }
 }
